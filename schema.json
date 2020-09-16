@@ -1,0 +1,63 @@
+[
+	{
+		"namespace": "xnote",
+		"functions": [
+			{
+				"name": "getStoragePath",
+				"type": "function",
+				"description": "Get legacy xnote storage path",
+				"async": true,
+				"parameters": []
+			},
+			{
+				"name": "getNotes",
+				"type": "function",
+				"description": "Returns legacy xnotes",
+				"async": true,
+				"parameters": [
+					{
+						"name": "path",
+						"type": "string",
+						"description": "Path to xnote legacy storage"
+					}
+				]
+			},
+			{
+				"name": "loadNote",
+				"type": "function",
+				"description": "Loads xnote structure",
+				"async": true,
+				"parameters": [
+					{
+						"name": "fileName",
+						"type": "string",
+						"description": "XNote filename"
+					}
+				]
+			}
+		]
+	},
+	{
+		"namespace": "legacy",
+		"functions": [
+			{
+				"name": "confirm",
+				"type": "function",
+				"description": "Display confirm dialog",
+				"async": true,
+				"parameters": [
+					{
+						"name": "title",
+						"type": "string",
+						"description": "Dialog title"
+					},
+					{
+						"name": "msg",
+						"type": "string",
+						"description": "Dialog message"
+					}
+				]
+			}
+		]
+	}
+]
