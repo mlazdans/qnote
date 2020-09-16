@@ -20,7 +20,7 @@ const popupClose = () => {
 		CurrentNote.text = YTextE.value;
 		ext.closeCurrentNote();
 	} catch (e) {
-		console.error("Window is likely dead", e);
+		//console.error("Window is likely dead", e);
 	}
 }
 
