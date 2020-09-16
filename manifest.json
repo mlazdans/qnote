@@ -1,0 +1,68 @@
+{
+	"manifest_version": 2,
+	"name": "QNote",
+	"author": "Martins Lazdans",
+	"default_locale": "en",
+	"description": "Attempt to migrate XNote++ to Thunderbird 78+",
+	"version": "0.2",
+	"applications": {
+		"gecko": {
+			"id": "qnote@dqdp.net",
+			"strict_min_version": "78.0"
+		}
+	},
+	"icons": {
+		"48": "images/icon.svg"
+	},
+	"permissions": [
+		"messagesRead",
+		"storage",
+		"downloads",
+		"menus"
+	],
+	"background": {
+		"scripts": [
+			"scripts/qnote.js",
+			"scripts/menu.js",
+			"scripts/utils.js",
+			"scripts/background.js"
+		]
+	},
+	"options_ui": {
+		"page": "html/options.html"
+	},
+	"message_display_action": {
+		"default_title": "QNote",
+		"default_icon": "images/icon-disabled.svg"
+	},
+	"experiment_apis": {
+		"xnote": {
+			"schema": "schema.json",
+			"parent": {
+				"scopes": [
+					"addon_parent"
+				],
+				"paths": [
+					[
+						"xnote"
+					]
+				],
+				"script": "scripts/xnote.js"
+			}
+		},
+		"legacy": {
+			"schema": "schema.json",
+			"parent": {
+				"scopes": [
+					"addon_parent"
+				],
+				"paths": [
+					[
+						"legacy"
+					]
+				],
+				"script": "scripts/legacy.js"
+			}
+		}
+	}
+}

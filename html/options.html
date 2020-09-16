@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8"/>
+</head>
+
+<body>
+
+<form id="form">
+	<fieldset>
+		<legend> QNote </legend>
+		<table>
+			<tr>
+				<td><label for="input_width" data-i18n="width.label"></label></td>
+				<td><input type="number" data-preference="width" id="input_width" maxlength="7" size="7" min="100" max="99999" /></td>
+				<td><label for="input_height" data-i18n="height.label"></label></td>
+				<td><input type="number" data-preference="height" id="input_height" maxlength="7" size="7" min="100" max="99999" /></td>
+			</tr>
+		</table>
+		<table>
+			<tr>
+				<td><input type="checkbox" data-preference="showOnSelect" id="input_showOnSelect"></td>
+				<td colspan="3"><label for="input_showOnSelect" data-i18n="showOnSelect.label"></label></td>
+			</tr>
+			<tr>
+				<td><input type="checkbox" data-preference="useTag" id="input_useTag"></td>
+				<td><label for="input_useTag" data-i18n="useTag.label"></label></td>
+				<td>
+					<select data-preference="tagName" id="select_tagName">
+					</select>
+				</td>
+				<td data-i18n="use.tag.manager"></td>
+			</tr>
+		</table>
+		<div>
+			<button type="button" id="saveButton" data-i18n="savePreferences.button"></button>
+		</div>
+	</fieldset>
+</form>
+
+<fieldset>
+	<legend data-i18n="maintenance"></legend>
+	<table>
+		<tr>
+			<td><button type="button" id="importLegacyXNotesButton" data-i18n="importLegacyXNotes.button" disabled="disabled"></button></td>
+			<td id="xnoteFolderInfo" data-i18n="xnote.folder.unaccesible"></td>
+			<td><div id="importLegacyXNotesLoader" style="display: none;"><img src="../images/loader.gif"></div></td>
+		</tr>
+		<tr>
+			<td><button type="button" id="clearStorageButton" data-i18n="clearStorage.button"></button></td>
+			<td data-i18n="clears.extension.storage"></td>
+		</tr>
+		<tr>
+			<td><button type="button" id="exportStorageButton" data-i18n="exportStorage.button"></button></td>
+			<td data-i18n="export.extension.storage"></td>
+		</tr>
+	</table>
+	<table>
+		<tr>
+			<!-- <td><button type="button" id="importStorageButton" data-i18n="importStorage.button"></button></td> -->
+			<td data-i18n="import.extension.storage"></td>
+			<td><input type="file" accept="application/json" id="importFile"></td>
+		</tr>
+	</table>
+</fieldset>
+
+
+<script src="../scripts/options.js"></script>
+
+</body>
+</html>

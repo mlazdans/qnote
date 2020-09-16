@@ -1,0 +1,30 @@
+{
+	"width.label": { "message": "Width:" },
+	"height.label": { "message": "Height:" },
+	"useTag.label": { "message": "Use Tag" },
+	"showOnSelect.label": { "message": "Show note popup on message selection" },
+	"savePreferences.button": { "message": "Save" },
+	"importLegacyXNotes.button": { "message": "Import legacy XNotes" },
+	"clearStorage.button": { "message": "Clear storage" },
+	"exportStorage.button": { "message": "Export storage" },
+	"importStorage.button": { "message": "Import storage" },
+
+	"confirm": { "message": "Confirm" },
+	"are.you.sure": { "message": "Are you sure?" },
+
+	"maintenance": { "message": " Maintenance " },
+	"xnote.folder.unaccesible": { "message": "XNote folder is not found inside your profile folder or it is not readable." },
+	"clears.extension.storage": { "message": "Clears extension storage" },
+	"export.extension.storage": { "message": "Exports extension storage" },
+	"import.extension.storage": { "message": "Import extension storage" },
+	"use.tag.manager": { "message": "Please use tag manager to manage tags" },
+
+	"xnote.folder.found": { "message": "XNote folder found: $1" },
+	"import.finished.stats": { "message": "Import finished:\nimported notes - $1\nerrored notes - $2\nexisting notes - $3" },
+	"Could not import legacy notes": { "message": "Could not import legacy notes" },
+	"storage.cleared": { "message": "Storage cleared" },
+	"storage.clear.failed": { "message": "Failed to clear storage: $1" },
+	"storage.imported": { "message": "Storage imported" },
+	"storage.import.failed": { "message": "Failed to import storage: $1" },
+	"json.parse.error": { "message": "JSON parse error: $1" }
+}
