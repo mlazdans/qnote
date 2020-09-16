@@ -9,6 +9,7 @@ var clearStorageButton = document.getElementById('clearStorageButton');
 var exportStorageButton = document.getElementById('exportStorageButton');
 var importFile = document.getElementById("importFile");
 var importLegacyXNotesLoader = document.getElementById("importLegacyXNotesLoader");
+var reloadExtensionButton = document.getElementById("reloadExtensionButton");
 
 function isButton(node){
 	return node.nodeName == "INPUT" && node.type.toLocaleUpperCase() == "BUTTON"
@@ -110,7 +111,7 @@ async function clearStorage(){
 		await ext.closeCurrentNote();
 		ext.browser.storage.local.clear().then(() => {
 			alert(_("storage.cleared"));
-			ext.browser.runtime.reload();
+			reloadExtension();
 		}, (e) => {
 			alert(_("storage.clear.failed", e.message));
 		});
@@ -123,8 +124,8 @@ async function exportStorage(){
 	let url = window.URL.createObjectURL(blob);
 
 	return ext.browser.downloads.download({
-		url : url,
-		filename : 'storage.json'
+		url: url,
+		filename: 'storage.json'
 	});
 }
 
@@ -142,7 +143,7 @@ async function importStorage() {
 
 		ext.browser.storage.local.set(storage).then(()=>{
 			alert(_("storage.imported"));
-			ext.browser.runtime.reload();
+			reloadExtension();
 		}, (e)=>{
 			alert(_("storage.import.failed", e.message));
 		});
@@ -153,6 +154,7 @@ async function importStorage() {
 
 async function initLegacyImportButton(){
 	var path = await ext.browser.xnote.getStoragePath();
+	var profilePath = await ext.browser.xnote.getProfilePath();
 
 	if(path){
 		Prefs.legacyStoragePath = path;
@@ -162,8 +164,15 @@ async function initLegacyImportButton(){
 
 		importLegacyXNotesButton.disabled = false;
 	} else {
+		document.getElementById('xnoteFolderInfo').textContent = _("xnote.folder.unaccesible", profilePath);
+
 		importLegacyXNotesButton.disabled = true;
 	}
+}
+
+async function reloadExtension(){
+	await ext.closeCurrentNote();
+	return ext.browser.runtime.reload();
 }
 
 async function initOptions(){
@@ -181,7 +190,17 @@ async function initOptions(){
 	importLegacyXNotesButton.addEventListener('click', importLegacyXNotes);
 	clearStorageButton.addEventListener('click', clearStorage);
 	exportStorageButton.addEventListener('click', exportStorage);
-	importFile.addEventListener("change", importStorage, false);
+	importFile.addEventListener("change", importStorage);
+	reloadExtensionButton.addEventListener("click", reloadExtension);
+
+	//let vers = await ext.browser.legacy.compareVersions("78", );
+	let info = await ext.browser.runtime.getBrowserInfo();
+	let vers = await ext.browser.legacy.compareVersions("78", info.version);
+	if(vers<0){
+		exportStorageButton.disabled = false;
+	} else {
+		exportStorageButton.disabled = true;
+	}
 
 	initLegacyImportButton();
 }

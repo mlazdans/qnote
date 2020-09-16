@@ -1,3 +1,7 @@
+function getTabId(tab){
+	return Number.isInteger(tab) ? tab : tab.id;
+}
+
 // messageId = int messageId from messageList
 async function createNote(messageId) {
 	var note = new QNote(await getMessageId(messageId));
@@ -72,7 +76,7 @@ async function tagCurrentNote(toTag = true) {
 }
 
 async function closeCurrentNote() {
-	if(!CurrentNote){
+	if(!CurrentNote || (CurrentNote.windowId === undefined)){
 		return;
 	}
 
@@ -91,30 +95,38 @@ async function closeCurrentNote() {
 }
 
 async function popCurrentNote(id, createNew = false, pop = false) {
+	if(CurrentNote && CurrentNote.popping){
+		return;
+	}
+
 	if(CurrentNote && CurrentNote.windowId){
 		await closeCurrentNote();
 	}
 
 	var note = await createNote(id);
-	CurrentNote = note;
+	var data = await note.load();
 
-	var data = await CurrentNote.load();
-	if(data){
-		updateMessageIcon(true);
-	} else {
-		updateMessageIcon(false);
-	}
+	updateMessageIcon(data?true:false);
 
 	if((data && pop) || createNew){
-		var windowInfo = await browser.windows.create({
-			url: browser.extension.getURL("html/popup.html"),
+		CurrentNote = note;
+		CurrentNote.popping = true;
+		await browser.windows.create({
+			//url: browser.extension.getURL("html/popup.html"),
+			url: "html/popup.html",
 			type: "popup",
 			width: CurrentNote.width,
 			height: CurrentNote.height,
 			left: CurrentNote.x,
 			top: CurrentNote.y
+		}, (windowInfo)=>{
+			CurrentNote.windowId = windowInfo.id;
+			CurrentNote.popping = false;
 		});
-		CurrentNote.windowId = windowInfo.id;
+	} else {
+		if(CurrentNote){
+			CurrentNote.popping = false;
+		}
 	}
 }
 

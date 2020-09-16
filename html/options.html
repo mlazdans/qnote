@@ -2,6 +2,7 @@
 <html>
 <head>
 	<meta charset="utf-8"/>
+	<link rel="stylesheet" href="../html/options.css" type="text/css"></style>
 </head>
 
 <body>
@@ -43,16 +44,20 @@
 	<table>
 		<tr>
 			<td><button type="button" id="importLegacyXNotesButton" data-i18n="importLegacyXNotes.button" disabled="disabled"></button></td>
-			<td id="xnoteFolderInfo" data-i18n="xnote.folder.unaccesible"></td>
+			<td id="xnoteFolderInfo"></td>
 			<td><div id="importLegacyXNotesLoader" style="display: none;"><img src="../images/loader.gif"></div></td>
+		</tr>
+		<tr>
+			<td><button type="button" id="exportStorageButton" data-i18n="exportStorage.button"></button></td>
+			<td data-i18n="export.extension.storage"></td>
 		</tr>
 		<tr>
 			<td><button type="button" id="clearStorageButton" data-i18n="clearStorage.button"></button></td>
 			<td data-i18n="clears.extension.storage"></td>
 		</tr>
 		<tr>
-			<td><button type="button" id="exportStorageButton" data-i18n="exportStorage.button"></button></td>
-			<td data-i18n="export.extension.storage"></td>
+			<td><button type="button" id="reloadExtensionButton" data-i18n="reloadExtension.button"></button></td>
+			<td data-i18n="reload.extension"></td>
 		</tr>
 	</table>
 	<table>

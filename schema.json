@@ -10,6 +10,13 @@
 				"parameters": []
 			},
 			{
+				"name": "getProfilePath",
+				"type": "function",
+				"description": "Get profile path",
+				"async": true,
+				"parameters": []
+			},
+			{
 				"name": "getNotes",
 				"type": "function",
 				"description": "Returns legacy xnotes",
@@ -57,7 +64,26 @@
 						"description": "Dialog message"
 					}
 				]
+			},
+			{
+				"name": "compareVersions",
+				"type": "function",
+				"description": "Version compare",
+				"async": true,
+				"parameters": [
+					{
+						"name": "v1",
+						"type": "string",
+						"description": "Version 1"
+					},
+					{
+						"name": "v2",
+						"type": "string",
+						"description": "Version 2"
+					}
+				]
 			}
+
 		]
 	}
 ]

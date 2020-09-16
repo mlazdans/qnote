@@ -41,7 +41,6 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 					return pub;
 				},
 				async getNotes(path) {
-					//var file = new FileUtils.File("D:\\thunderbird\\dev.profile\\XNote");
 					try {
 						var file = new FileUtils.File(path);
 					} catch {
@@ -57,45 +56,19 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 					}
 					return notes;
 				},
+				__getProfilePath: function() {
+					return Components.classes['@mozilla.org/file/directory_service;1']
+						.getService(Components.interfaces.nsIProperties)
+						.get('ProfD', Components.interfaces.nsIFile);
+				},
+				getProfilePath: function() {
+					var _storageDir = this.__getProfilePath();
+					return _storageDir.path;
+				},
 				getStoragePath: function() {
-					var _storageDir;
-					let directoryService = 	Components.classes['@mozilla.org/file/directory_service;1'].getService(Components.interfaces.nsIProperties);
-					let profileDir = directoryService.get('ProfD', Components.interfaces.nsIFile);
-					//console.log("profileDir: ", profileDir);
-					//let defaultDir = profileDir.clone();
-					let defaultDir = profileDir;
-					//console.log("defaultDir: ", defaultDir);
-					//let xnotePrefs = xnote.ns.Commons.xnotePrefs;
-					let xnotePrefs = Components.classes["@mozilla.org/preferences-service;1"].getService(Components.interfaces.nsIPrefService).getBranch("extensions.xnote.");
-					//let xnotePrefs = Services.prefs;
-
-					defaultDir.append('XNote');
-					if (!xnotePrefs.prefHasUserValue("storage_path")) {
-						_storageDir = defaultDir;
-					} else try {
-						//let storagePath = xnote.ns.UTF8Coder.decode(xnotePrefs.getCharPref('storage_path').trim());
-						let storagePath = xnotePrefs.getCharPref('storage_path').trim();
-						//let FileUtils = ChromeUtils.import("resource://gre/modules/FileUtils.jsm").FileUtils;
-						if (storagePath != "") {
-							if (storagePath.indexOf("[ProfD]") == 0) {
-								_storageDir = new FileUtils.File(profileDir.path);
-								_storageDir.appendRelativePath(storagePath.substring(7));
-							}
-							else {
-								_storageDir = new FileUtils.File(storagePath);
-							}
-						}
-						else {
-							_storageDir = defaultDir;
-						}
-					} catch (e) {
-						//~ dump("\nCould not get storage path:"+e+"\n"+e.stack+"\n...applying default storage path.");
-						_storageDir = defaultDir;
-					}
-					//context._storageDir = _storageDir;
-					//console.log("_storageDir: ", _storageDir.exists());
+					var _storageDir = this.__getProfilePath();
+					_storageDir.append('XNote');
 					return (_storageDir.exists() && _storageDir.isReadable() && _storageDir.isDirectory()) ? _storageDir.path : false;
-					//return _storageDir.path;
 				},
 			}
 		}
