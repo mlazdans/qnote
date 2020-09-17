@@ -2,26 +2,6 @@ function getTabId(tab){
 	return Number.isInteger(tab) ? tab : tab.id;
 }
 
-// NOTE: Seems that "yyyy-mm-dd - HH:MM" format has been hardcoded?
-function decodeXNoteDate(dateString) {
-	var retDate = new Date();
-	let [date, time] = dateString.split(" - ");
-	if(date){
-		let dateParts = date.split("-");
-		retDate.setFullYear(dateParts[0]);
-		retDate.setMonth(dateParts[1] - 1);
-		retDate.setDate(dateParts[2]);
-	}
-
-	if(time){
-		let timeParts = time.split(":");
-		retDate.setHours(timeParts[0]);
-		retDate.setMinutes(timeParts[1]);
-	}
-
-	return retDate;
-}
-
 /*
 UTF-8 Encoder / Decoder
 Original code from Web Toolkit: http://www.webtoolkit.info/javascript-utf8.html
@@ -78,7 +58,11 @@ var UTF8Coder = {
 
 // messageId = int messageId from messageList
 async function createNote(messageId) {
-	var note = new QNote(await getMessageId(messageId));
+	if(Prefs.storageOption === 'ext'){
+		var note = new QNote(await getMessageId(messageId));
+	} else if(Prefs.storageOption === 'folder'){
+		var note = new XNote(await getMessageId(messageId), Prefs.storageFolder);
+	}
 
 	note.messageId = messageId;
 
@@ -230,9 +214,13 @@ async function popCurrentNote(messageId, createNew = false, pop = false) {
 
 	closeCurrentNote();
 
-	note = await createNote(messageId);
+	var note = await createNote(messageId);
+	console.log("createNote", note);
+
 	note.popping = true;
+
 	var data = await note.load();
+	console.log("createNote load", note, data);
 
 	updateMessageIcon(data?true:false);
 
@@ -255,9 +243,9 @@ async function popCurrentNote(messageId, createNew = false, pop = false) {
 	}
 }
 
-async function importLegacyXNotes(path){
+async function importLegacyXNotes(root){
 	try {
-		var legacyXNotes = await browser.xnote.getNotes(path);
+		var legacyXNotes = await browser.xnote.getNotes(root);
 	} catch (e) {
 		console.error("Could not get XNotes", e);
 		return false;
@@ -270,31 +258,31 @@ async function importLegacyXNotes(path){
 	};
 
 	for (const note of legacyXNotes) {
-		let xn = await browser.xnote.loadNote(note.path);
+		let xn = await browser.xnote.loadNote(root, note.fileName);
 		if(xn === false){
 			console.log(note.path + " xnote file not found");
 			stats.err++;
 			continue;
 		}
 
-		let yn = new QNote(xn.messageId);
+		let yn = new QNote(xn.keyId);
 		let data = await yn.load();
 		if(data){
 			stats.exist++;
-			console.log(xn.messageId + " already exists in local store");
+			console.log(xn.keyId + " already exists in local store");
 		} else {
-			console.log(xn.messageId + " does NOT exists in local store");
+			console.log(xn.keyId + " does NOT exists in local store");
 			yn.x = xn.x;
 			yn.y = xn.y;
 			yn.width = xn.width;
 			yn.height = xn.height;
 			yn.text = xn.text;
-			yn.ts = decodeXNoteDate(xn.modificationDate);
+			yn.ts = xn.ts;
 
 			if(await yn.save()){
 				stats.imported++;
 			} else {
-				console.log("Error saving note " + yn.messageId);
+				console.log("Error saving note " + yn.keyId);
 				stats.err++;
 			}
 		}
