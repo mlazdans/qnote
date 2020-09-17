@@ -1,10 +1,12 @@
 var DefaultPrefs = {
 	useTag: false,
-	tagName: 'xnote',
+	tagName: "xnote",
 	dateFormat: "yyyy-mm-dd - HH:MM", // TODO: implement
 	width: 320,
 	height: 200,
 	showOnSelect: true,
+	storageOption: "ext",
+	storageFolder: "",
 	version: browser.runtime.getManifest().version
 }
 

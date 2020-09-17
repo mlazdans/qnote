@@ -10,12 +10,23 @@ var exportStorageButton = document.getElementById('exportStorageButton');
 var importFile = document.getElementById("importFile");
 var importLegacyXNotesLoader = document.getElementById("importLegacyXNotesLoader");
 var reloadExtensionButton = document.getElementById("reloadExtensionButton");
+var storageFolderBrowseButton = document.getElementById("storageFolderBrowseButton");
+var input_storageFolder = document.getElementById("input_storageFolder");
 
 function isButton(node){
-	return node.nodeName == "INPUT" && node.type.toLocaleUpperCase() == "BUTTON"
+	return node.nodeName == "INPUT" && node.type.toLocaleUpperCase() === "BUTTON"
 }
 function isCheckbox(node){
-	return node.nodeName == "INPUT" && node.type.toLocaleUpperCase() == "CHECKBOX"
+	return node.nodeName == "INPUT" && node.type.toLocaleUpperCase() === "CHECKBOX"
+}
+function isRadio(node){
+	return node.nodeName == "INPUT" && node.type.toLocaleUpperCase() === "RADIO"
+}
+
+function toggleLabelError(forE, color){
+	let label = document.querySelectorAll('label[for=' + forE + ']')[0];
+	label.style.color = color;
+	return label;
 }
 
 // Localize texts
@@ -42,7 +53,9 @@ async function setNode(node){
 		case "INPUT":
 			if(isCheckbox(node)){
 				node.checked = value;
-			}else{
+			} else if(isRadio(node)){
+				node.checked = (value === node.value);
+			} else {
 				node.value = value;
 			}
 			break;
@@ -52,38 +65,51 @@ async function setNode(node){
 	}
 }
 
-function importLegacyXNotes() {
+function importLegacyXNotes(path) {
 	importLegacyXNotesButton.disabled = true;
-	importLegacyXNotesLoader.style.display = 'block';
+	importLegacyXNotesLoader.style.display = '';
 
-	ext.importLegacyXNotes()
-	.then((stats)=>{
+	return ext.importLegacyXNotes(path).then((stats)=>{
 		if(stats){
 			alert(_("import.finished.stats", [stats.imported, stats.err, stats.exist]));
 		} else {
 			alert(_("Could not import legacy notes"));
 		}
 	}).finally(()=>{
-		initLegacyImportButton();
+		importLegacyXNotesButton.disabled = false;
 		importLegacyXNotesLoader.style.display = 'none';
 	});
 }
 
-function saveChanges(){
+async function savePrefs(){
+	if(storageOptionValue() == 'folder'){
+		let isReadable = await ext.browser.legacy.isReadable(input_storageFolder.value);
+		if(!isReadable){
+			toggleLabelError('storageOptionFolder', 'red');
+			alert(_("folder.unaccesible", input_storageFolder.value));
+			return false;
+		}
+	}
+	toggleLabelError('storageOptionFolder', '');
+
 	var elements = document.forms[0].elements;
 	for (i = 0; i < elements.length; i++) {
 		var item = elements[i];
 		var key = item.dataset.preference;
 		var value = item.value;
-		if (!key || isButton(item)) {
+
+		if (!key || isButton(item) || (isRadio(item) && !item.checked)) {
 			continue;
 		}
+
 		if (isCheckbox(item)){
 			value = item.checked;
 		}
+
 		Prefs[key] = value;
 	}
-	ext.savePrefs(Prefs);
+
+	return await ext.savePrefs(Prefs);
 }
 
 function initTags(){
@@ -153,26 +179,65 @@ async function importStorage() {
 }
 
 async function initLegacyImportButton(){
-	var path = await ext.browser.xnote.getStoragePath();
-	var profilePath = await ext.browser.xnote.getProfilePath();
+	var path;
+	var legacyPrefs = await ext.browser.xnote.getPrefs();
+	if(legacyPrefs.storage_path){
+		path = legacyPrefs.storage_path;
+	} else if(!(path = await ext.browser.xnote.getStoragePath())) {
+		path = await ext.browser.xnote.getProfilePath();
+	}
 
 	if(path){
-		Prefs.legacyStoragePath = path;
-		ext.Prefs.legacyStoragePath = path;
-
 		document.getElementById('xnoteFolderInfo').textContent = _("xnote.folder.found", path);
-
-		importLegacyXNotesButton.disabled = false;
 	} else {
 		document.getElementById('xnoteFolderInfo').textContent = _("xnote.folder.unaccesible", profilePath);
-
-		importLegacyXNotesButton.disabled = true;
 	}
+
+	importLegacyXNotesButton.addEventListener('click', ()=>{
+		ext.browser.legacy.folderPicker({
+			displayDirectory: path
+		}).then((path)=>{
+			return importLegacyXNotes(path);
+		});
+	});
 }
 
 async function reloadExtension(){
 	ext.closeCurrentNote();
 	return await ext.browser.runtime.reload();
+}
+
+function storageOptionChange(option){
+	for (const node of document.querySelectorAll('[class="storageFieldset"]')) {
+		if(node.id === 'storageFieldset_' + option){
+			node.style.display = '';
+		} else {
+			node.style.display = 'none';
+		}
+	}
+}
+
+function storageOptionValue(){
+	return document.querySelector('input[name="storageOption"]:checked').value;
+}
+
+async function storageOption(){
+	storageOptionChange(storageOptionValue());
+}
+
+async function storageFolderBrowse(){
+	var path;
+	if(Prefs.storageFolder){
+		path = Prefs.storageFolder;
+	} else {
+		path = await ext.browser.xnote.getProfilePath();
+	}
+
+	ext.browser.legacy.folderPicker({
+		displayDirectory: path
+	}).then((path)=>{
+		input_storageFolder.value = path;
+	});
 }
 
 async function initOptions(){
@@ -186,14 +251,6 @@ async function initOptions(){
 		setNode(node);
 	}
 
-	saveButton.addEventListener('click', saveChanges);
-	importLegacyXNotesButton.addEventListener('click', importLegacyXNotes);
-	clearStorageButton.addEventListener('click', clearStorage);
-	exportStorageButton.addEventListener('click', exportStorage);
-	importFile.addEventListener("change", importStorage);
-	reloadExtensionButton.addEventListener("click", reloadExtension);
-
-	//let vers = await ext.browser.legacy.compareVersions("78", );
 	let info = await ext.browser.runtime.getBrowserInfo();
 	let vers = await ext.browser.legacy.compareVersions("78", info.version);
 	if(vers<0){
@@ -203,6 +260,17 @@ async function initOptions(){
 	}
 
 	initLegacyImportButton();
+	saveButton.addEventListener('click', savePrefs);
+	clearStorageButton.addEventListener('click', clearStorage);
+	exportStorageButton.addEventListener('click', exportStorage);
+	importFile.addEventListener("change", importStorage);
+	reloadExtensionButton.addEventListener("click", reloadExtension);
+	storageFolderBrowseButton.addEventListener("click", storageFolderBrowse);
+
+	for (const node of document.querySelectorAll('input[name="storageOption"]')) {
+		node.addEventListener("click", storageOption);
+	}
+	storageOption();
 }
 
 initOptions();

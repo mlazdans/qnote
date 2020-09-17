@@ -11,10 +11,14 @@ var legacy = class extends ExtensionCommon.ExtensionAPI {
 				},
 				async compareVersions(v1, v2){
 					return Services.vc.compare(v1, v2);
+
 				},
-				async folderPicker(){
+				async folderPicker(options){
 					let fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(Components.interfaces.nsIFilePicker);
 					fp.init(Services.wm.getMostRecentWindow(null), "Select.storage.dir", fp.modeGetFolder);
+					if(options && options.displayDirectory){
+						fp.displayDirectory = new FileUtils.File(options.displayDirectory);
+					}
 					return new Promise(function(resolve, reject) {
 						fp.open(rv => {
 							if(rv === fp.returnOK){
@@ -22,6 +26,13 @@ var legacy = class extends ExtensionCommon.ExtensionAPI {
 							}
 						});
 					});
+				},
+				async isReadable(path){
+					try {
+						return (new FileUtils.File(path)).isReadable();
+					} catch {
+						return false;
+					}
 				}
 			}
 		}
