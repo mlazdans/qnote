@@ -4,15 +4,17 @@
 	"author": "Martins Lazdans",
 	"default_locale": "en",
 	"description": "Attempt to migrate XNote++ to Thunderbird 78+",
-	"version": "0.2",
+	"version": "0.3",
 	"applications": {
 		"gecko": {
 			"id": "qnote@dqdp.net",
-			"strict_min_version": "68.12.0"
+			"strict_min_version": "68.0"
 		}
 	},
 	"icons": {
-		"48": "images/icon.svg"
+		"32": "images/icon.svg",
+		"48": "images/icon.svg",
+		"64": "images/icon.svg"
 	},
 	"permissions": [
 		"messagesRead",

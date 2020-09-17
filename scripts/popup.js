@@ -12,24 +12,18 @@ if(CurrentNote.ts){
 }
 
 const popupClose = () => {
-	try {
-		CurrentNote.x = window.screenX;
-		CurrentNote.y = window.screenY;
-		CurrentNote.height = window.outerHeight;
-		CurrentNote.width = window.outerWidth;
-		CurrentNote.text = YTextE.value;
-		ext.closeCurrentNote();
-	} catch (e) {
-		//console.error("Window is likely dead", e);
-	}
+	CurrentNote.x = window.screenX;
+	CurrentNote.y = window.screenY;
+	CurrentNote.height = window.outerHeight;
+	CurrentNote.width = window.outerWidth;
+	CurrentNote.text = YTextE.value;
 }
 
 document.addEventListener('keyup', (event) => {
 	if(event.key == 'Escape'){
-		if(CurrentNote){
-			CurrentNote.needSave = false;
-		}
 		popupClose();
+		CurrentNote.needSave = false;
+		ext.browser.windows.remove(CurrentNote.windowId);
 	}
 });
 

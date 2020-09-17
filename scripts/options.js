@@ -108,7 +108,7 @@ function initTags(){
 async function clearStorage(){
 	let conf = await ext.browser.legacy.confirm(_("confirm"), _("are.you.sure"));
 	if(conf){
-		await ext.closeCurrentNote();
+		ext.closeCurrentNote();
 		ext.browser.storage.local.clear().then(() => {
 			alert(_("storage.cleared"));
 			reloadExtension();
@@ -171,8 +171,8 @@ async function initLegacyImportButton(){
 }
 
 async function reloadExtension(){
-	await ext.closeCurrentNote();
-	return ext.browser.runtime.reload();
+	ext.closeCurrentNote();
+	return await ext.browser.runtime.reload();
 }
 
 async function initOptions(){

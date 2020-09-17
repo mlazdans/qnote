@@ -3,9 +3,23 @@
 		"namespace": "xnote",
 		"functions": [
 			{
+				"name": "getDefaultPrefs",
+				"type": "function",
+				"description": "Get default preferences",
+				"async": true,
+				"parameters": []
+			},
+			{
+				"name": "getPrefs",
+				"type": "function",
+				"description": "Get preferences",
+				"async": true,
+				"parameters": []
+			},
+			{
 				"name": "getStoragePath",
 				"type": "function",
-				"description": "Get legacy xnote storage path",
+				"description": "Get storage path",
 				"async": true,
 				"parameters": []
 			},
@@ -19,7 +33,7 @@
 			{
 				"name": "getNotes",
 				"type": "function",
-				"description": "Returns legacy xnotes",
+				"description": "Returns list of xnote files",
 				"async": true,
 				"parameters": [
 					{
@@ -32,7 +46,7 @@
 			{
 				"name": "loadNote",
 				"type": "function",
-				"description": "Loads xnote structure",
+				"description": "Loads xnote from file",
 				"async": true,
 				"parameters": [
 					{
@@ -82,8 +96,14 @@
 						"description": "Version 2"
 					}
 				]
+			},
+			{
+				"name": "folderPicker",
+				"type": "function",
+				"description": "Pick a folder",
+				"async": true,
+				"parameters": []
 			}
-
 		]
 	}
 ]
