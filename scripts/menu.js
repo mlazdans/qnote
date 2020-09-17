@@ -7,7 +7,7 @@ var Menu = {
 			id: "modify",
 			title: "Modify note",
 			contexts: ["message_list"],
-			async onclick(info) {
+			onclick(info) {
 				popCurrentNote(Menu.getId(info), false, true);
 			},
 		});
@@ -15,23 +15,9 @@ var Menu = {
 		browser.menus.create({
 			id: "delete",
 			title: "Delete note",
-			contexts: ["message_list", "browser_action"],
-			async onclick(info) {
-				let messageId = Menu.getId(info);
-				// Close only if deleting CurrentNote
-				if(CurrentNote && (CurrentNote.messageId == messageId)){
-					await closeCurrentNote();
-				}
-				let note = await createNote(messageId);
-				let data = await note.load();
-				if(data){
-					await note.delete();
-					// Remove tag only if deleting CurrentNote
-					if(CurrentNote && (CurrentNote.messageId == messageId)){
-						tagCurrentNote(false);
-					}
-					updateMessageIcon(false);
-				}
+			contexts: ["message_list"],
+			onclick(info) {
+				deleteNoteForMessage(Menu.getId(info));
 			},
 		});
 
@@ -45,8 +31,8 @@ var Menu = {
 			id: "reset",
 			title: "Reset note window",
 			contexts: ["message_list"],
-			async onclick() {
-				await resetCurrentNote();
+			onclick(info) {
+				resetNoteForMessage(Menu.getId(info));
 			},
 		});
 	},
