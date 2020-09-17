@@ -209,7 +209,9 @@ async function tagCurrentNote(toTag = true) {
 }
 
 async function closeCurrentNote() {
-	return await browser.windows.remove(CurrentNote.windowId);
+	if(CurrentNote && CurrentNote.windowId){
+		return await browser.windows.remove(CurrentNote.windowId);
+	}
 }
 
 async function popCurrentNote(messageId, createNew = false, pop = false) {
@@ -226,9 +228,7 @@ async function popCurrentNote(messageId, createNew = false, pop = false) {
 		CurrentNote.popping = true;
 	}
 
-	if(CurrentNote && CurrentNote.windowId){
-		closeCurrentNote();
-	}
+	closeCurrentNote();
 
 	note = await createNote(messageId);
 	note.popping = true;
@@ -255,9 +255,9 @@ async function popCurrentNote(messageId, createNew = false, pop = false) {
 	}
 }
 
-async function importLegacyXNotes(){
+async function importLegacyXNotes(path){
 	try {
-		var legacyXNotes = await browser.xnote.getNotes(Prefs.legacyStoragePath);
+		var legacyXNotes = await browser.xnote.getNotes(path);
 	} catch (e) {
 		console.error("Could not get XNotes", e);
 		return false;

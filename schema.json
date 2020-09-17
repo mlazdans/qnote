@@ -102,7 +102,36 @@
 				"type": "function",
 				"description": "Pick a folder",
 				"async": true,
-				"parameters": []
+				"parameters": [
+					{
+						"name": "options",
+						"type": "object",
+						"optional": true,
+						"properties": {
+							"displayDirectory": {
+								"type": "string",
+								"optional": true,
+								"default": "",
+								"description": "Initial directory"
+							}
+						},
+						"default": {},
+						"description": "Options object"
+					}
+				]
+			},
+			{
+				"name": "isReadable",
+				"type": "function",
+				"description": "Returns true if path is readable",
+				"async": true,
+				"parameters": [
+					{
+						"name": "path",
+						"type": "string",
+						"description": "Path to check"
+					}
+				]
 			}
 		]
 	}

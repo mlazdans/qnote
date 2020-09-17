@@ -61,9 +61,9 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 						console.error(`Can not open legacy xnote: ${fileName}`);
 						return false;
 					}
-					var pub = {};
 
-					//file.appendRelativePath(fileName);
+					var note = {};
+
 					if(!file.exists() || !file.isReadable() || !file.isFile()){
 						console.error(`Can't access ${fileName}`);
 						return false;
@@ -71,22 +71,23 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 
 					var fileInStream = Components.classes['@mozilla.org/network/file-input-stream;1'].createInstance(Components.interfaces.nsIFileInputStream);
 					var fileScriptableIO = Components.classes['@mozilla.org/scriptableinputstream;1'].createInstance(Components.interfaces.nsIScriptableInputStream);
-					fileInStream.init(file, 0x01, parseInt("0444", 8), null );
+					fileInStream.init(file, 0x01, parseInt("0444", 8), null);
 					fileScriptableIO.init(fileInStream);
-					pub.x = parseInt(fileScriptableIO.read(4));
-					pub.y = parseInt(fileScriptableIO.read(4));
-					pub.width = parseInt(fileScriptableIO.read(4));
-					pub.height = parseInt(fileScriptableIO.read(4));
-					pub.modificationDate = fileScriptableIO.read(32);
-					pub.text = decodeURIComponent(fileScriptableIO.read(file.fileSize-48));
-					pub.messageId = file.leafName.substring(0, file.leafName.length - 6);
+
+					note.x = parseInt(fileScriptableIO.read(4));
+					note.y = parseInt(fileScriptableIO.read(4));
+					note.width = parseInt(fileScriptableIO.read(4));
+					note.height = parseInt(fileScriptableIO.read(4));
+					note.modificationDate = fileScriptableIO.read(32);
+					note.text = decodeURIComponent(fileScriptableIO.read(file.fileSize-48));
+					note.messageId = file.leafName.substring(0, file.leafName.length - 6);
 
 					fileScriptableIO.close();
 					fileInStream.close();
 
-					pub.text = pub.text.replace(/<BR>/g,'\n');
+					note.text = note.text.replace(/<BR>/g,'\n');
 
-					return pub;
+					return note;
 				},
 				async getNotes(path) {
 					try {
@@ -100,8 +101,11 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 
 					while (eFiles.hasMoreElements()) {
 						var o = eFiles.getNext().QueryInterface(Components.interfaces.nsIFile);
-						notes.push((({ path, leafName }) => ({ path, leafName }))(o));
+						if(o.leafName.substring(o.leafName.length - 6) === '.xnote'){
+							notes.push((({ path, leafName }) => ({ path, leafName }))(o));
+						}
 					}
+
 					return notes;
 				},
 				async getProfilePath() {
