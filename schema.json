@@ -50,9 +50,76 @@
 				"async": true,
 				"parameters": [
 					{
+						"name": "root",
+						"type": "string",
+						"description": "Root folder for XNotes"
+					},
+					{
 						"name": "fileName",
 						"type": "string",
 						"description": "XNote filename"
+					}
+				]
+			},
+			{
+				"name": "saveNote",
+				"type": "function",
+				"description": "Saves xnote into file",
+				"async": true,
+				"parameters": [
+					{
+						"name": "root",
+						"type": "string",
+						"description": "Root folder for XNotes"
+					},
+					{
+						"name": "fileName",
+						"type": "string",
+						"description": "XNote filename"
+					},
+					{
+						"name": "data",
+						"type": "object",
+						"properties": {
+							"x": {
+								"type": "integer",
+								"optional": true,
+								"default": 0,
+								"description": "Windows left position"
+							},
+							"y": {
+								"type": "integer",
+								"optional": true,
+								"default": 0,
+								"description": "Windows top position"
+							},
+							"width": {
+								"type": "integer",
+								"optional": true,
+								"default": 0,
+								"description": "Windows width"
+							},
+							"height": {
+								"type": "integer",
+								"optional": true,
+								"default": 0,
+								"description": "Windows height"
+							},
+							"text": {
+								"type": "string",
+								"optional": true,
+								"default": "",
+								"description": "Note text"
+							},
+							"ts": {
+								"type": "integer",
+								"optional": true,
+								"default": 0,
+								"description": "Modification timestamp"
+							}
+						},
+						"default": {},
+						"description": "Options object"
 					}
 				]
 			}

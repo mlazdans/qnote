@@ -24,7 +24,9 @@
 	],
 	"background": {
 		"scripts": [
+			"scripts/note.js",
 			"scripts/qnote.js",
+			"scripts/xnote.js",
 			"scripts/menu.js",
 			"scripts/utils.js",
 			"scripts/background.js"
@@ -49,7 +51,7 @@
 						"xnote"
 					]
 				],
-				"script": "scripts/xnote.js"
+				"script": "scripts/xnote-api.js"
 			}
 		},
 		"legacy": {
@@ -63,7 +65,7 @@
 						"legacy"
 					]
 				],
-				"script": "scripts/legacy.js"
+				"script": "scripts/legacy-api.js"
 			}
 		}
 	}
