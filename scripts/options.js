@@ -158,7 +158,8 @@ async function exportStorage(){
 
 	return ext.browser.downloads.download({
 		url: url,
-		filename: 'storage.json'
+		saveAs: true,
+		filename: 'qnote-storage.json'
 	});
 }
 
@@ -187,6 +188,7 @@ async function importStorage() {
 
 async function initLegacyImportButton(){
 	var path;
+
 	var legacyPrefs = await ext.browser.xnote.getPrefs();
 	if(legacyPrefs.storage_path){
 		path = legacyPrefs.storage_path;
@@ -234,9 +236,10 @@ async function storageOption(){
 
 async function storageFolderBrowse(){
 	var path;
+
 	if(Prefs.storageFolder){
 		path = Prefs.storageFolder;
-	} else {
+	} else if(!(path = await ext.browser.xnote.getStoragePath())) {
 		path = await ext.browser.xnote.getProfilePath();
 	}
 
