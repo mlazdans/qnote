@@ -20,8 +20,8 @@ class XNote extends Note {
 	}
 
 	async delete() {
-		// return browser.storage.local.remove(this.keyId).then(()=>{
-		// 	return true;
-		// });
+		return browser.xnote.deleteNote(this.root, this.keyId + '.xnote').then(()=>{
+			return true;
+		});
 	}
 }

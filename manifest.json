@@ -4,7 +4,7 @@
 	"author": "Martins Lazdans",
 	"default_locale": "en",
 	"description": "Attempt to migrate XNote++ to Thunderbird 78+",
-	"version": "0.3",
+	"version": "0.4",
 	"applications": {
 		"gecko": {
 			"id": "qnote@dqdp.net",
@@ -24,11 +24,11 @@
 	],
 	"background": {
 		"scripts": [
+			"scripts/utils.js",
 			"scripts/note.js",
 			"scripts/qnote.js",
 			"scripts/xnote.js",
 			"scripts/menu.js",
-			"scripts/utils.js",
 			"scripts/background.js"
 		]
 	},
