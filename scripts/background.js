@@ -1,9 +1,38 @@
+// window.addEventListener("load",()=>{
+// 	browser.xnote.installObserver();
+// });
+
+// window.addEventListener("beforeunload", ()=>{
+// 	console.log("beforeunload");
+// 	//await browser.xnote.uninstallObserver();
+// });
+
+// window.addEventListener("onclose", ()=>{
+// 	console.log("onclose");
+// 	//await browser.xnote.uninstallObserver();
+// });
+
+// window.addEventListener("suspend", ()=>{
+// 	console.log("suspend");
+// 	//await browser.xnote.uninstallObserver();
+// });
+
+// window.addEventListener("unload", ()=>{
+// 	console.log("unload");
+// 	browser.xnote.uninstallObserver();
+// });
+
+// browser.runtime.onInstalled.addListener(details => {
+// 	console.log("onInstalled");
+// });
+
 var DefaultPrefs = {
 	useTag: false,
 	tagName: "xnote",
 	dateFormat: "yyyy-mm-dd - HH:MM", // TODO: implement
 	width: 320,
 	height: 200,
+	showFirstChars: 0,
 	showOnSelect: true,
 	storageOption: "ext",
 	storageFolder: "",
@@ -12,6 +41,7 @@ var DefaultPrefs = {
 
 var CurrentNote;
 var Prefs;
+var LegacyPrefs;
 
 function initExt(){
 	browser.windows.onRemoved.addListener((windowId)=>{
@@ -20,11 +50,15 @@ function initExt(){
 			return;
 		}
 
-		if(CurrentNote.text && CurrentNote.needSave){
-			CurrentNote.save().then(async (res)=>{
-				tagCurrentNote(Prefs.useTag);
-				updateMessageIcon(res?true:false);
-				CurrentNote = undefined;
+		if(CurrentNote.needSave){
+			// Ddelete if no text
+			let f = CurrentNote.text ? "save" : "delete";
+			CurrentNote[f]().then(async (res)=>{
+				if(res){
+					tagCurrentNote(Prefs.useTag);
+					updateMessageIcon(res?true:false);
+					CurrentNote = undefined;
+				}
 			});
 		} else {
 			CurrentNote = undefined;

@@ -1,7 +1,137 @@
 var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
+var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
+
+var getView = () => {
+	return Services.wm.getMostRecentWindow("mail:3pane").gDBView;
+}
+
+var XNoteObserver = {
+	observe: function(aMsgFolder, aTopic, aData) {
+		if(aTopic !== "MsgCreateDBView"){
+			return;
+		}
+		addColumnHandler();
+	}
+};
+
+var columnHandler = {
+	isEditable: function(row, col) {
+		console.log("isEditable", row, col);
+		return false;
+	},
+	cycleCell: function(row,col) {
+		console.log("cycleCell", row, col);
+	},
+	getCellText: function(row, col) {
+		console.log("getCellText", row, col);
+		// let xnotePrefs = xnote.ns.Commons.xnotePrefs;
+		// if (xnotePrefs.getIntPref("show_first_x_chars_in_col") > 0) {
+		// 	let note = new xnote.ns.Note(getHeaderForRow(row).messageId);
+		// 	if (note.exists()) {
+		// 		return " " + note.text.substr(0,xnotePrefs.getIntPref("show_first_x_chars_in_col"));
+		// 	}
+		// }
+		// return null;
+	},
+	getSortStringForRow: function(hdr) {
+		console.log("getSortStringForRow", hdr);
+		// let xnotePrefs = xnote.ns.Commons.xnotePrefs;
+		// if (xnotePrefs.getIntPref("show_first_x_chars_in_col") > 0) {
+		// 	let note = new xnote.ns.Note(hdr.messageId);
+		// 	if (note.exists()) {
+		// 		return " " + note.text.substr(0,xnotePrefs.getIntPref("show_first_x_chars_in_col"));
+		// 	} else {
+		// 		return "";
+		// 	}
+		// }
+		// return pub.hasNote(hdr.messageId);
+	},
+	isString: function() {
+		console.log("isString");
+		return true;
+	},
+	getCellProperties: function(row, col, props){
+		console.log("getCellProperties", row, col, props);
+	},
+	getRowProperties: function(row, props){
+		console.log("getRowProperties", row, props);
+	},
+	getImageSrc: function(row, col) {
+		console.log("getImageSrc", row, col);
+		return extension.getURL("images/xnote_context.png");
+		//return "../images/xnote_context.png";
+		// let hdr = getHeaderForRow(row);
+		// if(pub.hasNote(hdr.messageId)){
+		// 	return "chrome://xnote/skin/xnote_context.png";
+		// } else {
+		// 	return null;
+		// }
+	},
+	getSortLongForRow: function(hdr) {
+		console.log("getSortLongForRow", hdr);
+		//return pub.hasNote(hdr.messageId);
+	}
+};
+
+// for (const node of w.document.querySelectorAll('treecol')) {
+// 	if(node.getAttribute('label') == 'QNote'){
+// 		console.log(node);
+// 	}
+// }
+var addColumnHandler = () => {
+	var w = Services.wm.getMostRecentWindow("mail:3pane");
+
+	var threadCols = w.document.getElementById("threadCols");
+	var xnoteCol = w.document.getElementById("xnoteCol");
+
+
+	if(xnoteCol){
+		console.log("xnoteCol exists", xnoteCol);
+		xnoteCol.parentNode.removeChild(xnoteCol.previousSibling);
+		xnoteCol.parentNode.removeChild(xnoteCol);
+		try {
+			getView().removeColumnHandler("xnoteCol");
+		} catch (e) {
+			console.log(e);
+		}
+	}
+
+	var html =
+		'<splitter class="tree-splitter" />' +
+		'<treecol id="xnoteCol" persist="ordinal width" label="QNote" currentView="unthreaded" ' +
+		'is="treecol-image" class="treecol-image xnote-column-header">' +
+		'<label class="treecol-text" flex="1" crop="right" value="Q" />' +
+		'</treecol>';
+
+	threadCols.appendChild(w.MozXULElement.parseXULToFragment(html));
+	console.log("firstc", html);
+
+	getView().addColumnHandler("xnoteCol", columnHandler);
+	console.log("addColumnHandler", columnHandler);
+	//dbView.addColumnHandler("xnoteCol", columnHandler);
+	//this.addCustomColumnHandler();
+};
 
 var xnote = class extends ExtensionCommon.ExtensionAPI {
+	/*
+	onShutdown(isAppShutdown) {
+		if(isAppShutdown){
+			return;
+		}
+		console.log("onShutdown", isAppShutdown);
+		try {
+			getView().removeColumnHandler("xnoteCol");
+		} catch {
+		}
+
+		try {
+			Services.obs.removeObserver(XNoteObserver, "MsgCreateDBView");
+		} catch {
+		}
+	}
+	*/
 	getAPI(context) {
 		return {
 			xnote: {
@@ -115,12 +245,18 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 				async getPrefs(){
 					return this.__getPrefs();
 				},
-				async saveNote(root, fileName, note){
-					console.log("saveNote", root, fileName, note);
+				noteFile(root, fileName){
 					try {
 						var file = new FileUtils.File(root);
 						file.appendRelativePath(fileName);
+						return file;
 					} catch {
+						return false;
+					}
+				},
+				async saveNote(root, fileName, note){
+					var file = this.noteFile(root, fileName);
+					if(!file){
 						console.error(`Can not open xnote: ${fileName}`);
 						return false;
 					}
@@ -149,25 +285,33 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 
 					fileOutStream.close();
 
-					tempFile.moveTo(null, file.leafName);
-
-					return true;
+					try {
+						tempFile.moveTo(null, file.leafName);
+						return true;
+					} catch {
+						return false;
+					}
+				},
+				async noteExists(root, fileName){
+					var file = this.noteFile(root, fileName);
+					return file && file.exists() && file.isFile();
+				},
+				async deleteNote(root, fileName){
+					var file = this.noteFile(root, fileName);
+					try {
+						file.remove(false);
+						return true;
+					} catch {
+						return false;
+					}
 				},
 				async loadNote(root, fileName){
-					try {
-						var file = new FileUtils.File(root);
-						file.appendRelativePath(fileName);
-					} catch {
-						console.error(`Can not open xnote: ${fileName}`);
+					var file = this.noteFile(root, fileName);
+					if(!file || !file.exists() || !file.isReadable() || !file.isFile()){
 						return false;
 					}
 
 					var note = {};
-
-					if(!file.exists() || !file.isReadable() || !file.isFile()){
-						console.error(`Can't access ${fileName}`);
-						return false;
-					}
 
 					var fileInStream = Components.classes['@mozilla.org/network/file-input-stream;1'].createInstance(Components.interfaces.nsIFileInputStream);
 					var fileScriptableIO = Components.classes['@mozilla.org/scriptableinputstream;1'].createInstance(Components.interfaces.nsIScriptableInputStream);
@@ -218,8 +362,22 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 					var _storageDir = this.__getProfilePath();
 					_storageDir.append('XNote');
 					return (_storageDir.exists() && _storageDir.isReadable() && _storageDir.isDirectory()) ? _storageDir.path : false;
+				},
+				async installObserver() {
+					// return;
+					// var eObservers = Services.obs.enumerateObservers("MsgCreateDBView");
+					// while (eObservers.hasMoreElements()) {
+					// 	var o = eObservers.getNext().QueryInterface(Ci.nsIObserver);
+					// 	Services.obs.removeObserver(o, "MsgCreateDBView");
+					// }
+
+					//Services.obs.addObserver(XNoteObserver, "MsgCreateDBView", false);
+				},
+				async uninstallObserver() {
+					Services.obs.removeObserver(XNoteObserver, "MsgCreateDBView");
 				}
 			}
 		}
 	}
 }
+

@@ -62,6 +62,42 @@
 				]
 			},
 			{
+				"name": "deleteNote",
+				"type": "function",
+				"description": "Delete xnote",
+				"async": true,
+				"parameters": [
+					{
+						"name": "root",
+						"type": "string",
+						"description": "Root folder for XNotes"
+					},
+					{
+						"name": "fileName",
+						"type": "string",
+						"description": "XNote filename"
+					}
+				]
+			},
+			{
+				"name": "noteExists",
+				"type": "function",
+				"description": "Returns true if xnote exists",
+				"async": true,
+				"parameters": [
+					{
+						"name": "root",
+						"type": "string",
+						"description": "Root folder for XNotes"
+					},
+					{
+						"name": "fileName",
+						"type": "string",
+						"description": "XNote filename"
+					}
+				]
+			},
+			{
 				"name": "saveNote",
 				"type": "function",
 				"description": "Saves xnote into file",
@@ -122,6 +158,20 @@
 						"description": "Options object"
 					}
 				]
+			},
+			{
+				"name": "installObserver",
+				"type": "function",
+				"description": "Installs column observer",
+				"async": true,
+				"parameters": []
+			},
+			{
+				"name": "uninstallObserver",
+				"type": "function",
+				"description": "Uninstalls column observer",
+				"async": true,
+				"parameters": []
 			}
 		]
 	},

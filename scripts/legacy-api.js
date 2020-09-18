@@ -16,7 +16,7 @@ var legacy = class extends ExtensionCommon.ExtensionAPI {
 				async folderPicker(options){
 					let fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(Components.interfaces.nsIFilePicker);
 
-					fp.init(Services.wm.getMostRecentWindow(null), "Select.storage.dir", fp.modeGetFolder);
+					fp.init(Services.wm.getMostRecentWindow(null), "Select storage folder", fp.modeGetFolder);
 					if(options && options.displayDirectory){
 						fp.displayDirectory = new FileUtils.File(options.displayDirectory);
 					}

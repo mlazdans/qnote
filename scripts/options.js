@@ -29,14 +29,21 @@ function toggleLabelError(forE, color){
 	return label;
 }
 
-// Localize texts
-for (const node of document.querySelectorAll('[data-i18n]')) {
-	let id = node.dataset.i18n;
-	var text = _(id);
-	if(isButton(node)){
-		node.value = text;
-	}else{
-		node.appendChild(document.createTextNode(text));
+function setTexts(){
+	for (const node of document.querySelectorAll('[data-i18n]')) {
+		let id = node.dataset.i18n;
+		var text = _(id);
+		if(isButton(node)){
+			node.value = text;
+		} else {
+			node.appendChild(document.createTextNode(text));
+		}
+	}
+}
+
+function setData(){
+	for (const node of document.querySelectorAll('[data-preference]')) {
+		setNode(node);
 	}
 }
 
@@ -242,14 +249,12 @@ async function storageFolderBrowse(){
 
 async function initOptions(){
 	Prefs = await ext.loadPrefs();
-
 	Prefs.tags = await ext.browser.messages.listTags();
 
 	initTags();
 
-	for (const node of document.querySelectorAll('[data-preference]')) {
-		setNode(node);
-	}
+	setTexts();
+	setData();
 
 	let info = await ext.browser.runtime.getBrowserInfo();
 	let vers = await ext.browser.legacy.compareVersions("78", info.version);
