@@ -158,20 +158,6 @@
 						"description": "Options object"
 					}
 				]
-			},
-			{
-				"name": "installObserver",
-				"type": "function",
-				"description": "Installs column observer",
-				"async": true,
-				"parameters": []
-			},
-			{
-				"name": "uninstallObserver",
-				"type": "function",
-				"description": "Uninstalls column observer",
-				"async": true,
-				"parameters": []
 			}
 		]
 	},
@@ -249,6 +235,64 @@
 						"description": "Path to check"
 					}
 				]
+			}
+		]
+	},
+	{
+		"namespace": "qnote",
+		"functions": [
+			{
+				"name": "installObserver",
+				"type": "function",
+				"description": "Installs column observer",
+				"async": true,
+				"parameters": []
+			},
+			{
+				"name": "uninstallObserver",
+				"type": "function",
+				"description": "Uninstalls column observer",
+				"async": true,
+				"parameters": []
+			},
+			{
+				"name": "getVisibleMessages",
+				"type": "function",
+				"description": "Returns list of visible messages",
+				"async": true,
+				"parameters": []
+			},
+			{
+				"name": "setNote",
+				"type": "function",
+				"description": "",
+				"async": true,
+				"parameters": [
+					{
+						"name": "options",
+						"type": "object",
+						"properties": {
+							"keyId": {
+								"type": "string",
+								"default": "",
+								"description": ""
+							},
+							"text": {
+								"type": "string",
+								"default": "",
+								"description": ""
+							}
+						},
+						"description": "Note object"
+					}
+				]
+			},
+			{
+				"name": "updateView",
+				"type": "function",
+				"description": "",
+				"async": true,
+				"parameters": []
 			}
 		]
 	}

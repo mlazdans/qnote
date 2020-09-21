@@ -1,22 +1,23 @@
 var ext = chrome.extension.getBackgroundPage();
 var CurrentNote = ext.CurrentNote;
+var note = ext.CurrentNote.note;
 
 var YTextE = document.getElementById('qnote-text');
 YTextE.focus();
-YTextE.value = CurrentNote.text;
+YTextE.value = note.text;
 
 document.title = 'QNote';
 
-if(CurrentNote.ts){
-	document.title += ': ' + (new Date(CurrentNote.ts)).toLocaleString();
+if(note.ts){
+	document.title += ': ' + (new Date(note.ts)).toLocaleString();
 }
 
 const popupClose = () => {
-	CurrentNote.x = window.screenX;
-	CurrentNote.y = window.screenY;
-	CurrentNote.height = window.outerHeight;
-	CurrentNote.width = window.outerWidth;
-	CurrentNote.text = YTextE.value;
+	note.x = window.screenX;
+	note.y = window.screenY;
+	note.height = window.outerHeight;
+	note.width = window.outerWidth;
+	note.text = YTextE.value;
 }
 
 document.addEventListener('keyup', (event) => {

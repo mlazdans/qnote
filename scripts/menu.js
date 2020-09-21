@@ -8,7 +8,7 @@ var Menu = {
 			title: "Modify note",
 			contexts: ["message_list"],
 			onclick(info) {
-				popCurrentNote(Menu.getId(info), false, true);
+				CurrentNote.pop(Menu.getId(info), false, true);
 			},
 		});
 
@@ -42,7 +42,7 @@ var Menu = {
 			title: "Create new note",
 			contexts: ["message_list"],
 			async onclick(info) {
-				popCurrentNote(Menu.getId(info), true, true);
+				CurrentNote.pop(Menu.getId(info), true, true);
 			},
 		});
 	}

@@ -4,7 +4,7 @@
 	"author": "Martins Lazdans",
 	"default_locale": "en",
 	"description": "Attempt to migrate XNote++ to Thunderbird 78+",
-	"version": "0.4",
+	"version": "0.5",
 	"applications": {
 		"gecko": {
 			"id": "qnote@dqdp.net",
@@ -19,8 +19,10 @@
 	"permissions": [
 		"messagesRead",
 		"storage",
+		"unlimitedStorage",
 		"downloads",
-		"menus"
+		"menus",
+		"accountsRead"
 	],
 	"background": {
 		"scripts": [
@@ -43,29 +45,25 @@
 		"xnote": {
 			"schema": "schema.json",
 			"parent": {
-				"scopes": [
-					"addon_parent"
-				],
-				"paths": [
-					[
-						"xnote"
-					]
-				],
+				"scopes": ["addon_parent"],
+				"paths": [["xnote"]],
 				"script": "scripts/xnote-api.js"
 			}
 		},
 		"legacy": {
 			"schema": "schema.json",
 			"parent": {
-				"scopes": [
-					"addon_parent"
-				],
-				"paths": [
-					[
-						"legacy"
-					]
-				],
+				"scopes": ["addon_parent"],
+				"paths": [["legacy"]],
 				"script": "scripts/legacy-api.js"
+			}
+		},
+		"qnote": {
+			"schema": "schema.json",
+			"parent": {
+				"scopes": ["addon_parent"],
+				"paths": [["qnote"]],
+				"script": "scripts/qnote-api.js"
 			}
 		}
 	}

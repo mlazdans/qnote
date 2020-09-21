@@ -1,26 +1,8 @@
-// window.addEventListener("load",()=>{
-// 	browser.xnote.installObserver();
-// });
+// TODO: note column options
 
-// window.addEventListener("beforeunload", ()=>{
-// 	console.log("beforeunload");
-// 	//await browser.xnote.uninstallObserver();
-// });
-
-// window.addEventListener("onclose", ()=>{
-// 	console.log("onclose");
-// 	//await browser.xnote.uninstallObserver();
-// });
-
-// window.addEventListener("suspend", ()=>{
-// 	console.log("suspend");
-// 	//await browser.xnote.uninstallObserver();
-// });
-
-// window.addEventListener("unload", ()=>{
-// 	console.log("unload");
-// 	browser.xnote.uninstallObserver();
-// });
+window.addEventListener("load",()=>{
+	browser.qnote.installObserver();
+});
 
 // browser.runtime.onInstalled.addListener(details => {
 // 	console.log("onInstalled");
@@ -39,36 +21,139 @@ var DefaultPrefs = {
 	version: browser.runtime.getManifest().version
 }
 
-var CurrentNote;
+var CurrentNote = {
+	init(){
+		CurrentNote.note = undefined;
+		CurrentNote.messageId = undefined;
+		CurrentNote.windowId = undefined;
+		CurrentNote.popping = false;
+		CurrentNote.needSave = true;
+	},
+	async onAfterDelete(){
+		await afterNoteDelete(CurrentNote.messageId, CurrentNote.note);
+		CurrentNote.init();
+		// await deleteNoteColumn(CurrentNote.note);
+		// if(Prefs.useTag){
+		// 	await CurrentNote.tag(false);
+		// }
+		// updateMessageDisplayIcon(false);
+		// CurrentNote.init();
+	},
+	async onAfterSave(){
+		await afterNoteSave(CurrentNote.messageId, CurrentNote.note);
+		CurrentNote.init();
+		// await updateNoteColumn(CurrentNote.note);
+		// if(Prefs.useTag){
+		// 	await CurrentNote.tag(true);
+		// }
+		// updateMessageDisplayIcon(true);
+		// CurrentNote.init();
+	},
+	// async tag(toTag = true) {
+	// 	if(CurrentNote.messageId){
+	// 		return await tagMessage(CurrentNote.messageId, toTag);
+	// 	}
+	// },
+	async save(){
+		let res = await CurrentNote.note.save();
+		if(res){
+			CurrentNote.onAfterSave();
+			return true;
+		} else {
+			return false;
+		}
+
+	},
+	async delete(){
+		let res = await CurrentNote.note.delete();
+		if(res){
+			CurrentNote.onAfterDelete();
+			return true;
+		} else {
+			return false;
+		}
+	},
+	async focus() {
+		if(CurrentNote.windowId){
+			return browser.windows.update(CurrentNote.windowId, {
+				focused: true
+			});
+		}
+	},
+	async close(closeWindow = true) {
+		if(closeWindow && CurrentNote.windowId){
+			return await browser.windows.remove(CurrentNote.windowId);
+		}
+
+		if(CurrentNote.needSave && CurrentNote.note){
+			let f = CurrentNote.note.text ? "save" : "delete"; // Ddelete if no text
+			await CurrentNote[f]();
+		} else {
+			CurrentNote.init();
+		}
+	},
+	async pop(messageId, createNew = false, pop = false) {
+		if(CurrentNote.popping){
+			return;
+		}
+
+		if(CurrentNote.messageId === messageId){
+			CurrentNote.focus();
+			return;
+		}
+
+		await CurrentNote.close();
+
+		CurrentNote.popping = true;
+
+		var note = await createNoteForMessage(messageId);
+		var data = await note.load();
+
+		updateMessageDisplayIcon(data?true:false);
+
+		if((data && pop) || createNew){
+			let opt = {
+				url: "html/popup.html",
+				type: "popup",
+				width: note.width || Prefs.width,
+				height: note.height || Prefs.height,
+				left: note.x || Prefs.x,
+				top: note.y || Prefs.y
+			};
+
+			return browser.windows
+			.create(opt).then((windowInfo)=>{
+				CurrentNote.note = note;
+				CurrentNote.messageId = messageId;
+				CurrentNote.windowId = windowInfo.id;
+				CurrentNote.popping = false;
+				return true;
+			}).finally(()=>{
+				CurrentNote.popping = false;
+			});
+		} else {
+			CurrentNote.popping = false;
+		}
+	}
+}
+
 var Prefs;
 var LegacyPrefs;
 
 function initExt(){
-	browser.windows.onRemoved.addListener((windowId)=>{
+	browser.windows.onRemoved.addListener(async (windowId)=>{
 		// We are interested only on current popup
 		if(windowId !== CurrentNote.windowId){
 			return;
 		}
 
-		if(CurrentNote.needSave){
-			// Ddelete if no text
-			let f = CurrentNote.text ? "save" : "delete";
-			CurrentNote[f]().then(async (res)=>{
-				if(res){
-					tagCurrentNote(Prefs.useTag);
-					updateMessageIcon(res?true:false);
-					CurrentNote = undefined;
-				}
-			});
-		} else {
-			CurrentNote = undefined;
-		}
+		CurrentNote.close(false);
 	});
 
 	// Click on QNote button
 	browser.messageDisplayAction.onClicked.addListener((tab) => {
 		browser.messageDisplay.getDisplayedMessage(getTabId(tab)).then((message) => {
-			popCurrentNote(message.id, true, true);
+			CurrentNote.pop(message.id, true, true);
 		});
 	});
 
@@ -77,8 +162,8 @@ function initExt(){
 		// Pop only on main tab. Perhaps need configurable?
 		if(getTabId(tab) === 1){
 			// Pop only if message changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
-			if(!CurrentNote || (CurrentNote.windowId === undefined) || (CurrentNote.messageId !== message.id)){
-				popCurrentNote(message.id, false, Prefs.showOnSelect);
+			if(!CurrentNote.windowId || (CurrentNote.messageId !== message.id)){
+				CurrentNote.pop(message.id, false, Prefs.showOnSelect);
 			}
 		}
 	});
@@ -96,16 +181,30 @@ function initExt(){
 			return;
 		}
 
-		createNote(Menu.getId(info)).then((note)=>{
-			note.load().then((data)=>{
+		createNoteForMessage(Menu.getId(info)).then((note)=>{
+			note.load().then(async (data)=>{
 				Menu[data?"modify":"new"]();
-				browser.menus.refresh();
+				await browser.menus.refresh();
 			});
 		});
+	});
+
+	browser.mailTabs.onDisplayedFolderChanged.addListener(async (tab, displayedFolder)=>{
+		var messages = await browser.qnote.getVisibleMessages();
+		for(let m of messages){
+			var note = createNote(m.messageId);
+			await note.load();
+			await browser.qnote.setNote({
+				text: note.text,
+				keyId: m.messageId
+			});
+		}
+		await browser.qnote.updateView();
 	});
 }
 
 loadPrefs().then((prefs)=>{
 	Prefs = prefs;
+	CurrentNote.init();
 	initExt();
 });
