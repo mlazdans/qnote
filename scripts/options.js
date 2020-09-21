@@ -52,9 +52,11 @@ async function setNode(node){
 	let value = Prefs[pref];
 	switch(node.nodeName) {
 		case "SELECT":
-			var option = node.querySelectorAll('[value='+value+']')[0];
-			if(option){
-				option.selected = true;
+			for(let option of node.querySelectorAll("option")){
+				if(option.value == value){
+					option.selected = true;
+					break;
+				}
 			}
 			break;
 		case "INPUT":
@@ -141,7 +143,7 @@ function initTags(){
 async function clearStorage(){
 	let conf = await ext.browser.legacy.confirm(_("confirm"), _("are.you.sure"));
 	if(conf){
-		ext.closeCurrentNote();
+		await ext.CurrentNote.close();
 		ext.browser.storage.local.clear().then(() => {
 			alert(_("storage.cleared"));
 			reloadExtension();
@@ -212,7 +214,7 @@ async function initLegacyImportButton(){
 }
 
 async function reloadExtension(){
-	ext.closeCurrentNote();
+	await ext.CurrentNote.close();
 	return await ext.browser.runtime.reload();
 }
 
@@ -227,7 +229,8 @@ function storageOptionChange(option){
 }
 
 function storageOptionValue(){
-	return document.querySelector('input[name="storageOption"]:checked').value;
+	var e = document.querySelector('input[name="storageOption"]:checked');
+	return e ? e.value : ext.DefaultPrefs.storageFolder;
 }
 
 async function storageOption(){
@@ -281,4 +284,6 @@ async function initOptions(){
 	storageOption();
 }
 
-initOptions();
+window.addEventListener("load",()=>{
+	initOptions();
+});

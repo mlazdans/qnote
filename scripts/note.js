@@ -7,7 +7,6 @@ class Note {
 		this.height;
 		this.text = '';
 		this.ts;
-		this.needSave = true;
 	}
 
 	reset(data){
