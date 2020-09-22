@@ -53,6 +53,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				},
 				async deleteColumnNote(keyId){
 					ColumnHandler.deleteNoteCache(keyId);
+				},
+				async setColumnTextLimit(limit){
+					ColumnHandler.setTextLimit(limit);
 				}
 			}
 		}

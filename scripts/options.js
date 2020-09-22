@@ -109,13 +109,15 @@ async function savePrefs(){
 		var key = item.dataset.preference;
 		var value = item.value;
 
-		if (!key || isButton(item) || (isRadio(item) && !item.checked)) {
+		if (!key || isButton(item) || (isRadio(item) && !item.checked) || (ext.DefaultPrefs[key] === undefined)) {
 			continue;
 		}
 
 		if (isCheckbox(item)){
 			value = item.checked;
 		}
+
+		value = ext.DefaultPrefs[key].constructor(value); // Type cast
 
 		Prefs[key] = value;
 	}
@@ -124,6 +126,9 @@ async function savePrefs(){
 		if(saved){
 			if(Prefs.storageOption != oldPrefs.storageOption){
 				reloadExtension();
+			} else if(Prefs.showFirstChars !== oldPrefs.showFirstChars){
+				await ext.browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
+				await ext.browser.qapp.updateView();
 			}
 		}
 
@@ -131,9 +136,9 @@ async function savePrefs(){
 	});
 }
 
-function initTags(){
+function initTags(tags){
 	var select = window.document.getElementById('select_tagName');
-	if(!select || !Prefs.tags){
+	if(!select || !tags){
 		return false;
 	}
 
@@ -141,7 +146,7 @@ function initTags(){
 		select.remove(0);
 	}
 
-	for (const tag of Prefs.tags) {
+	for (const tag of tags) {
 		var opt = document.createElement('option');
 		opt.style.backgroundColor = tag.color;
 		opt.text = tag.tag;
@@ -265,9 +270,9 @@ async function storageFolderBrowse(){
 
 async function initOptions(){
 	Prefs = await ext.loadPrefs();
-	Prefs.tags = await ext.browser.messages.listTags();
+	let tags = await ext.browser.messages.listTags();
 
-	initTags();
+	initTags(tags);
 
 	setTexts();
 	setData();
