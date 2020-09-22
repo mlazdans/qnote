@@ -42,28 +42,36 @@
 		"default_icon": "images/icon-disabled.svg"
 	},
 	"experiment_apis": {
-		"xnote": {
-			"schema": "schema.json",
-			"parent": {
-				"scopes": ["addon_parent"],
-				"paths": [["xnote"]],
-				"script": "scripts/xnote-api.js"
+		"qapp": {
+			"schema": "schemas/qapp.json",
+			"child": {
+				"scopes": ["addon_child"],
+				"paths": [["qapp"]],
+				"script": "api/qapp.js"
 			}
 		},
 		"legacy": {
-			"schema": "schema.json",
-			"parent": {
-				"scopes": ["addon_parent"],
+			"schema": "schemas/legacy.json",
+			"child": {
+				"scopes": ["addon_child"],
 				"paths": [["legacy"]],
-				"script": "scripts/legacy-api.js"
+				"script": "api/legacy.js"
 			}
 		},
 		"qnote": {
-			"schema": "schema.json",
-			"parent": {
-				"scopes": ["addon_parent"],
+			"schema": "schemas/qnote.json",
+			"child": {
+				"scopes": ["addon_child"],
 				"paths": [["qnote"]],
-				"script": "scripts/qnote-api.js"
+				"script": "api/qnote.js"
+			}
+		},
+		"xnote": {
+			"schema": "schemas/xnote.json",
+			"child": {
+				"scopes": ["addon_child"],
+				"paths": [["xnote"]],
+				"script": "api/xnote.js"
 			}
 		}
 	}

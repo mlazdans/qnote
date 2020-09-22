@@ -4,28 +4,22 @@ class QNote extends Note {
 	}
 
 	async load(){
-		return browser.storage.local.get([this.keyId]).then((store)=>{
-			if(!store || !store[this.keyId]){
-				return;
-			}
-
-			this.reset(store[this.keyId]);
-
-			return store[this.keyId];
+		return browser.qnote.loadNote(this.keyId).then((note)=>{
+			this.reset(note);
+			return note;
 		});
 	}
 
 	async save(){
 		var data = super.save();
-		return browser.storage.local.set({
-			[this.keyId]: data
-		}).then(()=>{
+
+		return browser.qnote.saveNote(this.keyId, data).then(()=>{
 			return data;
 		});
 	}
 
 	async delete() {
-		return browser.storage.local.remove(this.keyId).then(()=>{
+		return browser.qnote.deleteNote(this.keyId).then(()=>{
 			return true;
 		});
 	}

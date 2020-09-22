@@ -1,0 +1,77 @@
+[{
+	"namespace": "qnote",
+	"functions": [{
+		"name": "loadNote",
+		"type": "function",
+		"description": "Loads qnote from local storage",
+		"async": true,
+		"parameters": [{
+			"name": "keyId",
+			"type": "string",
+			"description": "QNote key"
+		}]
+	},{
+		"name": "deleteNote",
+		"type": "function",
+		"description": "",
+		"async": true,
+		"parameters": [{
+			"name": "keyId",
+			"type": "string",
+			"description": ""
+		}]
+	},{
+		"name": "saveNote",
+		"type": "function",
+		"description": "Saves qnote into local storage",
+		"async": true,
+		"parameters": [{
+			"name": "keyId",
+			"type": "string",
+			"description": "QNote key"
+		},{
+			"name": "data",
+			"type": "object",
+			"properties": {
+				"x": {
+					"type": "integer",
+					"optional": true,
+					"default": 0,
+					"description": "Windows left position"
+				},
+				"y": {
+					"type": "integer",
+					"optional": true,
+					"default": 0,
+					"description": "Windows top position"
+				},
+				"width": {
+					"type": "integer",
+					"optional": true,
+					"default": 0,
+					"description": "Windows width"
+				},
+				"height": {
+					"type": "integer",
+					"optional": true,
+					"default": 0,
+					"description": "Windows height"
+				},
+				"text": {
+					"type": "string",
+					"optional": true,
+					"default": "",
+					"description": "Note text"
+				},
+				"ts": {
+					"type": "integer",
+					"optional": true,
+					"default": 0,
+					"description": "Modification timestamp"
+				}
+			},
+			"default": {},
+			"description": "Data object"
+		}]
+	}]
+}]

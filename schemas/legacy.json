@@ -1,0 +1,63 @@
+[{
+	"namespace": "legacy",
+	"functions": [{
+		"name": "confirm",
+		"type": "function",
+		"description": "Display confirm dialog",
+		"async": true,
+		"parameters": [{
+			"name": "title",
+			"type": "string",
+			"description": "Dialog title"
+		},{
+			"name": "msg",
+			"type": "string",
+			"description": "Dialog message"
+		}]
+	},{
+		"name": "compareVersions",
+		"type": "function",
+		"description": "Version compare",
+		"async": true,
+		"parameters": [{
+			"name": "v1",
+			"type": "string",
+			"description": "Version 1"
+		},
+		{
+			"name": "v2",
+			"type": "string",
+			"description": "Version 2"
+		}]
+	},{
+		"name": "folderPicker",
+		"type": "function",
+		"description": "Pick a folder",
+		"async": true,
+		"parameters": [{
+			"name": "options",
+			"type": "object",
+			"optional": true,
+			"properties": {
+				"displayDirectory": {
+					"type": "string",
+					"optional": true,
+					"default": "",
+					"description": "Initial directory"
+				}
+			},
+			"default": {},
+			"description": "Options object"
+		}]
+	},{
+		"name": "isReadable",
+		"type": "function",
+		"description": "Returns true if path is readable",
+		"async": true,
+		"parameters": [{
+			"name": "path",
+			"type": "string",
+			"description": "Path to check"
+		}]
+	}]
+}]
