@@ -1,3 +1,4 @@
+// TODO: uninstall listeners
 var Prefs;
 var LegacyPrefs;
 var DefaultPrefs = {
@@ -162,18 +163,6 @@ function initExt(){
 	});
 
 	browser.mailTabs.onDisplayedFolderChanged.addListener((tab, displayedFolder)=>{
-		// var messages = await browser.qnote.getVisibleMessages();
-		// for(let m of messages){
-		// 	var note = createNote(m.messageId);
-		// 	await note.load().then(async (data)=>{
-		// 		if(data){
-		// 			await browser.qnote.setNote({
-		// 				keyId: m.messageId,
-		// 				text: note.text.substring(0, Prefs.showFirstChars)
-		// 			});
-		// 		}
-		// 	});
-		// }
 		browser.qapp.updateView();
 	});
 }

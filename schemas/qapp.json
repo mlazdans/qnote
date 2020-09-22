@@ -52,12 +52,20 @@
 		"type": "function",
 		"description": "",
 		"async": true,
-		"parameters": [
-			{
-				"name": "keyId",
-				"type": "string",
-				"description": ""
-			}
-		]
+		"parameters": [{
+			"name": "keyId",
+			"type": "string",
+			"description": ""
+		}]
+	},{
+		"name": "setColumnTextLimit",
+		"type": "function",
+		"description": "",
+		"async": true,
+		"parameters": [{
+			"name": "limit",
+			"type": "integer",
+			"description": ""
+		}]
 	}]
 }]

@@ -39,6 +39,8 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 						if(f && _xnotePrefs.prefHasUserValue(k)){
 							p[k] = _xnotePrefs[f](k);
 						}
+
+						p[k] = DefaultPrefs[k].constructor(p[k]); // Type cast
 					}
 
 					return p;

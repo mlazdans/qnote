@@ -18,9 +18,9 @@ var handler = {
 		return note.exists ? note.text : null;
 	},
 	getSortStringForRow: function(hdr) {
-		let note = ColumnHandler.getNote(hdr.messageId);
+		// let note = ColumnHandler.getNote(hdr.messageId);
 
-		return note.exists ? note.text : null;
+		// return note.exists ? note.text : null;
 	},
 	isString: function() {
 		return true;
@@ -75,14 +75,10 @@ ColumnHandler = {
 	handlers: [],
 	NotesCache: [],
 	Observer: Observer,
+	setTextLimit(limit){
+		ColumnHandler.options.textLimit = limit;
+	},
 	saveNoteCache(note){
-		if(ColumnHandler.options.textLimit){
-			if(typeof note.text === 'string'){
-				note.text = note.text.substring(0, ColumnHandler.options.textLimit);
-			}
-		} else {
-			note.text = '';
-		}
 		ColumnHandler.NotesCache[note.keyId] = note;
 	},
 	getNoteCache(keyId){
@@ -109,6 +105,13 @@ ColumnHandler = {
 		let note = ColumnHandler.getNoteCache(messageId);
 
 		if(note){
+			if(ColumnHandler.options.textLimit){
+				if(typeof note.text === 'string'){
+					note.text = note.text.substring(0, ColumnHandler.options.textLimit);
+				}
+			} else {
+				note.text = '';
+			}
 			return note;
 		} else {
 			if(ColumnHandler.options.onNoteRequest){
