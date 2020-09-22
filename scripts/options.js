@@ -91,6 +91,8 @@ function importLegacyXNotes(path) {
 }
 
 async function savePrefs(){
+	var oldPrefs = Object.assign({}, Prefs);
+
 	if(storageOptionValue() == 'folder'){
 		let isReadable = await ext.browser.legacy.isReadable(input_storageFolder.value);
 		if(!isReadable){
@@ -118,7 +120,15 @@ async function savePrefs(){
 		Prefs[key] = value;
 	}
 
-	return await ext.savePrefs(Prefs);
+	await ext.savePrefs(Prefs).then(async (saved)=>{
+		if(saved){
+			if(Prefs.storageOption != oldPrefs.storageOption){
+				reloadExtension();
+			}
+		}
+
+		return saved;
+	});
 }
 
 function initTags(){

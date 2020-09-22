@@ -1,0 +1,137 @@
+[{
+	"namespace": "xnote",
+	"functions": [{
+		"name": "getDefaultPrefs",
+		"type": "function",
+		"description": "Get default preferences",
+		"async": true,
+		"parameters": []
+	},{
+		"name": "getPrefs",
+		"type": "function",
+		"description": "Get preferences",
+		"async": true,
+		"parameters": []
+	},{
+		"name": "getStoragePath",
+		"type": "function",
+		"description": "Get storage path",
+		"async": true,
+		"parameters": []
+	},{
+		"name": "getProfilePath",
+		"type": "function",
+		"description": "Get profile path",
+		"async": true,
+		"parameters": []
+	},{
+		"name": "getNotes",
+		"type": "function",
+		"description": "Returns list of xnote files",
+		"async": true,
+		"parameters": [{
+			"name": "path",
+			"type": "string",
+			"description": "Path to xnote legacy storage"
+		}]
+	},{
+		"name": "loadNote",
+		"type": "function",
+		"description": "Loads xnote from file",
+		"async": true,
+		"parameters": [{
+			"name": "root",
+			"type": "string",
+			"description": "Root folder for XNotes"
+		},{
+			"name": "fileName",
+			"type": "string",
+			"description": "XNote filename"
+		}]
+	},{
+		"name": "deleteNote",
+		"type": "function",
+		"description": "Delete xnote",
+		"async": true,
+		"parameters": [{
+			"name": "root",
+			"type": "string",
+			"description": "Root folder for XNotes"
+		},{
+			"name": "fileName",
+			"type": "string",
+			"description": "XNote filename"
+		}]
+	},{
+		"name": "noteExists",
+		"type": "function",
+		"description": "Returns true if xnote exists",
+		"async": true,
+		"parameters": [{
+			"name": "root",
+			"type": "string",
+			"description": "Root folder for XNotes"
+		},{
+			"name": "fileName",
+			"type": "string",
+			"description": "XNote filename"
+		}]
+	},{
+		"name": "saveNote",
+		"type": "function",
+		"description": "Saves xnote into file",
+		"async": true,
+		"parameters": [{
+			"name": "root",
+			"type": "string",
+			"description": "Root folder for XNotes"
+		},{
+			"name": "fileName",
+			"type": "string",
+			"description": "XNote filename"
+		},{
+			"name": "data",
+			"type": "object",
+			"properties": {
+				"x": {
+					"type": "integer",
+					"optional": true,
+					"default": 0,
+					"description": "Windows left position"
+				},
+				"y": {
+					"type": "integer",
+					"optional": true,
+					"default": 0,
+					"description": "Windows top position"
+				},
+				"width": {
+					"type": "integer",
+					"optional": true,
+					"default": 0,
+					"description": "Windows width"
+				},
+				"height": {
+					"type": "integer",
+					"optional": true,
+					"default": 0,
+					"description": "Windows height"
+				},
+				"text": {
+					"type": "string",
+					"optional": true,
+					"default": "",
+					"description": "Note text"
+				},
+				"ts": {
+					"type": "integer",
+					"optional": true,
+					"default": 0,
+					"description": "Modification timestamp"
+				}
+			},
+			"default": {},
+			"description": "Data object"
+		}]
+	}]
+}]

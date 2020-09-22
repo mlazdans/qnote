@@ -1,3 +1,5 @@
+var Prefs;
+var LegacyPrefs;
 var DefaultPrefs = {
 	useTag: false,
 	tagName: "xnote",
@@ -22,28 +24,11 @@ var CurrentNote = {
 	async onAfterDelete(){
 		await afterNoteDelete(CurrentNote.messageId, CurrentNote.note);
 		CurrentNote.init();
-		// await deleteNoteColumn(CurrentNote.note);
-		// if(Prefs.useTag){
-		// 	await CurrentNote.tag(false);
-		// }
-		// updateMessageDisplayIcon(false);
-		// CurrentNote.init();
 	},
 	async onAfterSave(){
 		await afterNoteSave(CurrentNote.messageId, CurrentNote.note);
 		CurrentNote.init();
-		// await updateNoteColumn(CurrentNote.note);
-		// if(Prefs.useTag){
-		// 	await CurrentNote.tag(true);
-		// }
-		// updateMessageDisplayIcon(true);
-		// CurrentNote.init();
 	},
-	// async tag(toTag = true) {
-	// 	if(CurrentNote.messageId){
-	// 		return await tagMessage(CurrentNote.messageId, toTag);
-	// 	}
-	// },
 	async save(){
 		let res = await CurrentNote.note.save();
 		if(res){
@@ -88,7 +73,7 @@ var CurrentNote = {
 		}
 
 		if(CurrentNote.messageId === messageId){
-			CurrentNote.focus();
+			await CurrentNote.focus();
 			return;
 		}
 
@@ -99,7 +84,7 @@ var CurrentNote = {
 		var note = await createNoteForMessage(messageId);
 		var data = await note.load();
 
-		updateMessageDisplayIcon(data?true:false);
+		await updateMessageDisplayIcon(data?true:false);
 
 		if((data && pop) || createNew){
 			let opt = {
@@ -126,9 +111,6 @@ var CurrentNote = {
 		}
 	}
 }
-
-var Prefs;
-var LegacyPrefs;
 
 function initExt(){
 	browser.windows.onRemoved.addListener(async (windowId)=>{
@@ -179,25 +161,30 @@ function initExt(){
 		});
 	});
 
-	browser.mailTabs.onDisplayedFolderChanged.addListener(async (tab, displayedFolder)=>{
-		var messages = await browser.qnote.getVisibleMessages();
-		for(let m of messages){
-			var note = createNote(m.messageId);
-			await note.load().then(async (data)=>{
-				if(data){
-					await browser.qnote.setNote({
-						keyId: m.messageId,
-						text: note.text.substring(0, Prefs.showFirstChars)
-					});
-				}
-			});
-		}
-		await browser.qnote.updateView();
+	browser.mailTabs.onDisplayedFolderChanged.addListener((tab, displayedFolder)=>{
+		// var messages = await browser.qnote.getVisibleMessages();
+		// for(let m of messages){
+		// 	var note = createNote(m.messageId);
+		// 	await note.load().then(async (data)=>{
+		// 		if(data){
+		// 			await browser.qnote.setNote({
+		// 				keyId: m.messageId,
+		// 				text: note.text.substring(0, Prefs.showFirstChars)
+		// 			});
+		// 		}
+		// 	});
+		// }
+		browser.qapp.updateView();
 	});
 }
 
-loadPrefs().then((prefs)=>{
-	Prefs = prefs;
-	CurrentNote.init();
-	initExt();
+window.addEventListener("load", async ()=>{
+	loadPrefs().then(async (prefs)=>{
+		Prefs = prefs;
+		CurrentNote.init();
+		initExt();
+		browser.qapp.installColumnHandler().then(()=>{
+			browser.qapp.updateView();
+		})
+	});
 });
