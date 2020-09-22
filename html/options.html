@@ -22,13 +22,19 @@
 	<table>
 		<tr>
 			<td><input type="checkbox" data-preference="showOnSelect" id="input_showOnSelect"></td>
-			<td colspan="3"><label for="input_showOnSelect" data-i18n="showOnSelect.label"></label></td>
+			<td colspan="3"><label for="input_showOnSelect" data-i18n="show.on.select.label"></label></td>
 		</tr>
 		<tr>
 			<td><input type="checkbox" data-preference="useTag" id="input_useTag"></td>
-			<td><label for="input_useTag" data-i18n="useTag.label"></label></td>
+			<td><label for="input_useTag" data-i18n="use.tag.label"></label></td>
 			<td><select data-preference="tagName" id="select_tagName"></select></td>
 			<td data-i18n="use.tag.manager"></td>
+		</tr>
+	</table>
+	<table>
+		<tr>
+			<td><label for="input_showFirstChars" data-i18n="show.first.chars.label"></label></td>
+			<td><input type="number" data-preference="showFirstChars" id="input_showFirstChars" maxlength="5" size="5" min="0" max="999" /></td>
 		</tr>
 	</table>
 </fieldset>
@@ -47,7 +53,7 @@
 	<div class="storageFieldset" id="storageFieldset_ext">
 		<table>
 			<tr>
-				<td><button type="button" id="importLegacyXNotesButton" data-i18n="importLegacyXNotes.button"></button></td>
+				<td><button type="button" id="importLegacyXNotesButton" data-i18n="import.legacy.xnotes.button"></button></td>
 				<td id="xnoteFolderInfo"></td>
 				<td><div id="importLegacyXNotesLoader" style="display: none;"><img src="../images/loader.gif"></div></td>
 			</tr>
@@ -68,24 +74,24 @@
 	<legend data-i18n="maintenance.fieldset"></legend>
 	<table>
 		<tr>
-			<td colspan="3" data-i18n="export.extension.storage"></td>
+			<td colspan="3" data-i18n="storage.export.limitation"></td>
 		</tr>
 		<tr>
-			<td><button type="button" id="reloadExtensionButton" data-i18n="reloadExtension.button"></button></td>
-			<td><button type="button" id="exportStorageButton" data-i18n="exportStorage.button"></button></td>
-			<td><button type="button" id="clearStorageButton" data-i18n="clearStorage.button"></button></td>
+			<td><button type="button" id="reloadExtensionButton" data-i18n="extension.reload.button"></button></td>
+			<td><button type="button" id="exportStorageButton" data-i18n="storage.export.button"></button></td>
+			<td><button type="button" id="clearStorageButton" data-i18n="storage.clear.button"></button></td>
 		</tr>
 	</table>
 	<table>
 		<tr>
 			<td><input type="file" accept="application/json" id="importFile"></td>
-			<td data-i18n="import.extension.storage"></td>
+			<td data-i18n="storage.import"></td>
 		</tr>
 	</table>
 </fieldset>
 
 <p>
-	<button type="button" id="saveButton" data-i18n="savePreferences.button"></button>
+	<button type="button" id="saveButton" data-i18n="save.preferences.button"></button>
 </p>
 
 </form>

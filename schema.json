@@ -242,20 +242,6 @@
 		"namespace": "qnote",
 		"functions": [
 			{
-				"name": "installObserver",
-				"type": "function",
-				"description": "Installs column observer",
-				"async": true,
-				"parameters": []
-			},
-			{
-				"name": "uninstallObserver",
-				"type": "function",
-				"description": "Uninstalls column observer",
-				"async": true,
-				"parameters": []
-			},
-			{
 				"name": "getVisibleMessages",
 				"type": "function",
 				"description": "Returns list of visible messages",
@@ -284,6 +270,19 @@
 							}
 						},
 						"description": "Note object"
+					}
+				]
+			},
+			{
+				"name": "deleteNote",
+				"type": "function",
+				"description": "",
+				"async": true,
+				"parameters": [
+					{
+						"name": "keyId",
+						"type": "string",
+						"description": ""
 					}
 				]
 			},

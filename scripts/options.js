@@ -80,9 +80,9 @@ function importLegacyXNotes(path) {
 
 	return ext.importLegacyXNotes(path).then((stats)=>{
 		if(stats){
-			alert(_("import.finished.stats", [stats.imported, stats.err, stats.exist]));
+			alert(_("xnote.import.finished.stats", [stats.imported, stats.err, stats.exist]));
 		} else {
-			alert(_("Could not import legacy notes"));
+			alert(_("xnote.import.fail"));
 		}
 	}).finally(()=>{
 		importLegacyXNotesButton.disabled = false;
@@ -201,7 +201,7 @@ async function initLegacyImportButton(){
 	if(path){
 		document.getElementById('xnoteFolderInfo').textContent = _("xnote.folder.found", path);
 	} else {
-		document.getElementById('xnoteFolderInfo').textContent = _("xnote.folder.unaccesible", profilePath);
+		document.getElementById('xnoteFolderInfo').textContent = _("xnote.folder.inaccessible", profilePath);
 	}
 
 	importLegacyXNotesButton.addEventListener('click', ()=>{

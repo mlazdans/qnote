@@ -1,30 +1,28 @@
 {
-	"width.label": { "message": "Width:" },
-	"height.label": { "message": "Height:" },
-	"useTag.label": { "message": "Use Tag" },
-	"showOnSelect.label": { "message": "Show note popup on message selection" },
-	"savePreferences.button": { "message": "Save" },
-	"importLegacyXNotes.button": { "message": "Import legacy XNotes" },
-	"clearStorage.button": { "message": "Clear storage" },
-	"exportStorage.button": { "message": "Export storage" },
-	"importStorage.button": { "message": "Import storage" },
-	"reloadExtension.button": { "message": "Reload" },
-
-
 	"confirm": { "message": "Confirm" },
 	"are.you.sure": { "message": "Are you sure?" },
 	"browse": { "message": "Browse" },
+	"folder.unaccesible": { "message": "Folder not found or is not readable: $1" },
+	"json.parse.error": { "message": "JSON parse error: $1" },
+
+	"width.label": { "message": "Width:" },
+	"height.label": { "message": "Height:" },
+	"use.tag.label": { "message": "Use Tag:" },
+	"show.on.select.label": { "message": "Show note popup on message selection" },
+	"save.preferences.button": { "message": "Save" },
+	"import.legacy.xnotes.button": { "message": "Import legacy XNotes" },
+	"extension.reload.button": { "message": "Reload" },
+	"show.first.chars.label": {"message": "Show first X characters in QNote column"},
 
 	"maintenance.fieldset": { "message": " Maintenance " },
-	"xnote.folder.unaccesible": { "message": "XNote folder not found or is not readable: $1" },
-	"xnote.folder.found": { "message": "XNote folder found: $1" },
-	"export.extension.storage": { "message": "'Export storage' available only on TB>=78" },
-	"import.extension.storage": { "message": "Import extension storage" },
 	"use.tag.manager": { "message": "Please use tag manager to manage tags" },
 
-	"import.finished.stats": { "message": "Import finished:\nimported notes - $1\nerrored notes - $2\nexisting notes - $3" },
-	"Could not import legacy notes": { "message": "Could not import legacy notes" },
+	"xnote.import.finished.stats": { "message": "Import finished:\nimported notes - $1\nerrored notes - $2\nexisting notes - $3" },
+	"xnote.import.fail": { "message": "Could not import legacy notes" },
+	"xnote.folder.inaccessible": { "message": "XNote folder not found or is not readable: $1" },
+	"xnote.folder.found": { "message": "XNote folder found: $1" },
 
+	"storage.export.limitation": { "message": "'Export storage' available only on TB>=78" },
 	"storage.fieldset": { "message": " Storage " },
 	"storage.option.ext": { "message": "Inside extension" },
 	"storage.option.folder": { "message": "Local folder" },
@@ -32,7 +30,7 @@
 	"storage.clear.failed": { "message": "Failed to clear storage: $1" },
 	"storage.imported": { "message": "Storage imported" },
 	"storage.import.failed": { "message": "Failed to import storage: $1" },
-
-	"folder.unaccesible": { "message": "Folder not found or is not readable: $1" },
-	"json.parse.error": { "message": "JSON parse error: $1" }
+	"storage.clear.button": { "message": "Clear storage" },
+	"storage.export.button": { "message": "Export storage" },
+	"storage.import": { "message": "Import extension storage" }
 }
