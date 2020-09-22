@@ -261,15 +261,13 @@ async function loadPrefs() {
 }
 
 async function deleteNoteColumn(note){
-	return updateNoteColumn({
-		keyId: note.keyId,
-		text: ''
-	});
+	await browser.qnote.deleteNote(note.keyId);
+	await browser.qnote.updateView();
 }
 async function updateNoteColumn(note){
 	await browser.qnote.setNote({
 		keyId: note.keyId,
-		text: note.text
+		text: note.text.substring(0, Prefs.showFirstChars)
 	});
 	await browser.qnote.updateView();
 }

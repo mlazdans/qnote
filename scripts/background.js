@@ -1,13 +1,3 @@
-// TODO: note column options
-
-window.addEventListener("load",()=>{
-	browser.qnote.installObserver();
-});
-
-// browser.runtime.onInstalled.addListener(details => {
-// 	console.log("onInstalled");
-// });
-
 var DefaultPrefs = {
 	useTag: false,
 	tagName: "xnote",
@@ -193,10 +183,13 @@ function initExt(){
 		var messages = await browser.qnote.getVisibleMessages();
 		for(let m of messages){
 			var note = createNote(m.messageId);
-			await note.load();
-			await browser.qnote.setNote({
-				text: note.text,
-				keyId: m.messageId
+			await note.load().then(async (data)=>{
+				if(data){
+					await browser.qnote.setNote({
+						keyId: m.messageId,
+						text: note.text.substring(0, Prefs.showFirstChars)
+					});
+				}
 			});
 		}
 		await browser.qnote.updateView();
