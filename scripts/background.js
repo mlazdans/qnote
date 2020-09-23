@@ -10,7 +10,7 @@ var DefaultPrefs = {
 	height: 200,
 	showFirstChars: 0,
 	showOnSelect: true,
-	storageOption: "ext",
+	storageOption: "folder",
 	storageFolder: "",
 	version: browser.runtime.getManifest().version
 }

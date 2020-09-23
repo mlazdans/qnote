@@ -162,7 +162,7 @@ async function tagMessage(messageId, toTag = true) {
 
 async function importLegacyXNotes(root){
 	try {
-		var legacyXNotes = await browser.xnote.getNotes(root);
+		var legacyXNotes = await browser.xnote.getAllNotes(root);
 	} catch (e) {
 		console.error("Could not get XNotes", e);
 		return false;
@@ -254,6 +254,7 @@ async function loadPrefs() {
 		}
 
 		if(isEmptyPrefs){
+			p.storageFolder
 			p.storageOption = p.storageFolder ? 'folder' : 'ext';
 			await savePrefs(p);
 		}
