@@ -1,19 +1,8 @@
 // TODO: uninstall listeners
 // TODO: column message batch handler
+// TODO: permanent storage
+// TODO: onDelete onReset as event
 var Prefs;
-var LegacyPrefs;
-var DefaultPrefs = {
-	useTag: false,
-	tagName: "xnote",
-	dateFormat: "yyyy-mm-dd - HH:MM", // TODO: implement
-	width: 320,
-	height: 200,
-	showFirstChars: 0,
-	showOnSelect: true,
-	storageOption: "folder",
-	storageFolder: "",
-	version: browser.runtime.getManifest().version
-}
 
 var CurrentNote = {
 	init(){
@@ -171,12 +160,16 @@ function initExt(){
 }
 
 window.addEventListener("load", async ()=>{
-	loadPrefs().then(async (prefs)=>{
-		Prefs = prefs;
-		CurrentNote.init();
-		initExt();
-		browser.qapp.installColumnHandler().then(()=>{
-			//browser.qapp.updateView();
-		})
-	});
+	Prefs = await loadPrefsWithDefaults();
+	CurrentNote.init();
+	initExt();
+	await browser.qapp.installColumnHandler();
+	// loadPrefs().then(async (prefs)=>{
+	// 	Prefs = prefs;
+	// 	CurrentNote.init();
+	// 	initExt();
+	// 	browser.qapp.installColumnHandler().then(()=>{
+	// 		//browser.qapp.updateView();
+	// 	})
+	// });
 });

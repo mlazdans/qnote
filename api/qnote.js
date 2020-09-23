@@ -1,12 +1,16 @@
+var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+
 var qnote = class extends ExtensionCommon.ExtensionAPI {
+	onShutdown(isAppShutdown) {
+		if(isAppShutdown){
+			return;
+		}
+
+		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
+	}
 	getAPI(context) {
-		let { extension } = context;
-
-		var API = extension.apiManager.apis.get(extension);
-
-		var browser = {
-			storage: API.get('storage').getAPI(context).storage
-		};
+		var wex = Components.utils.waiveXrays(context.cloneScope);
+		var { browser } = wex;
 
 		return {
 			qnote: {

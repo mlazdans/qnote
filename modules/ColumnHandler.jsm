@@ -145,7 +145,10 @@ ColumnHandler = {
 			}
 		}
 
-		Services.obs.removeObserver(ColumnHandler.Observer, "MsgCreateDBView");
+		try {
+			Services.obs.removeObserver(ColumnHandler.Observer, "MsgCreateDBView");
+		} catch {
+		}
 
 		var w = Services.wm.getMostRecentWindow("mail:3pane");
 		var qnoteCol = w.document.getElementById("qnoteCol");

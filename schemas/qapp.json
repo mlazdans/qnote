@@ -1,9 +1,21 @@
 [{
 	"namespace": "qapp",
 	"functions": [{
-		"name": "getVisibleMessages",
+		"name": "getProfilePath",
 		"type": "function",
-		"description": "Returns list of visible messages",
+		"description": "Get profile path",
+		"async": true,
+		"parameters": []
+	},{
+		"name": "getDefaultPrefs",
+		"type": "function",
+		"description": "Get default preferences",
+		"async": true,
+		"parameters": []
+	},{
+		"name": "getPrefs",
+		"type": "function",
+		"description": "Get preferences",
 		"async": true,
 		"parameters": []
 	},{
