@@ -175,6 +175,7 @@ async function importLegacyXNotes(root){
 	};
 
 	for (const note of legacyXNotes) {
+		// TODO: new XNote
 		let xn = await browser.xnote.loadNote(root, note.fileName);
 		if(xn === false){
 			console.log(note.path + " xnote file not found");
@@ -207,63 +208,47 @@ async function importLegacyXNotes(root){
 	return stats;
 }
 
+// TODO: move to qapp API
 async function savePrefs(p) {
-	try {
-		for(let k of Object.keys(DefaultPrefs)){
-			if(p[k] !== undefined){
-				await browser.storage.local.set({
-					['pref.' + k]: p[k]
-				});
-			}
+	var defaultPrefs = await browser.qapp.getDefaultPrefs();
+	for(let k of Object.keys(defaultPrefs)){
+		if(p[k] !== undefined){
+			await browser.storage.local.set({
+				['pref.' + k]: p[k]
+			});
 		}
-
-		Prefs = await loadPrefs();
-		return true;
-	} catch {
-		Prefs = await loadPrefs();
-		return false;
 	}
+
+	return true;
 }
 
-async function loadPrefs() {
-	let p = {};
-	try {
-		for(let k of Object.keys(DefaultPrefs)){
-			let v = await browser.storage.local.get('pref.' + k);
-			if(v['pref.' + k] !== undefined){
-				p[k] = DefaultPrefs[k].constructor(v['pref.' + k]); // Type cast
+async function loadPrefsWithDefaults() {
+	let p = await browser.qapp.getPrefs();
+	let defaultPrefs = await browser.qapp.getDefaultPrefs();
+	let isEmptyPrefs = Object.keys(p).length === 0;
+
+	// Check for legacy settings if no settings at all
+	if(isEmptyPrefs){
+		let l = legacyPrefsMapper(await browser.xnote.getPrefs());
+		for(let k of Object.keys(defaultPrefs)){
+			if(l[k] === undefined){
+				p[k] = defaultPrefs[k];
+			} else {
+				p[k] = l[k];
 			}
 		}
-
-		// Check for legacy settings
-		let isEmptyPrefs = Object.keys(p).length === 0;
-		if(isEmptyPrefs){
-			let lprefs = await browser.xnote.getPrefs();
-			LegacyPrefs = legacyPrefsMapper(lprefs);
-			for(let k of Object.keys(DefaultPrefs)){
-				if(LegacyPrefs[k] === undefined){
-					p[k] = DefaultPrefs[k];
-				} else {
-					p[k] = LegacyPrefs[k];
-				}
-			}
-		}
-
-		if(p.tagName){
-			p.tagName = p.tagName.toLowerCase();
-		}
-
-		if(isEmptyPrefs){
-			p.storageFolder
-			p.storageOption = p.storageFolder ? 'folder' : 'ext';
-			await savePrefs(p);
-		}
-
-		return p;
-	} catch (e) {
-		console.error(e);
-		return DefaultPrefs;
 	}
+
+	if(p.tagName){
+		p.tagName = p.tagName.toLowerCase();
+	}
+
+	if(isEmptyPrefs){
+		// TODO: default folder
+		p.storageOption = p.storageFolder ? 'folder' : 'ext';
+	}
+
+	return p;
 }
 
 async function deleteNoteColumn(note){

@@ -2,6 +2,7 @@ var ext = chrome.extension.getBackgroundPage();
 var _ = browser.i18n.getMessage;
 
 var Prefs;
+var DefaultPrefs;
 
 var importLegacyXNotesButton = document.getElementById('importLegacyXNotesButton');
 var saveButton = document.getElementById('saveButton');
@@ -23,7 +24,7 @@ function isRadio(node){
 	return node.nodeName == "INPUT" && node.type.toLocaleUpperCase() === "RADIO"
 }
 
-function toggleLabelError(forE, color){
+function setLabelColor(forE, color){
 	let label = document.querySelectorAll('label[for=' + forE + ']')[0];
 	label.style.color = color;
 	return label;
@@ -50,6 +51,7 @@ function setData(){
 async function setNode(node){
 	let pref = node.dataset.preference;
 	let value = Prefs[pref];
+
 	switch(node.nodeName) {
 		case "SELECT":
 			for(let option of node.querySelectorAll("option")){
@@ -96,13 +98,13 @@ async function savePrefs(){
 	if(storageOptionValue() == 'folder'){
 		let isReadable = await ext.browser.legacy.isReadable(input_storageFolder.value);
 		if(!isReadable){
-			toggleLabelError('storageOptionFolder', 'red');
+			setLabelColor('storageOptionFolder', 'red');
 			alert(_("folder.unaccesible", input_storageFolder.value));
 			return false;
 		}
 	}
 
-	toggleLabelError('storageOptionFolder', '');
+	setLabelColor('storageOptionFolder', '');
 
 	var elements = document.forms[0].elements;
 	for (i = 0; i < elements.length; i++) {
@@ -110,7 +112,7 @@ async function savePrefs(){
 		var key = item.dataset.preference;
 		var value = item.value;
 
-		if (!key || isButton(item) || (isRadio(item) && !item.checked) || (ext.DefaultPrefs[key] === undefined)) {
+		if (!key || isButton(item) || (isRadio(item) && !item.checked) || (DefaultPrefs[key] === undefined)) {
 			continue;
 		}
 
@@ -118,13 +120,15 @@ async function savePrefs(){
 			value = item.checked;
 		}
 
-		value = ext.DefaultPrefs[key].constructor(value); // Type cast
+		value = DefaultPrefs[key].constructor(value); // Type cast
 
 		Prefs[key] = value;
 	}
 
 	await ext.savePrefs(Prefs).then(async (saved)=>{
 		if(saved){
+			// Update extension prefs
+			ext.Prefs = await ext.loadPrefsWithDefaults();
 			if(Prefs.storageOption != oldPrefs.storageOption){
 				reloadExtension();
 			} else if(Prefs.showFirstChars !== oldPrefs.showFirstChars){
@@ -132,8 +136,6 @@ async function savePrefs(){
 				await ext.browser.qapp.updateView();
 			}
 		}
-
-		return saved;
 	});
 }
 
@@ -181,6 +183,7 @@ async function exportStorage(){
 	});
 }
 
+// TODO: to utils.js
 async function importStorage() {
 	const reader = new FileReader();
 	const file = this.files[0];
@@ -206,13 +209,12 @@ async function importStorage() {
 
 async function initLegacyImportButton(){
 	var path;
+	var legacyPrefs = ext.legacyPrefsMapper(await ext.browser.xnote.getPrefs());
 
-	var legacyPrefs = await ext.browser.xnote.getPrefs();
-
-	if(legacyPrefs.storage_path){
-		path = legacyPrefs.storage_path;
+	if(legacyPrefs.storageFolder){
+		path = legacyPrefs.storageFolder;
 	} else if(!(path = await ext.browser.xnote.getStoragePath())) {
-		path = await ext.browser.xnote.getProfilePath();
+		path = await ext.browser.qapp.getProfilePath();
 	}
 
 	if(path){
@@ -247,11 +249,7 @@ function storageOptionChange(option){
 
 function storageOptionValue(){
 	var e = document.querySelector('input[name="storageOption"]:checked');
-	return e ? e.value : ext.DefaultPrefs.storageFolder;
-}
-
-async function storageOption(){
-	storageOptionChange(storageOptionValue());
+	return e ? e.value : DefaultPrefs.storageFolder;
 }
 
 async function storageFolderBrowse(){
@@ -260,7 +258,7 @@ async function storageFolderBrowse(){
 	if(Prefs.storageFolder){
 		path = Prefs.storageFolder;
 	} else if(!(path = await ext.browser.xnote.getStoragePath())) {
-		path = await ext.browser.xnote.getProfilePath();
+		path = await ext.browser.qapp.getProfilePath();
 	}
 
 	ext.browser.legacy.folderPicker({
@@ -271,8 +269,9 @@ async function storageFolderBrowse(){
 }
 
 async function initOptions(){
-	Prefs = await ext.loadPrefs();
 	let tags = await ext.browser.messages.listTags();
+	Prefs = await ext.loadPrefsWithDefaults();
+	DefaultPrefs = await browser.qapp.getDefaultPrefs();
 
 	initTags(tags);
 	setTexts();
@@ -295,9 +294,11 @@ async function initOptions(){
 	storageFolderBrowseButton.addEventListener("click", storageFolderBrowse);
 
 	for (const node of document.querySelectorAll('input[name="storageOption"]')) {
-		node.addEventListener("click", storageOption);
+		node.addEventListener("click", ()=>{
+			storageOptionChange(storageOptionValue());
+		});
 	}
-	storageOption();
+	storageOptionChange(storageOptionValue());
 }
 
 window.addEventListener("load",()=>{

@@ -19,12 +19,6 @@
 		"async": true,
 		"parameters": []
 	},{
-		"name": "getProfilePath",
-		"type": "function",
-		"description": "Get profile path",
-		"async": true,
-		"parameters": []
-	},{
 		"name": "getAllNotes",
 		"type": "function",
 		"description": "Returns list of xnote files in a folder",
