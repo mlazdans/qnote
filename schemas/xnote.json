@@ -25,14 +25,14 @@
 		"async": true,
 		"parameters": []
 	},{
-		"name": "getNotes",
+		"name": "getAllNotes",
 		"type": "function",
-		"description": "Returns list of xnote files",
+		"description": "Returns list of xnote files in a folder",
 		"async": true,
 		"parameters": [{
 			"name": "path",
 			"type": "string",
-			"description": "Path to xnote legacy storage"
+			"description": "Path to xnote legacy storage root"
 		}]
 	},{
 		"name": "loadNote",

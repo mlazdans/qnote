@@ -101,6 +101,7 @@ async function savePrefs(){
 			return false;
 		}
 	}
+
 	toggleLabelError('storageOptionFolder', '');
 
 	var elements = document.forms[0].elements;
@@ -207,6 +208,7 @@ async function initLegacyImportButton(){
 	var path;
 
 	var legacyPrefs = await ext.browser.xnote.getPrefs();
+
 	if(legacyPrefs.storage_path){
 		path = legacyPrefs.storage_path;
 	} else if(!(path = await ext.browser.xnote.getStoragePath())) {
