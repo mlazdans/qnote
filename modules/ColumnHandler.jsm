@@ -13,14 +13,14 @@ var handler = {
 	cycleCell: function(row,col) {
 	},
 	getCellText: function(row, col) {
-		let note = ColumnHandler.getNote(row);
+		let note = ColumnHandler.getNote(row,col);
 
-		return note.exists ? note.text : null;
+		return note.exists ? note.shortText : null;
 	},
 	getSortStringForRow: function(hdr) {
-		// let note = ColumnHandler.getNote(hdr.messageId);
+		let note = ColumnHandler.getNote(hdr.messageId);
 
-		// return note.exists ? note.text : null;
+		return note.exists ? note.text : null;
 	},
 	isString: function() {
 		return true;
@@ -30,7 +30,7 @@ var handler = {
 	getRowProperties: function(row, props){
 	},
 	getImageSrc: function(row, col) {
-		let note = ColumnHandler.getNote(row);
+		let note = ColumnHandler.getNote(row,col);
 
 		return note.exists ? extension.rootURI.resolve("images/icon-column.png") : null;
 	},
@@ -40,7 +40,8 @@ var handler = {
 
 var Observer = {
 	observe: function(aMsgFolder, aTopic, aData) {
-		if(!ColumnHandler.getView()){
+		var view = ColumnHandler.getView();
+		if(!view){
 			return;
 		}
 
@@ -49,7 +50,7 @@ var Observer = {
 
 		var html =
 			'<splitter class="tree-splitter" />' +
-			'<treecol id="qnoteCol" persist="ordinal width sortDirection" flex="2" closemenu="none" label="QNote">' +
+			'<treecol id="qnoteCol" persist="ordinal width sortDirection" flex="1" closemenu="none" label="QNote">' +
 			'<label class="treecol-text" flex="1" crop="right" />' +
 			'<image class="treecol-sortdirection"/>' +
 			'</treecol>'
@@ -60,13 +61,7 @@ var Observer = {
 			threadCols.appendChild(w.MozXULElement.parseXULToFragment(html));
 		}
 
-		if(threadCols){
-			ColumnHandler.getView().addColumnHandler("qnoteCol", handler);
-
-			// https://www.xulplanet.com/references/xpcomref/ifaces/nsMsgViewNotificationCode/
-			ColumnHandler.getView().NoteChange(0, ColumnHandler.getView().rowCount, 2);
-			//ColumnHandler.handlers.push(ColumnHandler.getView());
-		}
+		view.addColumnHandler("qnoteCol", handler);
 	}
 };
 
@@ -89,12 +84,16 @@ ColumnHandler = {
 	deleteNoteCache(keyId){
 		ColumnHandler.NotesCache[keyId] = undefined;
 	},
-	getNote(row){
+	getView() {
+		return Services.wm.getMostRecentWindow("mail:3pane").gDBView;
+	},
+	getNote(row,col){
 		let messageId;
+		let view = ColumnHandler.getView();
 
 		if(Number.isInteger(row)){
 			try {
-				messageId = ColumnHandler.getView().getMsgHdrAt(row).messageId;
+				messageId = view.getMsgHdrAt(row).messageId;
 			} catch(e){
 				return {};
 			}
@@ -102,21 +101,25 @@ ColumnHandler = {
 			messageId = row;
 		}
 
-		let note = ColumnHandler.getNoteCache(messageId);
+		var note = ColumnHandler.getNoteCache(messageId);
 
 		if(note){
-			if(ColumnHandler.options.textLimit){
-				if(typeof note.text === 'string'){
-					note.text = note.text.substring(0, ColumnHandler.options.textLimit);
-				}
-			} else {
-				note.text = '';
+			var cloneNote = Object.assign({}, note);
+
+			cloneNote.shortText = '';
+
+			if(ColumnHandler.options.textLimit && (typeof cloneNote.text === 'string')){
+				cloneNote.shortText = cloneNote.text.substring(0, ColumnHandler.options.textLimit);
 			}
-			return note;
+
+			return cloneNote;
 		} else {
 			if(ColumnHandler.options.onNoteRequest){
-				ColumnHandler.options.onNoteRequest(messageId).then((note)=>{
-					ColumnHandler.saveNoteCache(note);
+				ColumnHandler.options.onNoteRequest(messageId).then((data)=>{
+					ColumnHandler.saveNoteCache(data);
+					if(col){
+						view.cycleCell(row, col);
+					}
 				});
 			}
 
@@ -132,9 +135,7 @@ ColumnHandler = {
 			Services.obs.removeObserver(o, "MsgCreateDBView");
 		}
 
-		//if(ColumnHandler.getView()){
-			Services.obs.addObserver(ColumnHandler.Observer, "MsgCreateDBView", false);
-		//}
+		Services.obs.addObserver(ColumnHandler.Observer, "MsgCreateDBView", false);
 	},
 	uninstall() {
 		for(let k of ColumnHandler.handlers){
@@ -152,8 +153,5 @@ ColumnHandler = {
 			qnoteCol.parentNode.removeChild(qnoteCol.previousSibling);
 			qnoteCol.parentNode.removeChild(qnoteCol);
 		}
-	},
-	getView() {
-		return Services.wm.getMostRecentWindow("mail:3pane").gDBView;
 	}
 };

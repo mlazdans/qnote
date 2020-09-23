@@ -49,13 +49,17 @@ async function getMessageKeyId(messageId) {
 	return partsParser(results);
 }
 
-
 function createNote(keyId) {
 	if(Prefs.storageOption === 'ext'){
 		return new QNote(keyId);
 	} else if(Prefs.storageOption === 'folder'){
 		return new XNote(keyId, Prefs.storageFolder);
 	}
+}
+
+async function loadNote(keyId) {
+	var note = createNote(keyId);
+	return await note.load();
 }
 
 // messageId = int messageId from messageList

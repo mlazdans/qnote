@@ -1,4 +1,5 @@
 // TODO: uninstall listeners
+// TODO: column message batch handler
 var Prefs;
 var LegacyPrefs;
 var DefaultPrefs = {
@@ -132,13 +133,15 @@ function initExt(){
 
 	// Click on message
 	browser.messageDisplay.onMessageDisplayed.addListener((tab, message) => {
-		// Pop only on main tab. Perhaps need configurable?
-		if(getTabId(tab) === 1){
-			// Pop only if message changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
-			if(!CurrentNote.windowId || (CurrentNote.messageId !== message.id)){
-				CurrentNote.pop(message.id, false, Prefs.showOnSelect);
+		browser.tabs.get(getTabId(tab)).then((tab)=>{
+			// Pop only on main tab. Perhaps need configurable?
+			if(tab.mailTab){
+				// Pop only if message changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
+				if(!CurrentNote.windowId || (CurrentNote.messageId !== message.id)){
+					CurrentNote.pop(message.id, false, Prefs.showOnSelect);
+				}
 			}
-		}
+		});
 	});
 
 	// Context menu on message
@@ -163,7 +166,7 @@ function initExt(){
 	});
 
 	browser.mailTabs.onDisplayedFolderChanged.addListener((tab, displayedFolder)=>{
-		browser.qapp.updateView();
+		return browser.qapp.updateView();
 	});
 }
 
@@ -173,7 +176,7 @@ window.addEventListener("load", async ()=>{
 		CurrentNote.init();
 		initExt();
 		browser.qapp.installColumnHandler().then(()=>{
-			browser.qapp.updateView();
+			//browser.qapp.updateView();
 		})
 	});
 });

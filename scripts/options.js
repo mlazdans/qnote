@@ -273,7 +273,6 @@ async function initOptions(){
 	let tags = await ext.browser.messages.listTags();
 
 	initTags(tags);
-
 	setTexts();
 	setData();
 

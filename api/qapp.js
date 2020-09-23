@@ -25,28 +25,24 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					ColumnHandler.install({
 						textLimit: wex.Prefs.showFirstChars,
 						onNoteRequest: async (messageId) => {
-							var note = wex.createNote(messageId);
-							return note.load().then((data)=>{
-								if(data){
-									return {
-										keyId: note.keyId,
-										exists: true,
-										text: data.text
-									}
-								} else {
-									return {
-										keyId: note.keyId,
-										exists: false
-									}
+							var data = await wex.loadNote(messageId);
+							if(data){
+								return {
+									keyId: messageId,
+									exists: true,
+									text: data.text
 								}
-							});
+							} else {
+								return {
+									keyId: messageId,
+									exists: false
+								}
+							}
 						}
 					});
 				},
 				async updateView(){
-					if(ColumnHandler.getView()){
-						ColumnHandler.Observer.observe();
-					}
+					ColumnHandler.Observer.observe();
 				},
 				async updateColumnNote(note){
 					ColumnHandler.saveNoteCache(note);
