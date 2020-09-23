@@ -161,11 +161,9 @@ async function tagMessage(messageId, toTag = true) {
 }
 
 async function importLegacyXNotes(root){
-	try {
-		var legacyXNotes = await browser.xnote.getAllNotes(root);
-	} catch (e) {
-		console.error("Could not get XNotes", e);
-		return false;
+	var legacyXNotes = await browser.xnote.getAllNotes(root);
+	if(!legacyXNotes){
+		return;
 	}
 
 	var stats = {
@@ -175,21 +173,19 @@ async function importLegacyXNotes(root){
 	};
 
 	for (const note of legacyXNotes) {
-		// TODO: new XNote
-		let xn = await browser.xnote.loadNote(root, note.fileName);
-		if(xn === false){
-			console.log(note.path + " xnote file not found");
+		let xn = new XNote(note.keyId, root);
+		if(!(await xn.load())){
+			console.error("Error loading xnote " + xn.keyId);
 			stats.err++;
 			continue;
 		}
 
-		let yn = new QNote(xn.keyId);
-		let data = await yn.load();
-		if(data){
+		let yn = new QNote(note.keyId);
+		if(await yn.load()){
+			//console.log(xn.keyId + " already exists in local store");
 			stats.exist++;
-			console.log(xn.keyId + " already exists in local store");
 		} else {
-			console.log(xn.keyId + " does NOT exists in local store");
+			//console.log(xn.keyId + " does NOT exists in local store");
 			yn.x = xn.x;
 			yn.y = xn.y;
 			yn.width = xn.width;
@@ -200,11 +196,12 @@ async function importLegacyXNotes(root){
 			if(await yn.save()){
 				stats.imported++;
 			} else {
-				console.log("Error saving note " + yn.keyId);
+				console.error("Error saving qnote " + yn.keyId);
 				stats.err++;
 			}
 		}
 	}
+
 	return stats;
 }
 

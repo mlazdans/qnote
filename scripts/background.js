@@ -1,5 +1,4 @@
 // TODO: uninstall listeners
-// TODO: column message batch handler
 // TODO: permanent storage
 // TODO: onDelete onReset as event
 var Prefs;
@@ -103,7 +102,13 @@ var CurrentNote = {
 	}
 }
 
-function initExt(){
+async function initExtension(){
+	Prefs = await loadPrefsWithDefaults();
+
+	CurrentNote.init();
+
+	await browser.qapp.installColumnHandler();
+
 	browser.windows.onRemoved.addListener(async (windowId)=>{
 		// We are interested only on current popup
 		if(windowId !== CurrentNote.windowId){
@@ -157,19 +162,10 @@ function initExt(){
 	browser.mailTabs.onDisplayedFolderChanged.addListener((tab, displayedFolder)=>{
 		return browser.qapp.updateView();
 	});
+
+	browser.qapp.updateView();
 }
 
-window.addEventListener("load", async ()=>{
-	Prefs = await loadPrefsWithDefaults();
-	CurrentNote.init();
-	initExt();
-	await browser.qapp.installColumnHandler();
-	// loadPrefs().then(async (prefs)=>{
-	// 	Prefs = prefs;
-	// 	CurrentNote.init();
-	// 	initExt();
-	// 	browser.qapp.installColumnHandler().then(()=>{
-	// 		//browser.qapp.updateView();
-	// 	})
-	// });
+window.addEventListener("load", ()=>{
+	initExtension();
 });

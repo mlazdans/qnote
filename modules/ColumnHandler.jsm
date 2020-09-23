@@ -10,10 +10,10 @@ var handler = {
 	isEditable: function(row, col) {
 		return false;
 	},
-	cycleCell: function(row,col) {
+	cycleCell: function(row, col) {
 	},
 	getCellText: function(row, col) {
-		let note = ColumnHandler.getNote(row,col);
+		let note = ColumnHandler.getNote(row);
 
 		return note.exists ? note.shortText : null;
 	},
@@ -30,7 +30,7 @@ var handler = {
 	getRowProperties: function(row, props){
 	},
 	getImageSrc: function(row, col) {
-		let note = ColumnHandler.getNote(row,col);
+		let note = ColumnHandler.getNote(row);
 
 		return note.exists ? extension.rootURI.resolve("images/icon-column.png") : null;
 	},
@@ -67,8 +67,9 @@ var Observer = {
 
 ColumnHandler = {
 	options: {},
-	handlers: [],
+	//handlers: [],
 	NotesCache: [],
+	noteBlocker: new Map(),
 	Observer: Observer,
 	setTextLimit(limit){
 		ColumnHandler.options.textLimit = limit;
@@ -84,12 +85,25 @@ ColumnHandler = {
 	deleteNoteCache(keyId){
 		ColumnHandler.NotesCache[keyId] = undefined;
 	},
+	clearNoteCache(){
+		ColumnHandler.NotesCache = [];
+	},
 	getView() {
 		return Services.wm.getMostRecentWindow("mail:3pane").gDBView;
 	},
-	getNote(row,col){
+	getNote(row){
+		let self = ColumnHandler;
+		let blocker = self.noteBlocker;
+
+		// Block concurrent calls on same note as we will update column once it has been loded from local cache, local storage or file
+		if(blocker.has(row)){
+			return {};
+		}
+
+		blocker.set(row, true);
+
 		let messageId;
-		let view = ColumnHandler.getView();
+		let view = self.getView();
 
 		if(Number.isInteger(row)){
 			try {
@@ -101,25 +115,29 @@ ColumnHandler = {
 			messageId = row;
 		}
 
-		var note = ColumnHandler.getNoteCache(messageId);
+		var note = self.getNoteCache(messageId);
 
 		if(note){
+			// This part should be synchronous I guess
 			var cloneNote = Object.assign({}, note);
 
 			cloneNote.shortText = '';
 
-			if(ColumnHandler.options.textLimit && (typeof cloneNote.text === 'string')){
-				cloneNote.shortText = cloneNote.text.substring(0, ColumnHandler.options.textLimit);
+			if(self.options.textLimit && (typeof cloneNote.text === 'string')){
+				cloneNote.shortText = cloneNote.text.substring(0, self.options.textLimit);
 			}
+
+			blocker.delete(row);
 
 			return cloneNote;
 		} else {
-			if(ColumnHandler.options.onNoteRequest){
-				ColumnHandler.options.onNoteRequest(messageId).then((data)=>{
-					ColumnHandler.saveNoteCache(data);
-					if(col){
-						view.cycleCell(row, col);
-					}
+			if(self.options.onNoteRequest){
+				self.options.onNoteRequest(messageId).then((data)=>{
+					self.saveNoteCache(data);
+					blocker.delete(row);
+					// Asynchronically here we update note column.
+					// That method is part of Mozilla API and has nothing to do with either XNote or QNote :)
+					view.NoteChange(row, 1, 2);
 				});
 			}
 
@@ -138,12 +156,12 @@ ColumnHandler = {
 		Services.obs.addObserver(ColumnHandler.Observer, "MsgCreateDBView", false);
 	},
 	uninstall() {
-		for(let k of ColumnHandler.handlers){
-			try {
-				k.removeColumnHandler("qnoteCol");
-			} catch {
-			}
-		}
+		// for(let k of ColumnHandler.handlers){
+		// 	try {
+		// 		k.removeColumnHandler("qnoteCol");
+		// 	} catch {
+		// 	}
+		// }
 
 		try {
 			Services.obs.removeObserver(ColumnHandler.Observer, "MsgCreateDBView");

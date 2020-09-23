@@ -5,11 +5,11 @@ var Prefs;
 var DefaultPrefs;
 
 var importLegacyXNotesButton = document.getElementById('importLegacyXNotesButton');
+var importLegacyXNotesLoader = document.getElementById("importLegacyXNotesLoader");
 var saveButton = document.getElementById('saveButton');
 var clearStorageButton = document.getElementById('clearStorageButton');
 var exportStorageButton = document.getElementById('exportStorageButton');
 var importFile = document.getElementById("importFile");
-var importLegacyXNotesLoader = document.getElementById("importLegacyXNotesLoader");
 var reloadExtensionButton = document.getElementById("reloadExtensionButton");
 var storageFolderBrowseButton = document.getElementById("storageFolderBrowseButton");
 var input_storageFolder = document.getElementById("input_storageFolder");
@@ -95,7 +95,7 @@ function importLegacyXNotes(path) {
 async function savePrefs(){
 	var oldPrefs = Object.assign({}, Prefs);
 
-	if(storageOptionValue() == 'folder'){
+	if(storageOptionValue() === 'folder'){
 		let isReadable = await ext.browser.legacy.isReadable(input_storageFolder.value);
 		if(!isReadable){
 			setLabelColor('storageOptionFolder', 'red');
@@ -129,12 +129,23 @@ async function savePrefs(){
 		if(saved){
 			// Update extension prefs
 			ext.Prefs = await ext.loadPrefsWithDefaults();
+
 			if(Prefs.storageOption != oldPrefs.storageOption){
-				reloadExtension();
-			} else if(Prefs.showFirstChars !== oldPrefs.showFirstChars){
-				await ext.browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
-				await ext.browser.qapp.updateView();
+				await ext.browser.qapp.clearColumnNotes();
+				//reloadExtension();
+				//return;
 			}
+
+			if(Prefs.showFirstChars !== oldPrefs.showFirstChars){
+				await ext.browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
+			}
+
+			// Invalidate column cache
+			if(Prefs.storageFolder !== oldPrefs.storageFolder){
+				await ext.browser.qapp.clearColumnNotes();
+			}
+
+			await ext.browser.qapp.updateView();
 		}
 	});
 }
@@ -207,7 +218,18 @@ async function importStorage() {
 	reader.readAsText(file);
 }
 
-async function initLegacyImportButton(){
+async function initExportStorageButton() {
+	let info = await ext.browser.runtime.getBrowserInfo();
+	let vers = await ext.browser.legacy.compareVersions("78", info.version);
+
+	if(vers<0){
+		exportStorageButton.disabled = false;
+	} else {
+		exportStorageButton.disabled = true;
+	}
+}
+
+async function initXNoteImportButton(){
 	var path;
 	var legacyPrefs = ext.legacyPrefsMapper(await ext.browser.xnote.getPrefs());
 
@@ -237,7 +259,15 @@ async function reloadExtension(){
 	return await ext.browser.runtime.reload();
 }
 
-function storageOptionChange(option){
+function storageOptionValue(){
+	var e = document.querySelector('input[name="storageOption"]:checked');
+
+	return e ? e.value : DefaultPrefs.storageFolder;
+}
+
+function storageOptionChange(){
+	let option = storageOptionValue();
+
 	for (const node of document.querySelectorAll('[class="storageFieldset"]')) {
 		if(node.id === 'storageFieldset_' + option){
 			node.style.display = '';
@@ -245,11 +275,6 @@ function storageOptionChange(option){
 			node.style.display = 'none';
 		}
 	}
-}
-
-function storageOptionValue(){
-	var e = document.querySelector('input[name="storageOption"]:checked');
-	return e ? e.value : DefaultPrefs.storageFolder;
 }
 
 async function storageFolderBrowse(){
@@ -268,7 +293,7 @@ async function storageFolderBrowse(){
 	});
 }
 
-async function initOptions(){
+async function initOptionsPage(){
 	let tags = await ext.browser.messages.listTags();
 	Prefs = await ext.loadPrefsWithDefaults();
 	DefaultPrefs = await browser.qapp.getDefaultPrefs();
@@ -277,15 +302,9 @@ async function initOptions(){
 	setTexts();
 	setData();
 
-	let info = await ext.browser.runtime.getBrowserInfo();
-	let vers = await ext.browser.legacy.compareVersions("78", info.version);
-	if(vers<0){
-		exportStorageButton.disabled = false;
-	} else {
-		exportStorageButton.disabled = true;
-	}
+	initXNoteImportButton();
+	initExportStorageButton();
 
-	initLegacyImportButton();
 	saveButton.addEventListener('click', savePrefs);
 	clearStorageButton.addEventListener('click', clearStorage);
 	exportStorageButton.addEventListener('click', exportStorage);
@@ -294,13 +313,11 @@ async function initOptions(){
 	storageFolderBrowseButton.addEventListener("click", storageFolderBrowse);
 
 	for (const node of document.querySelectorAll('input[name="storageOption"]')) {
-		node.addEventListener("click", ()=>{
-			storageOptionChange(storageOptionValue());
-		});
+		node.addEventListener("click", storageOptionChange);
 	}
-	storageOptionChange(storageOptionValue());
+	storageOptionChange();
 }
 
-window.addEventListener("load",()=>{
-	initOptions();
+window.addEventListener("load", ()=>{
+	initOptionsPage();
 });
