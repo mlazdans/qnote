@@ -108,7 +108,7 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 						var file = new FileUtils.File(root);
 					} catch {
 						console.error(`Can not open xnotes folder: ${root}`);
-						return false;
+						return;
 					}
 
 					var eFiles = file.directoryEntries;
@@ -118,6 +118,7 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 						var o = eFiles.getNext().QueryInterface(Components.interfaces.nsIFile);
 						if(o.leafName.substring(o.leafName.length - 6) === '.xnote'){
 							notes.push({
+								keyId: o.leafName.substring(0, o.leafName.length - 6),
 								fileName: o.leafName
 							});
 						}
@@ -128,7 +129,7 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 				async getStoragePath() {
 					var _storageDir = QUtils.getProfilePath();
 					_storageDir.append('XNote');
-					return (_storageDir.exists() && _storageDir.isReadable() && _storageDir.isDirectory()) ? _storageDir.path : false;
+					return (_storageDir.exists() && _storageDir.isReadable() && _storageDir.isDirectory()) ? _storageDir.path : undefined;
 				}
 			}
 		}

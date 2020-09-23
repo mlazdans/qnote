@@ -79,5 +79,11 @@
 			"type": "integer",
 			"description": ""
 		}]
+	},{
+		"name": "clearColumnNotes",
+		"type": "function",
+		"description": "",
+		"async": true,
+		"parameters": []
 	}]
 }]
