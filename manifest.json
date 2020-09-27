@@ -58,14 +58,6 @@
 				"script": "api/legacy.js"
 			}
 		},
-		"qnote": {
-			"schema": "schemas/qnote.json",
-			"child": {
-				"scopes": ["addon_child"],
-				"paths": [["qnote"]],
-				"script": "api/qnote.js"
-			}
-		},
 		"xnote": {
 			"schema": "schemas/xnote.json",
 			"child": {
