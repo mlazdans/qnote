@@ -112,5 +112,11 @@ var XUtils = {
 		} catch {
 			return false;
 		}
+	},
+	getProfilePath() {
+		return Components.classes['@mozilla.org/file/directory_service;1']
+			.getService(Components.interfaces.nsIProperties)
+			.get('ProfD', Components.interfaces.nsIFile)
+		;
 	}
 };

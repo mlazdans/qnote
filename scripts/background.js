@@ -1,142 +1,25 @@
 // TODO: uninstall listeners
-// TODO: permanent storage
 // TODO: onDelete onReset as event
+
 var Prefs;
 
-var CurrentNote = {
-	init(){
-		CurrentNote.note = undefined;
-		CurrentNote.messageId = undefined;
-		CurrentNote.windowId = undefined;
-		CurrentNote.popping = false;
-		CurrentNote.needSave = true;
-	},
-	async onAfterDelete(){
-		await afterNoteDelete(CurrentNote.messageId, CurrentNote.note);
-		CurrentNote.init();
-	},
-	async onAfterSave(){
-		await afterNoteSave(CurrentNote.messageId, CurrentNote.note);
-		CurrentNote.init();
-	},
-	async save(){
-		let res = await CurrentNote.note.save();
-		if(res){
-			CurrentNote.onAfterSave();
-			return true;
-		} else {
-			return false;
-		}
+//var CurrentNote = new WebExtensionNoteWindow();
+var CurrentNote = new XULNoteWindow();
 
-	},
-	async delete(){
-		let res = await CurrentNote.note.delete();
-		if(res){
-			CurrentNote.onAfterDelete();
-			return true;
-		} else {
-			return false;
-		}
-	},
-	async focus() {
-		if(CurrentNote.windowId){
-			return browser.windows.update(CurrentNote.windowId, {
-				focused: true
-			});
-		}
-	},
-	async close(closeWindow = true) {
-		if(closeWindow && CurrentNote.windowId){
-			return await browser.windows.remove(CurrentNote.windowId);
-		}
+CurrentNote.onAfterDelete = async (note)=>{
+	await afterNoteDelete(note.messageId, note.note);
+	note.init();
+}
 
-		if(CurrentNote.needSave && CurrentNote.note){
-			let f = CurrentNote.note.text ? "save" : "delete"; // Ddelete if no text
-			await CurrentNote[f]();
-		} else {
-			CurrentNote.init();
-		}
-	},
-	async pop(messageId, createNew = false, pop = false) {
-		if(CurrentNote.popping){
-			return;
-		}
-
-		if(CurrentNote.messageId === messageId){
-			await CurrentNote.focus();
-			return;
-		}
-
-		await CurrentNote.close();
-
-		CurrentNote.popping = true;
-
-		var note = await createNoteForMessage(messageId);
-		var data = await note.load();
-
-		await updateMessageDisplayIcon(data?true:false);
-
-		if((data && pop) || createNew){
-			let opt = {
-				url: "html/popup.html",
-				type: "popup",
-				width: note.width || Prefs.width,
-				height: note.height || Prefs.height,
-				left: note.x || Prefs.x,
-				top: note.y || Prefs.y
-			};
-
-			return browser.windows
-			.create(opt).then((windowInfo)=>{
-				CurrentNote.note = note;
-				CurrentNote.messageId = messageId;
-				CurrentNote.windowId = windowInfo.id;
-				CurrentNote.popping = false;
-				return true;
-			}).finally(()=>{
-				CurrentNote.popping = false;
-			});
-		} else {
-			CurrentNote.popping = false;
-		}
-	}
+CurrentNote.onAfterSave = async (note)=>{
+	await afterNoteSave(note.messageId, note.note);
+	note.init();
 }
 
 async function initExtension(){
 	Prefs = await loadPrefsWithDefaults();
 
-	CurrentNote.init();
-
 	await browser.qapp.installColumnHandler();
-
-	browser.windows.onRemoved.addListener(async (windowId)=>{
-		// We are interested only on current popup
-		if(windowId !== CurrentNote.windowId){
-			return;
-		}
-
-		CurrentNote.close(false);
-	});
-
-	// Click on QNote button
-	browser.messageDisplayAction.onClicked.addListener((tab) => {
-		browser.messageDisplay.getDisplayedMessage(getTabId(tab)).then((message) => {
-			CurrentNote.pop(message.id, true, true);
-		});
-	});
-
-	// Click on message
-	browser.messageDisplay.onMessageDisplayed.addListener((tab, message) => {
-		browser.tabs.get(getTabId(tab)).then((tab)=>{
-			// Pop only on main tab. Perhaps need configurable?
-			if(tab.mailTab){
-				// Pop only if message changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
-				if(!CurrentNote.windowId || (CurrentNote.messageId !== message.id)){
-					CurrentNote.pop(message.id, false, Prefs.showOnSelect);
-				}
-			}
-		});
-	});
 
 	// Context menu on message
 	browser.menus.onShown.addListener((info) => {
@@ -164,6 +47,13 @@ async function initExtension(){
 	});
 
 	browser.qapp.updateView();
+
+	// start:dev
+	// browser.browserAction.onClicked.addListener((tab) => {
+	// 	browser.runtime.reload();
+	// });
+	//browser.qapp.popup();
+	// end:dev
 }
 
 window.addEventListener("load", ()=>{

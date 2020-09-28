@@ -32,6 +32,49 @@ async function updateMessageDisplayIcon(on = true){
 	});
 }
 
+async function getDefaultPrefs() {
+	return {
+		useTag: false,
+		tagName: "xnote",
+		dateFormat: "yyyy-mm-dd - HH:MM", // TODO: implement
+		width: 320,
+		height: 200,
+		showFirstChars: 0,
+		showOnSelect: true,
+		storageOption: "folder",
+		storageFolder: ""//,
+		//version: browser.runtime.getManifest().version
+	};
+}
+
+async function getPrefs(){
+	let p = {};
+	let defaultPrefs = getDefaultPrefs();
+
+	for(let k of Object.keys(defaultPrefs)){
+		let v = await browser.storage.local.get('pref.' + k);
+		if(v['pref.' + k] !== undefined){
+			p[k] = defaultPrefs[k].constructor(v['pref.' + k]); // Type cast
+		}
+	}
+
+	return p;
+}
+
+async function savePrefs(p) {
+	var defaultPrefs = await getDefaultPrefs();
+	for(let k of Object.keys(defaultPrefs)){
+		if(p[k] !== undefined){
+			await browser.storage.local.set({
+				['pref.' + k]: p[k]
+			});
+		}
+	}
+
+	return true;
+}
+
+
 // messageId = int messageId from messageList
 async function getMessageKeyId(messageId) {
 	let partsParser = (parts) => {
@@ -58,8 +101,7 @@ function createNote(keyId) {
 }
 
 async function loadNote(keyId) {
-	var note = createNote(keyId);
-	return await note.load();
+	return await createNote(keyId).load();
 }
 
 // messageId = int messageId from messageList
@@ -119,7 +161,7 @@ async function resetNoteForMessage(messageId){
 	});
 
 	if(CurrentNote.messageId === messageId){
-		await browser.windows.update(CurrentNote.windowId, {
+		await CurrentNote.updateWindow({
 			left: note.x,
 			top: note.y,
 			width: note.width,
@@ -205,23 +247,9 @@ async function importLegacyXNotes(root){
 	return stats;
 }
 
-// TODO: move to qapp API
-async function savePrefs(p) {
-	var defaultPrefs = await browser.qapp.getDefaultPrefs();
-	for(let k of Object.keys(defaultPrefs)){
-		if(p[k] !== undefined){
-			await browser.storage.local.set({
-				['pref.' + k]: p[k]
-			});
-		}
-	}
-
-	return true;
-}
-
 async function loadPrefsWithDefaults() {
-	let p = await browser.qapp.getPrefs();
-	let defaultPrefs = await browser.qapp.getDefaultPrefs();
+	let p = await getPrefs();
+	let defaultPrefs = await getDefaultPrefs();
 	let isEmptyPrefs = Object.keys(p).length === 0;
 
 	// Check for legacy settings if no settings at all
@@ -241,7 +269,7 @@ async function loadPrefsWithDefaults() {
 	}
 
 	if(isEmptyPrefs){
-		// TODO: default folder
+		// TODO: default xnote folder
 		p.storageOption = p.storageFolder ? 'folder' : 'ext';
 	}
 
