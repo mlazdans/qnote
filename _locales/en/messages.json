@@ -32,5 +32,9 @@
 	"storage.import.failed": { "message": "Failed to import storage: $1" },
 	"storage.clear.button": { "message": "Clear storage" },
 	"storage.export.button": { "message": "Export storage" },
-	"storage.import": { "message": "Import extension storage" }
+	"storage.import": { "message": "Import extension storage" },
+
+	"window.fieldset": { "message": "Window" },
+	"window.option.xul": { "message": "Legacy floating panel" },
+	"window.option.webext": { "message": "Popup window" }
 }

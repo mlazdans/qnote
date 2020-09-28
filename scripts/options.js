@@ -132,8 +132,6 @@ async function savePrefs(){
 
 			if(Prefs.storageOption != oldPrefs.storageOption){
 				await ext.browser.qapp.clearColumnNotes();
-				//reloadExtension();
-				//return;
 			}
 
 			if(Prefs.showFirstChars !== oldPrefs.showFirstChars){
@@ -143,6 +141,10 @@ async function savePrefs(){
 			// Invalidate column cache
 			if(Prefs.storageFolder !== oldPrefs.storageFolder){
 				await ext.browser.qapp.clearColumnNotes();
+			}
+
+			if(Prefs.windowOption !== oldPrefs.windowOption){
+				reloadExtension();
 			}
 
 			await ext.browser.qapp.updateView();
@@ -296,7 +298,7 @@ async function storageFolderBrowse(){
 async function initOptionsPage(){
 	let tags = await ext.browser.messages.listTags();
 	Prefs = await ext.loadPrefsWithDefaults();
-	DefaultPrefs = await ext.getDefaultPrefs();
+	DefaultPrefs = ext.getDefaultPrefs();
 
 	initTags(tags);
 	setTexts();

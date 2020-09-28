@@ -1,23 +1,27 @@
-// TODO: uninstall listeners
-// TODO: onDelete onReset as event
-
 var Prefs;
+var CurrentNote;
 
-//var CurrentNote = new WebExtensionNoteWindow();
-var CurrentNote = new XULNoteWindow();
+function initCurrentNote(){
+	if(Prefs.windowOption === 'xul'){
+		CurrentNote = new XULNoteWindow();
+	} else if(Prefs.windowOption == 'webext'){
+		CurrentNote = new WebExtensionNoteWindow();
+	}
+	CurrentNote.onAfterDelete = async (note)=>{
+		await afterNoteDelete(note.messageId, note.note);
+		note.init();
+	}
 
-CurrentNote.onAfterDelete = async (note)=>{
-	await afterNoteDelete(note.messageId, note.note);
-	note.init();
-}
-
-CurrentNote.onAfterSave = async (note)=>{
-	await afterNoteSave(note.messageId, note.note);
-	note.init();
+	CurrentNote.onAfterSave = async (note)=>{
+		await afterNoteSave(note.messageId, note.note);
+		note.init();
+	}
 }
 
 async function initExtension(){
 	Prefs = await loadPrefsWithDefaults();
+
+	initCurrentNote();
 
 	await browser.qapp.installColumnHandler();
 
@@ -47,13 +51,6 @@ async function initExtension(){
 	});
 
 	browser.qapp.updateView();
-
-	// start:dev
-	// browser.browserAction.onClicked.addListener((tab) => {
-	// 	browser.runtime.reload();
-	// });
-	//browser.qapp.popup();
-	// end:dev
 }
 
 window.addEventListener("load", ()=>{

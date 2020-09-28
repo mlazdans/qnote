@@ -140,7 +140,7 @@ class NotePopup extends BasePopup {
 
 		panel.addEventListener('mousedown', handleDragStart, false);
 
-		//this.shown = false;
+		this.shown = false;
 		this.tempPanel = panel;
 		this.tempBrowser = this.browser;
 
@@ -158,54 +158,35 @@ class NotePopup extends BasePopup {
 		}
 	}
 
-	// destroy() {
-	// 	console.log("destroy");
-	// 	// return;
-	// 	return super.destroy().then(() => {
-	// 		this.removeTempPanel();
-	// 	});
-	// }
 	destroy(e) {
-		//console.log("destroy");
-		// return;
 		return super.destroy().then(() => {
-			// let window = Services.wm.getMostRecentWindow("mail:3pane");
-			// let document = window.document;
-			// let panel = document.getElementById(this.windowId);
-			// console.log("destroy", panel);
 			this.removeTempPanel();
 		});
 	}
 
 	closePopup() {
-		if (this.shown) {
-			this.viewNode.hidePopup();
-		} else {
-			this.destroy();
-		}
+		//console.log("closePopup", this.onClose);
+		// if (this.shown) {
+		// 	this.viewNode.hidePopup();
+		// } else {
+		// if(!this.destroyed && this.onClose){
+		// 	this.onClose();
+		// }
+		//console.log(this.destroyed);
+		this.destroy();
+		//console.log(this.destroyed);
+		//}
 	}
-	// closePopup() {
-	// 	console.log("closePopup");
-	// 	// return;
-	// 	if (this.shown) {
-	// 		this.viewNode.hidePopup();
-	// 	} else {
-	// 		this.destroy();
+
+	// handleEvent(e) {
+	// 	console.log("handleEvent", e);
+	// 	if(e.type === 'popuphiding'){
+	// 		if(this.onClose){
+	// 			this.onClose(e);
+	// 		}
+	// 		e.preventDefault();
 	// 	}
+
+	// 	return super.handleEvent(e);
 	// }
-
-	handleEvent(e) {
-		console.log("handleEvent", e);
-		if(e.type === 'popuphiding'){
-			if(this.onClose){
-				this.onClose(e);
-			}
-			e.preventDefault();
-		}
-		//console.log("handleEvent", wex);
-
-		// event.preventDefault();
-		// return;
-		return super.handleEvent(e);
-	}
 }

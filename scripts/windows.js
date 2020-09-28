@@ -1,6 +1,26 @@
 class NoteWindow {
 	constructor() {
 		this.init();
+
+		// Click on QNote button
+		browser.messageDisplayAction.onClicked.addListener((tab) => {
+			browser.messageDisplay.getDisplayedMessage(getTabId(tab)).then((message) => {
+				this.pop(message.id, true, true);
+			});
+		});
+
+		// Click on message
+		browser.messageDisplay.onMessageDisplayed.addListener((tab, message) => {
+			browser.tabs.get(getTabId(tab)).then((tab)=>{
+				// Pop only on main tab. Perhaps need configurable?
+				if(tab.mailTab){
+					// Pop only if message changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
+					if(!this.windowId || (this.messageId !== message.id)){
+						this.pop(message.id, false, Prefs.showOnSelect);
+					}
+				}
+			});
+		});
 	}
 
 	init(){
@@ -54,26 +74,6 @@ class WebExtensionNoteWindow extends NoteWindow {
 			}
 
 			this.close(false);
-		});
-
-		// Click on QNote button
-		browser.messageDisplayAction.onClicked.addListener((tab) => {
-			browser.messageDisplay.getDisplayedMessage(getTabId(tab)).then((message) => {
-				this.pop(message.id, true, true);
-			});
-		});
-
-		// Click on message
-		browser.messageDisplay.onMessageDisplayed.addListener((tab, message) => {
-			browser.tabs.get(getTabId(tab)).then((tab)=>{
-				// Pop only on main tab. Perhaps need configurable?
-				if(tab.mailTab){
-					// Pop only if message changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
-					if(!this.windowId || (this.messageId !== message.id)){
-						this.pop(message.id, false, Prefs.showOnSelect);
-					}
-				}
-			});
 		});
 	}
 
@@ -148,30 +148,6 @@ class WebExtensionNoteWindow extends NoteWindow {
 }
 
 class XULNoteWindow extends NoteWindow {
-	constructor() {
-		super();
-
-		// Click on QNote button
-		browser.messageDisplayAction.onClicked.addListener((tab) => {
-			browser.messageDisplay.getDisplayedMessage(getTabId(tab)).then((message) => {
-				this.pop(message.id, true, true);
-			});
-		});
-
-		// Click on message
-		browser.messageDisplay.onMessageDisplayed.addListener((tab, message) => {
-			browser.tabs.get(getTabId(tab)).then((tab)=>{
-				// Pop only on main tab. Perhaps need configurable?
-				if(tab.mailTab){
-					// Pop only if message changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
-					if(!this.windowId || (this.messageId !== message.id)){
-						this.pop(message.id, false, Prefs.showOnSelect);
-					}
-				}
-			});
-		});
-	}
-
 	async close(closeWindow = true) {
 		if(closeWindow && this.windowId){
 			await browser.qapp.popupClose(this.windowId);

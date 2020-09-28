@@ -39,6 +39,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// before_start, before_end, after_start, after_end, start_before, start_after,
 					// end_before, end_after, overlap, and after_pointer.
 
+					var self = this;
 					var n = new NotePopup(
 						extension.getURL(opt.url)
 					);
@@ -53,27 +54,31 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						wex.CurrentNote.note.y = e.y;
 					};
 
-					// n.onClose = (e)=>{
-					// 	console.log("n.onClose", wex.CurrentNote);
-					// };
-
 					if(opt.left && opt.top) {
 						n.viewNode.openPopup(null, "topleft", opt.left, opt.top);
 					} else {
 						n.viewNode.openPopup(null, "topleft");
 					}
 
-					n.browserLoaded.then(async (e)=>{
-						//console.log("n.browserLoaded", opt, wex.CurrentNote.note, wex.CurrentNote.note.width || opt.width);
+					n.contentReady.then(async (e)=>{
+						var closeButton = n.tempBrowser.contentWindow.document.getElementById('closeButton');
+						closeButton.addEventListener("click", (e)=>{
+							wex.CurrentNote.close();
+						});
+
+						var deleteButton = n.tempBrowser.contentWindow.document.getElementById('deleteButton');
+						deleteButton.addEventListener("click", (e)=>{
+							wex.CurrentNote.note.text = '';
+							wex.CurrentNote.close();
+						});
+
 						n.viewNode.addEventListener("keyup", (e)=>{
 							if(e.key === 'Escape'){
 								wex.CurrentNote.needSave = false;
-								n.closePopup();
+								wex.CurrentNote.close();
 							}
 						});
-						// n.viewNode.addEventListener("blur", (e)=>{
-						// 	n.closePopup();
-						// });
+
 						n.viewNode.moveTo(opt.left, opt.top);
 						// await n.resizeBrowser({
 						// 	width: wex.CurrentNote.note.width || opt.width,

@@ -32,7 +32,7 @@ async function updateMessageDisplayIcon(on = true){
 	});
 }
 
-async function getDefaultPrefs() {
+function getDefaultPrefs() {
 	return {
 		useTag: false,
 		tagName: "xnote",
@@ -41,6 +41,7 @@ async function getDefaultPrefs() {
 		height: 200,
 		showFirstChars: 0,
 		showOnSelect: true,
+		windowOption: "xul",
 		storageOption: "folder",
 		storageFolder: ""//,
 		//version: browser.runtime.getManifest().version
@@ -62,7 +63,7 @@ async function getPrefs(){
 }
 
 async function savePrefs(p) {
-	var defaultPrefs = await getDefaultPrefs();
+	var defaultPrefs = getDefaultPrefs();
 	for(let k of Object.keys(defaultPrefs)){
 		if(p[k] !== undefined){
 			await browser.storage.local.set({
@@ -249,7 +250,7 @@ async function importLegacyXNotes(root){
 
 async function loadPrefsWithDefaults() {
 	let p = await getPrefs();
-	let defaultPrefs = await getDefaultPrefs();
+	let defaultPrefs = getDefaultPrefs();
 	let isEmptyPrefs = Object.keys(p).length === 0;
 
 	// Check for legacy settings if no settings at all
@@ -261,6 +262,13 @@ async function loadPrefsWithDefaults() {
 			} else {
 				p[k] = l[k];
 			}
+		}
+	}
+
+	// Apply defaults
+	for(let k of Object.keys(defaultPrefs)){
+		if(p[k] === undefined){
+			p[k] = defaultPrefs[k];
 		}
 	}
 
