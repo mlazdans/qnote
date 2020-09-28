@@ -1,10 +1,11 @@
 var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+var { BasePopup, ViewPopup } = ChromeUtils.import("resource:///modules/ExtensionPopups.jsm");
 
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var { ColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/ColumnHandler.jsm"));
-var { QUtils } = ChromeUtils.import(extension.rootURI.resolve("modules/QUtils.jsm"));
+var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
 
 var qapp = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown(isAppShutdown) {
@@ -17,29 +18,76 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		ColumnHandler.uninstall();
 
 		Components.utils.unload(extension.rootURI.resolve("modules/ColumnHandler.jsm"));
-		Components.utils.unload(extension.rootURI.resolve("modules/QUtils.jsm"));
+		Components.utils.unload(extension.rootURI.resolve("modules/NotePopup.jsm"));
 	}
 	getAPI(context) {
 		var wex = Components.utils.waiveXrays(context.cloneScope);
-		var { browser } = wex;
+		var popups = new Map();
 
 		return {
 			qapp: {
-				async getPrefs(){
-					let p = {};
-					let defaultPrefs = QUtils.getDefaultPrefs();
+				async popupClose(id){
+					if(popups.has(id)){
+						popups.get(id).closePopup();
+						popups.delete(id);
+					}
+				},
+				async popup(opt){
+					// https://developer.mozilla.org/en-US/docs/Archive/Mozilla/XUL/Method/openPopup
+					// https://developer.mozilla.org/en-US/docs/Archive/Mozilla/XUL/PopupGuide/Positioning
+					// Possible values for position are:
+					// before_start, before_end, after_start, after_end, start_before, start_after,
+					// end_before, end_after, overlap, and after_pointer.
 
-					for(let k of Object.keys(defaultPrefs)){
-						let v = await browser.storage.local.get('pref.' + k);
-						if(v['pref.' + k] !== undefined){
-							p[k] = defaultPrefs[k].constructor(v['pref.' + k]); // Type cast
-						}
+					var n = new NotePopup(
+						extension.getURL(opt.url)
+					);
+
+					n.onResize = (e)=>{
+						wex.CurrentNote.note.width = e.width;
+						wex.CurrentNote.note.height = e.height;
+					};
+
+					n.onMove = (e)=>{
+						wex.CurrentNote.note.x = e.x;
+						wex.CurrentNote.note.y = e.y;
+					};
+
+					// n.onClose = (e)=>{
+					// 	console.log("n.onClose", wex.CurrentNote);
+					// };
+
+					if(opt.left && opt.top) {
+						n.viewNode.openPopup(null, "topleft", opt.left, opt.top);
+					} else {
+						n.viewNode.openPopup(null, "topleft");
 					}
 
-					return p;
-				},
-				async getDefaultPrefs() {
-					return QUtils.getDefaultPrefs();
+					n.browserLoaded.then(async (e)=>{
+						//console.log("n.browserLoaded", opt, wex.CurrentNote.note, wex.CurrentNote.note.width || opt.width);
+						n.viewNode.addEventListener("keyup", (e)=>{
+							if(e.key === 'Escape'){
+								wex.CurrentNote.needSave = false;
+								n.closePopup();
+							}
+						});
+						// n.viewNode.addEventListener("blur", (e)=>{
+						// 	n.closePopup();
+						// });
+						n.viewNode.moveTo(opt.left, opt.top);
+						// await n.resizeBrowser({
+						// 	width: wex.CurrentNote.note.width || opt.width,
+						// 	height: wex.CurrentNote.note.height || opt.height
+						// });
+						// await n.resizeBrowser({
+						// 	width: wex.CurrentNote.note.width || opt.width,
+						// 	height: wex.CurrentNote.note.height || opt.height
+						// });
+					});
+
+					popups.set(n.windowId, n);
+
+					return n.windowId;
 				},
 				async installColumnHandler(){
 					ColumnHandler.install({
@@ -77,7 +125,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					ColumnHandler.setTextLimit(limit);
 				},
 				async getProfilePath() {
-					return QUtils.getProfilePath().path;
+					return Components.classes['@mozilla.org/file/directory_service;1']
+						.getService(Components.interfaces.nsIProperties)
+						.get('ProfD', Components.interfaces.nsIFile)
+						.path
+					;
 				}
 			}
 		}

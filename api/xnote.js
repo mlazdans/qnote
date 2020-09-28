@@ -3,7 +3,6 @@ var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { QUtils } = ChromeUtils.import(extension.rootURI.resolve("modules/QUtils.jsm"));
 var { XUtils } = ChromeUtils.import(extension.rootURI.resolve("modules/XUtils.jsm"));
 
 var xnote = class extends ExtensionCommon.ExtensionAPI {
@@ -14,7 +13,6 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 
-		Components.utils.unload(extension.rootURI.resolve("modules/QUtils.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/XUtils.jsm"));
 	}
 	getAPI(context) {
@@ -24,7 +22,7 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 					return XUtils.getPrefs();
 				},
 				async getDefaultPrefs() {
-					return QUtils.getDefaultPrefs();
+					return XUtils.getDefaultPrefs();
 				},
 				async saveNote(root, fileName, note){
 					var file = XUtils.noteFile(root, fileName);
@@ -127,7 +125,7 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 					return notes;
 				},
 				async getStoragePath() {
-					var _storageDir = QUtils.getProfilePath();
+					var _storageDir = XUtils.getProfilePath();
 					_storageDir.append('XNote');
 					return (_storageDir.exists() && _storageDir.isReadable() && _storageDir.isDirectory()) ? _storageDir.path : undefined;
 				}

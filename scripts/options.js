@@ -296,7 +296,7 @@ async function storageFolderBrowse(){
 async function initOptionsPage(){
 	let tags = await ext.browser.messages.listTags();
 	Prefs = await ext.loadPrefsWithDefaults();
-	DefaultPrefs = await browser.qapp.getDefaultPrefs();
+	DefaultPrefs = await ext.getDefaultPrefs();
 
 	initTags(tags);
 	setTexts();

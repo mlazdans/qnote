@@ -7,18 +7,6 @@
 		"async": true,
 		"parameters": []
 	},{
-		"name": "getDefaultPrefs",
-		"type": "function",
-		"description": "Get default preferences",
-		"async": true,
-		"parameters": []
-	},{
-		"name": "getPrefs",
-		"type": "function",
-		"description": "Get preferences",
-		"async": true,
-		"parameters": []
-	},{
 		"name": "installColumnHandler",
 		"type": "function",
 		"description": "",
@@ -35,30 +23,28 @@
 		"type": "function",
 		"description": "",
 		"async": true,
-		"parameters": [
-			{
-				"name": "options",
-				"type": "object",
-				"properties": {
-					"keyId": {
-						"type": "string",
-						"default": "",
-						"description": ""
-					},
-					"exists": {
-						"type": "boolean",
-						"default": true,
-						"description": ""
-					},
-					"text": {
-						"type": "string",
-						"default": "",
-						"description": ""
-					}
+		"parameters": [{
+			"name": "options",
+			"type": "object",
+			"properties": {
+				"keyId": {
+					"type": "string",
+					"default": "",
+					"description": ""
 				},
-				"description": "Note object"
-			}
-		]
+				"exists": {
+					"type": "boolean",
+					"default": true,
+					"description": ""
+				},
+				"text": {
+					"type": "string",
+					"default": "",
+					"description": ""
+				}
+			},
+			"description": "Note object"
+		}]
 	},{
 		"name": "deleteColumnNote",
 		"type": "function",
@@ -85,5 +71,56 @@
 		"description": "",
 		"async": true,
 		"parameters": []
+	},{
+		"name": "popup",
+		"type": "function",
+		"description": "",
+		"async": true,
+		"parameters": [{
+			"name": "options",
+			"type": "object",
+			"description": "Popup options",
+			"properties": {
+				"url": {
+					"type": "string",
+					"default": "",
+					"description": ""
+				},
+				"left": {
+					"type": "integer",
+					"optional": true,
+					"default": 0,
+					"description": "Windows left position"
+				},
+				"top": {
+					"type": "integer",
+					"optional": true,
+					"default": 0,
+					"description": "Windows top position"
+				},
+				"width": {
+					"type": "integer",
+					"optional": true,
+					"default": 0,
+					"description": "Windows width"
+				},
+				"height": {
+					"type": "integer",
+					"optional": true,
+					"default": 0,
+					"description": "Windows height"
+				}
+			}
+		}]
+	},{
+		"name": "popupClose",
+		"type": "function",
+		"description": "",
+		"async": true,
+		"parameters": [{
+			"name": "id",
+			"type": "string",
+			"description": ""
+		}]
 	}]
 }]
