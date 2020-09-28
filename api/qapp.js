@@ -60,34 +60,37 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						n.viewNode.openPopup(null, "topleft");
 					}
 
-					n.contentReady.then(async (e)=>{
-						var closeButton = n.tempBrowser.contentWindow.document.getElementById('closeButton');
-						closeButton.addEventListener("click", (e)=>{
-							wex.CurrentNote.close();
-						});
-
-						var deleteButton = n.tempBrowser.contentWindow.document.getElementById('deleteButton');
-						deleteButton.addEventListener("click", (e)=>{
-							wex.CurrentNote.note.text = '';
-							wex.CurrentNote.close();
-						});
-
-						n.viewNode.addEventListener("keyup", (e)=>{
-							if(e.key === 'Escape'){
-								wex.CurrentNote.needSave = false;
+					n.contentReady.then((e)=>{
+						n.browser.contentWindow.addEventListener("DOMContentLoaded", ()=>{
+							var closeButton = n.tempBrowser.contentWindow.document.getElementById('closeButton');
+							closeButton.addEventListener("click", (e)=>{
 								wex.CurrentNote.close();
-							}
-						});
+							});
 
-						n.viewNode.moveTo(opt.left, opt.top);
-						// await n.resizeBrowser({
-						// 	width: wex.CurrentNote.note.width || opt.width,
-						// 	height: wex.CurrentNote.note.height || opt.height
-						// });
-						// await n.resizeBrowser({
-						// 	width: wex.CurrentNote.note.width || opt.width,
-						// 	height: wex.CurrentNote.note.height || opt.height
-						// });
+							var deleteButton = n.tempBrowser.contentWindow.document.getElementById('deleteButton');
+							deleteButton.addEventListener("click", (e)=>{
+								wex.CurrentNote.note.text = '';
+								wex.CurrentNote.close();
+							});
+
+							n.viewNode.addEventListener("keydown", (e)=>{
+								if(e.key === 'Escape'){
+									wex.CurrentNote.needSave = false;
+									wex.CurrentNote.close();
+									e.preventDefault();
+								}
+							}, false);
+
+							n.viewNode.moveTo(opt.left, opt.top);
+							// await n.resizeBrowser({
+							// 	width: wex.CurrentNote.note.width || opt.width,
+							// 	height: wex.CurrentNote.note.height || opt.height
+							// });
+							// await n.resizeBrowser({
+							// 	width: wex.CurrentNote.note.width || opt.width,
+							// 	height: wex.CurrentNote.note.height || opt.height
+							// });
+						});
 					});
 
 					popups.set(n.windowId, n);
