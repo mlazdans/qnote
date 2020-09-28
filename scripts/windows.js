@@ -185,9 +185,20 @@ class XULNoteWindow extends NoteWindow {
 				url: "html/popup3.html",
 				width: note.width,
 				height: note.height,
-				left: (note.x || 0) + w.left,
-				top: (note.y || 0) + w.top
+				left: note.x || 0,
+				top: note.y || 0
 			};
+
+			if(!opt.left){
+				opt.left = Math.round((w.width - w.left) / 2);
+			}
+
+			if(!opt.top){
+				opt.top = Math.round((w.height - w.top) / 2);
+			}
+
+			opt.left += w.left;
+			opt.top += w.top;
 
 			browser.qapp.popup(opt).then((windowId)=>{
 				this.note = note;
