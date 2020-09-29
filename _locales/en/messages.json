@@ -13,6 +13,7 @@
 	"import.legacy.xnotes.button": { "message": "Import legacy XNotes" },
 	"extension.reload.button": { "message": "Reload" },
 	"show.first.chars.label": {"message": "Show first X characters in QNote column"},
+	"focus.on.display": {"message": "Focus QNote after display (only floating panel)"},
 
 	"maintenance.fieldset": { "message": " Maintenance " },
 	"use.tag.manager": { "message": "Please use tag manager to manage tags" },

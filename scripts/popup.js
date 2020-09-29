@@ -4,7 +4,7 @@ var note = ext.CurrentNote.note;
 
 var YTextE = document.getElementById('qnote-text');
 
-if(!ext.Prefs.focusOnDisplay){
+if(ext.Prefs.focusOnDisplay){
 	YTextE.focus();
 }
 

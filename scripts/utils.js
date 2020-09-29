@@ -41,6 +41,7 @@ function getDefaultPrefs() {
 		height: 200,
 		showFirstChars: 0,
 		showOnSelect: true,
+		focusOnDisplay: false,
 		windowOption: "xul",
 		storageOption: "folder",
 		storageFolder: ""//,
