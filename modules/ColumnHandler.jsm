@@ -49,10 +49,10 @@ var Observer = {
 		var qnoteCol = w.document.getElementById("qnoteCol");
 
 		var html =
-			'<splitter class="tree-splitter" />' +
-			'<treecol id="qnoteCol" persist="ordinal width sortDirection" flex="1" closemenu="none" label="QNote">' +
-			'<label class="treecol-text" flex="1" crop="right" />' +
-			'<image class="treecol-sortdirection"/>' +
+			'<splitter class="tree-splitter" resizeafter="farthest" />' +
+			'<treecol id="qnoteCol" persist="hidden ordinal sortDirection width" label="QNote" closemenu="none" minwidth="18" tooltiptext="QNote">' +
+			'<label class="treecol-text" crop="right" value="QNote" />' +
+			'<image class="treecol-sortdirection" />' +
 			'</treecol>'
 		;
 

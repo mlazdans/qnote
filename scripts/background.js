@@ -1,3 +1,5 @@
+// TODO: column width persistance
+// TODO: configure focus to message or note
 var Prefs;
 var CurrentNote;
 
@@ -27,7 +29,7 @@ async function initExtension(){
 
 	// Context menu on message
 	browser.menus.onShown.addListener((info) => {
-		// Awoid context menu other than from messageList
+		// Avoid context menu other than from messageList
 		if(info.selectedMessages === undefined){
 			return;
 		}
