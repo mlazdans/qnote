@@ -60,38 +60,56 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						n.viewNode.openPopup(null, "topleft");
 					}
 
-					n.contentReady.then((e)=>{
-						n.browser.contentWindow.addEventListener("DOMContentLoaded", ()=>{
-							var closeButton = n.tempBrowser.contentWindow.document.getElementById('closeButton');
-							closeButton.addEventListener("click", (e)=>{
-								wex.CurrentNote.close();
-							});
-
-							var deleteButton = n.tempBrowser.contentWindow.document.getElementById('deleteButton');
-							deleteButton.addEventListener("click", (e)=>{
-								wex.CurrentNote.note.text = '';
-								wex.CurrentNote.close();
-							});
-
-							n.viewNode.addEventListener("keydown", (e)=>{
-								if(e.key === 'Escape'){
-									wex.CurrentNote.needSave = false;
-									wex.CurrentNote.close();
-									e.preventDefault();
-								}
-							}, false);
-
-							n.viewNode.moveTo(opt.left, opt.top);
-							// await n.resizeBrowser({
-							// 	width: wex.CurrentNote.note.width || opt.width,
-							// 	height: wex.CurrentNote.note.height || opt.height
-							// });
-							// await n.resizeBrowser({
-							// 	width: wex.CurrentNote.note.width || opt.width,
-							// 	height: wex.CurrentNote.note.height || opt.height
-							// });
+					var addListeners = ()=>{
+						var closeButton = n.browser.contentWindow.document.getElementById('closeButton');
+						closeButton.addEventListener("click", (e)=>{
+							wex.CurrentNote.close();
 						});
+
+						var deleteButton = n.browser.contentWindow.document.getElementById('deleteButton');
+						deleteButton.addEventListener("click", (e)=>{
+							wex.CurrentNote.note.text = '';
+							wex.CurrentNote.close();
+						});
+
+						n.viewNode.addEventListener("keydown", (e)=>{
+							if(e.key === 'Escape'){
+								wex.CurrentNote.needSave = false;
+								wex.CurrentNote.close();
+								e.preventDefault();
+							}
+						}, false);
+
+						n.viewNode.moveTo(opt.left, opt.top);
+						// await n.resizeBrowser({
+						// 	width: wex.CurrentNote.note.width || opt.width,
+						// 	height: wex.CurrentNote.note.height || opt.height
+						// });
+						// await n.resizeBrowser({
+						// 	width: wex.CurrentNote.note.width || opt.width,
+						// 	height: wex.CurrentNote.note.height || opt.height
+						// });
+					};
+
+					n.contentReady.then(()=>{
+						var doc = n.browser.contentWindow.document;
+						if(doc.readyState === 'complete'){
+							addListeners();
+						} else {
+							//console.log("contentReady", doc.readyState);
+							//addListeners();
+							doc.addEventListener("DOMContentLoaded", ()=>{
+								//console.log("DOMContentLoaded");
+								addListeners();
+							});
+						}
 					});
+					// n.contentReady.then((e)=>{
+					// 	console.log("n.contentReady");
+					// 	console.log(n.browser);
+					// 	n.browser.contentWindow.addEventListener("DOMContentLoaded", ()=>{
+					// 	});
+					// });
 
 					popups.set(n.windowId, n);
 

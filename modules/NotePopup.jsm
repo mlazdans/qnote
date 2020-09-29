@@ -147,7 +147,7 @@ class NotePopup extends BasePopup {
 		this.tempPanel = panel;
 		this.tempBrowser = this.browser;
 
-		// this.browser.classList.add("webextension-preload-browser");
+		this.browser.classList.add("webextension-preload-browser");
 	}
 
 	removeTempPanel() {
