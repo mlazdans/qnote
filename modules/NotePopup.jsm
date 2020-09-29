@@ -140,8 +140,10 @@ class NotePopup extends BasePopup {
 
 		panel.addEventListener('mousedown', handleDragStart, false);
 
-		panel.adjustArrowPosition = () => {
-		};
+		if(panel.adjustArrowPosition === undefined){
+			panel.adjustArrowPosition = () => {
+			};
+		}
 
 		this.shown = false;
 		this.tempPanel = panel;

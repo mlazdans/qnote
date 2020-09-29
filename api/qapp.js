@@ -39,7 +39,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// before_start, before_end, after_start, after_end, start_before, start_after,
 					// end_before, end_after, overlap, and after_pointer.
 
-					var self = this;
 					var n = new NotePopup(
 						extension.getURL(opt.url)
 					);
@@ -61,12 +60,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 
 					var addListeners = ()=>{
-						var closeButton = n.browser.contentWindow.document.getElementById('closeButton');
+						var document = n.browser.contentWindow.document;
+						var closeButton = document.getElementById('closeButton');
 						closeButton.addEventListener("click", (e)=>{
 							wex.CurrentNote.close();
 						});
 
-						var deleteButton = n.browser.contentWindow.document.getElementById('deleteButton');
+						var deleteButton = document.getElementById('deleteButton');
 						deleteButton.addEventListener("click", (e)=>{
 							wex.CurrentNote.note.text = '';
 							wex.CurrentNote.close();
@@ -81,6 +81,15 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						}, false);
 
 						n.viewNode.moveTo(opt.left, opt.top);
+
+						try {
+							if(!wex.Prefs.focusOnDisplay){
+								Services.wm.getMostRecentWindow("mail:3pane").gFolderDisplay.tree.focus();
+							}
+						} catch(e) {
+							console.error(e);
+						}
+
 						// await n.resizeBrowser({
 						// 	width: wex.CurrentNote.note.width || opt.width,
 						// 	height: wex.CurrentNote.note.height || opt.height

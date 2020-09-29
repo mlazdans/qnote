@@ -3,11 +3,14 @@ var CurrentNote = ext.CurrentNote;
 var note = ext.CurrentNote.note;
 
 var YTextE = document.getElementById('qnote-text');
-YTextE.focus();
+
+if(!ext.Prefs.focusOnDisplay){
+	YTextE.focus();
+}
+
 YTextE.value = note.text;
 
 document.title = 'QNote';
-
 if(note.ts){
 	document.title += ': ' + (new Date(note.ts)).toLocaleString();
 }

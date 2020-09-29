@@ -5,6 +5,17 @@ var YTextE = document.getElementById('qnote-text');
 var popup = document.getElementById('popup');
 var title = document.getElementById('title');
 
+if(!ext.Prefs.focusOnDisplay){
+	YTextE.focus();
+}
+
+YTextE.value = note.text;
+
+title.firstChild.textContent = 'QNote: ';
+if(note.ts){
+	title.firstChild.textContent += (new Date(note.ts)).toLocaleString();
+}
+
 function resizePopup(w, h){
 	popup.style.width = w + 'px';
 	popup.style.height = h + 'px';
@@ -22,14 +33,6 @@ window.addEventListener('DOMContentLoaded', () => {
 
 	resizePopup(w, h);
 });
-
-YTextE.focus();
-YTextE.value = note.text;
-
-title.firstChild.textContent = 'QNote: ';
-if(note.ts){
-	title.firstChild.textContent += (new Date(note.ts)).toLocaleString();
-}
 
 YTextE.addEventListener("keyup", (e)=>{
 	note.text = YTextE.value;
