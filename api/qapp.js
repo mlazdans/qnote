@@ -83,7 +83,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						n.viewNode.moveTo(opt.left, opt.top);
 
 						try {
-							if(!wex.Prefs.focusOnDisplay){
+							let focus = wex.Prefs.focusOnDisplay || !wex.CurrentNote.note.text;
+							if(!focus){
 								Services.wm.getMostRecentWindow("mail:3pane").gFolderDisplay.tree.focus();
 							}
 						} catch(e) {

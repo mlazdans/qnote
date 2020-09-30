@@ -5,7 +5,7 @@ var YTextE = document.getElementById('qnote-text');
 var popup = document.getElementById('popup');
 var title = document.getElementById('title');
 
-if(ext.Prefs.focusOnDisplay){
+if(ext.Prefs.focusOnDisplay || !note || !note.text){
 	YTextE.focus();
 }
 
