@@ -96,8 +96,7 @@ async function savePrefs(){
 	var oldPrefs = Object.assign({}, Prefs);
 
 	if(storageOptionValue() === 'folder'){
-		let isReadable = await ext.browser.legacy.isReadable(input_storageFolder.value);
-		if(!isReadable){
+		if(!await isReadable(input_storageFolder.value)){
 			setLabelColor('storageOptionFolder', 'red');
 			alert(_("folder.unaccesible", input_storageFolder.value));
 			return false;
@@ -231,27 +230,45 @@ async function initExportStorageButton() {
 	}
 }
 
-async function initXNoteImportButton(){
+async function isReadable(path){
+	return path && await browser.legacy.isReadable(path);
+}
+
+async function getXNoteStoragePath(){
 	var path;
 	var legacyPrefs = ext.legacyPrefsMapper(await ext.browser.xnote.getPrefs());
 
 	if(legacyPrefs.storageFolder){
 		path = legacyPrefs.storageFolder;
-	} else if(!(path = await ext.browser.xnote.getStoragePath())) {
-		path = await ext.browser.qapp.getProfilePath();
 	}
 
+	if(!await isReadable(path)){
+		path = await ext.browser.xnote.getStoragePath();
+	}
+
+	return path;
+}
+
+async function initXNoteImportButton(){
+	var path = await getXNoteStoragePath();
+
 	if(path){
-		document.getElementById('xnoteFolderInfo').textContent = _("xnote.folder.found", path);
-	} else {
-		document.getElementById('xnoteFolderInfo').textContent = _("xnote.folder.inaccessible", profilePath);
+		if(await isReadable(path)){
+			document.getElementById('xnoteFolderInfo').textContent = _("xnote.folder.found", path);
+		} else {
+			document.getElementById('xnoteFolderInfo').textContent = _("xnote.folder.inaccessible", path);
+			path = '';
+		}
 	}
 
 	importLegacyXNotesButton.addEventListener('click', ()=>{
-		ext.browser.legacy.folderPicker({
-			displayDirectory: path
-		}).then((path)=>{
-			return importLegacyXNotes(path);
+		let opt = {};
+		if(path){
+			opt.displayDirectory = path;
+		}
+
+		ext.browser.legacy.folderPicker(opt).then((selectedPath)=>{
+			return importLegacyXNotes(selectedPath);
 		});
 	});
 }
@@ -280,18 +297,19 @@ function storageOptionChange(){
 }
 
 async function storageFolderBrowse(){
-	var path;
+	var path = await getXNoteStoragePath();
 
-	if(Prefs.storageFolder){
-		path = Prefs.storageFolder;
-	} else if(!(path = await ext.browser.xnote.getStoragePath())) {
+	if(!await isReadable(path)){
 		path = await ext.browser.qapp.getProfilePath();
 	}
 
-	ext.browser.legacy.folderPicker({
-		displayDirectory: path
-	}).then((path)=>{
-		input_storageFolder.value = path;
+	let opt = {};
+	if(await isReadable(path)){
+		opt.displayDirectory = path;
+	}
+
+	ext.browser.legacy.folderPicker(opt).then((selectedPath)=>{
+		input_storageFolder.value = selectedPath;
 	});
 }
 

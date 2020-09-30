@@ -127,7 +127,8 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 				async getStoragePath() {
 					var _storageDir = XUtils.getProfilePath();
 					_storageDir.append('XNote');
-					return (_storageDir.exists() && _storageDir.isReadable() && _storageDir.isDirectory()) ? _storageDir.path : undefined;
+					return _storageDir.path;
+					//return (_storageDir.exists() && _storageDir.isReadable() && _storageDir.isDirectory()) ? _storageDir.path : undefined;
 				}
 			}
 		}
