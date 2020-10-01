@@ -26,7 +26,6 @@ class NotePopup extends BasePopup {
 
 		let panel = document.createXULElement("panel");
 		panel.setAttribute("id", windowId);
-		//panel.setAttribute("id", "qnote-window-panel");
 		//panel.setAttribute("class", "mail-extension-panel panel-no-padding");
 		panel.setAttribute("noautohide", true);
 		//panel.setAttribute("type", "arrow");
@@ -146,52 +145,9 @@ class NotePopup extends BasePopup {
 		}
 
 		this.shown = false;
-		this.tempPanel = panel;
-		this.tempBrowser = this.browser;
-
-		this.browser.classList.add("webextension-preload-browser");
-	}
-
-	removeTempPanel() {
-		if (this.tempPanel) {
-			this.tempPanel.remove();
-			this.tempPanel = null;
-		}
-		if (this.tempBrowser) {
-			this.tempBrowser.parentNode.remove();
-			this.tempBrowser = null;
-		}
-	}
-
-	destroy(e) {
-		return super.destroy().then(() => {
-			this.removeTempPanel();
-		});
 	}
 
 	closePopup() {
-		//console.log("closePopup", this.onClose);
-		// if (this.shown) {
-		// 	this.viewNode.hidePopup();
-		// } else {
-		// if(!this.destroyed && this.onClose){
-		// 	this.onClose();
-		// }
-		//console.log(this.destroyed);
 		this.destroy();
-		//console.log(this.destroyed);
-		//}
 	}
-
-	// handleEvent(e) {
-	// 	console.log("handleEvent", e);
-	// 	if(e.type === 'popuphiding'){
-	// 		if(this.onClose){
-	// 			this.onClose(e);
-	// 		}
-	// 		e.preventDefault();
-	// 	}
-
-	// 	return super.handleEvent(e);
-	// }
 }

@@ -33,12 +33,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 				},
 				async popup(opt){
-					// https://developer.mozilla.org/en-US/docs/Archive/Mozilla/XUL/Method/openPopup
-					// https://developer.mozilla.org/en-US/docs/Archive/Mozilla/XUL/PopupGuide/Positioning
-					// Possible values for position are:
-					// before_start, before_end, after_start, after_end, start_before, start_after,
-					// end_before, end_after, overlap, and after_pointer.
-
 					var n = new NotePopup(
 						extension.getURL(opt.url)
 					);
@@ -53,13 +47,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						wex.CurrentNote.note.y = e.y;
 					};
 
-					if(opt.left && opt.top) {
-						n.viewNode.openPopup(null, "topleft", opt.left, opt.top);
-					} else {
-						n.viewNode.openPopup(null, "topleft");
-					}
-
-					var addListeners = ()=>{
+					var initNote = ()=>{
 						var document = n.browser.contentWindow.document;
 						var closeButton = document.getElementById('closeButton');
 						closeButton.addEventListener("click", (e)=>{
@@ -90,36 +78,31 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						} catch(e) {
 							console.error(e);
 						}
-
-						// await n.resizeBrowser({
-						// 	width: wex.CurrentNote.note.width || opt.width,
-						// 	height: wex.CurrentNote.note.height || opt.height
-						// });
-						// await n.resizeBrowser({
-						// 	width: wex.CurrentNote.note.width || opt.width,
-						// 	height: wex.CurrentNote.note.height || opt.height
-						// });
 					};
 
-					n.contentReady.then(()=>{
-						var doc = n.browser.contentWindow.document;
-						if(doc.readyState === 'complete'){
-							addListeners();
-						} else {
-							//console.log("contentReady", doc.readyState);
-							//addListeners();
-							doc.addEventListener("DOMContentLoaded", ()=>{
-								//console.log("DOMContentLoaded");
-								addListeners();
-							});
+					n.browser.addEventListener("DOMContentLoaded", ()=>{
+						// We are not interested once default page has been loaded
+						if(n.browser.contentWindow.document.URL === 'about:blank'){
+							return;
 						}
+
+						n.browserLoaded.then(initNote);
+						// n.contentReady.then(()=>{
+						// });
+						// n.browserReady.then(()=>{
+						// });
 					});
-					// n.contentReady.then((e)=>{
-					// 	console.log("n.contentReady");
-					// 	console.log(n.browser);
-					// 	n.browser.contentWindow.addEventListener("DOMContentLoaded", ()=>{
-					// 	});
-					// });
+
+					// https://developer.mozilla.org/en-US/docs/Archive/Mozilla/XUL/Method/openPopup
+					// https://developer.mozilla.org/en-US/docs/Archive/Mozilla/XUL/PopupGuide/Positioning
+					// Possible values for position are:
+					// before_start, before_end, after_start, after_end, start_before, start_after,
+					// end_before, end_after, overlap, and after_pointer.
+					if(opt.left && opt.top) {
+						n.viewNode.openPopup(null, "topleft", opt.left, opt.top);
+					} else {
+						n.viewNode.openPopup(null, "topleft");
+					}
 
 					popups.set(n.windowId, n);
 
