@@ -27,6 +27,7 @@
 	"background": {
 		"scripts": [
 			"scripts/utils.js",
+			"modules/XUtils.jsm",
 			"scripts/note.js",
 			"scripts/qnote.js",
 			"scripts/xnote.js",

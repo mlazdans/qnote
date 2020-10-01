@@ -57,20 +57,6 @@
 			"description": "XNote filename"
 		}]
 	},{
-		"name": "noteExists",
-		"type": "function",
-		"description": "Returns true if xnote exists",
-		"async": true,
-		"parameters": [{
-			"name": "root",
-			"type": "string",
-			"description": "Root folder for XNotes"
-		},{
-			"name": "fileName",
-			"type": "string",
-			"description": "XNote filename"
-		}]
-	},{
 		"name": "saveNote",
 		"type": "function",
 		"description": "Saves xnote into file",

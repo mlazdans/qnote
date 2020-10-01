@@ -1,6 +1,3 @@
-var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
-var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-
 var EXPORTED_SYMBOLS = ["XUtils"];
 
 var XUtils = {
@@ -15,33 +12,6 @@ var XUtils = {
 			storage_path: '',
 			version: '2.3.1'
 		};
-	},
-	getPrefs(){
-		var _xnotePrefs = Services.prefs.QueryInterface(Components.interfaces.nsIPrefBranch).getBranch("extensions.xnote.");
-		var defaultPrefs = XUtils.getDefaultPrefs();
-		var p = {};
-
-		for(let k of Object.keys(defaultPrefs)){
-			let f;
-			let t = typeof defaultPrefs[k];
-
-			if(t === 'boolean'){
-				f = 'getBoolPref';
-			} else if(t === 'string'){
-				f = 'getCharPref';
-			} else if(t === 'number'){
-				f = 'getIntPref';
-			}
-
-			//p[k] = defaultPrefs[k];
-
-			if(f && _xnotePrefs.prefHasUserValue(k)){
-				p[k] = _xnotePrefs[f](k);
-				p[k] = defaultPrefs[k].constructor(p[k]); // Type cast
-			}
-		}
-
-		return p;
 	},
 	// TODO: Seems that "yyyy-mm-dd - HH:MM" format has been hardcoded? Not sure yet.
 	noteDateToDate(dateString) {
@@ -104,19 +74,10 @@ var XUtils = {
 			}
 		});
 	},
-	noteFile(root, fileName){
-		try {
-			var file = new FileUtils.File(root);
-			file.appendRelativePath(fileName);
-			return file;
-		} catch {
-			return false;
-		}
+	encodeFileName(str){
+		return escape(str);
 	},
-	getProfilePath() {
-		return Components.classes['@mozilla.org/file/directory_service;1']
-			.getService(Components.interfaces.nsIProperties)
-			.get('ProfD', Components.interfaces.nsIFile)
-		;
+	decodeFileName(str){
+		return unescape(str);
 	}
 };
