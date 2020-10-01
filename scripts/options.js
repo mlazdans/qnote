@@ -13,6 +13,7 @@ var importFile = document.getElementById("importFile");
 var reloadExtensionButton = document.getElementById("reloadExtensionButton");
 var storageFolderBrowseButton = document.getElementById("storageFolderBrowseButton");
 var input_storageFolder = document.getElementById("input_storageFolder");
+var input_overwriteExistingNotes = document.getElementById("input_overwriteExistingNotes");
 
 function isButton(node){
 	return node.nodeName == "INPUT" && node.type.toLocaleUpperCase() === "BUTTON"
@@ -82,7 +83,7 @@ function importLegacyXNotes(path) {
 
 	return ext.importLegacyXNotes(path).then((stats)=>{
 		if(stats){
-			alert(_("xnote.import.finished.stats", [stats.imported, stats.err, stats.exist]));
+			alert(_("xnote.import.finished.stats", [stats.imported, stats.err, stats.exist, stats.overwritten]));
 		} else {
 			alert(_("xnote.import.fail"));
 		}
@@ -331,6 +332,9 @@ async function initOptionsPage(){
 	importFile.addEventListener("change", importStorage);
 	reloadExtensionButton.addEventListener("click", reloadExtension);
 	storageFolderBrowseButton.addEventListener("click", storageFolderBrowse);
+	input_overwriteExistingNotes.addEventListener("click", ()=>{
+		ext.Prefs.overwriteExistingNotes = input_overwriteExistingNotes.checked;
+	});
 
 	for (const node of document.querySelectorAll('input[name="storageOption"]')) {
 		node.addEventListener("click", storageOptionChange);

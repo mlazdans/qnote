@@ -214,7 +214,8 @@ async function importLegacyXNotes(root){
 	var stats = {
 		err: 0,
 		exist: 0,
-		imported: 0
+		imported: 0,
+		overwritten: 0
 	};
 
 	for (const note of legacyXNotes) {
@@ -226,11 +227,15 @@ async function importLegacyXNotes(root){
 		}
 
 		let yn = new QNote(note.keyId);
-		if(await yn.load()){
-			//console.log(xn.keyId + " already exists in local store");
+		let exists = await yn.load();
+
+		if(exists && !Prefs.overwriteExistingNotes){
 			stats.exist++;
 		} else {
-			//console.log(xn.keyId + " does NOT exists in local store");
+			// Remove loaded note information so that original ts can be saved
+			if(exists){
+				yn.loadedNote = undefined;
+			}
 			yn.x = xn.x;
 			yn.y = xn.y;
 			yn.width = xn.width;
@@ -239,7 +244,11 @@ async function importLegacyXNotes(root){
 			yn.ts = xn.ts;
 
 			if(await yn.save()){
-				stats.imported++;
+				if(exists){
+					stats.overwritten++;
+				} else {
+					stats.imported++;
+				}
 			} else {
 				console.error("Error saving qnote " + yn.keyId);
 				stats.err++;

@@ -14,11 +14,12 @@
 	"extension.reload.button": { "message": "Reload" },
 	"show.first.chars.label": {"message": "Show first X characters in QNote column"},
 	"focus.on.display": {"message": "Focus QNote after display (only floating panel)"},
+	"overwrite.existing.notes": {"message": "Overwrite existing notes"},
 
 	"maintenance.fieldset": { "message": " Maintenance " },
 	"use.tag.manager": { "message": "Please use tag manager to manage tags" },
 
-	"xnote.import.finished.stats": { "message": "Import finished:\nimported notes - $1\nerrored notes - $2\nexisting notes - $3" },
+	"xnote.import.finished.stats": { "message": "Import finished:\nimported notes - $1\nerrored notes - $2\nexisting notes - $3\noverwritten notes - $4" },
 	"xnote.import.fail": { "message": "Could not import legacy notes" },
 	"xnote.folder.inaccessible": { "message": "XNote folder not found or is not readable: $1" },
 	"xnote.folder.found": { "message": "XNote folder found: $1" },

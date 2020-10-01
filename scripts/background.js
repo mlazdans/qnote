@@ -1,4 +1,5 @@
 // TODO: column width persistance
+// TODO: migrate .xnote to some sensible format (json?) if folder storage option used
 var Prefs;
 var CurrentNote;
 
