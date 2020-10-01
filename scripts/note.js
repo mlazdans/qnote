@@ -7,6 +7,11 @@ class Note {
 		this.height;
 		this.text = '';
 		this.ts;
+		this.loadedNote;
+	}
+
+	load(data){
+		return this.loadedNote = this.reset(data);
 	}
 
 	reset(data){
@@ -18,7 +23,7 @@ class Note {
 	}
 
 	save(){
-		return {
+		let data = {
 			x: this.x,
 			y: this.y,
 			width: this.width,
@@ -26,5 +31,13 @@ class Note {
 			text: this.text,
 			ts: Date.now()
 		};
+
+		if(this.loadedNote){
+			if(this.loadedNote.text === this.text){
+				data.ts = this.loadedNote.ts;
+			}
+		}
+
+		return data;
 	}
 }

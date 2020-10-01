@@ -4,12 +4,12 @@ class QNote extends Note {
 	}
 
 	async load(){
-		return browser.storage.local.get([this.keyId]).then((store)=>{
+		return browser.storage.local.get([this.keyId]).then(store => {
 			if(!store || !store[this.keyId]){
 				return false;
 			}
 
-			return this.reset(store[this.keyId]);
+			return super.load(store[this.keyId]);
 		});
 	}
 

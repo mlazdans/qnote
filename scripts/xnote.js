@@ -5,8 +5,8 @@ class XNote extends Note {
 	}
 
 	async load(){
-		return browser.xnote.loadNote(this.root, this.keyId + '.xnote').then((note)=>{
-			return this.reset(note);
+		return browser.xnote.loadNote(this.root, this.keyId + '.xnote').then(note => {
+			return super.load(note);
 		});
 	}
 

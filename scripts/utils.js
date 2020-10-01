@@ -174,6 +174,7 @@ async function resetNoteForMessage(messageId){
 		return true;
 	} else {
 		return await note.save().then(async ()=>{
+			// TODO: move to createNoteForMessage as event
 			await afterNoteSave(messageId, note);
 			return true;
 		});
