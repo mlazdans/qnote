@@ -29,12 +29,12 @@ class Note {
 			width: this.width,
 			height: this.height,
 			text: this.text,
-			ts: Date.now()
+			ts: this.ts || Date.now()
 		};
 
 		if(this.loadedNote){
-			if(this.loadedNote.text === this.text){
-				data.ts = this.loadedNote.ts;
+			if(this.loadedNote.text !== this.text){
+				data.ts = Date.now();
 			}
 		}
 
