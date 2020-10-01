@@ -22,7 +22,7 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 		let noteFile = (root, fileName, encodeFileName = NF_DO_ENCODE) => {
 			try {
 				var file = new FileUtils.File(root);
-				if(encodeFileName == NF_DO_ENCODE){
+				if(encodeFileName === NF_DO_ENCODE){
 					file.appendRelativePath(XUtils.encodeFileName(fileName));
 				} else {
 					file.appendRelativePath(fileName);
@@ -145,12 +145,12 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 					fileInStream.init(file, 0x01, parseInt("0444", 8), null);
 					fileScriptableIO.init(fileInStream);
 
-					note.keyId = file.leafName.substring(0, file.leafName.length - 6);
+					//note.keyId = file.leafName.substring(0, file.leafName.length - 6);
 					note.x = parseInt(fileScriptableIO.read(4));
 					note.y = parseInt(fileScriptableIO.read(4));
 					note.width = parseInt(fileScriptableIO.read(4));
 					note.height = parseInt(fileScriptableIO.read(4));
-					note.ts = XUtils.noteDateToDate(fileScriptableIO.read(32));
+					note.ts = XUtils.noteDateToDate(fileScriptableIO.read(32)).getTime();
 					note.text = decodeURIComponent(fileScriptableIO.read(file.fileSize-48));
 
 					fileScriptableIO.close();
