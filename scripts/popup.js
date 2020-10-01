@@ -23,7 +23,7 @@ const popupClose = () => {
 	note.text = YTextE.value;
 }
 
-document.addEventListener('keyup', (event) => {
+document.addEventListener('keydown', (event) => {
 	if(event.key == 'Escape'){
 		popupClose();
 		CurrentNote.needSave = false;

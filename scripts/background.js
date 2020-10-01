@@ -1,5 +1,4 @@
 // TODO: column width persistance
-// TODO: configure focus to message or note
 var Prefs;
 var CurrentNote;
 

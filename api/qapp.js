@@ -60,20 +60,26 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 							wex.CurrentNote.close();
 						});
 
-						n.viewNode.addEventListener("keydown", (e)=>{
+						n.viewNode.moveTo(opt.left, opt.top);
+
+						var w = Services.wm.getMostRecentWindow("mail:3pane");
+
+						var escaper = (e)=>{
 							if(e.key === 'Escape'){
 								wex.CurrentNote.needSave = false;
 								wex.CurrentNote.close();
 								e.preventDefault();
+								w.removeEventListener("keydown", escaper);
 							}
-						}, false);
+						};
 
-						n.viewNode.moveTo(opt.left, opt.top);
+						// Attaching to main window for escaping non-focused notes
+						w.addEventListener("keydown", escaper);
 
 						try {
 							let focus = wex.Prefs.focusOnDisplay || !wex.CurrentNote.note.text;
 							if(!focus){
-								Services.wm.getMostRecentWindow("mail:3pane").gFolderDisplay.tree.focus();
+								w.gFolderDisplay.tree.focus();
 							}
 						} catch(e) {
 							console.error(e);
