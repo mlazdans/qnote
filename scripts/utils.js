@@ -76,7 +76,6 @@ async function savePrefs(p) {
 	return true;
 }
 
-
 // messageId = int messageId from messageList
 async function getMessageKeyId(messageId) {
 	let partsParser = (parts) => {
@@ -205,7 +204,7 @@ async function tagMessage(messageId, toTag = true) {
 	});
 }
 
-async function importLegacyXNotes(root){
+async function importXNotes(root){
 	var legacyXNotes = await browser.xnote.getAllNotes(root);
 	if(!legacyXNotes){
 		return;
@@ -307,4 +306,26 @@ async function updateNoteColumn(note){
 		text: note.text
 	});
 	await browser.qapp.updateView();
+}
+
+async function reloadExtension(){
+	await CurrentNote.close();
+	return await browser.runtime.reload();
+}
+
+async function clearStorage(){
+	await CurrentNote.close();
+	return browser.storage.local.clear();
+}
+
+async function exportStorage(){
+	let storage = await browser.storage.local.get(null);
+	let blob = new Blob([JSON.stringify(storage)], {type : 'application/json'});
+	let url = window.URL.createObjectURL(blob);
+
+	return browser.downloads.download({
+		url: url,
+		saveAs: true,
+		filename: 'qnote-storage.json'
+	});
 }

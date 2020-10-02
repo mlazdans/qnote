@@ -4,8 +4,8 @@ var _ = browser.i18n.getMessage;
 var Prefs;
 var DefaultPrefs;
 
-var importLegacyXNotesButton = document.getElementById('importLegacyXNotesButton');
-var importLegacyXNotesLoader = document.getElementById("importLegacyXNotesLoader");
+var importXNotesButton = document.getElementById('importXNotesButton');
+var importXNotesLoader = document.getElementById("importXNotesLoader");
 var saveButton = document.getElementById('saveButton');
 var clearStorageButton = document.getElementById('clearStorageButton');
 var exportStorageButton = document.getElementById('exportStorageButton');
@@ -77,22 +77,6 @@ async function setNode(node){
 	}
 }
 
-function importLegacyXNotes(path) {
-	importLegacyXNotesButton.disabled = true;
-	importLegacyXNotesLoader.style.display = '';
-
-	return ext.importLegacyXNotes(path).then((stats)=>{
-		if(stats){
-			alert(_("xnote.import.finished.stats", [stats.imported, stats.err, stats.exist, stats.overwritten]));
-		} else {
-			alert(_("xnote.import.fail"));
-		}
-	}).finally(()=>{
-		importLegacyXNotesButton.disabled = false;
-		importLegacyXNotesLoader.style.display = 'none';
-	});
-}
-
 async function savePrefs(){
 	var oldPrefs = Object.assign({}, Prefs);
 
@@ -131,23 +115,23 @@ async function savePrefs(){
 			ext.Prefs = await ext.loadPrefsWithDefaults();
 
 			if(Prefs.storageOption != oldPrefs.storageOption){
-				await ext.browser.qapp.clearColumnNotes();
+				await browser.qapp.clearColumnNotes();
 			}
 
 			if(Prefs.showFirstChars !== oldPrefs.showFirstChars){
-				await ext.browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
+				await browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
 			}
 
 			// Invalidate column cache
 			if(Prefs.storageFolder !== oldPrefs.storageFolder){
-				await ext.browser.qapp.clearColumnNotes();
+				await browser.qapp.clearColumnNotes();
 			}
 
 			if(Prefs.windowOption !== oldPrefs.windowOption){
-				reloadExtension();
+				ext.reloadExtension();
 			}
 
-			await ext.browser.qapp.updateView();
+			await browser.qapp.updateView();
 		}
 	});
 }
@@ -171,58 +155,9 @@ function initTags(tags){
 	}
 }
 
-async function clearStorage(){
-	let conf = await ext.browser.legacy.confirm(_("confirm"), _("are.you.sure"));
-	if(conf){
-		await ext.CurrentNote.close();
-		ext.browser.storage.local.clear().then(() => {
-			alert(_("storage.cleared"));
-			reloadExtension();
-		}, (e) => {
-			alert(_("storage.clear.failed", e.message));
-		});
-	}
-}
-
-async function exportStorage(){
-	let storage = await ext.browser.storage.local.get(null);
-	let blob = new Blob([JSON.stringify(storage)], {type : 'application/json'});
-	let url = window.URL.createObjectURL(blob);
-
-	return ext.browser.downloads.download({
-		url: url,
-		saveAs: true,
-		filename: 'qnote-storage.json'
-	});
-}
-
-// TODO: to utils.js
-async function importStorage() {
-	const reader = new FileReader();
-	const file = this.files[0];
-
-	reader.onload = (e) => {
-		try {
-			var storage = JSON.parse(e.target.result);
-		} catch(e){
-			alert(_("json.parse.error", e.message));
-			return false;
-		}
-
-		ext.browser.storage.local.set(storage).then(()=>{
-			alert(_("storage.imported"));
-			reloadExtension();
-		}, (e)=>{
-			alert(_("storage.import.failed", e.message));
-		});
-	};
-
-	reader.readAsText(file);
-}
-
 async function initExportStorageButton() {
 	let info = await ext.browser.runtime.getBrowserInfo();
-	let vers = await ext.browser.legacy.compareVersions("78", info.version);
+	let vers = await browser.legacy.compareVersions("78", info.version);
 
 	if(vers<0){
 		exportStorageButton.disabled = false;
@@ -237,14 +172,14 @@ async function isReadable(path){
 
 async function getXNoteStoragePath(){
 	var path;
-	var legacyPrefs = ext.legacyPrefsMapper(await ext.browser.xnote.getPrefs());
+	var legacyPrefs = ext.legacyPrefsMapper(await browser.xnote.getPrefs());
 
 	if(legacyPrefs.storageFolder){
 		path = legacyPrefs.storageFolder;
 	}
 
 	if(!await isReadable(path)){
-		path = await ext.browser.xnote.getStoragePath();
+		path = await browser.xnote.getStoragePath();
 	}
 
 	return path;
@@ -262,21 +197,28 @@ async function initXNoteImportButton(){
 		}
 	}
 
-	importLegacyXNotesButton.addEventListener('click', ()=>{
+	importXNotesButton.addEventListener('click', ()=>{
 		let opt = {};
 		if(path){
 			opt.displayDirectory = path;
 		}
 
-		ext.browser.legacy.folderPicker(opt).then((selectedPath)=>{
-			return importLegacyXNotes(selectedPath);
+		browser.legacy.folderPicker(opt).then((selectedPath)=>{
+			importXNotesButton.disabled = true;
+			importXNotesLoader.style.display = '';
+
+			return ext.importXNotes(selectedPath).then(stats => {
+				if(stats){
+					alert(_("xnote.import.finished.stats", [stats.imported, stats.err, stats.exist, stats.overwritten]));
+				} else {
+					alert(_("xnote.import.fail"));
+				}
+			}).finally(()=>{
+				importXNotesButton.disabled = false;
+				importXNotesLoader.style.display = 'none';
+			});
 		});
 	});
-}
-
-async function reloadExtension(){
-	await ext.CurrentNote.close();
-	return await ext.browser.runtime.reload();
 }
 
 function storageOptionValue(){
@@ -301,7 +243,7 @@ async function storageFolderBrowse(){
 	var path = await getXNoteStoragePath();
 
 	if(!await isReadable(path)){
-		path = await ext.browser.qapp.getProfilePath();
+		path = await browser.qapp.getProfilePath();
 	}
 
 	let opt = {};
@@ -309,9 +251,44 @@ async function storageFolderBrowse(){
 		opt.displayDirectory = path;
 	}
 
-	ext.browser.legacy.folderPicker(opt).then((selectedPath)=>{
+	browser.legacy.folderPicker(opt).then((selectedPath)=>{
 		input_storageFolder.value = selectedPath;
 	});
+}
+
+function importInternalStorage() {
+	const reader = new FileReader();
+	const file = this.files[0];
+
+	reader.onload = (e) => {
+		try {
+			var storage = JSON.parse(e.target.result);
+		} catch(e){
+			alert(_("json.parse.error", e.message));
+			return false;
+		}
+
+		browser.storage.local.set(storage).then(()=>{
+			alert(_("storage.imported"));
+			ext.reloadExtension();
+		}, (e)=>{
+			alert(_("storage.import.failed", e.message));
+		});
+	};
+
+	reader.readAsText(file);
+}
+
+async function clearStorage(){
+	let conf = await browser.legacy.confirm(_("confirm"), _("are.you.sure"));
+	if(conf){
+		ext.clearStorage().then(() => {
+			alert(_("storage.cleared"));
+			ext.reloadExtension();
+		}, (e) => {
+			alert(_("storage.clear.failed", e.message));
+		});
+	}
 }
 
 async function initOptionsPage(){
@@ -327,10 +304,11 @@ async function initOptionsPage(){
 	initExportStorageButton();
 
 	saveButton.addEventListener('click', savePrefs);
+
 	clearStorageButton.addEventListener('click', clearStorage);
-	exportStorageButton.addEventListener('click', exportStorage);
-	importFile.addEventListener("change", importStorage);
-	reloadExtensionButton.addEventListener("click", reloadExtension);
+	exportStorageButton.addEventListener('click', ext.exportStorage);
+	importFile.addEventListener("change", importInternalStorage);
+	reloadExtensionButton.addEventListener("click", ext.reloadExtension);
 	storageFolderBrowseButton.addEventListener("click", storageFolderBrowse);
 	input_overwriteExistingNotes.addEventListener("click", ()=>{
 		ext.Prefs.overwriteExistingNotes = input_overwriteExistingNotes.checked;
