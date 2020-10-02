@@ -94,7 +94,7 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 		}
 
 		function decodeFileName(str){
-			return unescape(str.replace("%2F", "/"));
+			return unescape(str.replace(/%2F/g, "/"));
 		}
 
 		function noteFile(root, keyId, enFileName = NF_DO_ENCODE){
