@@ -1,46 +1,6 @@
 var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
-function noteFile(root, fileName){
-	try {
-		var file = new FileUtils.File(root);
-
-		file.appendRelativePath(encodeFileName(fileName + '.qnote'));
-
-		return file;
-	} catch {
-		return false;
-	}
-}
-
-function fileExists(file){
-	return file && file.exists() && file.isFile() && file.isReadable();
-}
-
-function getExistingNoteFile(root, fileName) {
-	var file = noteFile(root, fileName);
-
-	if(fileExists(file)){
-		return file;
-	}
-
-	return false;
-}
-
-function encodeFileName(str){
-	return encodeURIComponent(str)
-		.replace(/\*/g, "%2A")
-		.replace(/\~/g, "%7E")
-	;
-}
-
-function decodeFileName(str){
-	return decodeURIComponent(str)
-		.replace(/%2A/g, "*")
-		.replace(/%7E/g, "~")
-	;
-}
-
 var qnote = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown(isAppShutdown) {
 		if(isAppShutdown){
@@ -50,12 +10,52 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 	}
 	getAPI(context) {
+		function noteFile(root, fileName){
+			try {
+				var file = new FileUtils.File(root);
+
+				file.appendRelativePath(encodeFileName(fileName + '.qnote'));
+
+				return file;
+			} catch {
+				return false;
+			}
+		}
+
+		function fileExists(file){
+			return file && file.exists() && file.isFile() && file.isReadable();
+		}
+
+		function getExistingNoteFile(root, fileName) {
+			var file = noteFile(root, fileName);
+
+			if(fileExists(file)){
+				return file;
+			}
+
+			return false;
+		}
+
+		function encodeFileName(str){
+			return encodeURIComponent(str)
+				.replace(/\*/g, "%2A")
+				.replace(/\~/g, "%7E")
+			;
+		}
+
+		function decodeFileName(str){
+			return decodeURIComponent(str)
+				.replace(/%2A/g, "*")
+				.replace(/%7E/g, "~")
+			;
+		}
+
 		return {
 			qnote: {
 				async saveNote(root, fileName, note){
 					var file = noteFile(root, fileName);
 					if(!file){
-						console.error(`Can not open xnote: ${fileName}`);
+						console.error(`Can not open qnote: ${fileName}`);
 						return false;
 					}
 
@@ -97,8 +97,7 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 					fileInStream.init(file, 0x01, parseInt("0444", 8), null);
 					fileScriptableIO.init(fileInStream);
 
-					var noteData = fileScriptableIO.read(file.fileSize);
-					var note = JSON.parse(noteData);
+					var note = JSON.parse(fileScriptableIO.read(file.fileSize));
 
 					fileScriptableIO.close();
 					fileInStream.close();
@@ -109,7 +108,7 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 					try {
 						var file = new FileUtils.File(root);
 					} catch {
-						console.error(`Can not open xnotes folder: ${root}`);
+						console.error(`Can not open qnotes folder: ${root}`);
 						return;
 					}
 

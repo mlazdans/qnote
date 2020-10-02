@@ -110,7 +110,7 @@ class QNoteFolder extends Note {
 	async load(){
 		var note = await browser.qnote.loadNote(this.root, this.keyId);
 
-		// Check for XNote
+		// Check for legacy XNote
 		if(!note){
 			note = await browser.xnote.loadNote(this.root, this.keyId);
 		}
