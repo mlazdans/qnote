@@ -1,5 +1,4 @@
 {
-	"confirm": { "message": "Confirm" },
 	"are.you.sure": { "message": "Are you sure?" },
 	"browse": { "message": "Browse" },
 	"folder.unaccesible": { "message": "Folder not found or is not readable: $1" },
@@ -16,6 +15,7 @@
 	"focus.on.display": {"message": "Focus QNote after display (only floating panel)"},
 	"overwrite.existing.notes": {"message": "Overwrite existing notes"},
 	"can.use.xnote.folder": {"message": "You can use legacy XNote++ folder"},
+	"no.message_id.header": {"message": "Can't create note. Message without 'message-id:' header"},
 
 	"maintenance.fieldset": { "message": " Maintenance " },
 	"use.tag.manager": { "message": "Please use tag manager to manage tags" },

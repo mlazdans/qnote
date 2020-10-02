@@ -1,3 +1,5 @@
+var _ = browser.i18n.getMessage;
+
 class NoteWindow {
 	constructor() {
 		this.init();
@@ -169,9 +171,17 @@ class XULNoteWindow extends NoteWindow {
 
 		await this.close();
 
+		var note = await createNoteForMessage(messageId);
+
+		if(!note.keyId){
+			if(createNew){
+				await browser.legacy.alert(_("no.message_id.header"));
+			}
+			return;
+		}
+
 		this.popping = true;
 
-		var note = await createNoteForMessage(messageId);
 		var data = await note.load();
 
 		await updateMessageDisplayIcon(data?true:false);
