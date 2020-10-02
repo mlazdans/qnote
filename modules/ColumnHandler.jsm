@@ -45,20 +45,30 @@ var Observer = {
 			return;
 		}
 
+		// http://wbamberg.github.io/idl-reference/docs/nsIXULStore.html
+		let width = 24;
+		var __xulStore = Cc["@mozilla.org/xul/xulstore;1"].getService(Ci.nsIXULStore);
+		if(__xulStore.hasValue("chrome://messenger/content/messenger.xhtml", "qnoteCol", "width")){
+			width = __xulStore.getValue("chrome://messenger/content/messenger.xhtml", "qnoteCol", "width");
+		}
+
 		var w = Services.wm.getMostRecentWindow("mail:3pane");
 		var qnoteCol = w.document.getElementById("qnoteCol");
 
-		var html =
-			'<splitter class="tree-splitter" resizeafter="farthest" />' +
-			'<treecol id="qnoteCol" persist="hidden ordinal sortDirection width" label="QNote" closemenu="none" minwidth="18" tooltiptext="QNote">' +
-			'<label class="treecol-text" crop="right" value="QNote" />' +
-			'<image class="treecol-sortdirection" />' +
-			'</treecol>'
+		var html = `<splitter class="tree-splitter" resizeafter="farthest" />
+			<treecol id="qnoteCol" persist="hidden ordinal width sortDirection" width="${width}"
+			label="QNote" minwidth="24" tooltiptext="QNote" currentView="unthreaded"
+			is="treecol-image" class="treecol-image qnote-column-header"/>`
 		;
+		// '<label class="treecol-text" crop="right" value="QNote" />' +
+		// '<image class="treecol-sortdirection" />' +
 
 		var threadCols = w.document.getElementById("threadCols");
 		if(!qnoteCol && threadCols){
-			threadCols.appendChild(w.MozXULElement.parseXULToFragment(html));
+			let treecols = threadCols.querySelectorAll("treecol");
+			let last = treecols[treecols.length - 1];
+			last.parentNode.insertBefore(w.MozXULElement.parseXULToFragment(html), last.nextSibling);
+			//threadCols.appendChild(w.MozXULElement.parseXULToFragment(html));
 		}
 
 		view.addColumnHandler("qnoteCol", handler);

@@ -1,4 +1,5 @@
 // TODO: column width persistance
+// TODO: column disappears when new window is created
 var Prefs;
 var CurrentNote;
 
@@ -47,16 +48,18 @@ async function initExtension(){
 		});
 	});
 
+	// Change folders
 	browser.mailTabs.onDisplayedFolderChanged.addListener((tab, displayedFolder)=>{
 		return CurrentNote.close().then(()=>{
 			return browser.qapp.updateView();
 		});
 	});
 
-	browser.tabs.onActivated.addListener((activeInfo)=>{
+	// Change tabs
+	browser.tabs.onActivated.addListener(activeInfo => {
 		browser.tabs.query({
 			mailTab: true
-		}).then((tabs)=>{
+		}).then(tabs => {
 			for(let tab of tabs){
 				if(tab.id === activeInfo.tabid){
 					return;
