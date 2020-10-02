@@ -27,11 +27,8 @@
 	"background": {
 		"scripts": [
 			"scripts/utils.js",
-			"modules/XUtils.jsm",
-			"scripts/note.js",
-			"scripts/qnote.js",
-			"scripts/xnote.js",
 			"scripts/menu.js",
+			"scripts/notes.js",
 			"scripts/windows.js",
 			"scripts/background.js"
 		]
@@ -66,6 +63,14 @@
 				"scopes": ["addon_child"],
 				"paths": [["xnote"]],
 				"script": "api/xnote.js"
+			}
+		},
+		"qnote": {
+			"schema": "schemas/qnote.json",
+			"child": {
+				"scopes": ["addon_child"],
+				"paths": [["qnote"]],
+				"script": "api/qnote.js"
 			}
 		}
 	}

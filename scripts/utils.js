@@ -1,3 +1,20 @@
+function getDefaultPrefs() {
+	return {
+		useTag: false,
+		tagName: "xnote",
+		dateFormat: "yyyy-mm-dd - HH:MM", // TODO: implement
+		width: 320,
+		height: 200,
+		showFirstChars: 0,
+		showOnSelect: true,
+		focusOnDisplay: false,
+		windowOption: "xul",
+		storageOption: "folder",
+		storageFolder: ""//,
+		//version: browser.runtime.getManifest().version
+	};
+}
+
 function getTabId(tab){
 	return Number.isInteger(tab) ? tab : tab.id;
 }
@@ -32,7 +49,7 @@ async function updateMessageDisplayIcon(on = true){
 
 async function getPrefs(){
 	let p = {};
-	let defaultPrefs = QUtils.getDefaultPrefs();
+	let defaultPrefs = getDefaultPrefs();
 
 	for(let k of Object.keys(defaultPrefs)){
 		let v = await browser.storage.local.get('pref.' + k);
@@ -45,7 +62,7 @@ async function getPrefs(){
 }
 
 async function savePrefs(p) {
-	var defaultPrefs = QUtils.getDefaultPrefs();
+	var defaultPrefs = getDefaultPrefs();
 	for(let k of Object.keys(defaultPrefs)){
 		if(p[k] !== undefined){
 			await browser.storage.local.set({
@@ -78,7 +95,8 @@ function createNote(keyId) {
 	if(Prefs.storageOption === 'ext'){
 		return new QNote(keyId);
 	} else if(Prefs.storageOption === 'folder'){
-		return new XNote(keyId, Prefs.storageFolder);
+		return new QNoteFolder(keyId, Prefs.storageFolder);
+		//return new XNote(keyId, Prefs.storageFolder);
 	}
 }
 
@@ -241,7 +259,7 @@ async function importXNotes(root){
 
 async function loadPrefsWithDefaults() {
 	let p = await getPrefs();
-	let defaultPrefs = QUtils.getDefaultPrefs();
+	let defaultPrefs = getDefaultPrefs();
 	let isEmptyPrefs = Object.keys(p).length === 0;
 
 	// Check for legacy settings if no settings at all

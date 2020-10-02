@@ -1,9 +1,152 @@
 var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
-var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
-var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { XUtils } = ChromeUtils.import(extension.rootURI.resolve("modules/XUtils.jsm"));
+const NF_DO_ENCODE = 1;
+const NF_DO_NOT_ENCODE = 0;
+
+function getDefaultPrefs() {
+	return {
+		usetag: false,
+		dateformat: "yyyy-mm-dd - HH:MM",
+		width: 250,
+		height: 200,
+		show_on_select: true,
+		show_first_x_chars_in_col: 0,
+		storage_path: '',
+		version: '2.3.1'
+	};
+}
+
+// TODO: Seems that "yyyy-mm-dd - HH:MM" format has been hardcoded? Not sure yet.
+function noteDateToDate(dateString) {
+	var retDate = new Date();
+	let [date, time] = dateString.split(" - ");
+	if(date){
+		let dateParts = date.split("-");
+		retDate.setFullYear(dateParts[0]);
+		retDate.setMonth(dateParts[1] - 1);
+		retDate.setDate(dateParts[2]);
+	}
+
+	if(time){
+		let timeParts = time.split(":");
+		retDate.setHours(timeParts[0]);
+		retDate.setMinutes(timeParts[1]);
+	}
+
+	return retDate;
+}
+
+function dateToNoteDate(d, mask) {
+	// If preferred, zeroise() can be moved out of the format() method for performance and reuse purposes
+	var zeroize = function (value, length) {
+		if (!length) length = 2;
+		value = String(value);
+		for (var i = 0, zeros = ''; i < (length - value.length); i++) {
+			zeros += '0';
+		}
+		return zeros + value;
+	};
+
+	return mask.replace(/"[^"]*"|'[^']*'|\b(?:d{1,4}|m{1,4}|yy(?:yy)?|([hHMs])\1?|TT|tt|[lL])\b/g, function($0) {
+		switch($0) {
+			case 'd':	return d.getDate();
+			case 'dd':	return zeroize(d.getDate());
+			case 'ddd':	return ['Sun','Mon','Tue','Wed','Thr','Fri','Sat'][d.getDay()];
+			case 'dddd':	return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()];
+			case 'm':	return d.getMonth() + 1;
+			case 'mm':	return zeroize(d.getMonth() + 1);
+			case 'mmm':	return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
+			case 'mmmm':	return ['January','February','March','April','May','June','July','August','September','October','November','December'][d.getMonth()];
+			case 'yy':	return String(d.getFullYear()).substr(2);
+			case 'yyyy':	return d.getFullYear();
+			case 'h':	return d.getHours() % 12 || 12;
+			case 'hh':	return zeroize(d.getHours() % 12 || 12);
+			case 'H':	return d.getHours();
+			case 'HH':	return zeroize(d.getHours());
+			case 'M':	return d.getMinutes();
+			case 'MM':	return zeroize(d.getMinutes());
+			case 's':	return d.getSeconds();
+			case 'ss':	return zeroize(d.getSeconds());
+			case 'l':	return zeroize(d.getMilliseconds(), 3);
+			case 'L':	var m = d.getMilliseconds();
+					if (m > 99) m = Math.round(m / 10);
+					return zeroize(m);
+			case 'tt':	return d.getHours() < 12 ? 'am' : 'pm';
+			case 'TT':	return d.getHours() < 12 ? 'AM' : 'PM';
+			// Return quoted strings with the surrounding quotes removed
+			default:	return $0.substr(1, $0.length - 2);
+		}
+	});
+}
+
+function encodeFileName(str){
+	return escape(str).replace(/\//g, "%2F");
+}
+
+function decodeFileName(str){
+	return unescape(str.replace("%2F", "/"));
+}
+
+function noteFile(root, keyId, encodeFileName = NF_DO_ENCODE){
+	try {
+		var file = new FileUtils.File(root);
+		if(encodeFileName === NF_DO_ENCODE){
+			file.appendRelativePath(encodeFileName(keyId + '.xnote'));
+		} else {
+			file.appendRelativePath(keyId + '.xnote');
+		}
+		return file;
+	} catch {
+		return false;
+	}
+}
+
+function getPrefs(){
+	var _xnotePrefs = Services.prefs.QueryInterface(Components.interfaces.nsIPrefBranch).getBranch("extensions.xnote.");
+	var defaultPrefs = getDefaultPrefs();
+	var p = {};
+
+	for(let k of Object.keys(defaultPrefs)){
+		let f;
+		let t = typeof defaultPrefs[k];
+
+		if(t === 'boolean'){
+			f = 'getBoolPref';
+		} else if(t === 'string'){
+			f = 'getCharPref';
+		} else if(t === 'number'){
+			f = 'getIntPref';
+		}
+
+		//p[k] = defaultPrefs[k];
+
+		if(f && _xnotePrefs.prefHasUserValue(k)){
+			p[k] = _xnotePrefs[f](k);
+			p[k] = defaultPrefs[k].constructor(p[k]); // Type cast
+		}
+	}
+
+	return p;
+}
+
+function fileExists(file){
+	return file && file.exists() && file.isFile() && file.isReadable();
+}
+
+function getExistingNoteFile(root, keyId){
+	let file;
+
+	if(fileExists(file = noteFile(root, keyId, NF_DO_ENCODE))){
+		return file;
+	}
+
+	if(fileExists(file = noteFile(root, keyId, NF_DO_NOT_ENCODE))){
+		return file;
+	}
+
+	return false;
+}
 
 var xnote = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown(isAppShutdown) {
@@ -12,85 +155,20 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 		}
 
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
-
-		Components.utils.unload(extension.rootURI.resolve("modules/XUtils.jsm"));
 	}
 	getAPI(context) {
-		const NF_DO_ENCODE = 1;
-		const NF_DO_NOT_ENCODE = 0;
-
-		let noteFile = (root, fileName, encodeFileName = NF_DO_ENCODE) => {
-			try {
-				var file = new FileUtils.File(root);
-				if(encodeFileName === NF_DO_ENCODE){
-					file.appendRelativePath(XUtils.encodeFileName(fileName));
-				} else {
-					file.appendRelativePath(fileName);
-				}
-				return file;
-			} catch {
-				return false;
-			}
-		};
-
-		let getPrefs = () => {
-			var _xnotePrefs = Services.prefs.QueryInterface(Components.interfaces.nsIPrefBranch).getBranch("extensions.xnote.");
-			var defaultPrefs = XUtils.getDefaultPrefs();
-			var p = {};
-
-			for(let k of Object.keys(defaultPrefs)){
-				let f;
-				let t = typeof defaultPrefs[k];
-
-				if(t === 'boolean'){
-					f = 'getBoolPref';
-				} else if(t === 'string'){
-					f = 'getCharPref';
-				} else if(t === 'number'){
-					f = 'getIntPref';
-				}
-
-				//p[k] = defaultPrefs[k];
-
-				if(f && _xnotePrefs.prefHasUserValue(k)){
-					p[k] = _xnotePrefs[f](k);
-					p[k] = defaultPrefs[k].constructor(p[k]); // Type cast
-				}
-			}
-
-			return p;
-		}
-
-		let fileExists = (file) => {
-			return file && file.exists() && file.isFile() && file.isReadable();
-		};
-
-		let getExistingNoteFile = (root, fileName) => {
-			let file;
-
-			if(fileExists(file = noteFile(root, fileName, NF_DO_ENCODE))){
-				return file;
-			}
-
-			if(fileExists(file = noteFile(root, fileName, NF_DO_NOT_ENCODE))){
-				return file;
-			}
-
-			return false;
-		}
-
 		return {
 			xnote: {
 				async getPrefs(){
 					return getPrefs();
 				},
 				async getDefaultPrefs() {
-					return XUtils.getDefaultPrefs();
+					return getDefaultPrefs();
 				},
-				async saveNote(root, fileName, note){
-					var file = noteFile(root, fileName);
+				async saveNote(root, keyId, note){
+					var file = noteFile(root, keyId);
 					if(!file){
-						console.error(`Can not open xnote: ${fileName}`);
+						console.error(`Can not open xnote: ${keyId}`);
 						return false;
 					}
 
@@ -108,7 +186,7 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 					fileOutStream.write(String(note.width), 4);
 					fileOutStream.write(String(note.height), 4);
 
-					let d = XUtils.dateToNoteDate(new Date(note.ts), getPrefs().dateformat || XUtils.getDefaultPrefs().dateformat);
+					let d = dateToNoteDate(new Date(note.ts), getPrefs().dateformat || getDefaultPrefs().dateformat);
 					fileOutStream.write(d, 32);
 
 					let contentencode = encodeURIComponent(note.text.replace(/\n/g,'<BR>'));
@@ -123,8 +201,8 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 						return false;
 					}
 				},
-				async deleteNote(root, fileName){
-					var file = getExistingNoteFile(root, fileName);
+				async deleteNote(root, keyId){
+					var file = getExistingNoteFile(root, keyId);
 					try {
 						file.remove(false);
 						return true;
@@ -132,8 +210,8 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 						return false;
 					}
 				},
-				async loadNote(root, fileName){
-					var file = getExistingNoteFile(root, fileName);
+				async loadNote(root, keyId){
+					var file = getExistingNoteFile(root, keyId);
 					if(!file){
 						return false;
 					}
@@ -150,7 +228,7 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 					note.y = parseInt(fileScriptableIO.read(4));
 					note.width = parseInt(fileScriptableIO.read(4));
 					note.height = parseInt(fileScriptableIO.read(4));
-					note.ts = XUtils.noteDateToDate(fileScriptableIO.read(32)).getTime();
+					note.ts = noteDateToDate(fileScriptableIO.read(32)).getTime();
 					note.text = decodeURIComponent(fileScriptableIO.read(file.fileSize-48));
 
 					fileScriptableIO.close();
@@ -174,7 +252,7 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 					while (eFiles.hasMoreElements()) {
 						var o = eFiles.getNext().QueryInterface(Components.interfaces.nsIFile);
 
-						var fileName = XUtils.decodeFileName(o.leafName);
+						var fileName = decodeFileName(o.leafName);
 						if(fileName.substring(fileName.length - 6) === '.xnote'){
 							notes.push({
 								keyId: fileName.substring(0, fileName.length - 6),

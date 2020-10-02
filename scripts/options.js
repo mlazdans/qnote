@@ -1,5 +1,4 @@
 var ext = chrome.extension.getBackgroundPage();
-var QUtils = ext.QUtils;
 var _ = browser.i18n.getMessage;
 
 var Prefs;
@@ -294,7 +293,7 @@ async function clearStorage(){
 async function initOptionsPage(){
 	let tags = await ext.browser.messages.listTags();
 	Prefs = await ext.loadPrefsWithDefaults();
-	DefaultPrefs = QUtils.getDefaultPrefs();
+	DefaultPrefs = ext.getDefaultPrefs();
 
 	initTags(tags);
 	setTexts();
