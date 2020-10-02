@@ -75,9 +75,9 @@ var XUtils = {
 		});
 	},
 	encodeFileName(str){
-		return escape(str);
+		return escape(str).replace(/\//g, "%2F");
 	},
 	decodeFileName(str){
-		return unescape(str);
+		return unescape(str.replace("%2F", "/"));
 	}
 };
