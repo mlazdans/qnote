@@ -1,6 +1,21 @@
 [{
 	"namespace": "legacy",
 	"functions": [{
+		"name": "alert",
+		"type": "function",
+		"description": "Display alert dialog",
+		"async": true,
+		"parameters": [{
+			"name": "title",
+			"type": "string",
+			"description": "Dialog title or message"
+		},{
+			"name": "msg",
+			"optional": true,
+			"type": "string",
+			"description": "Dialog message"
+		}]
+	},{
 		"name": "confirm",
 		"type": "function",
 		"description": "Display confirm dialog",
@@ -8,9 +23,10 @@
 		"parameters": [{
 			"name": "title",
 			"type": "string",
-			"description": "Dialog title"
+			"description": "Dialog title or message"
 		},{
 			"name": "msg",
+			"optional": true,
 			"type": "string",
 			"description": "Dialog message"
 		}]

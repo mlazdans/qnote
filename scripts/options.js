@@ -280,7 +280,7 @@ function importInternalStorage() {
 }
 
 async function clearStorage(){
-	if(await browser.legacy.confirm(_("confirm"), _("are.you.sure"))){
+	if(await browser.legacy.confirm(_("are.you.sure"))){
 		ext.clearStorage().then(() => {
 			alert(_("storage.cleared"));
 			ext.reloadExtension();

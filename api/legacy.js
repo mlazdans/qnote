@@ -5,9 +5,32 @@ var legacy = class extends ExtensionCommon.ExtensionAPI {
 	getAPI(context) {
 		return {
 			legacy: {
+				// https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIPromptService#prompt_example
+				async alert(title, msg){
+					var args = [null];
+
+					if(msg === null){
+						msg = title;
+						title = null;
+					}
+
+					args.push(title);
+					args.push(msg);
+
+					return Services.prompt.alert(...args);
+				},
 				async confirm(title, msg){
-					// https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIPromptService#prompt_example
-					return Services.prompt.confirm(null, title, msg);
+					var args = [null];
+
+					if(msg === null){
+						msg = title;
+						title = null;
+					}
+
+					args.push(title);
+					args.push(msg);
+
+					return Services.prompt.confirm(...args);
 				},
 				async compareVersions(v1, v2){
 					return Services.vc.compare(v1, v2);
