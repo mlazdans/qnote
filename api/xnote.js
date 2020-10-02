@@ -66,13 +66,13 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 		};
 
 		let getExistingNoteFile = (root, fileName) => {
-			var file = noteFile(root, fileName, NF_DO_ENCODE);
-			if(fileExists(file)){
+			let file;
+
+			if(fileExists(file = noteFile(root, fileName, NF_DO_ENCODE))){
 				return file;
 			}
 
-			var file = noteFile(root, fileName, NF_DO_NOT_ENCODE);
-			if(fileExists(file)){
+			if(fileExists(file = noteFile(root, fileName, NF_DO_NOT_ENCODE))){
 				return file;
 			}
 

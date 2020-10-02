@@ -1,5 +1,3 @@
-var _ = browser.i18n.getMessage;
-
 function getTabId(tab){
 	return Number.isInteger(tab) ? tab : tab.id;
 }
@@ -32,26 +30,9 @@ async function updateMessageDisplayIcon(on = true){
 	});
 }
 
-function getDefaultPrefs() {
-	return {
-		useTag: false,
-		tagName: "xnote",
-		dateFormat: "yyyy-mm-dd - HH:MM", // TODO: implement
-		width: 320,
-		height: 200,
-		showFirstChars: 0,
-		showOnSelect: true,
-		focusOnDisplay: false,
-		windowOption: "xul",
-		storageOption: "folder",
-		storageFolder: ""//,
-		//version: browser.runtime.getManifest().version
-	};
-}
-
 async function getPrefs(){
 	let p = {};
-	let defaultPrefs = getDefaultPrefs();
+	let defaultPrefs = QUtils.getDefaultPrefs();
 
 	for(let k of Object.keys(defaultPrefs)){
 		let v = await browser.storage.local.get('pref.' + k);
@@ -64,7 +45,7 @@ async function getPrefs(){
 }
 
 async function savePrefs(p) {
-	var defaultPrefs = getDefaultPrefs();
+	var defaultPrefs = QUtils.getDefaultPrefs();
 	for(let k of Object.keys(defaultPrefs)){
 		if(p[k] !== undefined){
 			await browser.storage.local.set({
@@ -260,7 +241,7 @@ async function importXNotes(root){
 
 async function loadPrefsWithDefaults() {
 	let p = await getPrefs();
-	let defaultPrefs = getDefaultPrefs();
+	let defaultPrefs = QUtils.getDefaultPrefs();
 	let isEmptyPrefs = Object.keys(p).length === 0;
 
 	// Check for legacy settings if no settings at all

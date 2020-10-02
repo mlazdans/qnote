@@ -1,4 +1,5 @@
 var ext = chrome.extension.getBackgroundPage();
+var QUtils = ext.QUtils;
 var _ = browser.i18n.getMessage;
 
 var Prefs;
@@ -280,8 +281,7 @@ function importInternalStorage() {
 }
 
 async function clearStorage(){
-	let conf = await browser.legacy.confirm(_("confirm"), _("are.you.sure"));
-	if(conf){
+	if(await browser.legacy.confirm(_("confirm"), _("are.you.sure"))){
 		ext.clearStorage().then(() => {
 			alert(_("storage.cleared"));
 			ext.reloadExtension();
@@ -294,7 +294,7 @@ async function clearStorage(){
 async function initOptionsPage(){
 	let tags = await ext.browser.messages.listTags();
 	Prefs = await ext.loadPrefsWithDefaults();
-	DefaultPrefs = ext.getDefaultPrefs();
+	DefaultPrefs = QUtils.getDefaultPrefs();
 
 	initTags(tags);
 	setTexts();
@@ -304,7 +304,6 @@ async function initOptionsPage(){
 	initExportStorageButton();
 
 	saveButton.addEventListener('click', savePrefs);
-
 	clearStorageButton.addEventListener('click', clearStorage);
 	exportStorageButton.addEventListener('click', ext.exportStorage);
 	importFile.addEventListener("change", importInternalStorage);
@@ -317,6 +316,7 @@ async function initOptionsPage(){
 	for (const node of document.querySelectorAll('input[name="storageOption"]')) {
 		node.addEventListener("click", storageOptionChange);
 	}
+
 	storageOptionChange();
 }
 
