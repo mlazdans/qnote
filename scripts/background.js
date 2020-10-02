@@ -1,5 +1,4 @@
 // TODO: column width persistance
-// TODO: migrate .xnote to some sensible format (json?) if folder storage option used
 var Prefs;
 var CurrentNote;
 
@@ -49,7 +48,22 @@ async function initExtension(){
 	});
 
 	browser.mailTabs.onDisplayedFolderChanged.addListener((tab, displayedFolder)=>{
-		return browser.qapp.updateView();
+		return CurrentNote.close().then(()=>{
+			return browser.qapp.updateView();
+		});
+	});
+
+	browser.tabs.onActivated.addListener((activeInfo)=>{
+		browser.tabs.query({
+			mailTab: true
+		}).then((tabs)=>{
+			for(let tab of tabs){
+				if(tab.id === activeInfo.tabid){
+					return;
+				}
+			}
+			CurrentNote.close();
+		});
 	});
 
 	browser.qapp.updateView();
