@@ -97,7 +97,10 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 					fileInStream.init(file, 0x01, parseInt("0444", 8), null);
 					fileScriptableIO.init(fileInStream);
 
-					var note = JSON.parse(fileScriptableIO.read(file.fileSize));
+					try {
+						var note = JSON.parse(fileScriptableIO.read(file.fileSize));
+					} catch {
+					}
 
 					fileScriptableIO.close();
 					fileInStream.close();
