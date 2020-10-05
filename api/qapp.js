@@ -36,8 +36,21 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			qapp: {
 				async popupClose(id){
 					if(popups.has(id)){
-						popups.get(id).closePopup();
+						popups.get(id).close();
 						popups.delete(id);
+					}
+				},
+				async popupFocus(id){
+					if(!popups.has(id)){
+						return;
+					}
+
+					let n = popups.get(id);
+					let document = n.browser.contentWindow.document;
+					let YTextE = document.getElementById('qnote-text');
+
+					if(YTextE){
+						YTextE.focus();
 					}
 				},
 				async popup(opt){
@@ -94,17 +107,22 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						}
 					};
 
-					n.browser.addEventListener("DOMContentLoaded", ()=>{
-						// We are not interested once default page has been loaded
-						if(n.browser.contentWindow.document.URL === 'about:blank'){
-							return;
-						}
+					let promise = new Promise(function(resolve, reject) {
+						n.browser.addEventListener("DOMContentLoaded", ()=>{
+							// We are not interested once default page has been loaded
+							if(n.browser.contentWindow.document.URL !== extension.getURL(opt.url)){
+								return;
+							}
 
-						n.browserLoaded.then(initNote);
-						// n.contentReady.then(()=>{
-						// });
-						// n.browserReady.then(()=>{
-						// });
+							n.browserLoaded.then(()=>{
+								initNote();
+								resolve(n.windowId);
+							});
+							// n.contentReady.then(()=>{
+							// });
+							// n.browserReady.then(()=>{
+							// });
+						});
 					});
 
 					// https://developer.mozilla.org/en-US/docs/Archive/Mozilla/XUL/Method/openPopup
@@ -120,7 +138,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					popups.set(n.windowId, n);
 
-					return n.windowId;
+					return promise;
 				},
 				async installColumnHandler(){
 					ColumnHandler.install({

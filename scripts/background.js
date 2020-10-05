@@ -1,5 +1,5 @@
-// TODO: column width persistance
 // TODO: column disappears when new window is created
+// TODO: keyboard shortcuts
 var Prefs;
 var CurrentNote;
 

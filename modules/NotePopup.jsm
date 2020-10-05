@@ -147,7 +147,7 @@ class NotePopup extends BasePopup {
 		this.shown = false;
 	}
 
-	closePopup() {
+	close() {
 		this.destroy();
 	}
 }

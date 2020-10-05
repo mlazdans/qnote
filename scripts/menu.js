@@ -8,7 +8,9 @@ var Menu = {
 			title: "Modify note",
 			contexts: ["message_list"],
 			onclick(info) {
-				CurrentNote.pop(Menu.getId(info), false, true);
+				CurrentNote.pop(Menu.getId(info), false, true).then(()=>{
+					CurrentNote.focus();
+				});
 			},
 		});
 

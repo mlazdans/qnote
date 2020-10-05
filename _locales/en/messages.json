@@ -14,7 +14,7 @@
 	"show.first.chars.label": {"message": "Show first X characters in QNote column"},
 	"focus.on.display": {"message": "Focus QNote after display (only floating panel)"},
 	"overwrite.existing.notes": {"message": "Overwrite existing notes"},
-	"can.use.xnote.folder": {"message": "You can use legacy XNote++ folder"},
+	"can.use.xnote.folder": {"message": "You can use legacy XNotes folder"},
 	"no.message_id.header": {"message": "Can't create note. Message without 'message-id:' header"},
 
 	"maintenance.fieldset": { "message": " Maintenance " },
@@ -38,6 +38,6 @@
 	"storage.import": { "message": "Import extension storage" },
 
 	"window.fieldset": { "message": "Window" },
-	"window.option.xul": { "message": "Legacy floating panel" },
+	"window.option.xul": { "message": "Floating panel" },
 	"window.option.webext": { "message": "Popup window" }
 }

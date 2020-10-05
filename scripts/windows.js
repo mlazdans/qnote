@@ -6,8 +6,10 @@ class NoteWindow {
 
 		// Click on QNote button
 		browser.messageDisplayAction.onClicked.addListener((tab) => {
-			browser.messageDisplay.getDisplayedMessage(getTabId(tab)).then((message) => {
-				this.pop(message.id, true, true);
+			browser.messageDisplay.getDisplayedMessage(getTabId(tab)).then(message => {
+				this.pop(message.id, true, true).then(()=>{
+					this.focus();
+				});
 			});
 		});
 
@@ -101,6 +103,7 @@ class WebExtensionNoteWindow extends NoteWindow {
 			await this[f]();
 		} else {
 			this.init();
+			this.focusPopup = undefined;
 		}
 	}
 
@@ -133,10 +136,12 @@ class WebExtensionNoteWindow extends NoteWindow {
 				top: note.y || Prefs.y
 			};
 
+			this.note = note;
+			this.messageId = messageId;
+
 			return browser.windows
-				.create(opt).then((windowInfo)=>{
-					this.note = note;
-					this.messageId = messageId;
+				.create(opt)
+				.then((windowInfo)=>{
 					this.windowId = windowInfo.id;
 
 					return true;
@@ -150,6 +155,12 @@ class WebExtensionNoteWindow extends NoteWindow {
 }
 
 class XULNoteWindow extends NoteWindow {
+	async focus() {
+		if(this.windowId){
+			await browser.qapp.popupFocus(this.windowId);
+		}
+	}
+
 	async close(closeWindow = true) {
 		if(closeWindow && this.windowId){
 			await browser.qapp.popupClose(this.windowId);
@@ -210,9 +221,10 @@ class XULNoteWindow extends NoteWindow {
 			opt.left += w.left;
 			opt.top += w.top;
 
-			browser.qapp.popup(opt).then((windowId)=>{
-				this.note = note;
-				this.messageId = messageId;
+			this.note = note;
+			this.messageId = messageId;
+
+			return browser.qapp.popup(opt).then(windowId => {
 				this.windowId = windowId;
 
 				return true;
