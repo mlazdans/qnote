@@ -149,5 +149,10 @@ class NotePopup extends BasePopup {
 
 	close() {
 		this.destroy();
+		let window = Services.wm.getMostRecentWindow("mail:3pane");
+		let panel = window.document.getElementById(this.windowId);
+		if(panel){
+			panel.remove();
+		}
 	}
 }
