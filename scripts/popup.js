@@ -23,11 +23,11 @@ const popupClose = () => {
 	note.text = YTextE.value;
 }
 
+// We need additional Escape handler here, becauce main window is blured and it's handler won't work here
 document.addEventListener('keydown', (event) => {
 	if(event.key == 'Escape'){
-		popupClose();
 		CurrentNote.needSave = false;
-		ext.browser.windows.remove(CurrentNote.windowId);
+		CurrentNote.close();
 	}
 });
 

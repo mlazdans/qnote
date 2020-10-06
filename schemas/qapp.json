@@ -7,12 +7,6 @@
 		"async": true,
 		"parameters": []
 	},{
-		"name": "installColumnHandler",
-		"type": "function",
-		"description": "",
-		"async": true,
-		"parameters": []
-	},{
 		"name": "updateView",
 		"type": "function",
 		"description": "",
@@ -136,6 +130,12 @@
 		"name": "messagesFocus",
 		"type": "function",
 		"description": "Focus message pane",
+		"async": true,
+		"parameters": []
+	},{
+		"name": "init",
+		"type": "function",
+		"description": "Initialize extension",
 		"async": true,
 		"parameters": []
 	}]

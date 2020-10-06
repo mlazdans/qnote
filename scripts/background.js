@@ -4,8 +4,13 @@ var CurrentNote;
 var CurrentMessageId;
 
 async function focusCurrentWindow(){
-	// browser.windows.update() will focus main window, but not message list
-	await browser.qapp.messagesFocus();
+	return browser.windows.getCurrent().then(async window => {
+		await browser.windows.update(window.id, {
+			focused: true
+		});
+		// browser.windows.update() will focus main window, but not message list
+		await browser.qapp.messagesFocus();
+	});
 }
 
 function initCurrentNote(){
@@ -30,7 +35,7 @@ async function initExtension(){
 
 	initCurrentNote();
 
-	await browser.qapp.installColumnHandler();
+	await browser.qapp.init();
 
 	// Context menu on message
 	browser.menus.onShown.addListener((info) => {
@@ -74,6 +79,7 @@ async function initExtension(){
 		});
 	});
 
+	// Handle keyboard shortcuts
 	var QCommands = {
 		qnote: () => {
 			if(CurrentMessageId){
@@ -88,7 +94,6 @@ async function initExtension(){
 		}
 	};
 
-	// Handle keyboard shortcuts
 	browser.commands.onCommand.addListener(command => {
 		if(QCommands[command]){
 			QCommands[command]();

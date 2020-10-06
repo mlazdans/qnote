@@ -7,10 +7,17 @@ var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var { ColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/ColumnHandler.jsm"));
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
 
+let escaper;
+
 var qapp = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown(isAppShutdown) {
 		if(isAppShutdown){
 			return;
+		}
+
+		try {
+			Services.wm.getMostRecentWindow("mail:3pane").removeEventListener("keydown", escaper);
+		} catch {
 		}
 
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
@@ -22,18 +29,36 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 	}
 	getAPI(context) {
 		var wex = Components.utils.waiveXrays(context.cloneScope);
-		var popups = new Map();
-
-		try {
-			let styleSheetService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
-			let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
-			styleSheetService.loadAndRegisterSheet(uri, styleSheetService.USER_SHEET);
-		} catch(e) {
-			console.error(e);
-		}
 
 		return {
 			qapp: {
+				async init(){
+					this.popups = new Map();
+					try {
+						let styleSheetService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
+						let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
+						styleSheetService.loadAndRegisterSheet(uri, styleSheetService.USER_SHEET);
+					} catch(e) {
+						console.error(e);
+					}
+
+					await this.installColumnHandler();
+
+					escaper = e => {
+						if(e.key === 'Escape'){
+							if(wex.CurrentNote.windowId){
+								wex.CurrentNote.needSave = false;
+								wex.CurrentNote.close();
+								e.preventDefault();
+							}
+						}
+					};
+
+					try {
+						Services.wm.getMostRecentWindow("mail:3pane").addEventListener("keydown", escaper);
+					} catch {
+					}
+				},
 				async messagesFocus(){
 					try {
 						Services.wm.getMostRecentWindow("mail:3pane").gFolderDisplay.tree.focus();
@@ -41,17 +66,17 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 				},
 				async popupClose(id){
-					if(popups.has(id)){
-						popups.get(id).close();
-						popups.delete(id);
+					if(this.popups.has(id)){
+						this.popups.get(id).close();
+						this.popups.delete(id);
 					}
 				},
 				async popupFocus(id){
-					if(!popups.has(id)){
+					if(!this.popups.has(id)){
 						return;
 					}
 
-					let n = popups.get(id);
+					let n = this.popups.get(id);
 					let document = n.browser.contentWindow.document;
 					let YTextE = document.getElementById('qnote-text');
 
@@ -60,6 +85,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 				},
 				async popup(opt){
+					var self = this;
 					var n = new NotePopup(
 						extension.getURL(opt.url)
 					);
@@ -89,24 +115,24 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 						n.viewNode.moveTo(opt.left, opt.top);
 
-						var w = Services.wm.getMostRecentWindow("mail:3pane");
+						// var w = Services.wm.getMostRecentWindow("mail:3pane");
 
-						var escaper = (e)=>{
-							if(e.key === 'Escape'){
-								wex.CurrentNote.needSave = false;
-								wex.CurrentNote.close();
-								e.preventDefault();
-								w.removeEventListener("keydown", escaper);
-							}
-						};
+						// var escaper = (e)=>{
+						// 	if(e.key === 'Escape'){
+						// 		wex.CurrentNote.needSave = false;
+						// 		wex.CurrentNote.close();
+						// 		e.preventDefault();
+						// 		w.removeEventListener("keydown", escaper);
+						// 	}
+						// };
 
-						// Attaching to main window for escaping non-focused notes
-						w.addEventListener("keydown", escaper);
+						// // Attaching to main window for escaping non-focused notes
+						// w.addEventListener("keydown", escaper);
 
 						try {
 							let focus = wex.Prefs.focusOnDisplay || !wex.CurrentNote.note.text;
 							if(!focus){
-								w.gFolderDisplay.tree.focus();
+								Services.wm.getMostRecentWindow("mail:3pane").gFolderDisplay.tree.focus();
 							}
 						} catch(e) {
 							console.error(e);
@@ -133,7 +159,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 							n.browserLoaded.then(()=>{
 								initNote();
-								popups.set(n.windowId, n);
+								self.popups.set(n.windowId, n);
 								resolve(n.windowId);
 							});
 							// n.contentReady.then(()=>{
