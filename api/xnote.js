@@ -162,9 +162,6 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 				async getPrefs(){
 					return getPrefs();
 				},
-				async getDefaultPrefs() {
-					return getDefaultPrefs();
-				},
 				async saveNote(root, keyId, note){
 					var file = noteFile(root, keyId);
 					if(!file){

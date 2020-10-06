@@ -1,12 +1,6 @@
 [{
 	"namespace": "xnote",
 	"functions": [{
-		"name": "getDefaultPrefs",
-		"type": "function",
-		"description": "Get default preferences",
-		"async": true,
-		"parameters": []
-	},{
 		"name": "getPrefs",
 		"type": "function",
 		"description": "Get preferences",
