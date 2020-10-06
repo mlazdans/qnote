@@ -4,7 +4,7 @@
 	"author": "Martins Lazdans",
 	"default_locale": "en",
 	"description": "Attempt to migrate XNote++ to Thunderbird 78+",
-	"version": "0.6.0",
+	"version": "0.6.1",
 	"applications": {
 		"gecko": {
 			"id": "qnote@dqdp.net",
@@ -39,6 +39,14 @@
 	"message_display_action": {
 		"default_title": "QNote",
 		"default_icon": "images/icon-disabled.svg"
+	},
+	"commands": {
+		"qnote": {
+			"suggested_key": {
+				"default": "Alt+Q"
+			},
+			"description": "Toggle QNote"
+		}
 	},
 	"experiment_apis": {
 		"qapp": {

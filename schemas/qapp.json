@@ -132,5 +132,11 @@
 			"type": "string",
 			"description": ""
 		}]
+	},{
+		"name": "messagesFocus",
+		"type": "function",
+		"description": "Focus message pane",
+		"async": true,
+		"parameters": []
 	}]
 }]

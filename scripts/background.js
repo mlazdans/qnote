@@ -1,7 +1,12 @@
 // TODO: column disappears when new window is created
-// TODO: keyboard shortcuts
 var Prefs;
 var CurrentNote;
+var CurrentMessageId;
+
+async function focusCurrentWindow(){
+	// browser.windows.update() will focus main window, but not message list
+	await browser.qapp.messagesFocus();
+}
 
 function initCurrentNote(){
 	if(Prefs.windowOption === 'xul'){
@@ -67,6 +72,31 @@ async function initExtension(){
 			}
 			CurrentNote.close();
 		});
+	});
+
+	var QCommands = {
+		qnote: () => {
+			if(CurrentMessageId){
+				if(CurrentNote.windowId){
+					CurrentNote.close();
+				} else {
+					CurrentNote.pop(CurrentMessageId, true, true).then(()=>{
+						CurrentNote.focus();
+					});
+				}
+			}
+		}
+	};
+
+	// Handle keyboard shortcuts
+	browser.commands.onCommand.addListener(command => {
+		if(QCommands[command]){
+			QCommands[command]();
+		}
+	});
+
+	browser.messageDisplay.onMessageDisplayed.addListener((tab, message) => {
+		CurrentMessageId = message.id;
 	});
 
 	browser.qapp.updateView();

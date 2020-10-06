@@ -61,6 +61,7 @@ class NoteWindow {
 	}
 
 	async close() {
+		focusCurrentWindow();
 	}
 
 	async pop() {
@@ -105,6 +106,7 @@ class WebExtensionNoteWindow extends NoteWindow {
 			this.init();
 			this.focusPopup = undefined;
 		}
+		super.close();
 	}
 
 	async pop(messageId, createNew = false, pop = false) {
@@ -173,6 +175,7 @@ class XULNoteWindow extends NoteWindow {
 		} else {
 			this.init();
 		}
+		super.close();
 	}
 
 	async pop(messageId, createNew = false, pop = false) {

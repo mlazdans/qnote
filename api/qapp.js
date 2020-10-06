@@ -34,6 +34,12 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		return {
 			qapp: {
+				async messagesFocus(){
+					try {
+						Services.wm.getMostRecentWindow("mail:3pane").gFolderDisplay.tree.focus();
+					} catch {
+					}
+				},
 				async popupClose(id){
 					if(popups.has(id)){
 						popups.get(id).close();
@@ -107,15 +113,27 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						}
 					};
 
-					let promise = new Promise(function(resolve, reject) {
+					return new Promise(function(resolve, reject) {
+						// https://developer.mozilla.org/en-US/docs/Archive/Mozilla/XUL/Method/openPopup
+						// https://developer.mozilla.org/en-US/docs/Archive/Mozilla/XUL/PopupGuide/Positioning
+						// Possible values for position are:
+						// before_start, before_end, after_start, after_end, start_before, start_after,
+						// end_before, end_after, overlap, and after_pointer.
+						if(opt.left && opt.top) {
+							n.viewNode.openPopup(null, "topleft", opt.left, opt.top);
+						} else {
+							n.viewNode.openPopup(null, "topleft");
+						}
+
 						n.browser.addEventListener("DOMContentLoaded", ()=>{
-							// We are not interested once default page has been loaded
+							// We are not interested when about:blank been loaded
 							if(n.browser.contentWindow.document.URL !== extension.getURL(opt.url)){
 								return;
 							}
 
 							n.browserLoaded.then(()=>{
 								initNote();
+								popups.set(n.windowId, n);
 								resolve(n.windowId);
 							});
 							// n.contentReady.then(()=>{
@@ -124,21 +142,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 							// });
 						});
 					});
-
-					// https://developer.mozilla.org/en-US/docs/Archive/Mozilla/XUL/Method/openPopup
-					// https://developer.mozilla.org/en-US/docs/Archive/Mozilla/XUL/PopupGuide/Positioning
-					// Possible values for position are:
-					// before_start, before_end, after_start, after_end, start_before, start_after,
-					// end_before, end_after, overlap, and after_pointer.
-					if(opt.left && opt.top) {
-						n.viewNode.openPopup(null, "topleft", opt.left, opt.top);
-					} else {
-						n.viewNode.openPopup(null, "topleft");
-					}
-
-					popups.set(n.windowId, n);
-
-					return promise;
 				},
 				async installColumnHandler(){
 					ColumnHandler.install({
