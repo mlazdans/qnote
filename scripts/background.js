@@ -80,23 +80,28 @@ async function initExtension(){
 	});
 
 	// Handle keyboard shortcuts
+	var QPr = false;
 	var QCommands = {
-		qnote: () => {
+		qnote: async () => {
+			if(QPr){
+				return;
+			}
 			if(CurrentMessageId){
+				QPr = true;
 				if(CurrentNote.windowId){
-					CurrentNote.close();
+					await CurrentNote.close();
 				} else {
-					CurrentNote.pop(CurrentMessageId, true, true).then(()=>{
-						CurrentNote.focus();
-					});
+					await CurrentNote.pop(CurrentMessageId, true, true);
+					await CurrentNote.focus();
 				}
+				QPr = false;
 			}
 		}
 	};
 
-	browser.commands.onCommand.addListener(command => {
+	browser.commands.onCommand.addListener(async command => {
 		if(QCommands[command]){
-			QCommands[command]();
+			await QCommands[command]();
 		}
 	});
 
