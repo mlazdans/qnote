@@ -157,6 +157,13 @@ class WebExtensionNoteWindow extends NoteWindow {
 }
 
 class XULNoteWindow extends NoteWindow {
+	async updateWindow(opt){
+		if(this.windowId){
+			await browser.qapp.popupClose(this.windowId);
+			await this.pop(this.messageId, false, true);
+		}
+	}
+
 	async focus() {
 		if(this.windowId){
 			await browser.qapp.popupFocus(this.windowId);
@@ -166,7 +173,6 @@ class XULNoteWindow extends NoteWindow {
 	async close(closeWindow = true) {
 		if(closeWindow && this.windowId){
 			await browser.qapp.popupClose(this.windowId);
-			//return await browser.windows.remove(this.windowId);
 		}
 
 		if(this.needSave && this.note){

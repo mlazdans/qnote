@@ -1,4 +1,5 @@
 // TODO: column disappears when new window is created
+// TODO: implement updateWindow() for floating panel
 var Prefs;
 var CurrentNote;
 var CurrentMessageId;
