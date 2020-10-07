@@ -4,9 +4,9 @@ var note = ext.CurrentNote.note;
 
 var YTextE = document.getElementById('qnote-text');
 
-if(ext.Prefs.focusOnDisplay || !note || !note.text){
+//if(ext.Prefs.focusOnDisplay || !note || !note.text){
 	YTextE.focus();
-}
+//}
 
 YTextE.value = note.text;
 
@@ -24,13 +24,13 @@ const popupClose = () => {
 }
 
 // We need additional Escape handler here, becauce main window is blured and it's handler won't work here
-document.addEventListener('keydown', (event) => {
-	if(event.key == 'Escape'){
+document.addEventListener('keydown', e => {
+	if(e.key == 'Escape'){
 		CurrentNote.needSave = false;
 		CurrentNote.close();
 	}
 });
 
-window.addEventListener('pagehide', () => {
+window.addEventListener('pagehide', e => {
 	popupClose();
 });
