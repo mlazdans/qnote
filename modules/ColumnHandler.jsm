@@ -57,7 +57,7 @@ var Observer = {
 
 		var html = `<splitter class="tree-splitter" resizeafter="farthest" />
 			<treecol id="qnoteCol" persist="hidden ordinal width sortDirection" width="${width}"
-			label="QNote" minwidth="14" tooltiptext="QNote" currentView="unthreaded"
+			label="QNote" minwidth="19" tooltiptext="QNote" currentView="unthreaded"
 			is="treecol-image" class="treecol-image qnote-column-header"/>`
 		;
 		// '<label class="treecol-text" crop="right" value="QNote" />' +
