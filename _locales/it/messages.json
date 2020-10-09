@@ -1,0 +1,43 @@
+{
+	"are.you.sure": { "message": "Sei sicuro?" },
+	"browse": { "message": "Sfoglia" },
+	"folder.unaccesible": { "message": "Cartella non trovata o non leggibile: $1" },
+	"json.parse.error": { "message": "Errore parse JSON: $1" },
+
+	"width.label": { "message": "Larghezza:" },
+	"height.label": { "message": "Altezza:" },
+	"use.tag.label": { "message": "Usa categoria:" },
+	"show.on.select.label": { "message": "Visualizza nota quando selezioni il messaggio" },
+	"save.preferences.button": { "message": "Salva" },
+	"import.legacy.xnotes.button": { "message": "Importa XNotes esistenti" },
+	"extension.reload.button": { "message": "Ricarica" },
+	"show.first.chars.label": {"message": "Visualizza i primi \"n\" caratteri nella colonna QNote"},
+	"focus.on.display": {"message": "Attiva QNote dopo la visualizzazione (solo pannello fluttuante)"},
+	"overwrite.existing.notes": {"message": "Sovrascrivo le note esistenti?"},
+	"can.use.xnote.folder": {"message": "Puoi usare la cartella esistente di XNotes folder"},
+	"no.message_id.header": {"message": "Non posso creare la nota. Messaggio senza 'message-id:' intestazione"},
+
+	"maintenance.fieldset": { "message": " Manutenzione " },
+	"use.tag.manager": { "message": "Per favore vai in impostazioni/Calendario/Categorie per gestire le categorie" },
+
+	"xnote.import.finished.stats": { "message": "Importazione finita:\nnote importate - $1\nnote con errori - $2\nnote esistenti - $3\nnote sovrascritte - $4" },
+	"xnote.import.fail": { "message": "Impossibile importare note precedenti" },
+	"xnote.folder.inaccessible": { "message": "Cartella XNote non trovata o non leggibile: $1" },
+	"xnote.folder.found": { "message": "Cartella XNote non trovata: $1" },
+
+	"storage.export.limitation": { "message": "'Esporta archivio' disponibile solo in TB>=78" },
+	"storage.fieldset": { "message": " Archivio " },
+	"storage.option.ext": { "message": "Estensione interna" },
+	"storage.option.folder": { "message": "Cartella locale" },
+	"storage.cleared": { "message": "Archivio cancellato" },
+	"storage.clear.failed": { "message": "Impossibile cancellare l'archivio: $1" },
+	"storage.imported": { "message": "Archivio importato" },
+	"storage.import.failed": { "message": "Errore durante l'importazione dell'archivio: $1" },
+	"storage.clear.button": { "message": "Cancella archivio" },
+	"storage.export.button": { "message": "Esporta archivio" },
+	"storage.import": { "message": "Importa archivio estensione" },
+
+	"window.fieldset": { "message": "Finestra" },
+	"window.option.xul": { "message": "Pannello fluttuante" },
+	"window.option.webext": { "message": "Finestra popup" }
+}
