@@ -1,3 +1,5 @@
+var _ = browser.i18n.getMessage;
+
 var Menu = {
 	getId: (info) => {
 		return info.selectedMessages.messages[0].id;
@@ -5,7 +7,7 @@ var Menu = {
 	modify: () => {
 		browser.menus.create({
 			id: "modify",
-			title: "Modify note",
+			title: _("modify.note"),
 			contexts: ["message_list"],
 			onclick(info) {
 				CurrentNote.pop(Menu.getId(info), false, true).then(()=>{
@@ -16,7 +18,7 @@ var Menu = {
 
 		browser.menus.create({
 			id: "delete",
-			title: "Delete note",
+			title: _("delete.note"),
 			contexts: ["message_list"],
 			onclick(info) {
 				deleteNoteForMessage(Menu.getId(info));
@@ -31,7 +33,7 @@ var Menu = {
 
 		browser.menus.create({
 			id: "reset",
-			title: "Reset note window",
+			title: _("reset.note.window"),
 			contexts: ["message_list"],
 			onclick(info) {
 				resetNoteForMessage(Menu.getId(info));
@@ -41,7 +43,7 @@ var Menu = {
 	new: () => {
 		browser.menus.create({
 			id: "create",
-			title: "Create new note",
+			title: _("create.new.note"),
 			contexts: ["message_list"],
 			async onclick(info) {
 				CurrentNote.pop(Menu.getId(info), true, true);

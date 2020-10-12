@@ -1,5 +1,8 @@
 // TODO: column disappears when new window is created
 // TODO: implement updateWindow() for floating panel
+// TODO: note optionally next to message
+// TODO: menu translation
+// TODO: check QuickText
 var Prefs;
 var CurrentNote;
 var CurrentMessageId;

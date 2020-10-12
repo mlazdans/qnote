@@ -3,7 +3,7 @@
 	"name": "QNote",
 	"author": "Martins Lazdans",
 	"default_locale": "en",
-	"description": "Attempt to migrate XNote++ to Thunderbird 78+",
+	"description": "__MSG_description__",
 	"version": "0.6.2",
 	"applications": {
 		"gecko": {
@@ -45,7 +45,7 @@
 			"suggested_key": {
 				"default": "Alt+Q"
 			},
-			"description": "Toggle QNote"
+			"description": "__MSG_toggle.qnote__"
 		}
 	},
 	"experiment_apis": {

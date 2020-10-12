@@ -1,8 +1,14 @@
 {
+	"description": { "message": "Attempt to migrate XNote++ to Thunderbird 78+" },
 	"are.you.sure": { "message": "Are you sure?" },
 	"browse": { "message": "Browse" },
 	"folder.unaccesible": { "message": "Folder not found or is not readable: $1" },
 	"json.parse.error": { "message": "JSON parse error: $1" },
+	"modify.note": { "message": "Modify note" },
+	"delete.note": { "message": "Delete note" },
+	"reset.note.window": { "message": "Reset note window" },
+	"create.new.note": { "message": "Create new note" },
+	"toggle.qnote": { "message": "Toggle note" },
 
 	"width.label": { "message": "Width:" },
 	"height.label": { "message": "Height:" },
