@@ -67,7 +67,14 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 
 					let fileOutStream = Cc['@mozilla.org/network/file-output-stream;1'].createInstance(Ci.nsIFileOutputStream);
 					fileOutStream.init(tempFile, 2, 0x200, false); // Opens for writing only
-					fileOutStream.write(data, data.length);
+
+					var con = Cc["@mozilla.org/intl/converter-output-stream;1"].createInstance(Ci.nsIConverterOutputStream);
+					con.init(fileOutStream, "utf-8", 0, 0xFFFD); // U+FFFD = replacement character
+					con.writeString(data);
+					con.close();
+
+					// fileOutStream.init(tempFile, 2, 0x200, false); // Opens for writing only
+					// fileOutStream.write(data, data.length);
 					fileOutStream.close();
 
 					try {
@@ -93,16 +100,27 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 					}
 
 					var fileInStream = Cc['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream);
-					var fileScriptableIO = Cc['@mozilla.org/scriptableinputstream;1'].createInstance(Ci.nsIScriptableInputStream);
+					//var fileScriptableIO = Cc['@mozilla.org/scriptableinputstream;1'].createInstance(Ci.nsIScriptableInputStream);
 					fileInStream.init(file, 0x01, parseInt("0444", 8), null);
-					fileScriptableIO.init(fileInStream);
+
+					var con = Cc["@mozilla.org/intl/converter-input-stream;1"].createInstance(Ci.nsIConverterInputStream);
+					con.init(fileInStream, "utf-8", 0, 0xFFFD); // U+FFFD = replacement character
+
+					//fileScriptableIO.init(fileInStream);
+					var data = '';
+					var str = {};
+					while (con.readString(4096, str) != 0) {
+						data += str.value;
+					}
 
 					try {
-						var note = JSON.parse(fileScriptableIO.read(file.fileSize));
+						var note = JSON.parse(data);
+						//var note = JSON.parse(con.read(file.fileSize));
 					} catch {
 					}
 
-					fileScriptableIO.close();
+					//fileScriptableIO.close();
+					con.close();
 					fileInStream.close();
 
 					return note;
