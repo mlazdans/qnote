@@ -1,8 +1,14 @@
 {
+	"description": { "message": "Provo a migrare XNote++ in Thunderbird 78+" },
 	"are.you.sure": { "message": "Sei sicuro?" },
 	"browse": { "message": "Sfoglia" },
 	"folder.unaccesible": { "message": "Cartella non trovata o non leggibile: $1" },
 	"json.parse.error": { "message": "Errore parse JSON: $1" },
+	"modify.note": { "message": "Modifica nota" },
+	"delete.note": { "message": "Cancella nota" },
+	"reset.note.window": { "message": "Reimposta finestra nota" },
+	"create.new.note": { "message": "Crea una nuova nota" },
+	"toggle.qnote": { "message": "Attiva/disattiva nota" },
 
 	"width.label": { "message": "Larghezza:" },
 	"height.label": { "message": "Altezza:" },

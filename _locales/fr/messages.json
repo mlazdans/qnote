@@ -6,7 +6,7 @@
 	"json.parse.error": { "message": "Erreur d’analyse JSON : $1" },
 	"modify.note": { "message": "Modifier la note" },
 	"delete.note": { "message": "Supprimer la note" },
-	"reset.note.window": { "message": "Réinitialiser la fenêtre de la note" },
+	"reset.note.window": { "message": "Réinitialiser la fenêtre" },
 	"create.new.note": { "message": "Créer une note" },
 	"toggle.qnote": { "message": "Ouvrir ou fermer la note" },
 
