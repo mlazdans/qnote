@@ -1,8 +1,6 @@
 // TODO: column disappears when new window is created
 // TODO: implement updateWindow() for floating panel
 // TODO: note optionally next to message
-// TODO: menu translation
-// TODO: check QuickText
 var Prefs;
 var CurrentNote;
 var CurrentMessageId;
@@ -35,6 +33,8 @@ function initCurrentNote(){
 }
 
 async function initExtension(){
+	browser.windows.onCreated.removeListener(initExtension);
+
 	Prefs = await loadPrefsWithDefaults();
 
 	initCurrentNote();
@@ -116,6 +116,23 @@ async function initExtension(){
 	browser.qapp.updateView();
 }
 
-window.addEventListener("load", ()=>{
-	initExtension();
-});
+// window.addEventListener("load", ()=>{
+// 	initExtension();
+// });
+
+async function waitForLoad() {
+	let windows = await browser.windows.getAll({windowTypes:["normal"]});
+	if (windows.length > 0) {
+		return false;
+	}
+
+	return new Promise(function(resolve, reject) {
+		function listener() {
+			browser.windows.onCreated.removeListener(listener);
+			resolve(true);
+		}
+		browser.windows.onCreated.addListener(listener);
+	});
+}
+
+waitForLoad().then((isAppStartup) => initExtension());
