@@ -205,9 +205,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					ColumnHandler.setTextLimit(limit);
 				},
 				async getProfilePath() {
-					return Components.classes['@mozilla.org/file/directory_service;1']
-						.getService(Components.interfaces.nsIProperties)
-						.get('ProfD', Components.interfaces.nsIFile)
+					return Cc['@mozilla.org/file/directory_service;1']
+						.getService(Ci.nsIProperties)
+						.get('ProfD', Ci.nsIFile)
 						.path
 					;
 				}
