@@ -17,6 +17,7 @@ img {
 }
 
 #title {
+	color: black;
 	background: url(../images/title-background.png);
 	background-repeat: repeat-x;
 	background-position: bottom;
@@ -26,7 +27,7 @@ img {
 	align-items: baseline;
 	font-size: small;
 	font-weight: bolder;
-	/* border-bottom: solid 1px #FAF098; */
+	border-bottom: solid 1px #d19231;
 }
 #title .title {
 	margin: auto 0 auto 6px;
@@ -34,7 +35,6 @@ img {
 }
 
 #title .close {
-	/* border: 1px solid green; */
 	margin: 6px 4px 4px 4px;
 	flex-grow: 1;
 }
@@ -54,9 +54,6 @@ img {
 	height: 100vh;
 }
 
-
-
-
 #controls {
 	height: 26px;
 	display: flex;
@@ -70,11 +67,9 @@ img {
 	flex-basis: bottom;
 	padding: 0;
 	margin: 0;
-	/* border: 1px solid blue; */
 }
 
 #deleteButton {
-	/* border: 1px solid red; */
 	margin-left: 6px;
 	cursor: pointer;
 	width: 14px;
@@ -97,6 +92,7 @@ img {
 }
 
 textarea {
+	color: black;
 	resize: none;
 	width: 100%;
 	height:100%;

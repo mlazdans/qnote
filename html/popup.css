@@ -1,18 +1,10 @@
-/*
-html, body {
-	height: 100%;
-	margin: 0;
-	padding: 0;
-}
-*/
-
 html{
-	min-height:100%;/* make sure it is at least as tall as the viewport */
+	min-height:100%;
 	position:relative;
 }
 
 body{
-	height:100%; /* force the BODY element to match the height of the HTML element */
+	height:100%;
 }
 
 #popup-content {
@@ -25,6 +17,7 @@ body{
 }
 
 textarea {
+	color: black;
 	width: 100%;
 	height:100%;
 	margin: 0 auto;
