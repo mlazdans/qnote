@@ -34,13 +34,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			qapp: {
 				async init(){
 					this.popups = new Map();
-					try {
-						let styleSheetService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
-						let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
-						styleSheetService.loadAndRegisterSheet(uri, styleSheetService.USER_SHEET);
-					} catch(e) {
-						console.error(e);
-					}
 
 					await this.installColumnHandler();
 
