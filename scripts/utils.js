@@ -299,11 +299,13 @@ async function deleteNoteColumn(note){
 }
 
 async function updateNoteColumn(note){
-	await browser.qapp.updateColumnNote({
-		keyId: note.keyId,
-		exists: true,
-		text: note.text
-	});
+	if(note){
+		await browser.qapp.updateColumnNote({
+			keyId: note.keyId,
+			exists: true,
+			text: note.text
+		});
+	}
 	await browser.qapp.updateView();
 }
 
