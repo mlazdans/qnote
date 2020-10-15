@@ -33,7 +33,7 @@ function initCurrentNote(){
 }
 
 async function initExtension(){
-	browser.windows.onCreated.removeListener(initExtension);
+	//browser.windows.onCreated.removeListener(initExtension);
 
 	Prefs = await loadPrefsWithDefaults();
 
