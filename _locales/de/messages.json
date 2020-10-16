@@ -45,5 +45,8 @@
 
 	"window.fieldset": { "message": "Darstellung" },
 	"window.option.xul": { "message": "Post-it" },
-	"window.option.webext": { "message": "Eigenes Fenster" }
+	"window.option.webext": { "message": "Eigenes Fenster" },
+
+	"close.and.save": { "message": "Schließen und Speichern" },
+	"delete": { "message": "Löschen" }
 }
