@@ -11,6 +11,7 @@ var PopupCounter = 0;
 class NotePopup extends BasePopup {
 	constructor(
 		popupURL,
+		window
 		// browserStyle,
 		// fixedWidth,
 		// blockParser
@@ -18,7 +19,7 @@ class NotePopup extends BasePopup {
 		PopupCounter++;
 		//let id = "qnote-window-panel-" + PopupCounter;
 		let id = "qnote-window-panel";
-		let window = Services.wm.getMostRecentWindow("mail:3pane");
+		//let window = Services.wm.getMostRecentWindow(null);
 		let document = window.document;
 		let windowId = makeWidgetId(id);
 
@@ -40,6 +41,7 @@ class NotePopup extends BasePopup {
 		super(extension, panel, popupURL, browserStyle, fixedWidth, blockParser);
 
 		this.windowId = windowId;
+		this.window = window;
 
 		var self = this;
 
@@ -149,10 +151,15 @@ class NotePopup extends BasePopup {
 
 	close() {
 		this.destroy();
-		let window = Services.wm.getMostRecentWindow("mail:3pane");
+		//let window = Services.wm.getMostRecentWindow("mail:3pane");
+		let window = this.window;
 		let panel = window.document.getElementById(this.windowId);
 		if(panel){
 			panel.remove();
+		}
+
+		if(this.onClose){
+			this.onClose();
 		}
 	}
 }

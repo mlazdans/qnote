@@ -103,7 +103,7 @@ var Observer = {
 				// colOrdinalStr = `ordinal="${ordinal}" style="-moz-box-ordinal-group: ${ordinal};"`;
 				// splitOrdinalStr = `style="-moz-box-ordinal-group: ${(ordinal - 1)};"`;
 			}
-			console.log("ordinals", ordinal, colOrdinalStr, splitOrdinalStr);
+			//console.log("ordinals", ordinal, colOrdinalStr, splitOrdinalStr);
 
 			var html = `<splitter class="tree-splitter" resizeafter="farthest" ${splitOrdinalStr} />
 				<treecol id="qnoteCol" persist="hidden ordinal width sortDirection" width="${width}" ${colOrdinalStr}

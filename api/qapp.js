@@ -7,7 +7,7 @@ var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var { ColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/ColumnHandler.jsm"));
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
 
-let escaper;
+//let escaper;
 
 var qapp = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown(isAppShutdown) {
@@ -15,10 +15,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			return;
 		}
 
-		try {
-			Services.wm.getMostRecentWindow("mail:3pane").removeEventListener("keydown", escaper);
-		} catch {
-		}
+		// try {
+		// 	Services.wm.getMostRecentWindow("mail:3pane").removeEventListener("keydown", escaper);
+		// } catch {
+		// }
 
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 
@@ -37,20 +37,20 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					await this.installColumnHandler();
 
-					escaper = e => {
-						if(e.key === 'Escape'){
-							if(wex.CurrentNote.windowId){
-								wex.CurrentNote.needSave = false;
-								wex.CurrentNote.close();
-								e.preventDefault();
-							}
-						}
-					};
+					// escaper = e => {
+					// 	if(e.key === 'Escape'){
+					// 		if(wex.CurrentNote.windowId){
+					// 			wex.CurrentNote.needSave = false;
+					// 			wex.CurrentNote.close();
+					// 			e.preventDefault();
+					// 		}
+					// 	}
+					// };
 
-					try {
-						Services.wm.getMostRecentWindow("mail:3pane").addEventListener("keydown", escaper);
-					} catch {
-					}
+					// try {
+					// 	Services.wm.getMostRecentWindow("mail:3pane").addEventListener("keydown", escaper);
+					// } catch {
+					// }
 				},
 				async messagesFocus(){
 					try {
@@ -79,28 +79,48 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				},
 				async popup(opt){
 					var self = this;
+					var window = Services.wm.getMostRecentWindow(null);
+
+					let escaper = e => {
+						if(e.key === 'Escape'){
+							if(wex.CurrentNote.windowId){
+								wex.CurrentNote.needSave = false;
+								wex.CurrentNote.close();
+								e.preventDefault();
+							}
+						}
+					};
+
+					window.addEventListener("keydown", escaper);
+
 					var n = new NotePopup(
-						extension.getURL(opt.url)
+						extension.getURL(opt.url),
+						window
 					);
 
-					n.onResize = (e)=>{
+					n.onResize = e => {
 						wex.CurrentNote.note.width = e.width;
 						wex.CurrentNote.note.height = e.height;
 					};
 
-					n.onMove = (e)=>{
+					n.onMove = e => {
 						wex.CurrentNote.note.x = e.x;
 						wex.CurrentNote.note.y = e.y;
 					};
 
-					var initNote = ()=>{
+					n.onClose = () => {
+						window.removeEventListener("keydown", escaper);
+					};
+
+					var initNote = () => {
 						var document = n.browser.contentWindow.document;
 						var closeButton = document.getElementById('closeButton');
+						var deleteButton = document.getElementById('deleteButton');
+
 						closeButton.addEventListener("click", (e)=>{
 							wex.CurrentNote.close();
 						});
 
-						var deleteButton = document.getElementById('deleteButton');
 						deleteButton.addEventListener("click", (e)=>{
 							wex.CurrentNote.note.text = '';
 							wex.CurrentNote.close();
@@ -108,24 +128,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 						n.viewNode.moveTo(opt.left, opt.top);
 
-						// var w = Services.wm.getMostRecentWindow("mail:3pane");
-
-						// var escaper = (e)=>{
-						// 	if(e.key === 'Escape'){
-						// 		wex.CurrentNote.needSave = false;
-						// 		wex.CurrentNote.close();
-						// 		e.preventDefault();
-						// 		w.removeEventListener("keydown", escaper);
-						// 	}
-						// };
-
-						// // Attaching to main window for escaping non-focused notes
-						// w.addEventListener("keydown", escaper);
-
 						try {
 							let focus = wex.Prefs.focusOnDisplay || !wex.CurrentNote.note.text;
 							if(!focus){
-								Services.wm.getMostRecentWindow("mail:3pane").gFolderDisplay.tree.focus();
+								window.gFolderDisplay.tree.focus();
 							}
 						} catch(e) {
 							console.error(e);
