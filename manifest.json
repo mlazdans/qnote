@@ -40,6 +40,10 @@
 		"default_title": "QNote",
 		"default_icon": "images/icon-disabled.svg"
 	},
+	"browser_action": {
+		"default_title": "QNote",
+		"default_icon": "images/icon.svg"
+	},
 	"commands": {
 		"qnote": {
 			"suggested_key": {

@@ -42,7 +42,9 @@ function legacyPrefsMapper(prefs){
 async function updateMessageDisplayIcon(on = true){
 	let icon = on ? "images/icon.svg" : "images/icon-disabled.svg";
 
-	return await browser.messageDisplayAction.setIcon({path: icon}).then(()=>{
+	return browser.messageDisplayAction.setIcon({path: icon}).then(()=>{
+		return true;
+	}) && await browser.browserAction.setIcon({path: icon}).then(()=>{
 		return true;
 	});
 }
@@ -330,3 +332,19 @@ async function exportStorage(){
 		filename: 'qnote-storage.json'
 	});
 }
+
+function QNoteTabPop(tab, createNew = true, doPop = true, doFocus = true) {
+	return browser.messageDisplay.getDisplayedMessage(getTabId(tab)).then(message => {
+		// Pop only on main tab. Perhaps need configurable?
+		// 	if(tab.mailTab){}
+
+		// Pop only if message changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
+		if(!CurrentNote.windowId || (CurrentNote.messageId !== message.id)){
+			CurrentNote.pop(message.id, createNew, doPop).then(()=>{
+				if(doFocus){
+					CurrentNote.focus();
+				}
+			});
+		}
+	});
+};

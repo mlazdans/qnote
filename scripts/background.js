@@ -1,4 +1,3 @@
-// TODO: implement updateWindow() for floating panel
 // TODO: note optionally next to message
 var Prefs;
 var CurrentNote;
@@ -9,6 +8,7 @@ async function focusCurrentWindow(){
 		await browser.windows.update(window.id, {
 			focused: true
 		});
+
 		// browser.windows.update() will focus main window, but not message list
 		await browser.qapp.messagesFocus();
 	});
@@ -20,12 +20,13 @@ function initCurrentNote(){
 	} else if(Prefs.windowOption == 'webext'){
 		CurrentNote = new WebExtensionNoteWindow();
 	}
-	CurrentNote.onAfterDelete = async (note)=>{
+
+	CurrentNote.onAfterDelete = async note => {
 		await afterNoteDelete(note.messageId, note.note);
 		note.init();
 	}
 
-	CurrentNote.onAfterSave = async (note)=>{
+	CurrentNote.onAfterSave = async note => {
 		await afterNoteSave(note.messageId, note.note);
 		note.init();
 	}
@@ -41,7 +42,7 @@ async function initExtension(){
 	await browser.qapp.init();
 
 	// Context menu on message
-	browser.menus.onShown.addListener((info) => {
+	browser.menus.onShown.addListener(info => {
 		// Avoid context menu other than from messageList
 		if(info.selectedMessages === undefined){
 			return;
@@ -108,16 +109,39 @@ async function initExtension(){
 		}
 	});
 
-	browser.messageDisplay.onMessageDisplayed.addListener((tab, message) => {
-		CurrentMessageId = message.id;
+	// Click on main window toolbar
+	browser.browserAction.onClicked.addListener(tab => {
+		return QNoteTabPop(tab);
 	});
 
-	browser.qapp.updateView();
+	// Click on QNote button
+	browser.messageDisplayAction.onClicked.addListener(tab => {
+		return QNoteTabPop(tab);
+	});
+
+	// Click on message
+	browser.messageDisplay.onMessageDisplayed.addListener((tab, message) => {
+		CurrentMessageId = message.id;
+		return QNoteTabPop(tab, false, Prefs.showOnSelect, false);
+		// browser.tabs.get(getTabId(tab)).then(tab => {
+		// 	// Pop only on main tab. Perhaps need configurable?
+		// 	if(tab.mailTab){
+		// 		// Pop only if message changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
+		// 		if(!CurrentNote.windowId || (CurrentNote.messageId !== message.id)){
+		// 			CurrentNote.pop(message.id, false, Prefs.showOnSelect);
+		// 		}
+		// 	}
+		// });
+	});
+
+	//browser.qapp.updateView();
 }
 
-window.addEventListener("load", ()=>{
-	initExtension();
-});
+initExtension();
+
+// window.addEventListener("load", ()=>{
+// 	initExtension();
+// });
 
 // async function waitForLoad() {
 // 	let windows = await browser.windows.getAll({windowTypes:["normal"]});

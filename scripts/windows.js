@@ -3,28 +3,6 @@ var _ = browser.i18n.getMessage;
 class NoteWindow {
 	constructor() {
 		this.init();
-
-		// Click on QNote button
-		browser.messageDisplayAction.onClicked.addListener((tab) => {
-			browser.messageDisplay.getDisplayedMessage(getTabId(tab)).then(message => {
-				this.pop(message.id, true, true).then(()=>{
-					this.focus();
-				});
-			});
-		});
-
-		// Click on message
-		browser.messageDisplay.onMessageDisplayed.addListener((tab, message) => {
-			browser.tabs.get(getTabId(tab)).then((tab)=>{
-				// Pop only on main tab. Perhaps need configurable?
-				if(tab.mailTab){
-					// Pop only if message changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
-					if(!this.windowId || (this.messageId !== message.id)){
-						this.pop(message.id, false, Prefs.showOnSelect);
-					}
-				}
-			});
-		});
 	}
 
 	init(){
@@ -157,6 +135,7 @@ class WebExtensionNoteWindow extends NoteWindow {
 }
 
 class XULNoteWindow extends NoteWindow {
+	// TODO: implement updateWindow() for floating panel
 	async updateWindow(opt){
 		if(this.windowId){
 			await browser.qapp.popupClose(this.windowId);
