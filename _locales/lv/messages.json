@@ -45,5 +45,8 @@
 
 	"window.fieldset": { "message": "Logs" },
 	"window.option.xul": { "message": "Peldošais panelis" },
-	"window.option.webext": { "message": "Popup logs" }
+	"window.option.webext": { "message": "Popup logs" },
+
+	"close.and.save": { "message": "Aizvērt un saglabāt" },
+	"delete": { "message": "Dzēst" }
 }

@@ -45,5 +45,8 @@
 
 	"window.fieldset": { "message": "Window" },
 	"window.option.xul": { "message": "Floating panel" },
-	"window.option.webext": { "message": "Popup window" }
+	"window.option.webext": { "message": "Popup window" },
+
+	"close.and.save": { "message": "Close and save" },
+	"delete": { "message": "Delete" }
 }

@@ -1,9 +1,18 @@
 var ext = chrome.extension.getBackgroundPage();
+var _ = browser.i18n.getMessage;
 var note = ext.CurrentNote.note;
 
 var YTextE = document.getElementById('qnote-text');
 var popup = document.getElementById('popup');
 var title = document.getElementById('title');
+
+for (const node of document.querySelectorAll('div.close')) {
+	node.title = _('close.and.save');
+}
+
+for (const node of document.querySelectorAll('div.delete')) {
+	node.title = _('delete');
+}
 
 if(ext.Prefs.focusOnDisplay || !note || !note.text){
 	YTextE.focus();
