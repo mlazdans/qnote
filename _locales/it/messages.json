@@ -45,5 +45,8 @@
 
 	"window.fieldset": { "message": "Finestra" },
 	"window.option.xul": { "message": "Pannello fluttuante" },
-	"window.option.webext": { "message": "Finestra popup" }
+	"window.option.webext": { "message": "Finestra popup" },
+
+	"close.and.save": { "message": "Chiudi e salva" },
+	"delete": { "message": "Cancella" }
 }
