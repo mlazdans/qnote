@@ -45,5 +45,8 @@
 
 	"window.fieldset": { "message": "Présenter les notes dans " },
 	"window.option.xul": { "message": "un panneau flottant" },
-	"window.option.webext": { "message": "une fenêtre contextuelle" }
+	"window.option.webext": { "message": "une fenêtre contextuelle" },
+
+	"close.and.save": { "message": "Fermer et enregistrer" },
+	"delete": { "message": "Supprimer" }
 }
