@@ -6,25 +6,22 @@ var EXPORTED_SYMBOLS = ["NoteFilter"];
 
 var NoteFilter = {};
 
-// NOTE:
-// We need to completely restart TB if filter code changes
-// Currenlty there are no means to remove filter or there are but I'm not aware, please let me know qnote@dqdp.net
-
 {
 let noteGrabber;
+let qfQnoteCheckedId = 'qfb-qs-qnote-checked';
+let qnoteCustomTermId = 'qnote@dqdp.net#qnoteText';
 
 NoteFilter.install = options => {
 	NoteFilter.options = options;
 	noteGrabber = options.noteGrabber;
 
 	var ops = [Ci.nsMsgSearchOp.Contains, Ci.nsMsgSearchOp.DoesntContain, Ci.nsMsgSearchOp.Is, Ci.nsMsgSearchOp.Isnt];
-
 	var w = Services.wm.getMostRecentWindow("mail:3pane");
 
 	// TODO: check if exists
-	if(!w.document.getElementById('qfb-qs-qnote-text')){
+	if(!w.document.getElementById(qfQnoteCheckedId)){
 		let button = w.document.createXULElement('toolbarbutton');
-		button.setAttribute('id','qfb-qs-qnote-text');
+		button.setAttribute('id',qfQnoteCheckedId);
 		button.setAttribute('type','checkbox');
 		button.setAttribute('class','toolbarbuton-1');
 		button.setAttribute('label', 'QNote');
@@ -34,54 +31,45 @@ NoteFilter.install = options => {
 		filterBar.insertBefore(button, senderButton);
 	}
 
-	let quickfChecked = w.document.getElementById('qfb-qs-qnote-text');
+	let qfQnoteChecked = w.document.getElementById(qfQnoteCheckedId);
+	let qfTextBox = w.document.getElementById('qfb-qs-textbox');
+	let aMuxer = w.QuickFilterBarMuxer;
 
-	let buttonHandler = function(aEvent) {
-		//console.log("handlerC", quickfChecked.checked);
-		let aMuxer = w.QuickFilterBarMuxer;
-		// let state = aMuxer.getFilterValueForMutation(MessageTextFilter.name);
-		// let filterDef = MessageTextFilter.textFilterDefsByDomId[aEvent.target.id];
-		// //console.log("handlerC", aEvent.target, state, filterDef);
-		// state.states[filterDef.name] = aEvent.target.checked;
-		// console.log("aMuxer.activeFilterer", aMuxer.activeFilterer, state);
-		// aMuxer.updateSearch();
-		// try {
-			//let postValue = quickfChecked.checked ? true : null;
-		// 	//console.log(w.QuickFilterBarMuxer.activeFilterer);
-		if(quickfChecked.checked){
-			aMuxer.activeFilterer.setFilterValue('qnote', true);
-		} else {
-			aMuxer.activeFilterer.setFilterValue('qnote', null);
-		}
+	let buttonHandler = function() {
+		aMuxer.activeFilterer.setFilterValue('qnote', qfQnoteChecked.checked ? qfTextBox.value : null);
 		aMuxer.deferredUpdateSearch();
-		// } catch (e) {
-		// 	console.error(e);
-		// }
 	};
-	quickfChecked.addEventListener("command", buttonHandler);
 
+	let textHandler = function() {
+		if(qfQnoteChecked.checked){
+			aMuxer.activeFilterer.setFilterValue('qnote', qfTextBox.value);
+		}
+	}
+
+	qfTextBox.addEventListener("command", textHandler);
+	qfQnoteChecked.addEventListener("command", buttonHandler);
+
+	// NOTE:
+	// We need to completely restart TB if customTerm code changes
+	// Currenlty there are no means to remove filter or there are but I'm not aware, please let me know qnote@dqdp.net
 	var customTerm = {
-		id: 'qnote@dqdp.net#qnoteText',
+		id: qnoteCustomTermId,
 		name: 'QNote',
 		needsBody: false,
 		getEnabled: function(scope, op) {
-			//console.log("getEnabled", scope, op);
-			return true;
-			//return op === Ci.nsMsgSearchOp.Contains;
+			return false;
+			//return ops.includes(op);
 		},
+		// Currently disabled in search dialogs, because can't figure out how to add text box to the filter
+		// Probably through XUL or something
 		getAvailable: function(scope, op) {
-			let ret = ops.includes(op);
-			//console.log("getAvailable", scope, op, ret);
-			return ret;
-			//return op === Ci.nsMsgSearchOp.Contains;
+			return false;
+			//return ops.includes(op);
 		},
 		getAvailableOperators: function(scope, length) {
-			//console.log("getAvailableOperators", scope);
-
 			if(length){
 				length.value = ops.length;
 			}
-
 			return ops;
 		},
 		match: function(msgHdr, searchValue, searchOp) {
@@ -91,8 +79,9 @@ NoteFilter.install = options => {
 				return false;
 			}
 
-			var match = note.text.search(searchValue)>=0;
-			//console.log("match", msgHdr.messageId, note, match, searchOp);
+			let match = note.text.toLowerCase().search(searchValue)>=0;
+			// console.log("match", searchValue, searchOp);
+			// console.log("matched", msgHdr.messageId, note, match);
 
 			return match;
 		}
@@ -106,28 +95,29 @@ NoteFilter.install = options => {
 
 	QuickFilterManager.defineFilter({
 		name: "qnote",
-		domId: "qfb-qs-qnote-text",
+		domId: qfQnoteCheckedId,
 		// propagateState: function(aTemplState, aSticky){
 		// 	console.log("propagateState", aTemplState, aSticky);
 		// },
-		onCommand: function(aState, aNode, aEvent, aDocument){
-			console.log("onCommand", aState, aNode, aEvent, aDocument);
-			//return [aState, false];
-		},
+		// onCommand: function(aState, aNode, aEvent, aDocument){
+		// 	console.log("onCommand", aState, aNode, aEvent, aDocument);
+		// 	//return [aState, false];
+		// },
 		appendTerms: function(aTermCreator, aTerms, aFilterValue) {
-			let text = w.document.getElementById('qfb-qs-textbox').value;
 			// Let us borrow an existing code just for a while :>
-			let phrases = MessageTextFilter._parseSearchString(text);
+			let phrases = MessageTextFilter._parseSearchString(aFilterValue.toLowerCase());
 			let term;
 			let firstClause = true;
+			//console.log("appendTerms", aFilterValue, phrases);
 
 			for (let kw of phrases) {
 				term = aTermCreator.createTerm();
 
 				let value = term.value;
 				value.str = kw;
-
+				value.attrib = Ci.nsMsgSearchAttrib.Subject;
 				term.value = value;
+
 				term.attrib = Ci.nsMsgSearchAttrib.Custom;
 				term.customId = customTerm.id;
 				term.op = Ci.nsMsgSearchOp.Contains;
@@ -141,11 +131,13 @@ NoteFilter.install = options => {
 			if (term) {
 				term.endsGrouping = true;
 			}
-		},
-		domBindExtra: function(aDocument, aMuxer, aNode){
-			console.log("domBindExtra", aDocument, aMuxer, aNode);
 		}
+		// domBindExtra: function(aDocument, aMuxer, aNode){
+		// 	console.log("domBindExtra", aDocument, aMuxer, aNode);
+		// }
 	});
+
+	aMuxer.deferredUpdateSearch();
 
 	//var terms = MailServices.filters.getCustomTerms();
 	//var a = terms.QueryInterface(Ci.nsIMutableArray);
@@ -181,9 +173,9 @@ NoteFilter.install = options => {
 NoteFilter.uninstall = () => {
 	// Uninstall quick filter
 	var w = Services.wm.getMostRecentWindow("mail:3pane");
-	var quickfChecked = w.document.getElementById('qfb-qs-qnote-text');
-	if(quickfChecked){
-		quickfChecked.parentNode.removeChild(qnoteQF);
+	var qfQnoteChecked = w.document.getElementById(qfQnoteCheckedId);
+	if(qfQnoteChecked){
+		qfQnoteChecked.parentNode.removeChild(qfQnoteChecked);
 	}
 
 	// TODO: need to remove before shutdown
