@@ -23,11 +23,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		var wex = Components.utils.waiveXrays(context.cloneScope);
 
 		var noteGrabber = {
+			// function noterequest(keyId, data, params)
+			//  keyId - note key
+			//  data - note data
+			//  params - misc params passed to getNote()
 			listeners: {
-				// function(keyId, data, params)
-				// keyId - note key
-				// data - note data
-				// params - misc params passed to getNote()
 				"noterequest": []
 			},
 			noteBlocker: new Map(),
@@ -105,8 +105,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				async init(){
 					this.popups = new Map();
 
-					await this.installColumnHandler();
 					await this.installQuickFilter();
+					await this.installColumnHandler();
 				},
 				async messagesFocus(){
 					try {
@@ -225,8 +225,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					});
 				},
 				async installQuickFilter(){
-					NoteFilter.install({
-						noteGrabber: noteGrabber
+					// TODO: need to re-think better solution
+					wex.loadAllQAppNotes().then(() => {
+						NoteFilter.install({
+							noteGrabber: noteGrabber
+						});
 					});
 				},
 				async installColumnHandler(){

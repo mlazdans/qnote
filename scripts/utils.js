@@ -358,6 +358,14 @@ async function updateQAppNote(note){
 	}
 }
 
+async function loadAllQAppNotes(){
+	let noteList = await loadAllNotes();
+	for(let i = 0; i < noteList.length; i++){
+		updateQAppNote(noteList[i]);
+	}
+	return true;
+}
+
 async function updateNoteColumn(note){
 	await updateQAppNote(note);
 	await browser.qapp.updateView();
