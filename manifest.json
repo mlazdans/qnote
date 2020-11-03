@@ -42,7 +42,7 @@
 	},
 	"browser_action": {
 		"default_title": "QNote",
-		"default_icon": "images/icon.svg"
+		"default_icon": "images/icon-disabled.svg"
 	},
 	"commands": {
 		"qnote": {
