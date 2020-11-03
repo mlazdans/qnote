@@ -6,29 +6,99 @@ var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionPa
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var { ColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/ColumnHandler.jsm"));
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
-
-//let escaper;
+var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 
 var qapp = class extends ExtensionCommon.ExtensionAPI {
-	onShutdown(isAppShutdown) {
-		if(isAppShutdown){
-			return;
-		}
-
-		// try {
-		// 	Services.wm.getMostRecentWindow("mail:3pane").removeEventListener("keydown", escaper);
-		// } catch {
-		// }
-
+	onShutdown() {
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 
 		ColumnHandler.uninstall();
+		NoteFilter.uninstall();
 
 		Components.utils.unload(extension.rootURI.resolve("modules/ColumnHandler.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/NotePopup.jsm"));
+		Components.utils.unload(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 	}
 	getAPI(context) {
 		var wex = Components.utils.waiveXrays(context.cloneScope);
+
+		var noteGrabber = {
+			listeners: {
+				// function(keyId, data, params)
+				// keyId - note key
+				// data - note data
+				// params - misc params passed to getNote()
+				"noterequest": []
+			},
+			noteBlocker: new Map(),
+			NotesCache: [],
+			addListener(name, listener){
+				noteGrabber.listeners[name].push(listener);
+			},
+			saveNoteCache(note){
+				noteGrabber.NotesCache[note.keyId] = note;
+			},
+			getNoteCache(keyId){
+				if(noteGrabber.NotesCache[keyId]){
+					return noteGrabber.NotesCache[keyId];
+				}
+			},
+			deleteNoteCache(keyId){
+				noteGrabber.NotesCache[keyId] = undefined;
+			},
+			clearNoteCache(){
+				noteGrabber.NotesCache = [];
+			},
+			getNote(keyId, params){
+				let self = noteGrabber;
+				let blocker = self.noteBlocker;
+
+				// Block concurrent calls on same note as we will update column once it has been loded from local cache, local storage or file
+				// Not 100% sure if necessary but calls to column update can be quite many
+				if(blocker.has(keyId)){
+					return {};
+				}
+
+				blocker.set(keyId, true);
+
+				var note = self.getNoteCache(keyId);
+
+				if(note){
+					blocker.delete(keyId);
+
+					return Object.assign({}, note);
+				} else {
+					var onNoteRequest = async (keyId) => {
+						var data = await wex.loadNote(keyId);
+						if(data){
+							return {
+								keyId: keyId,
+								exists: true,
+								text: data.text
+							}
+						} else {
+							return {
+								keyId: keyId,
+								exists: false
+							}
+						}
+					}
+
+					onNoteRequest(keyId).then(data => {
+						self.saveNoteCache(data);
+
+						let listeners = noteGrabber.listeners['noterequest'];
+						for(let i =0; i < listeners.length; i++){
+							listeners[i](keyId, data, params);
+						}
+
+						blocker.delete(keyId);
+					});
+
+					return {};
+				}
+			}
+		}
 
 		return {
 			qapp: {
@@ -36,21 +106,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					this.popups = new Map();
 
 					await this.installColumnHandler();
-
-					// escaper = e => {
-					// 	if(e.key === 'Escape'){
-					// 		if(wex.CurrentNote.windowId){
-					// 			wex.CurrentNote.needSave = false;
-					// 			wex.CurrentNote.close();
-					// 			e.preventDefault();
-					// 		}
-					// 	}
-					// };
-
-					// try {
-					// 	Services.wm.getMostRecentWindow("mail:3pane").addEventListener("keydown", escaper);
-					// } catch {
-					// }
+					await this.installQuickFilter();
 				},
 				async messagesFocus(){
 					try {
@@ -168,37 +224,29 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						});
 					});
 				},
+				async installQuickFilter(){
+					NoteFilter.install({
+						noteGrabber: noteGrabber
+					});
+				},
 				async installColumnHandler(){
 					ColumnHandler.install({
 						textLimit: wex.Prefs.showFirstChars,
-						onNoteRequest: async (messageId) => {
-							var data = await wex.loadNote(messageId);
-							if(data){
-								return {
-									keyId: messageId,
-									exists: true,
-									text: data.text
-								}
-							} else {
-								return {
-									keyId: messageId,
-									exists: false
-								}
-							}
-						}
+						noteGrabber: noteGrabber
 					});
 				},
+				// TODO: rename column view update
 				async updateView(){
 					ColumnHandler.Observer.observe();
 				},
-				async updateColumnNote(note){
-					ColumnHandler.saveNoteCache(note);
+				async updateNote(note){
+					noteGrabber.saveNoteCache(note);
 				},
-				async deleteColumnNote(keyId){
-					ColumnHandler.deleteNoteCache(keyId);
+				async deleteNote(keyId){
+					noteGrabber.deleteNoteCache(keyId);
 				},
-				async clearColumnNotes(){
-					ColumnHandler.clearNoteCache();
+				async clearNotes(){
+					noteGrabber.clearNoteCache();
 				},
 				async setColumnTextLimit(limit){
 					ColumnHandler.setTextLimit(limit);

@@ -13,7 +13,7 @@
 		"async": true,
 		"parameters": []
 	},			{
-		"name": "updateColumnNote",
+		"name": "updateNote",
 		"type": "function",
 		"description": "",
 		"async": true,
@@ -40,7 +40,7 @@
 			"description": "Note object"
 		}]
 	},{
-		"name": "deleteColumnNote",
+		"name": "deleteNote",
 		"type": "function",
 		"description": "",
 		"async": true,
@@ -60,7 +60,7 @@
 			"description": ""
 		}]
 	},{
-		"name": "clearColumnNotes",
+		"name": "clearNotes",
 		"type": "function",
 		"description": "",
 		"async": true,
