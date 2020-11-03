@@ -84,21 +84,16 @@ async function initExtension(){
 	});
 
 	// Handle keyboard shortcuts
-	var QPr = false;
 	var QCommands = {
 		qnote: async () => {
-			if(QPr){
+			if(!CurrentMessageId){
 				return;
 			}
-			if(CurrentMessageId){
-				QPr = true;
-				if(CurrentNote.windowId){
-					await CurrentNote.close();
-				} else {
-					await CurrentNote.pop(CurrentMessageId, true, true);
-					await CurrentNote.focus();
-				}
-				QPr = false;
+			if(CurrentNote.windowId){
+				await CurrentNote.close();
+			} else {
+				await CurrentNote.pop(CurrentMessageId, true, true);
+				await CurrentNote.focus();
 			}
 		}
 	};
