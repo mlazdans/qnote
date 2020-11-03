@@ -129,6 +129,12 @@ async function initExtension(){
 		// });
 	});
 
+	// TODO: call only before search happens
+	let noteList = await loadAllNotes();
+	for(let i = 0; i < noteList.length; i++){
+		updateQAppNote(noteList[i]);
+	}
+
 	//browser.qapp.updateView();
 }
 
