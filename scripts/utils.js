@@ -130,12 +130,28 @@ function createNote(keyId) {
 		return new QNote(keyId);
 	} else if(Prefs.storageOption === 'folder'){
 		return new QNoteFolder(keyId, Prefs.storageFolder);
-		//return new XNote(keyId, Prefs.storageFolder);
 	}
 }
 
 async function loadNote(keyId) {
 	return await createNote(keyId).load();
+}
+
+async function loadAllNotes() {
+	let noteList = [];
+	if(Prefs.storageOption === 'ext'){
+	} else if(Prefs.storageOption === 'folder'){
+		var XNotes = await browser.xnote.getAllNotes(Prefs.storageFolder);
+		var QNotes = await browser.qnote.getAllNotes(Prefs.storageFolder);
+		var Notes = Object.assign(XNotes, QNotes);
+		for(let i = 0; i < Notes.length; i++){
+			let note = await createNote(Notes[i].keyId);
+			await note.load();
+			noteList.push(note);
+		}
+	}
+
+	return noteList;
 }
 
 // messageId = int messageId from messageList
@@ -328,18 +344,22 @@ async function loadPrefsWithDefaults() {
 }
 
 async function deleteNoteColumn(note){
-	await browser.qapp.deleteColumnNote(note.keyId);
+	await browser.qapp.deleteNote(note.keyId);
 	await browser.qapp.updateView();
 }
 
-async function updateNoteColumn(note){
+async function updateQAppNote(note){
 	if(note){
-		await browser.qapp.updateColumnNote({
+		return browser.qapp.updateNote({
 			keyId: note.keyId,
 			exists: true,
 			text: note.text
 		});
 	}
+}
+
+async function updateNoteColumn(note){
+	await updateQAppNote(note);
 	await browser.qapp.updateView();
 }
 
