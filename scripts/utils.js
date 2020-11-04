@@ -209,8 +209,7 @@ async function resetNoteForMessage(messageId){
 		note = CurrentNote.note;
 	} else {
 		note = await createNoteForMessage(messageId);
-		let data = await note.load();
-		if(!data){
+		if(await note.load()){
 			return;
 		}
 	}
@@ -319,6 +318,25 @@ async function importXNotes(root){
 	return stats;
 }
 
+async function isReadable(path){
+	return path && await browser.legacy.isReadable(path);
+}
+
+async function getXNoteStoragePath(){
+	let path;
+	let legacyPrefs = legacyPrefsMapper(await browser.xnote.getPrefs());
+
+	if(legacyPrefs.storageFolder){
+		path = legacyPrefs.storageFolder;
+	}
+
+	if(await isReadable(path)){
+		return path;
+	}
+
+	return await browser.xnote.getStoragePath();
+}
+
 async function loadPrefsWithDefaults() {
 	let p = await getPrefs();
 	let defaultPrefs = getDefaultPrefs();
@@ -348,8 +366,17 @@ async function loadPrefsWithDefaults() {
 	}
 
 	if(isEmptyPrefs){
-		// TODO: default xnote folder
-		p.storageOption = p.storageFolder ? 'folder' : 'ext';
+		// By default we set internal storage
+		// If legacy XNote storage_path is set and readable, then use it
+		//  else check if XNote folder exists inside profile directory
+		p.storageOption = 'ext';
+
+		let path = await getXNoteStoragePath();
+
+		if(await isReadable(path)){
+			p.storageOption = 'folder';
+			p.storageFolder = path;
+		}
 	}
 
 	return p;

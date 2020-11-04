@@ -81,7 +81,7 @@ async function savePrefs(){
 	var oldPrefs = Object.assign({}, Prefs);
 
 	if(storageOptionValue() === 'folder'){
-		if(!await isReadable(input_storageFolder.value)){
+		if(!await ext.isReadable(input_storageFolder.value)){
 			setLabelColor('storageOptionFolder', 'red');
 			alert(_("folder.unaccesible", input_storageFolder.value));
 			return false;
@@ -166,30 +166,11 @@ async function initExportStorageButton() {
 	}
 }
 
-async function isReadable(path){
-	return path && await browser.legacy.isReadable(path);
-}
-
-async function getXNoteStoragePath(){
-	var path;
-	var legacyPrefs = ext.legacyPrefsMapper(await browser.xnote.getPrefs());
-
-	if(legacyPrefs.storageFolder){
-		path = legacyPrefs.storageFolder;
-	}
-
-	if(!await isReadable(path)){
-		path = await browser.xnote.getStoragePath();
-	}
-
-	return path;
-}
-
 async function initXNoteImportButton(){
-	var path = await getXNoteStoragePath();
+	var path = await ext.getXNoteStoragePath();
 
 	if(path){
-		if(await isReadable(path)){
+		if(await ext.isReadable(path)){
 			document.getElementById('xnoteFolderInfo').textContent = _("xnote.folder.found", path);
 		} else {
 			document.getElementById('xnoteFolderInfo').textContent = _("xnote.folder.inaccessible", path);
@@ -240,14 +221,14 @@ function storageOptionChange(){
 }
 
 async function storageFolderBrowse(){
-	var path = await getXNoteStoragePath();
+	var path = await ext.getXNoteStoragePath();
 
-	if(!await isReadable(path)){
+	if(!await ext.isReadable(path)){
 		path = await browser.qapp.getProfilePath();
 	}
 
 	let opt = {};
-	if(await isReadable(path)){
+	if(await ext.isReadable(path)){
 		opt.displayDirectory = path;
 	}
 
