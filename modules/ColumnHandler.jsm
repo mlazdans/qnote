@@ -13,29 +13,25 @@ let noteGrabber;
 class QNoteColumnHandler {
 	constructor(folder) {
 		//console.log("new QNoteColumnHandler", noteGrabber.listeners.noterequest);
-		//this.window = window;
 		this.folder = folder;
 		this.window = folder.msgWindow.domWindow;
 		this.view = folder.view.dbView;
-		//this.view = window.gDBView;
 		this.setUpDOM();
 
 		let self = this;
 		let noteListener = (keyId, data, params) => {
 			if(self.view && params && params.row){
-				// Asynchronically here we update note column.
+				// Asynchronically here we update note row
 				// That method is part of Mozilla API and has nothing to do with either XNote or QNote :)
 				self.view.NoteChange(params.row, 1, 2);
 			}
 		}
 
-		// TODO: remove listener
-		//noteGrabber.addListener("noterequest", this.noteListener);
 		noteGrabber.addListener("noterequest", noteListener);
+
 		this.destroy = () => {
 			noteGrabber.removeListener("noterequest", noteListener);
 		}
-		//element.addEventListener('click', this.onclick2.bind(this), false); // Trick
 	}
 
 	setUpDOM() {
@@ -114,13 +110,6 @@ class QNoteColumnHandler {
 		let last = treecols[treecols.length - 1];
 
 		last.parentNode.insertBefore(w.MozXULElement.parseXULToFragment(html), last.nextSibling);
-		//console.log("no col");
-		//w.gFolderDisplay.hintColumnsChanged();
-
-		//if(cStates.qnoteCol === undefined){
-		//w.gFolderDisplay.setColumnStates(cStates);
-		//}
-		//threadCols.appendChild(w.MozXULElement.parseXULToFragment(html));
 	}
 
 	isEditable(row, col) {
@@ -201,9 +190,6 @@ let DBViewListener = {
 		//console.log("onActiveCreatedView", widget);
 	},
 	onDestroyingView: (widget, aFolderIsComingBack) => {
-		//let view = widget.view.dbView;
-		//let qnoteCol = view.getColumnHandler("qnoteCol");
-		//console.log("onDestroyingView");
 		if(widget.qnCH){
 			widget.qnCH.destroy();
 		}
