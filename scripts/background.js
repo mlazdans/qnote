@@ -1,4 +1,5 @@
 // TODO: note optionally next to message
+// TODO: message in new window - alt+q
 var Prefs;
 var CurrentNote;
 var CurrentMessageId;
