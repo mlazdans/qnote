@@ -8,6 +8,38 @@ var { ColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/Co
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
 var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 
+// var QAppWindowObserver = {
+// 	observe: function(aSubject, aTopic) {
+// 		console.log("qapp observe", aTopic);
+// 		if(aTopic === 'domwindowopened'){
+// 			aSubject.addEventListener("DOMContentLoaded", e => {
+// 				let document = e.target;
+// 				if(document.getElementById("mainPopupSet")){
+// 					QAppWindowObserver.lastWindow = aSubject;
+// 				}
+// 			});
+// 		}
+
+// 		if(aTopic === 'domwindowclosed'){
+// 			if(QAppWindowObserver.lastWindow === aSubject){
+// 				QAppWindowObserver.lastWindow = Services.wm.getMostRecentWindow("mail:3pane");
+// 				console.log("match");
+// 			} else {
+// 				console.log("does not match");
+// 			}
+// 		}
+// 	}
+// };
+
+function getQNoteSuitableWindow(){
+	var w = Services.wm.getMostRecentWindow(null);
+	if(w.document.getElementById("mainPopupSet")){
+		return w;
+	}
+
+	return Services.wm.getMostRecentWindow("mail:3pane");
+}
+
 var qapp = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown() {
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
@@ -15,10 +47,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		ColumnHandler.uninstall();
 		NoteFilter.uninstall();
 
+		//Services.ww.unregisterNotification(QAppWindowObserver);
+
 		Components.utils.unload(extension.rootURI.resolve("modules/ColumnHandler.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/NotePopup.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 	}
+
 	getAPI(context) {
 		var wex = Components.utils.waiveXrays(context.cloneScope);
 
@@ -107,14 +142,23 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				async init(){
 					this.popups = new Map();
 
+					//QAppWindowObserver.lastWindow = Services.wm.getMostRecentWindow("mail:3pane");
+					//Services.ww.registerNotification(QAppWindowObserver);
+
 					this.installQuickFilter();
 					this.installColumnHandler();
 				},
 				async messagesFocus(){
-					try {
-						Services.wm.getMostRecentWindow("mail:3pane").gFolderDisplay.tree.focus();
-					} catch {
+					let w = getQNoteSuitableWindow();
+					if(w.gFolderDisplay && w.gFolderDisplay.tree){
+						w.gFolderDisplay.tree.focus();
+						//w = Services.wm.getMostRecentWindow("mail:3pane");
 					}
+					// try {
+					// 	//Services.wm.getMostRecentWindow("mail:3pane").gFolderDisplay.tree.focus();
+					// 	//QAppWindowObserver.lastWindow.gFolderDisplay.tree.focus();
+					// } catch {
+					// }
 				},
 				async popupClose(id){
 					if(this.popups.has(id)){
@@ -137,7 +181,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				},
 				async popup(opt){
 					var self = this;
-					var window = Services.wm.getMostRecentWindow(null);
+					//var window = Services.wm.getMostRecentWindow(null);
+					//var window = QAppWindowObserver.lastWindow;
+					var window = getQNoteSuitableWindow();
 
 					let escaper = e => {
 						if(e.key === 'Escape'){
@@ -241,7 +287,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					});
 				},
 				async updateView(){
-					let gFolderDisplay = Services.wm.getMostRecentWindow(null).gFolderDisplay;
+					//let gFolderDisplay = Services.wm.getMostRecentWindow(null).gFolderDisplay;
+					//let gFolderDisplay = QAppWindowObserver.lastWindow.gFolderDisplay;
+					let gFolderDisplay = getQNoteSuitableWindow().gFolderDisplay;
 					if(gFolderDisplay){
 						gFolderDisplay.hintColumnsChanged();
 					}
