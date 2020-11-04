@@ -39,7 +39,9 @@ class NoteWindow {
 	}
 
 	async close() {
-		focusCurrentWindow();
+		if(this.windowId){
+			focusCurrentWindow();
+		}
 	}
 
 	async pop() {
