@@ -138,7 +138,6 @@ let Observer = {
 		}
 
 		view.addColumnHandler("qnoteCol", handler);
-		//console.log("addColumnHandler");
 		w.gFolderDisplay.hintColumnsChanged();
 	}
 };
@@ -166,22 +165,9 @@ ColumnHandler = {
 			}
 		});
 
-		var eObservers = Services.obs.enumerateObservers("MsgCreateDBView");
-		while (eObservers.hasMoreElements()) {
-			var o = eObservers.getNext().QueryInterface(Ci.nsIObserver);
-			Services.obs.removeObserver(o, "MsgCreateDBView");
-		}
-
 		Services.obs.addObserver(ColumnHandler.Observer, "MsgCreateDBView", false);
 	},
 	uninstall() {
-		// for(let k of ColumnHandler.handlers){
-		// 	try {
-		// 		k.removeColumnHandler("qnoteCol");
-		// 	} catch {
-		// 	}
-		// }
-
 		try {
 			Services.obs.removeObserver(ColumnHandler.Observer, "MsgCreateDBView");
 		} catch {
