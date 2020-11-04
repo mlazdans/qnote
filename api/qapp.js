@@ -105,8 +105,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				async init(){
 					this.popups = new Map();
 
-					await this.installQuickFilter();
-					await this.installColumnHandler();
+					this.installQuickFilter();
+					this.installColumnHandler();
 				},
 				async messagesFocus(){
 					try {

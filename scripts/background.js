@@ -127,28 +127,28 @@ async function initExtension(){
 		// });
 	});
 
-	//browser.qapp.updateView();
+	browser.qapp.updateView();
 }
 
-initExtension();
+//initExtension();
 
 // window.addEventListener("load", ()=>{
 // 	initExtension();
 // });
 
-// async function waitForLoad() {
-// 	let windows = await browser.windows.getAll({windowTypes:["normal"]});
-// 	if (windows.length > 0) {
-// 		return false;
-// 	}
+async function waitForLoad() {
+	let windows = await browser.windows.getAll({windowTypes:["normal"]});
+	if (windows.length > 0) {
+		return false;
+	}
 
-// 	return new Promise(function(resolve, reject) {
-// 		function listener() {
-// 			browser.windows.onCreated.removeListener(listener);
-// 			resolve(true);
-// 		}
-// 		browser.windows.onCreated.addListener(listener);
-// 	});
-// }
+	return new Promise(function(resolve, reject) {
+		function listener() {
+			browser.windows.onCreated.removeListener(listener);
+			resolve(true);
+		}
+		browser.windows.onCreated.addListener(listener);
+	});
+}
 
-// waitForLoad().then((isAppStartup) => initExtension());
+waitForLoad().then(isAppStartup => initExtension());
