@@ -1,5 +1,4 @@
 // TODO: note optionally next to message
-// TODO: columnhandler in search dialog
 var Prefs;
 var CurrentNote;
 var CurrentMessageId;

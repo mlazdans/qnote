@@ -28,12 +28,15 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			//  data - note data
 			//  params - misc params passed to getNote()
 			listeners: {
-				"noterequest": []
+				"noterequest": new Set()
 			},
 			noteBlocker: new Map(),
-			NotesCache: [],
+			NotesCache: [], // TODO: Set(), Map()?
+			removeListener(name, listener){
+				noteGrabber.listeners[name].delete(listener);
+			},
 			addListener(name, listener){
-				noteGrabber.listeners[name].push(listener);
+				noteGrabber.listeners[name].add(listener);
 			},
 			saveNoteCache(note){
 				noteGrabber.NotesCache[note.keyId] = note;
@@ -68,7 +71,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					return Object.assign({}, note);
 				} else {
-					var onNoteRequest = async (keyId) => {
+					let onNoteRequest = async (keyId) => {
 						var data = await wex.loadNote(keyId);
 						if(data){
 							return {
@@ -87,9 +90,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					onNoteRequest(keyId).then(data => {
 						self.saveNoteCache(data);
 
-						let listeners = noteGrabber.listeners['noterequest'];
-						for(let i =0; i < listeners.length; i++){
-							listeners[i](keyId, data, params);
+						for (let listener of noteGrabber.listeners.noterequest) {
+							listener(keyId, data, params);
 						}
 
 						blocker.delete(keyId);
@@ -186,7 +188,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 						try {
 							let focus = wex.Prefs.focusOnDisplay || !wex.CurrentNote.note.text;
-							if(!focus){
+							if(!focus && window.gFolderDisplay && window.gFolderDisplay.tree){
 								window.gFolderDisplay.tree.focus();
 							}
 						} catch(e) {
@@ -238,9 +240,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						noteGrabber: noteGrabber
 					});
 				},
-				// TODO: rename column view update
 				async updateView(){
-					ColumnHandler.Observer.observe();
+					let gFolderDisplay = Services.wm.getMostRecentWindow(null).gFolderDisplay;
+					if(gFolderDisplay){
+						gFolderDisplay.hintColumnsChanged();
+					}
 				},
 				async updateNote(note){
 					noteGrabber.saveNoteCache(note);
