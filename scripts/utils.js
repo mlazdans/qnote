@@ -138,17 +138,29 @@ async function loadNote(keyId) {
 }
 
 async function loadAllNotes() {
+	let Notes = [];
 	let noteList = [];
+
 	if(Prefs.storageOption === 'ext'){
-	} else if(Prefs.storageOption === 'folder'){
-		var XNotes = await browser.xnote.getAllNotes(Prefs.storageFolder);
-		var QNotes = await browser.qnote.getAllNotes(Prefs.storageFolder);
-		var Notes = Object.assign(XNotes, QNotes);
-		for(let i = 0; i < Notes.length; i++){
-			let note = await createNote(Notes[i].keyId);
-			await note.load();
-			noteList.push(note);
+		// TODO: move notes and prefs in separete namespace
+		let storage = await browser.storage.local.get(null);
+		for(let keyId in storage){
+			if(keyId.substr(0, 5) !== 'pref.') {
+				Notes.push({
+					keyId: keyId
+				});
+			}
 		}
+	} else if(Prefs.storageOption === 'folder'){
+		let XNotes = await browser.xnote.getAllNotes(Prefs.storageFolder);
+		let QNotes = await browser.qnote.getAllNotes(Prefs.storageFolder);
+		Notes = Object.assign(XNotes, QNotes);
+	}
+
+	for(let i = 0; i < Notes.length; i++){
+		let note = createNote(Notes[i].keyId);
+		await note.load();
+		noteList.push(note);
 	}
 
 	return noteList;
