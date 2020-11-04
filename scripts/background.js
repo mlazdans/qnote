@@ -1,4 +1,5 @@
 // TODO: note optionally next to message
+// TODO: columnhandler in search dialog
 var Prefs;
 var CurrentNote;
 var CurrentMessageId;
@@ -116,25 +117,10 @@ async function initExtension(){
 	browser.messageDisplay.onMessageDisplayed.addListener((tab, message) => {
 		CurrentMessageId = message.id;
 		return QNoteTabPop(tab, false, Prefs.showOnSelect, false);
-		// browser.tabs.get(getTabId(tab)).then(tab => {
-		// 	// Pop only on main tab. Perhaps need configurable?
-		// 	if(tab.mailTab){
-		// 		// Pop only if message changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
-		// 		if(!CurrentNote.windowId || (CurrentNote.messageId !== message.id)){
-		// 			CurrentNote.pop(message.id, false, Prefs.showOnSelect);
-		// 		}
-		// 	}
-		// });
 	});
 
 	browser.qapp.updateView();
 }
-
-//initExtension();
-
-// window.addEventListener("load", ()=>{
-// 	initExtension();
-// });
 
 async function waitForLoad() {
 	let windows = await browser.windows.getAll({windowTypes:["normal"]});
