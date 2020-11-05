@@ -54,6 +54,9 @@ class QNoteColumnHandler {
 			return;
 		}
 
+		// TODO: check database for column state (see sample folderDisplay.js)?
+		// let msgDatabase = this.view.displayedFolder.msgDatabase;
+
 		// http://wbamberg.github.io/idl-reference/docs/nsIXULStore.html
 		let width = 24;
 		let ordinal;
