@@ -246,12 +246,25 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						// https://developer.mozilla.org/en-US/docs/Archive/Mozilla/XUL/Method/openPopup
 						// https://developer.mozilla.org/en-US/docs/Archive/Mozilla/XUL/PopupGuide/Positioning
 						// Possible values for position are:
-						// before_start, before_end, after_start, after_end, start_before, start_after,
-						// end_before, end_after, overlap, and after_pointer.
+						// before_start, before_end, after_start, after_end,
+						// start_before, start_after, end_before, end_after
+						// overlap, after_pointer
+
+						let anchor = null;
+
+						// threadPaneBox, messagepanewrapper, status-bar, folderPaneBox
+						// anchor = window.document.getElementById('folderPaneBox');
+						// if(!anchor){
+						// 	anchor = null;
+						// }
+
+						// console.log("anchor", anchor);
+						// n.viewNode.openPopup(anchor, "bottomcenter bottomright");
+
 						if(opt.left && opt.top) {
-							n.viewNode.openPopup(null, "topleft", opt.left, opt.top);
+							n.viewNode.openPopup(anchor, "topleft", opt.left, opt.top);
 						} else {
-							n.viewNode.openPopup(null, "topleft");
+							n.viewNode.openPopup(anchor, "topleft");
 						}
 
 						n.browser.addEventListener("DOMContentLoaded", ()=>{
