@@ -302,9 +302,27 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				async updateView(){
 					//let gFolderDisplay = Services.wm.getMostRecentWindow(null).gFolderDisplay;
 					//let gFolderDisplay = QAppWindowObserver.lastWindow.gFolderDisplay;
-					let gFolderDisplay = getQNoteSuitableWindow().gFolderDisplay;
+					let w = getQNoteSuitableWindow();
+					let gFolderDisplay = w.gFolderDisplay;
 					if(gFolderDisplay){
-						gFolderDisplay.hintColumnsChanged();
+						let view = gFolderDisplay.view.dbView;
+						//let rangeCount = treeSelection.getRangeCount();
+						//console.log("updateView", view.rowCount, gFolderDisplay.tree.currentIndex, view.currentlyDisplayedMessage);
+						// nsIMsgDBView.idl
+						// NoteChange(nsMsgViewIndex, PRInt32, nsMsgViewNotificationCodeValue)
+						// const nsMsgViewNotificationCodeValue changed = 2;
+						/**
+						 * Notify tree that rows have changed.
+						 *
+						 * @param aFirstLineChanged   first view index for changed rows.
+						 * @param aNumRows            number of rows changed; < 0 means removed.
+						 * @param aChangeType         changeType.
+						 */
+						// void NoteChange(in nsMsgViewIndex aFirstLineChanged, in long aNumRows,
+						// 	in nsMsgViewNotificationCodeValue aChangeType);
+
+						// TODO: probably a good idea to change all rows in a view or at least add func parameter
+						view.NoteChange(view.currentlyDisplayedMessage, 1, 2);
 					}
 				},
 				async updateNote(note){
