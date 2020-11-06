@@ -1,5 +1,6 @@
 // TODO: note optionally next to message
 // TODO: message in new window - alt+q
+// TODO: save note only if changed properties
 var Prefs;
 var CurrentNote;
 var CurrentMessageId;
