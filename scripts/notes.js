@@ -8,6 +8,25 @@ class Note {
 		this.text = '';
 		this.ts;
 		this.loadedNote;
+		this.modified = false;
+		this.created = false;
+	}
+
+	isNotesEqual(n1, n2){
+		let k1 = Object.keys(n1);
+		let k2 = Object.keys(n2);
+
+		if(k1.length != k2.length){
+			return false;
+		}
+
+		for(let k of k1){
+			if(n1[k] !== n2[k]){
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	load(data){
@@ -36,6 +55,9 @@ class Note {
 			if(this.loadedNote.text !== this.text){
 				data.ts = Date.now();
 			}
+			this.modified = !this.isNotesEqual(this.loadedNote, data);
+		} else {
+			this.created = true;
 		}
 
 		return this.reset(data);
@@ -123,9 +145,13 @@ class QNoteFolder extends Note {
 	async save(){
 		var data = super.save();
 
-		return browser.qnote.saveNote(this.root, this.keyId, data).then(()=>{
+		if(this.modified || this.created) {
+			return browser.qnote.saveNote(this.root, this.keyId, data).then(()=>{
+				return data;
+			});
+		} else {
 			return data;
-		});
+		}
 	}
 
 	async delete() {
