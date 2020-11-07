@@ -91,7 +91,7 @@ img {
 	background-position: bottom right;
 }
 
-textarea {
+#qnote-text {
 	color: black;
 	resize: none;
 	width: 100%;
