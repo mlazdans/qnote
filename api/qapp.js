@@ -196,9 +196,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 								return;
 							}
 
-							let qnotes = document.getElementsByClassName('qnote-insidenote');
-							for(let i = 0; i < qnotes.length; i++){
-								qnotes[i].remove();
+							let domNodes = document.getElementsByClassName('qnote-insidenote');
+							while(domNodes.length){
+								domNodes[0].remove();
 							}
 
 							if(
@@ -443,9 +443,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return;
 					}
 
-					let qnotes = document.getElementsByClassName('qnote-insidenote');
-					for(let i = 0; i < qnotes.length; i++){
-						qnotes[i].remove();
+					let domNodes = document.getElementsByClassName('qnote-insidenote');
+					while(domNodes.length){
+						domNodes[0].remove();
 					}
 
 					let formated = formatQNoteHTML(data);
