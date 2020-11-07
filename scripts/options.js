@@ -131,6 +131,10 @@ async function savePrefs(){
 				ext.reloadExtension();
 			}
 
+			if(Prefs.enableSearch !== oldPrefs.enableSearch){
+				ext.reloadExtension();
+			}
+
 			await browser.qapp.updateView();
 		}
 	});
