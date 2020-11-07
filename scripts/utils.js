@@ -10,8 +10,11 @@ function getDefaultPrefs() {
 		focusOnDisplay: false,
 		windowOption: "xul",
 		storageOption: "folder",
-		storageFolder: ""//,
-		//version: browser.runtime.getManifest().version
+		storageFolder: "",
+		enableSearch: false, // defaults to false for now, because of poor implementation
+		enablePrint: true,
+		printAttachBottom: true,
+		printAttachTop: false
 	};
 }
 
@@ -392,7 +395,8 @@ async function updateQAppNote(note){
 		return browser.qapp.updateNote({
 			keyId: note.keyId,
 			exists: true,
-			text: note.text
+			text: note.text,
+			ts: note.ts
 		});
 	}
 }
@@ -447,6 +451,8 @@ function QNoteTabPop(tab, createNew = true, doPop = true, doFocus = true) {
 					CurrentNote.focus();
 				}
 			});
+		} else if(CurrentNote.windowId) {
+			CurrentNote.close();
 		}
 	});
 };
