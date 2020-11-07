@@ -13,8 +13,8 @@ function getDefaultPrefs() {
 		storageFolder: "",
 		enableSearch: false, // defaults to false for now, because of poor implementation
 		enablePrintAttach: true,
-		printAttachBottom: true,
-		printAttachTop: false,
+		printAttachBottom: false,
+		printAttachTop: true,
 		enableMessageAttach: false,
 		messageAttachBottom: false,
 		messageAttachTop: true
