@@ -38,7 +38,7 @@ class Note {
 			}
 		}
 
-		return data;
+		return this.reset(data);
 	}
 }
 
