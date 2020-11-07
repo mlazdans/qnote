@@ -8,7 +8,7 @@ var { ColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/Co
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
 var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 
-QAppWindowObserver = {
+var QAppWindowObserver = {
 	listeners: {
 		"domwindowopened": new Set(),
 		"domwindowclosed": new Set()
@@ -26,7 +26,28 @@ QAppWindowObserver = {
 			}
 		}
 	}
-}
+};
+
+// TODO: make consistent with popups
+var formatQNoteHTML = data => {
+	// https://searchfox.org/mozilla-central/source/dom/base/nsIDocumentEncoder.idl
+	let flags =
+		Ci.nsIDocumentEncoder.OutputForPlainTextClipboardCopy
+		// Ci.nsIDocumentEncoder.OutputDropInvisibleBreak |
+		// Ci.nsIDocumentEncoder.OutputFormatFlowed
+		// Ci.nsIDocumentEncoder.OutputFormatted |
+		// Ci.nsIDocumentEncoder.OutputLFLineBreak
+		;
+
+	// Strip tags, etc
+	let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
+	let text = parserUtils.convertToPlainText(data.text, flags, 0);
+
+	return {
+		title: 'QNote: ' + (new Date(data.ts)).toLocaleString(),
+		text: text
+	}
+};
 
 var qapp = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown() {
@@ -152,9 +173,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				printerQNoteAttacher(aSubject) {
 					let domLoadedEvent = e => {
 						let document = e.target;
-						if(
-							!document.URL.includes('chrome://messenger/content/msgPrintEngine')
-						){
+						if(!document.URL.includes('chrome://messenger/content/msgPrintEngine')){
 							return;
 						}
 
@@ -166,7 +185,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 							return;
 						}
 
-						pDocument.addEventListener("DOMContentLoaded", e => {
+						let printerWindowDOMListener = e => {
 							let document = e.target;
 
 							let body = document.getElementsByTagName('body');
@@ -201,29 +220,24 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 								return;
 							}
 
-							// Strip tags
-							let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
-							let text = parserUtils.convertToPlainText(
-								note.text,
-								Ci.nsIDocumentEncoder.OutputForPlainTextClipboardCopy,
-								0
-							);
+							let formated = formatQNoteHTML(note);
 
-							let date = (new Date(note.ts)).toLocaleString();
 							let html = `<div class="qnote-insidenote" style="margin: 0; padding: 0; border: 1px solid black;">
-								<div style="border-bottom: 1px solid black;">QNote: ${date}</div>
-								<div>${text}</div>
+								<div style="border-bottom: 1px solid black;">${formated.title}</div>
+								<div>${formated.text}</div>
 							</div>`;
 
 							if(wex.Prefs.printAttachTop){
-								body.insertAdjacentHTML('afterbegin', html + '<br>');
+								body.insertAdjacentHTML('afterbegin', html);
 							}
 
 							if(wex.Prefs.printAttachBottom){
-								body.insertAdjacentHTML('beforeend', '<br>' + html);
+								body.insertAdjacentHTML('beforeend', html);
 							}
-						});
+						};
+						pDocument.addEventListener("DOMContentLoaded", printerWindowDOMListener);
 					};
+
 					aSubject.addEventListener("DOMContentLoaded", domLoadedEvent);
 				},
 				async init(){
@@ -412,22 +426,17 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				},
 				async attachNoteToMessage(data){
 					let w = this.getMessageSuitableWindow();
-					let document = w.document;
-					// let messengerBundle = w.document.getElementById("bundle_messenger");
-					// let content = w.document.getElementById("content");
-					// console.log("attachNoteToMessage", content, messengerBundle);
-					// return;
+					let messagepane = w.document.getElementById('messagepane');
+					let document = messagepane.contentDocument;
+					// let gFolderDisplay = w.gFolderDisplay;
+					// let gMessageDisplay = w.gMessageDisplay;
+					// let view;
+					// if(gFolderDisplay){
+					// 	view = gFolderDisplay.view.dbView;
+					// }
 
-					let messagepane = document.getElementById('messagepane');
-					let gFolderDisplay = w.gFolderDisplay;
-					let gMessageDisplay = w.gMessageDisplay;
-					let view;
 
-					if(gFolderDisplay){
-						view = gFolderDisplay.view.dbView;
-					}
-
-					let body = messagepane.contentDocument.getElementsByTagName('body');
+					let body = document.getElementsByTagName('body');
 					if(body){
 						body = body[0];
 					} else {
@@ -439,6 +448,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						qnotes[i].remove();
 					}
 
+					let formated = formatQNoteHTML(data);
 
 					let css = `<style>
 					.qnote-title {
@@ -464,16 +474,16 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					let html = `<div class="qnote-insidenote">
 						${css}
-						<div class="qnote-title">Title</div>
-						<div class="qnote-text">Text</div>
+						<div class="qnote-title">${formated.title}</div>
+						<div class="qnote-text">${formated.text}</div>
 					</div>`;
 
 					if(wex.Prefs.messageAttachTop){
-						body.insertAdjacentHTML('afterbegin', html + '<br>');
+						body.insertAdjacentHTML('afterbegin', html);
 					}
 
 					if(wex.Prefs.messageAttachBottom){
-						body.insertAdjacentHTML('beforeend', '<br>' + html);
+						body.insertAdjacentHTML('beforeend', html);
 					}
 				},
 				async updateNote(note){
