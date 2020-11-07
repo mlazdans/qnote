@@ -19,9 +19,7 @@ let WindowObserver = {
 			aSubject.addEventListener("DOMContentLoaded", e => {
 				let document = e.target;
 
-				if(document.URL !== 'chrome://messenger/content/messenger.xul' &&
-					document.URL !== 'chrome://messenger/content/messenger.xhtml'
-				) {
+				if(!document.URL.includes('chrome://messenger/content/messenger')){
 					return;
 				}
 
