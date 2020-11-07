@@ -44,7 +44,37 @@ class NoteWindow {
 		// }
 	}
 
-	async pop() {
+	async pop(messageId, createNew, pop, popper) {
+		if(this.popping){
+			return;
+		}
+
+		await this.close();
+
+		var note = await createNoteForMessage(messageId);
+
+		if(!note.keyId){
+			if(createNew){
+				await browser.legacy.alert(_("no.message_id.header"));
+			}
+			return;
+		}
+
+		this.popping = true;
+		this.note = note;
+		this.messageId = messageId;
+
+		var data = await note.load();
+
+		await updateMessageDisplayIcon(data?true:false);
+
+		if((data && pop) || createNew){
+			popper(note).finally(()=>{
+				this.popping = false;
+			});
+		} else {
+			this.popping = false;
+		}
 	}
 }
 
@@ -90,25 +120,11 @@ class WebExtensionNoteWindow extends NoteWindow {
 	}
 
 	async pop(messageId, createNew = false, pop = false) {
-		if(this.popping){
-			return;
-		}
-
-		if(this.messageId === messageId){
-			await this.focus();
-			return;
-		}
-
-		await this.close();
-
-		this.popping = true;
-
-		var note = await createNoteForMessage(messageId);
-		var data = await note.load();
-
-		await updateMessageDisplayIcon(data?true:false);
-
-		if((data && pop) || createNew){
+		// if(this.messageId === messageId){
+		// 	await this.focus();
+		// 	return;
+		// }
+		let popper = async note => {
 			let opt = {
 				url: "html/popup.html",
 				type: "popup",
@@ -118,21 +134,14 @@ class WebExtensionNoteWindow extends NoteWindow {
 				top: note.y || Prefs.y
 			};
 
-			this.note = note;
-			this.messageId = messageId;
+			return browser.windows.create(opt).then(windowInfo => {
+				this.windowId = windowInfo.id;
 
-			return browser.windows
-				.create(opt)
-				.then((windowInfo)=>{
-					this.windowId = windowInfo.id;
+				return true;
+			});
+		};
 
-					return true;
-				}).finally(()=>{
-					this.popping = false;
-				});
-		} else {
-			this.popping = false;
-		}
+		return super.pop(messageId, createNew, pop, popper);
 	}
 }
 
@@ -166,30 +175,8 @@ class XULNoteWindow extends NoteWindow {
 	}
 
 	async pop(messageId, createNew = false, pop = false) {
-		if(this.popping){
-			return;
-		}
-
-		await this.close();
-
-		var note = await createNoteForMessage(messageId);
-
-		if(!note.keyId){
-			if(createNew){
-				await browser.legacy.alert(_("no.message_id.header"));
-			}
-			return;
-		}
-
-		this.popping = true;
-
-		var data = await note.load();
-
-		await updateMessageDisplayIcon(data?true:false);
-
-		let w = await browser.windows.getCurrent();
-
-		if((data && pop) || createNew){
+		let popper = async note => {
+			let w = await browser.windows.getCurrent();
 			note.width = note.width || Prefs.width;
 			note.height = note.height || Prefs.height;
 			let opt = {
@@ -211,18 +198,16 @@ class XULNoteWindow extends NoteWindow {
 			opt.left += w.left;
 			opt.top += w.top;
 
-			this.note = note;
-			this.messageId = messageId;
+			// this.note = note;
+			// this.messageId = messageId;
 
 			return browser.qapp.popup(opt).then(windowId => {
 				this.windowId = windowId;
 
 				return true;
-			}).finally(()=>{
-				this.popping = false;
 			});
-		} else {
-			this.popping = false;
-		}
+		};
+
+		return super.pop(messageId, createNew, pop, popper);
 	}
 }
