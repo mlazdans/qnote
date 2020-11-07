@@ -51,7 +51,8 @@
 	"delete": { "message": "Delete" },
 
 	"enable.search": { "message": "Enable search" },
-	"enable.print": { "message": "Enable print" },
-	"attach.bottom": { "message": "attach page bottom" },
-	"attach.top": { "message": "attach page top" }
+	"enable.print_attach": { "message": "Attach to print" },
+	"attach.bottom": { "message": "bottom" },
+	"attach.top": { "message": "top" },
+	"enable.message_attach": { "message": "Attach to message" }
 }

@@ -12,9 +12,12 @@ function getDefaultPrefs() {
 		storageOption: "folder",
 		storageFolder: "",
 		enableSearch: false, // defaults to false for now, because of poor implementation
-		enablePrint: true,
+		enablePrintAttach: true,
 		printAttachBottom: true,
-		printAttachTop: false
+		printAttachTop: false,
+		enableMessageAttach: false,
+		messageAttachBottom: false,
+		messageAttachTop: true
 	};
 }
 
@@ -446,7 +449,7 @@ function QNoteTabPop(tab, createNew = true, doPop = true, doFocus = true) {
 
 		// Pop only if message changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
 		if(!CurrentNote.windowId || (CurrentNote.messageId !== message.id)){
-			CurrentNote.pop(message.id, createNew, doPop).then(()=>{
+			CurrentNote.pop(message.id, createNew, doPop).then(data => {
 				if(doFocus){
 					CurrentNote.focus();
 				}

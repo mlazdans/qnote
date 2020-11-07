@@ -231,7 +231,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					//Services.obs.addObserver(MsgMsgDisplayed, "MsgMsgDisplayed");
 
-					if(wex.Prefs.enablePrint){
+					if(wex.Prefs.enablePrintAttach){
 						Services.ww.registerNotification(QAppWindowObserver);
 						QAppWindowObserver.addListener('domwindowopened', this.printerQNoteAttacher);
 					}
@@ -411,14 +411,14 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 				},
 				async attachNoteToMessage(data){
-					return;
 					let w = this.getMessageSuitableWindow();
-					let messengerBundle = w.document.getElementById("bundle_messenger");
-					let content = w.document.getElementById("content");
-					console.log("attachNoteToMessage", content, messengerBundle);
-					return;
+					let document = w.document;
+					// let messengerBundle = w.document.getElementById("bundle_messenger");
+					// let content = w.document.getElementById("content");
+					// console.log("attachNoteToMessage", content, messengerBundle);
+					// return;
 
-					let messagepane = w.document.getElementById('messagepane');
+					let messagepane = document.getElementById('messagepane');
 					let gFolderDisplay = w.gFolderDisplay;
 					let gMessageDisplay = w.gMessageDisplay;
 					let view;
@@ -434,11 +434,14 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return;
 					}
 
-					let ob = {
+					let qnotes = document.getElementsByClassName('qnote-insidenote');
+					for(let i = 0; i < qnotes.length; i++){
+						qnotes[i].remove();
 					}
 
+
 					let css = `<style>
-					#qnote-title {
+					.qnote-title {
 						color: black;
 						background-color: #fff08d;
 						display: flex;
@@ -449,7 +452,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						margin: 0;
 						padding: 6px;
 					}
-					#qnote-text {
+					.qnote-text {
 						color: black;
 						box-sizing: border-box;
 						margin: 0;
@@ -459,13 +462,19 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 					</style>`;
 
-					let html = `<div id="qnote-insidenote">
-						<div id="qnote-title">Title</div>
-						<div id="qnote-text">Text</div>
+					let html = `<div class="qnote-insidenote">
+						${css}
+						<div class="qnote-title">Title</div>
+						<div class="qnote-text">Text</div>
 					</div>`;
 
-					body.insertAdjacentHTML('afterbegin', html);
-					body.insertAdjacentHTML('afterbegin', css);
+					if(wex.Prefs.messageAttachTop){
+						body.insertAdjacentHTML('afterbegin', html + '<br>');
+					}
+
+					if(wex.Prefs.messageAttachBottom){
+						body.insertAdjacentHTML('beforeend', '<br>' + html);
+					}
 				},
 				async updateNote(note){
 					noteGrabber.saveNoteCache(note);

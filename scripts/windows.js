@@ -68,6 +68,14 @@ class NoteWindow {
 
 		await updateMessageDisplayIcon(data?true:false);
 
+		if(data && Prefs.enableMessageAttach){
+			await browser.qapp.attachNoteToMessage({
+				keyId: note.keyId,
+				text: data.text,
+				ts: data.ts
+			});
+		}
+
 		if((data && pop) || createNew){
 			popper(note).finally(()=>{
 				this.popping = false;
