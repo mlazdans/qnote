@@ -12,7 +12,34 @@
 		"description": "",
 		"async": true,
 		"parameters": []
-	},			{
+	},{
+		"name": "attachNoteToMessage",
+		"type": "function",
+		"description": "",
+		"async": true,
+		"parameters": [{
+			"name": "data",
+			"type": "object",
+			"properties": {
+				"keyId": {
+					"type": "string",
+					"default": "",
+					"description": ""
+				},
+				"ts": {
+					"type": "integer",
+					"default": 0,
+					"description": ""
+				},
+				"text": {
+					"type": "string",
+					"default": "",
+					"description": ""
+				}
+			},
+			"description": "Note object"
+		}]
+	},{
 		"name": "updateNote",
 		"type": "function",
 		"description": "",
@@ -29,6 +56,10 @@
 				"exists": {
 					"type": "boolean",
 					"default": true,
+					"description": ""
+				},
+				"ts": {
+					"type": "integer",
 					"description": ""
 				},
 				"text": {

@@ -48,5 +48,10 @@
 	"window.option.webext": { "message": "Popup window" },
 
 	"close.and.save": { "message": "Close and save" },
-	"delete": { "message": "Delete" }
+	"delete": { "message": "Delete" },
+
+	"enable.search": { "message": "Enable search" },
+	"enable.print": { "message": "Enable print" },
+	"attach.bottom": { "message": "attach page bottom" },
+	"attach.top": { "message": "attach page top" }
 }

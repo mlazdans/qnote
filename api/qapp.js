@@ -8,36 +8,24 @@ var { ColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/Co
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
 var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 
-// var QAppWindowObserver = {
-// 	observe: function(aSubject, aTopic) {
-// 		console.log("qapp observe", aTopic);
-// 		if(aTopic === 'domwindowopened'){
-// 			aSubject.addEventListener("DOMContentLoaded", e => {
-// 				let document = e.target;
-// 				if(document.getElementById("mainPopupSet")){
-// 					QAppWindowObserver.lastWindow = aSubject;
-// 				}
-// 			});
-// 		}
-
-// 		if(aTopic === 'domwindowclosed'){
-// 			if(QAppWindowObserver.lastWindow === aSubject){
-// 				QAppWindowObserver.lastWindow = Services.wm.getMostRecentWindow("mail:3pane");
-// 				console.log("match");
-// 			} else {
-// 				console.log("does not match");
-// 			}
-// 		}
-// 	}
-// };
-
-function getQNoteSuitableWindow(){
-	var w = Services.wm.getMostRecentWindow(null);
-	if(w.document.getElementById("mainPopupSet")){
-		return w;
+QAppWindowObserver = {
+	listeners: {
+		"domwindowopened": new Set(),
+		"domwindowclosed": new Set()
+	},
+	removeListener(name, listener){
+		QAppWindowObserver.listeners[name].delete(listener);
+	},
+	addListener(name, listener){
+		QAppWindowObserver.listeners[name].add(listener);
+	},
+	observe: function(aSubject, aTopic, aData) {
+		if(aTopic === 'domwindowopened' || aTopic === 'domwindowclosed'){
+			for (let listener of QAppWindowObserver.listeners[aTopic]) {
+				listener(aSubject, aTopic, aData);
+			}
+		}
 	}
-
-	return Services.wm.getMostRecentWindow("mail:3pane");
 }
 
 var qapp = class extends ExtensionCommon.ExtensionAPI {
@@ -47,7 +35,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		ColumnHandler.uninstall();
 		NoteFilter.uninstall();
 
-		//Services.ww.unregisterNotification(QAppWindowObserver);
+		Services.ww.unregisterNotification(QAppWindowObserver);
+		//Services.obs.removeObserver(this.MsgMsgDisplayed, "MsgMsgDisplayed");
 
 		Components.utils.unload(extension.rootURI.resolve("modules/ColumnHandler.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/NotePopup.jsm"));
@@ -56,6 +45,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 	getAPI(context) {
 		var wex = Components.utils.waiveXrays(context.cloneScope);
+		//var QAppWindowObserver = this.QAppWindowObserver;
+		//var MsgMsgDisplayed = this.MsgMsgDisplayed;
 
 		var noteGrabber = {
 			// function noterequest(keyId, data, params)
@@ -112,7 +103,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 							return {
 								keyId: keyId,
 								exists: true,
-								text: data.text
+								text: data.text,
+								ts: data.ts
 							}
 						} else {
 							return {
@@ -139,26 +131,123 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		return {
 			qapp: {
+				getMessageSuitableWindow(){
+					let w = Services.wm.getMostRecentWindow(null);
+
+					if(w.document.getElementById("messagepane")){
+						return w;
+					}
+
+					return Services.wm.getMostRecentWindow("mail:3pane");
+				},
+				getQNoteSuitableWindow(){
+					let w = Services.wm.getMostRecentWindow(null);
+
+					if(w.document.getElementById("mainPopupSet")){
+						return w;
+					}
+
+					return Services.wm.getMostRecentWindow("mail:3pane");
+				},
+				printerQNoteAttacher(aSubject) {
+					let domLoadedEvent = e => {
+						let document = e.target;
+						if(
+							!document.URL.includes('chrome://messenger/content/msgPrintEngine')
+						){
+							return;
+						}
+
+						let messageUrisToPrint = document.defaultView.arguments[1];
+
+						let pDocument = document.getElementById('content');
+						if(!pDocument){
+							console.log("Print content not found");
+							return;
+						}
+
+						pDocument.addEventListener("DOMContentLoaded", e => {
+							let document = e.target;
+
+							let body = document.getElementsByTagName('body');
+							if(body){
+								body = body[0];
+							} else {
+								console.log("Body not found");
+								return;
+							}
+
+							let qnotes = document.getElementsByClassName('qnote-insidenote');
+							for(let i = 0; i < qnotes.length; i++){
+								qnotes[i].remove();
+							}
+
+							if(
+								document.URL === 'about:blank' ||
+								!aSubject.opener ||
+								!aSubject.opener.messenger ||
+								!messageUrisToPrint ||
+								!messageUrisToPrint.shift
+							){
+								return;
+							}
+
+							let messenger = aSubject.opener.messenger;
+
+							//let uri =  "imap-message://dev%40dqdp.net@mail.dqdp.net/INBOX#13";
+							let msg = messenger.msgHdrFromURI(messageUrisToPrint.shift());
+							let note = noteGrabber.getNote(msg.messageId);
+							if(!note || !note.exists){
+								return;
+							}
+
+							// Strip tags
+							let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
+							let text = parserUtils.convertToPlainText(
+								note.text,
+								Ci.nsIDocumentEncoder.OutputForPlainTextClipboardCopy,
+								0
+							);
+
+							let date = (new Date(note.ts)).toLocaleString();
+							let html = `<div class="qnote-insidenote" style="margin: 0; padding: 0; border: 1px solid black;">
+								<div style="border-bottom: 1px solid black;">QNote: ${date}</div>
+								<div>${text}</div>
+							</div>`;
+
+							if(wex.Prefs.printAttachTop){
+								body.insertAdjacentHTML('afterbegin', html + '<br>');
+							}
+
+							if(wex.Prefs.printAttachBottom){
+								body.insertAdjacentHTML('beforeend', '<br>' + html);
+							}
+						});
+					};
+					aSubject.addEventListener("DOMContentLoaded", domLoadedEvent);
+				},
 				async init(){
 					this.popups = new Map();
 
-					//QAppWindowObserver.lastWindow = Services.wm.getMostRecentWindow("mail:3pane");
-					//Services.ww.registerNotification(QAppWindowObserver);
+					//Services.obs.addObserver(MsgMsgDisplayed, "MsgMsgDisplayed");
 
-					this.installQuickFilter();
+					if(wex.Prefs.enablePrint){
+						Services.ww.registerNotification(QAppWindowObserver);
+						QAppWindowObserver.addListener('domwindowopened', this.printerQNoteAttacher);
+					}
+
+					if(wex.Prefs.enableSearch){
+						this.installQuickFilter();
+					}
+
 					this.installColumnHandler();
 				},
 				async messagesFocus(){
-					let w = getQNoteSuitableWindow();
+					let w = this.getQNoteSuitableWindow();
 					if(w.gFolderDisplay && w.gFolderDisplay.tree){
 						w.gFolderDisplay.tree.focus();
 						//w = Services.wm.getMostRecentWindow("mail:3pane");
 					}
-					// try {
-					// 	//Services.wm.getMostRecentWindow("mail:3pane").gFolderDisplay.tree.focus();
-					// 	//QAppWindowObserver.lastWindow.gFolderDisplay.tree.focus();
-					// } catch {
-					// }
 				},
 				async popupClose(id){
 					if(this.popups.has(id)){
@@ -181,9 +270,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				},
 				async popup(opt){
 					var self = this;
-					//var window = Services.wm.getMostRecentWindow(null);
-					//var window = QAppWindowObserver.lastWindow;
-					var window = getQNoteSuitableWindow();
+					var window = this.getQNoteSuitableWindow();
 
 					let escaper = e => {
 						if(e.key === 'Escape'){
@@ -300,9 +387,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					});
 				},
 				async updateView(){
-					//let gFolderDisplay = Services.wm.getMostRecentWindow(null).gFolderDisplay;
-					//let gFolderDisplay = QAppWindowObserver.lastWindow.gFolderDisplay;
-					let w = getQNoteSuitableWindow();
+					let w = this.getQNoteSuitableWindow();
 					let gFolderDisplay = w.gFolderDisplay;
 					if(gFolderDisplay){
 						let view = gFolderDisplay.view.dbView;
@@ -324,6 +409,63 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						// TODO: probably a good idea to change all rows in a view or at least add func parameter
 						view.NoteChange(view.currentlyDisplayedMessage, 1, 2);
 					}
+				},
+				async attachNoteToMessage(data){
+					return;
+					let w = this.getMessageSuitableWindow();
+					let messengerBundle = w.document.getElementById("bundle_messenger");
+					let content = w.document.getElementById("content");
+					console.log("attachNoteToMessage", content, messengerBundle);
+					return;
+
+					let messagepane = w.document.getElementById('messagepane');
+					let gFolderDisplay = w.gFolderDisplay;
+					let gMessageDisplay = w.gMessageDisplay;
+					let view;
+
+					if(gFolderDisplay){
+						view = gFolderDisplay.view.dbView;
+					}
+
+					let body = messagepane.contentDocument.getElementsByTagName('body');
+					if(body){
+						body = body[0];
+					} else {
+						return;
+					}
+
+					let ob = {
+					}
+
+					let css = `<style>
+					#qnote-title {
+						color: black;
+						background-color: #fff08d;
+						display: flex;
+						align-items: baseline;
+						font-size: small;
+						font-weight: bolder;
+						border: solid 1px #d19231;
+						margin: 0;
+						padding: 6px;
+					}
+					#qnote-text {
+						color: black;
+						box-sizing: border-box;
+						margin: 0;
+						padding: 6px;
+						background-color: #FBFEBF;
+						border: solid 1px #FAF098;
+					}
+					</style>`;
+
+					let html = `<div id="qnote-insidenote">
+						<div id="qnote-title">Title</div>
+						<div id="qnote-text">Text</div>
+					</div>`;
+
+					body.insertAdjacentHTML('afterbegin', html);
+					body.insertAdjacentHTML('afterbegin', css);
 				},
 				async updateNote(note){
 					noteGrabber.saveNoteCache(note);
