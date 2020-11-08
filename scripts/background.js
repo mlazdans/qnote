@@ -1,4 +1,5 @@
 // TODO: note optionally next to message
+// TODO: check xnote version setting
 var Prefs;
 var CurrentNote;
 var CurrentTab;
