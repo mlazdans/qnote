@@ -74,21 +74,31 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		var noteGrabber = {
 			noteBlocker: new Map(),
-			NotesCache: [], // TODO: Set(), Map()?
+			noteCache: new Map(),
 			saveNoteCache(note){
-				noteGrabber.NotesCache[note.keyId] = note;
+				noteGrabber.noteCache.set(note.keyId, note);
 			},
 			getNoteCache(keyId){
-				if(noteGrabber.NotesCache[keyId]){
-					return noteGrabber.NotesCache[keyId];
-				}
+				return noteGrabber.noteCache.get(keyId);
 			},
 			deleteNoteCache(keyId){
-				noteGrabber.NotesCache[keyId] = undefined;
+				noteGrabber.noteCache.delete(keyId);
 			},
 			clearNoteCache(){
-				noteGrabber.NotesCache = [];
+				noteGrabber.noteCache = new Map();
 			},
+			// async getNotePromised(keyId, listener){
+			// 	return new Promise((resolve, reject) => {
+			// 		var note = noteGrabber.getNoteCache(keyId);
+			// 		if(note){
+			// 			resolve(keyId, note);
+			// 		} else {
+			// 			this.getNote(keyId, (keyId, data) => {
+			// 				resolve(keyId, data);
+			// 			})
+			// 		}
+			// 	});
+			// },
 			// function listener(keyId, data, params)
 			//  keyId - note key
 			//  data - note data
@@ -102,16 +112,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					return {};
 				}
 
-				blocker.set(keyId, true);
-
 				var note = noteGrabber.getNoteCache(keyId);
 
 				if(note){
-					blocker.delete(keyId);
-
 					return Object.assign({}, note);
 				} else {
-					let onNoteRequest = async (keyId) => {
+					blocker.set(keyId, true);
+					let onNoteRequest = async keyId => {
 						var data = await wex.loadNote(keyId);
 						if(data){
 							return {
@@ -134,7 +141,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						if(listener){
 							listener(keyId, data);
 						}
-
+					}).finally(() => {
 						blocker.delete(keyId);
 					});
 
