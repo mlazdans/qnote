@@ -32,16 +32,19 @@ var QAppWindowObserver = {
 var formatQNoteHTML = data => {
 	// https://searchfox.org/mozilla-central/source/dom/base/nsIDocumentEncoder.idl
 	let flags =
-		Ci.nsIDocumentEncoder.OutputForPlainTextClipboardCopy
-		// Ci.nsIDocumentEncoder.OutputDropInvisibleBreak |
-		// Ci.nsIDocumentEncoder.OutputFormatFlowed
-		// Ci.nsIDocumentEncoder.OutputFormatted |
-		// Ci.nsIDocumentEncoder.OutputLFLineBreak
+		Ci.nsIDocumentEncoder.OutputPreformatted
+		| Ci.nsIDocumentEncoder.OutputForPlainTextClipboardCopy
+		// Ci.nsIDocumentEncoder.OutputDropInvisibleBreak
+		// | Ci.nsIDocumentEncoder.OutputFormatFlowed
+		// | Ci.nsIDocumentEncoder.OutputFormatted
+		// | Ci.nsIDocumentEncoder.OutputLFLineBreak
 		;
 
 	// Strip tags, etc
 	let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
 	let text = parserUtils.convertToPlainText(data.text, flags, 0);
+	text = text.replace("\r\n", "<br>");
+	text = text.replace("\n", "<br>");
 
 	return {
 		title: 'QNote: ' + (new Date(data.ts)).toLocaleString(),
