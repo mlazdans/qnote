@@ -29,7 +29,7 @@ var QAppWindowObserver = {
 };
 
 // TODO: make consistent with popups
-var formatQNoteHTML = data => {
+var formatQNoteData = data => {
 	// https://searchfox.org/mozilla-central/source/dom/base/nsIDocumentEncoder.idl
 	let flags =
 		Ci.nsIDocumentEncoder.OutputPreformatted
@@ -220,18 +220,34 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 								return;
 							}
 
-							let formated = formatQNoteHTML(note);
+							let formated = formatQNoteData(note);
 
-							let html = `<div class="qnote-insidenote" style="margin: 0; padding: 0; border: 1px solid black;">
-								<div style="border-bottom: 1px solid black;">${formated.title}</div>
-								<div>${formated.text}</div>
-							</div>`;
+							let htmlFormatter = (title, text) => {
+								let html = ['<div class="qnote-insidenote" style="margin: 0; padding: 0; border: 1px solid black;">'];
+								if(title){
+									html.push(`<div style="border-bottom: 1px solid black;">${title}</div>`);
+								}
+								if(text){
+									html.push(`<div>${text}</div>`);
+								}
+								html.push('</div>');
+
+								return html.join("");
+							};
 
 							if(wex.Prefs.printAttachTop){
+								let html = htmlFormatter(
+									wex.Prefs.printAttachTopTitle ? formated.title : false,
+									wex.Prefs.printAttachTopText ? formated.text : false,
+								);
 								body.insertAdjacentHTML('afterbegin', html);
 							}
 
 							if(wex.Prefs.printAttachBottom){
+								let html = htmlFormatter(
+									wex.Prefs.printAttachBottomTitle ? formated.title : false,
+									wex.Prefs.printAttachBottomText ? formated.text : false,
+								);
 								body.insertAdjacentHTML('beforeend', html);
 							}
 						};
@@ -245,10 +261,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					//Services.obs.addObserver(MsgMsgDisplayed, "MsgMsgDisplayed");
 
-					if(wex.Prefs.enablePrintAttach){
-						Services.ww.registerNotification(QAppWindowObserver);
-						QAppWindowObserver.addListener('domwindowopened', this.printerQNoteAttacher);
-					}
+					Services.ww.registerNotification(QAppWindowObserver);
+					QAppWindowObserver.addListener('domwindowopened', this.printerQNoteAttacher);
 
 					if(wex.Prefs.enableSearch){
 						this.installQuickFilter();
@@ -447,11 +461,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						domNodes[0].remove();
 					}
 
-					if(!data || !wex.Prefs.enableMessageAttach){
+					if(!data){
 						return;
 					}
 
-					let formated = formatQNoteHTML(data);
+					let formated = formatQNoteData(data);
 
 					let css = `<style>
 					.qnote-title {
@@ -475,17 +489,33 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 					</style>`;
 
-					let html = `<div class="qnote-insidenote">
-						${css}
-						<div class="qnote-title">${formated.title}</div>
-						<div class="qnote-text">${formated.text}</div>
-					</div>`;
+					let htmlFormatter = (title, text) => {
+						let html = ['<div class="qnote-insidenote">'];
+						html.push(css);
+						if(title){
+							html.push(`<div class="qnote-title">${title}</div>`);
+						}
+						if(text){
+							html.push(`<div class="qnote-text">${text}</div>`);
+						}
+						html.push('</div>');
+
+						return html.join("");
+					};
 
 					if(wex.Prefs.messageAttachTop){
+						let html = htmlFormatter(
+							wex.Prefs.messageAttachTopTitle ? formated.title : false,
+							wex.Prefs.messageAttachTopText ? formated.text : false,
+						);
 						body.insertAdjacentHTML('afterbegin', html);
 					}
 
 					if(wex.Prefs.messageAttachBottom){
+						let html = htmlFormatter(
+							wex.Prefs.messageAttachBottomTitle ? formated.title : false,
+							wex.Prefs.messageAttachBottomText ? formated.text : false,
+						);
 						body.insertAdjacentHTML('beforeend', html);
 					}
 				},

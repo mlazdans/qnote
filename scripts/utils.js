@@ -12,12 +12,22 @@ function getDefaultPrefs() {
 		storageOption: "folder",
 		storageFolder: "",
 		enableSearch: false, // defaults to false for now, because of poor implementation
-		enablePrintAttach: true,
+
+		printAttachTop: false,
+		printAttachTopTitle: true,
+		printAttachTopText: true,
+
 		printAttachBottom: false,
-		printAttachTop: true,
-		enableMessageAttach: false,
+		printAttachBottomTitle: true,
+		printAttachBottomText: true,
+
+		messageAttachTop: false,
+		messageAttachTopTitle: true,
+		messageAttachTopText: true,
+
 		messageAttachBottom: false,
-		messageAttachTop: true
+		messageAttachBottomTitle: true,
+		messageAttachBottomText: true
 	};
 }
 

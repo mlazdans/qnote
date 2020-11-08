@@ -54,5 +54,7 @@
 	"enable.print_attach": { "message": "Attach to print" },
 	"attach.bottom": { "message": "bottom" },
 	"attach.top": { "message": "top" },
+	"attach.title": { "message": "title" },
+	"attach.text": { "message": "text" },
 	"enable.message_attach": { "message": "Attach to message" }
 }
