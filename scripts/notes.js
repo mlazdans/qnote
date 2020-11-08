@@ -10,6 +10,7 @@ class Note {
 		this.loadedNote;
 		this.modified = false;
 		this.created = false;
+		this.origin = "Note";
 	}
 
 	isNotesEqual(n1, n2){
@@ -67,6 +68,7 @@ class Note {
 class QNote extends Note {
 	constructor(keyId) {
 		super(keyId);
+		this.origin = "QNote";
 	}
 
 	async load(){
@@ -100,6 +102,7 @@ class XNote extends Note {
 	constructor(keyId, root) {
 		super(keyId);
 		this.root = root;
+		this.origin = "XNote";
 	}
 
 	async load(){
@@ -127,14 +130,19 @@ class QNoteFolder extends Note {
 	constructor(keyId, root) {
 		super(keyId);
 		this.root = root;
+		this.origin = "QNoteFolder";
 	}
 
 	async load(){
 		var note = await browser.qnote.loadNote(this.root, this.keyId);
 
 		// Check for legacy XNote
-		if(!note){
-			note = await browser.xnote.loadNote(this.root, this.keyId);
+		if(note){
+			this.origin = "QNoteFolder:QNote";
+		} else {
+			if(note = await browser.xnote.loadNote(this.root, this.keyId)){
+				this.origin = "QNoteFolder:XNote";
+			}
 		}
 
 		if(note) {
