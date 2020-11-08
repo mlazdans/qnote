@@ -128,6 +128,15 @@ let QuickFilter = {
 };
 
 NoteFilter = {
+	listeners: {
+		"uninstall": new Set()
+	},
+	removeListener(name, listener){
+		NoteFilter.listeners[name].delete(listener);
+	},
+	addListener(name, listener){
+		NoteFilter.listeners[name].add(listener);
+	},
 	updateSearch: aMuxer => {
 		aMuxer.deferredUpdateSearch();
 	},
@@ -169,6 +178,12 @@ NoteFilter = {
 
 		qfTextBox.addEventListener("command", textHandler);
 		qfQnoteChecked.addEventListener("command", buttonHandler);
+
+		NoteFilter.addListener("uninstall", () => {
+			qfTextBox.removeEventListener("command", textHandler);
+			qfQnoteChecked.removeEventListener("command", buttonHandler);
+			qfQnoteChecked.parentNode.removeChild(qfQnoteChecked);
+		});
 
 		NoteFilter.updateSearch(aMuxer);
 	},
@@ -219,15 +234,10 @@ NoteFilter = {
 		// });
 	},
 	uninstall: () => {
-		var w = Services.wm.getMostRecentWindow("mail:3pane");
-		var qfQnoteChecked = w.document.getElementById(qfQnoteCheckedId);
-
-		if(qfQnoteChecked){
-			qfQnoteChecked.parentNode.removeChild(qfQnoteChecked);
+		for (let listener of NoteFilter.listeners["uninstall"]) {
+			listener();
 		}
-
 		QuickFilterManager.killFilter("qnote");
-
 		Services.ww.unregisterNotification(WindowObserver);
 	}
 }
