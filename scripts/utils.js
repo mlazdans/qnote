@@ -144,32 +144,39 @@ async function loadNote(keyId) {
 }
 
 async function loadAllNotes() {
-	let Notes = [];
-	let noteList = [];
-
+	let p;
 	if(Prefs.storageOption === 'ext'){
 		// TODO: move notes and prefs in separete namespace
-		let storage = await browser.storage.local.get(null);
-		for(let keyId in storage){
-			if(keyId.substr(0, 5) !== 'pref.') {
-				Notes.push({
-					keyId: keyId
-				});
+		p = browser.storage.local.get(null).then(storage => {
+			let keys = [];
+			for(let keyId in storage){
+				if(keyId.substr(0, 5) !== 'pref.') {
+					keys.push({
+						keyId: keyId
+					});
+				}
 			}
-		}
+			return keys;
+		});
 	} else if(Prefs.storageOption === 'folder'){
-		let XNotes = await browser.xnote.getAllNotes(Prefs.storageFolder);
-		let QNotes = await browser.qnote.getAllNotes(Prefs.storageFolder);
-		Notes = Object.assign(XNotes, QNotes);
+		p = Promise.all([
+			browser.xnote.getAllNotes(Prefs.storageFolder),
+			browser.qnote.getAllNotes(Prefs.storageFolder)
+		]).then(values => {
+			return Object.assign(values[0], values[1]);
+		});
 	}
 
-	for(let i = 0; i < Notes.length; i++){
-		let note = createNote(Notes[i].keyId);
-		await note.load();
-		noteList.push(note);
-	}
+	return p.then(async keys => {
+		let Notes = [];
+		for(let k of keys){
+			let note = createNote(k.keyId);
+			await note.load();
+			Notes.push(note);
+		}
 
-	return noteList;
+		return Notes;
+	});
 }
 
 // messageId = int messageId from messageList
@@ -405,11 +412,11 @@ async function updateQAppNote(note){
 }
 
 async function loadAllQAppNotes(){
-	let noteList = await loadAllNotes();
-	for(let i = 0; i < noteList.length; i++){
-		updateQAppNote(noteList[i]);
-	}
-	return true;
+	loadAllNotes().then(notes => {
+		for(let note of notes){
+			updateQAppNote(note);
+		}
+	});
 }
 
 async function updateNoteMessage(note){
