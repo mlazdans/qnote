@@ -43,12 +43,12 @@ var formatQNoteData = data => {
 	// Strip tags, etc
 	let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
 	let text = parserUtils.convertToPlainText(data.text, flags, 0);
-	text = text.replace("\r\n", "<br>");
-	text = text.replace("\n", "<br>");
+	// text = text.replace(/\r\n/g, "<br>");
+	// text = text.replace(/\n/g, "<br>");
 
 	return {
 		title: 'QNote: ' + (new Date(data.ts)).toLocaleString(),
-		text: text
+		text: '<pre style="margin: 0;">' + text + '</pre>'
 	}
 };
 
