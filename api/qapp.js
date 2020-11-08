@@ -171,13 +171,80 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					return Services.wm.getMostRecentWindow("mail:3pane");
 				},
 				printerQNoteAttacher(aSubject) {
-					let domLoadedEvent = e => {
+					var messageUrisToPrint;
+					let printerWindowDOMListener = e => {
+						let document = e.target;
+
+						let body = document.getElementsByTagName('body');
+						if(body){
+							body = body[0];
+						} else {
+							console.log("Body not found");
+							return;
+						}
+
+						let domNodes = document.getElementsByClassName('qnote-insidenote');
+						while(domNodes.length){
+							domNodes[0].remove();
+						}
+
+						if(
+							document.URL === 'about:blank' ||
+							!aSubject.opener ||
+							!aSubject.opener.messenger ||
+							!messageUrisToPrint ||
+							!messageUrisToPrint.shift
+						){
+							return;
+						}
+
+						let messenger = aSubject.opener.messenger;
+
+						let msg = messenger.msgHdrFromURI(messageUrisToPrint.shift());
+						let note = noteGrabber.getNote(msg.messageId);
+						if(!note || !note.exists){
+							return;
+						}
+
+						let formated = formatQNoteData(note);
+
+						let htmlFormatter = (title, text) => {
+							let html = ['<div class="qnote-insidenote" style="margin: 0; padding: 0; border: 1px solid black;">'];
+							if(title){
+								html.push(`<div style="border-bottom: 1px solid black;">${title}</div>`);
+							}
+							if(text){
+								html.push(`<div>${text}</div>`);
+							}
+							html.push('</div>');
+
+							return html.join("");
+						};
+
+						if(wex.Prefs.printAttachTop){
+							let html = htmlFormatter(
+								wex.Prefs.printAttachTopTitle ? formated.title : false,
+								wex.Prefs.printAttachTopText ? formated.text : false,
+							);
+							body.insertAdjacentHTML('afterbegin', html);
+						}
+
+						if(wex.Prefs.printAttachBottom){
+							let html = htmlFormatter(
+								wex.Prefs.printAttachBottomTitle ? formated.title : false,
+								wex.Prefs.printAttachBottomText ? formated.text : false,
+							);
+							body.insertAdjacentHTML('beforeend', html);
+						}
+					};
+
+					let domLoadedListener = e => {
 						let document = e.target;
 						if(!document.URL.includes('chrome://messenger/content/msgPrintEngine')){
 							return;
 						}
 
-						let messageUrisToPrint = document.defaultView.arguments[1];
+						messageUrisToPrint = document.defaultView.arguments[1];
 
 						let pDocument = document.getElementById('content');
 						if(!pDocument){
@@ -185,76 +252,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 							return;
 						}
 
-						let printerWindowDOMListener = e => {
-							let document = e.target;
-
-							let body = document.getElementsByTagName('body');
-							if(body){
-								body = body[0];
-							} else {
-								console.log("Body not found");
-								return;
-							}
-
-							let domNodes = document.getElementsByClassName('qnote-insidenote');
-							while(domNodes.length){
-								domNodes[0].remove();
-							}
-
-							if(
-								document.URL === 'about:blank' ||
-								!aSubject.opener ||
-								!aSubject.opener.messenger ||
-								!messageUrisToPrint ||
-								!messageUrisToPrint.shift
-							){
-								return;
-							}
-
-							let messenger = aSubject.opener.messenger;
-
-							//let uri =  "imap-message://dev%40dqdp.net@mail.dqdp.net/INBOX#13";
-							let msg = messenger.msgHdrFromURI(messageUrisToPrint.shift());
-							let note = noteGrabber.getNote(msg.messageId);
-							if(!note || !note.exists){
-								return;
-							}
-
-							let formated = formatQNoteData(note);
-
-							let htmlFormatter = (title, text) => {
-								let html = ['<div class="qnote-insidenote" style="margin: 0; padding: 0; border: 1px solid black;">'];
-								if(title){
-									html.push(`<div style="border-bottom: 1px solid black;">${title}</div>`);
-								}
-								if(text){
-									html.push(`<div>${text}</div>`);
-								}
-								html.push('</div>');
-
-								return html.join("");
-							};
-
-							if(wex.Prefs.printAttachTop){
-								let html = htmlFormatter(
-									wex.Prefs.printAttachTopTitle ? formated.title : false,
-									wex.Prefs.printAttachTopText ? formated.text : false,
-								);
-								body.insertAdjacentHTML('afterbegin', html);
-							}
-
-							if(wex.Prefs.printAttachBottom){
-								let html = htmlFormatter(
-									wex.Prefs.printAttachBottomTitle ? formated.title : false,
-									wex.Prefs.printAttachBottomText ? formated.text : false,
-								);
-								body.insertAdjacentHTML('beforeend', html);
-							}
-						};
 						pDocument.addEventListener("DOMContentLoaded", printerWindowDOMListener);
 					};
 
-					aSubject.addEventListener("DOMContentLoaded", domLoadedEvent);
+					aSubject.addEventListener("DOMContentLoaded", domLoadedListener);
 				},
 				async init(){
 					this.popups = new Map();
@@ -357,7 +358,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						}
 					};
 
-					return new Promise(function(resolve, reject) {
+					return new Promise(function(resolve) {
 						// https://developer.mozilla.org/en-US/docs/Archive/Mozilla/XUL/Method/openPopup
 						// https://developer.mozilla.org/en-US/docs/Archive/Mozilla/XUL/PopupGuide/Positioning
 						// Possible values for position are:
@@ -435,6 +436,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						// 	in nsMsgViewNotificationCodeValue aChangeType);
 
 						// TODO: probably a good idea to change all rows in a view or at least add func parameter
+						// https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsITreeBoxObject#invalidateCell
 						view.NoteChange(view.currentlyDisplayedMessage, 1, 2);
 					}
 				},

@@ -26,7 +26,7 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 			};
 		}
 
-		// TODO: Seems that "yyyy-mm-dd - HH:MM" format has been hardcoded? Not sure yet.
+		// NOTE: Seems that "yyyy-mm-dd - HH:MM" format has been hardcoded for some time?
 		function noteDateToDate(dateString) {
 			let dateParsers = [
 				// "yyyy-mm-dd - HH:MM"
