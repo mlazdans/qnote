@@ -29,18 +29,12 @@ let WindowObserver = {
 				}
 			});
 		}
-
-		if(aTopic === 'domwindowclosed'){
-			// TODO: need to remove before uninstall
-			//let aMuxer = aSubject.QuickFilterBarMuxer;
-			//aMuxer.activeFilterer.setFilterValue('qnote', null);
-		}
 	}
 }
 
 // NOTE:
-// We need to completely restart TB if CustomTerm code changes
-// Currenlty there are no means to remove filter or there are but I'm not aware, please let me know qnote@dqdp.net
+// We need completely restart TB if CustomTerm code changes
+// Currenlty there are no means to remove filter or there is but I'm not aware, please let me know: qnote@dqdp.net
 let CustomTerm = {
 	id: qnoteCustomTermId,
 	name: 'QNote',
@@ -142,7 +136,6 @@ NoteFilter = {
 	},
 	attachToWindow: w => {
 		if(!w.document.getElementById(qfQnoteCheckedId)){
-			//console.log("attachToWindow");
 			let button = w.document.createXULElement('toolbarbutton');
 			button.setAttribute('id',qfQnoteCheckedId);
 			button.setAttribute('type','checkbox');
@@ -183,6 +176,17 @@ NoteFilter = {
 			qfTextBox.removeEventListener("command", textHandler);
 			qfQnoteChecked.removeEventListener("command", buttonHandler);
 			qfQnoteChecked.parentNode.removeChild(qfQnoteChecked);
+			// We need to remove state, because QF gets mad if we disable search and leave state as is
+			// Should manage state ourselves
+			let aFolderDisplay = w.gFolderDisplay;
+			if(aFolderDisplay){
+				let tab = aFolderDisplay._tabInfo;
+				let filterer = "quickFilter" in tab._ext ? tab._ext.quickFilter : null;
+				if(filterer){
+					// TODO: need to save filter state myself
+					filterer.setFilterValue('qnote', null);
+				}
+			}
 		});
 
 		NoteFilter.updateSearch(aMuxer);
