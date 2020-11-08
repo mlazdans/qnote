@@ -64,15 +64,7 @@ let CustomTerm = {
 	match: function(msgHdr, searchValue, searchOp) {
 		let note = noteGrabber.getNote(msgHdr.messageId);
 
-		if(!note || !note.exists){
-			return false;
-		}
-
-		let match = note.text.toLowerCase().search(searchValue)>=0;
-		// console.log("match", searchValue, searchOp);
-		// console.log("matched", msgHdr.messageId, note, match);
-
-		return match;
+		return note && note.exists && (note.text.toLowerCase().search(searchValue)>=0);
 	}
 };
 
@@ -103,7 +95,6 @@ let QuickFilter = {
 		NoteFilter.updateSearch(aMuxer);
 	},
 	appendTerms: function(aTermCreator, aTerms, aFilterValue) {
-		//console.log("aFilterValue", aFilterValue);
 		// Let us borrow an existing code just for a while :>
 		let phrases = MessageTextFilter._parseSearchString(aFilterValue.toLowerCase());
 		let term;
