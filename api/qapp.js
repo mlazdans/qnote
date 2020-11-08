@@ -73,21 +73,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		//var MsgMsgDisplayed = this.MsgMsgDisplayed;
 
 		var noteGrabber = {
-			// function noterequest(keyId, data, params)
-			//  keyId - note key
-			//  data - note data
-			//  params - misc params passed to getNote()
-			listeners: {
-				"noterequest": new Set()
-			},
 			noteBlocker: new Map(),
 			NotesCache: [], // TODO: Set(), Map()?
-			removeListener(name, listener){
-				noteGrabber.listeners[name].delete(listener);
-			},
-			addListener(name, listener){
-				noteGrabber.listeners[name].add(listener);
-			},
 			saveNoteCache(note){
 				noteGrabber.NotesCache[note.keyId] = note;
 			},
@@ -102,9 +89,12 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			clearNoteCache(){
 				noteGrabber.NotesCache = [];
 			},
-			getNote(keyId, params){
-				let self = noteGrabber;
-				let blocker = self.noteBlocker;
+			// function listener(keyId, data, params)
+			//  keyId - note key
+			//  data - note data
+			//  params - misc params passed to getNote()
+			getNote(keyId, listener){
+				let blocker = noteGrabber.noteBlocker;
 
 				// Block concurrent calls on same note as we will update column once it has been loded from local cache, local storage or file
 				// Not 100% sure if necessary but calls to column update can be quite many
@@ -114,7 +104,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 				blocker.set(keyId, true);
 
-				var note = self.getNoteCache(keyId);
+				var note = noteGrabber.getNoteCache(keyId);
 
 				if(note){
 					blocker.delete(keyId);
@@ -139,10 +129,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 
 					onNoteRequest(keyId).then(data => {
-						self.saveNoteCache(data);
+						noteGrabber.saveNoteCache(data);
 
-						for (let listener of noteGrabber.listeners.noterequest) {
-							listener(keyId, data, params);
+						if(listener){
+							listener(keyId, data);
 						}
 
 						blocker.delete(keyId);

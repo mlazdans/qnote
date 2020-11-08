@@ -12,25 +12,17 @@ let noteGrabber;
 
 class QNoteColumnHandler {
 	constructor(folder) {
-		//console.log("new QNoteColumnHandler", noteGrabber.listeners.noterequest);
 		this.folder = folder;
 		this.window = folder.msgWindow.domWindow;
 		this.view = folder.view.dbView;
 		this.setUpDOM();
 
-		let self = this;
-		let noteListener = (keyId, data, params) => {
-			if(self.view && params && params.row){
+		this.noteRowListener = (view, row) => {
+			if(view && row){
 				// Asynchronically here we update note row
 				// That method is part of Mozilla API and has nothing to do with either XNote or QNote :)
-				self.view.NoteChange(params.row, 1, 2);
+				view.NoteChange(row, 1, 2);
 			}
-		}
-
-		noteGrabber.addListener("noterequest", noteListener);
-
-		this.destroy = () => {
-			noteGrabber.removeListener("noterequest", noteListener);
 		}
 	}
 
@@ -119,11 +111,13 @@ class QNoteColumnHandler {
 		return false;
 	}
 
-	cycleCell(row, col) {
-	}
+	// cycleCell(row, col) {
+	// }
 
 	getCellText(row, col) {
-		let note = noteGrabber.getNote(this.view.getMsgHdrAt(row).messageId, {row: row});
+		let note = noteGrabber.getNote(this.view.getMsgHdrAt(row).messageId, () => {
+			this.noteRowListener(this.view, row);
+		});
 
 		if(note.exists && !note.shortText && ColumnHandler.options.textLimit && (typeof note.text === 'string')){
 			note.shortText = note.text.substring(0, ColumnHandler.options.textLimit);
@@ -142,20 +136,24 @@ class QNoteColumnHandler {
 		return true;
 	}
 
-	getCellProperties(row, col, props){
-	}
+	// getCellProperties(row, col, props){
+	// 	console.log("getCellProperties", row, col, props);
+	// }
 
-	getRowProperties(row, props){
-	}
+	// getRowProperties(row, props){
+	// 	console.log("getRowProperties", row, props);
+	// }
 
 	getImageSrc(row, col) {
-		let note = noteGrabber.getNote(this.view.getMsgHdrAt(row).messageId, {row: row});
+		let note = noteGrabber.getNote(this.view.getMsgHdrAt(row).messageId, () => {
+			this.noteRowListener(this.view, row);
+		});
 
 		return note.exists ? extension.rootURI.resolve("images/icon-column.png") : null;
 	}
 
-	getSortLongForRow(hdr) {
-	}
+	// getSortLongForRow(hdr) {
+	// }
 };
 
 let WindowObserver = {
@@ -182,7 +180,7 @@ let DBViewListener = {
 		let view = widget.view.dbView;
 		let qnCH = new QNoteColumnHandler(widget);
 
-		widget.qnCH = qnCH;
+		// widget.qnCH = qnCH;
 
 		view.addColumnHandler("qnoteCol", qnCH);
 
@@ -193,9 +191,9 @@ let DBViewListener = {
 		//console.log("onActiveCreatedView", widget);
 	},
 	onDestroyingView: (widget, aFolderIsComingBack) => {
-		if(widget.qnCH){
-			widget.qnCH.destroy();
-		}
+		// if(widget.qnCH){
+		// 	widget.qnCH.destroy();
+		// }
 	},
 	onMessagesLoaded: (widget, aAll) => {
 		//console.log("onMessagesLoaded", arguments);
