@@ -437,12 +437,17 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 						// TODO: probably a good idea to change all rows in a view or at least add func parameter
 						// https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsITreeBoxObject#invalidateCell
-						view.NoteChange(view.currentlyDisplayedMessage, 1, 2);
+						if(view){
+							view.NoteChange(view.currentlyDisplayedMessage, 1, 2);
+						}
 					}
 				},
 				async attachNoteToMessage(data){
 					let w = this.getMessageSuitableWindow();
 					let messagepane = w.document.getElementById('messagepane');
+					if(!messagepane){
+						return;
+					}
 					let document = messagepane.contentDocument;
 					// let gFolderDisplay = w.gFolderDisplay;
 					// let gMessageDisplay = w.gMessageDisplay;
