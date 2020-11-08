@@ -183,6 +183,7 @@ async function afterNoteDelete(messageId, note) {
 	}
 	updateMessageDisplayIcon(false);
 	await deleteNoteColumn(note);
+	await updateNoteMessage();
 }
 
 async function afterNoteSave(messageId, note) {
@@ -191,6 +192,7 @@ async function afterNoteSave(messageId, note) {
 	}
 	updateMessageDisplayIcon(true);
 	await updateNoteColumn(note);
+	await updateNoteMessage(note);
 }
 
 async function deleteNoteForMessage(messageId){
@@ -394,14 +396,12 @@ async function deleteNoteColumn(note){
 }
 
 async function updateQAppNote(note){
-	if(note){
-		return browser.qapp.updateNote({
-			keyId: note.keyId,
-			exists: true,
-			text: note.text,
-			ts: note.ts
-		});
-	}
+	return note ? browser.qapp.updateNote({
+		keyId: note.keyId,
+		exists: true,
+		text: note.text,
+		ts: note.ts
+	}) : undefined;
 }
 
 async function loadAllQAppNotes(){
@@ -410,6 +410,16 @@ async function loadAllQAppNotes(){
 		updateQAppNote(noteList[i]);
 	}
 	return true;
+}
+
+async function updateNoteMessage(note){
+	let data = note ? {
+		keyId: note.keyId,
+		text: note.text,
+		ts: note.ts
+	} : null;
+
+	await browser.qapp.attachNoteToMessage(data);
 }
 
 async function updateNoteColumn(note){

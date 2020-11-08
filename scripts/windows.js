@@ -67,14 +67,7 @@ class NoteWindow {
 		var data = await note.load();
 
 		await updateMessageDisplayIcon(data?true:false);
-
-		if(data && Prefs.enableMessageAttach){
-			await browser.qapp.attachNoteToMessage({
-				keyId: note.keyId,
-				text: data.text,
-				ts: data.ts
-			});
-		}
+		await updateNoteMessage(data ? note : undefined);
 
 		if((data && pop) || createNew){
 			popper(note).finally(()=>{

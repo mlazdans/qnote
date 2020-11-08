@@ -19,6 +19,7 @@
 		"async": true,
 		"parameters": [{
 			"name": "data",
+			"optional": true,
 			"type": "object",
 			"properties": {
 				"keyId": {

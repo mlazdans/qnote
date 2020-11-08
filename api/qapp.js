@@ -435,7 +435,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// 	view = gFolderDisplay.view.dbView;
 					// }
 
-
 					let body = document.getElementsByTagName('body');
 					if(body){
 						body = body[0];
@@ -446,6 +445,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					let domNodes = document.getElementsByClassName('qnote-insidenote');
 					while(domNodes.length){
 						domNodes[0].remove();
+					}
+
+					if(!data || !wex.Prefs.enableMessageAttach){
+						return;
 					}
 
 					let formated = formatQNoteHTML(data);
