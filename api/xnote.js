@@ -28,22 +28,55 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 
 		// TODO: Seems that "yyyy-mm-dd - HH:MM" format has been hardcoded? Not sure yet.
 		function noteDateToDate(dateString) {
-			var retDate = new Date();
-			let [date, time] = dateString.split(" - ");
-			if(date){
-				let dateParts = date.split("-");
-				retDate.setFullYear(dateParts[0]);
-				retDate.setMonth(dateParts[1] - 1);
-				retDate.setDate(dateParts[2]);
-			}
+			let dateParsers = [
+				// "yyyy-mm-dd - HH:MM"
+				ds => {
+					let D = new Date();
+					let [date, time] = ds.split(" - ");
 
-			if(time){
-				let timeParts = time.split(":");
-				retDate.setHours(timeParts[0]);
-				retDate.setMinutes(timeParts[1]);
-			}
+					if(date){
+						let dateParts = date.split("-");
+						D.setFullYear(dateParts[0]);
+						D.setMonth(dateParts[1] - 1);
+						D.setDate(dateParts[2]);
+					}
 
-			return retDate;
+					if(time){
+						let timeParts = time.split(":");
+						D.setHours(timeParts[0]);
+						D.setMinutes(timeParts[1]);
+					}
+
+					return D;
+				},
+				// "dd/mm/yyyy - HH:MM"
+				ds => {
+					let D = new Date();
+					let [date, time] = ds.split(" - ");
+
+					if(date){
+						let dateParts = date.split("/");
+						D.setFullYear(dateParts[2]);
+						D.setMonth(dateParts[1] - 1);
+						D.setDate(dateParts[0]);
+					}
+
+					if(time){
+						let timeParts = time.split(":");
+						D.setHours(timeParts[0]);
+						D.setMinutes(timeParts[1]);
+					}
+
+					return D;
+				}
+			];
+
+			for(let ds of dateParsers){
+				let D = ds(dateString);
+				if(D.getTime()){
+					return D;
+				}
+			}
 		}
 
 		function dateToNoteDate(d, mask) {
@@ -225,7 +258,13 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 					note.y = parseInt(fileScriptableIO.read(4));
 					note.width = parseInt(fileScriptableIO.read(4));
 					note.height = parseInt(fileScriptableIO.read(4));
-					note.ts = noteDateToDate(fileScriptableIO.read(32)).getTime();
+					let tsPart = fileScriptableIO.read(32);
+					note.ts = noteDateToDate(tsPart);
+					if(note.ts){
+						note.ts = note.ts.getTime();
+					} else {
+						note.ts = 0;
+					}
 					note.text = decodeURIComponent(fileScriptableIO.read(file.fileSize-48));
 
 					fileScriptableIO.close();
