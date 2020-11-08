@@ -467,16 +467,20 @@ async function exportStorage(){
 }
 
 function QNoteTabPop(tab, createNew = true, doPop = true, doFocus = true) {
-	return browser.messageDisplay.getDisplayedMessage(getTabId(tab)).then(message => {
+	let tabId = getTabId(tab);
+	return browser.messageDisplay.getDisplayedMessage(tabId).then(message => {
 		if(!message){
 			return;
 		}
-		// Pop only on main tab. Perhaps need configurable?
-		// 	if(tab.mailTab){}
 
-		// Pop only if message changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
-		if(!CurrentNote.windowId || (CurrentNote.messageId !== message.id)){
+		// Pop only if message changed or tab changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
+		if(
+			!CurrentNote.windowId ||
+			CurrentNote.messageId !== message.id ||
+			CurrentNote.tabId !== tabId
+		) {
 			CurrentNote.pop(message.id, createNew, doPop).then(data => {
+				CurrentNote.tabId = tabId;
 				if(doFocus){
 					CurrentNote.focus();
 				}

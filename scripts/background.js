@@ -1,9 +1,7 @@
 // TODO: note optionally next to message
-// TODO: message in new window - alt+q
-// TODO: save note only if changed properties
 var Prefs;
 var CurrentNote;
-var CurrentMessageId;
+var CurrentTab;
 
 async function focusCurrentWindow(){
 	return browser.windows.getCurrent().then(async window => {
@@ -86,14 +84,13 @@ async function initExtension(){
 	// Handle keyboard shortcuts
 	var QCommands = {
 		qnote: async () => {
-			if(!CurrentMessageId){
+			if(!CurrentTab){
 				return;
 			}
 			if(CurrentNote.windowId){
 				await CurrentNote.close();
 			} else {
-				await CurrentNote.pop(CurrentMessageId, true, true);
-				await CurrentNote.focus();
+				QNoteTabPop(CurrentTab, true, true, true);
 			}
 		}
 	};
@@ -116,7 +113,7 @@ async function initExtension(){
 
 	// Click on message
 	browser.messageDisplay.onMessageDisplayed.addListener((tab, message) => {
-		CurrentMessageId = message.id;
+		CurrentTab = tab;
 		return QNoteTabPop(tab, false, Prefs.showOnSelect, false);
 	});
 

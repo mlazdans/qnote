@@ -9,6 +9,7 @@ class NoteWindow {
 		this.note = undefined;
 		this.messageId = undefined;
 		this.windowId = undefined;
+		this.tabId = undefined;
 		this.popping = false;
 		this.needSave = true;
 	}
@@ -70,8 +71,9 @@ class NoteWindow {
 		await updateNoteMessage(data ? note : undefined);
 
 		if((data && pop) || createNew){
-			popper(note).finally(()=>{
+			return popper(note).finally(data => {
 				this.popping = false;
+				return data;
 			});
 		} else {
 			this.popping = false;
@@ -198,9 +200,6 @@ class XULNoteWindow extends NoteWindow {
 
 			opt.left += w.left;
 			opt.top += w.top;
-
-			// this.note = note;
-			// this.messageId = messageId;
 
 			return browser.qapp.popup(opt).then(windowId => {
 				this.windowId = windowId;
