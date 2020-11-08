@@ -92,6 +92,14 @@ async function savePrefs(p) {
 	return true;
 }
 
+async function saveSinglePref(k, v) {
+	await browser.storage.local.set({
+		['pref.' + k]: v
+	});
+
+	return true;
+}
+
 // utf8decode = function (utftext) {
 // 	var string = "";
 // 	var i = 0;
