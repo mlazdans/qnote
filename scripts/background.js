@@ -45,20 +45,37 @@ function initCurrentNote(){
 		CurrentNote = new WebExtensionNoteWindow();
 	}
 
-	CurrentNote.onAfterDelete = note => {
-		qcon.debug("CurrentNote.onAfterDelete", note);
-		if(Prefs.useTag){
-			tagMessage(note.keyId, false);
-		}
-		updateDisplayedMessage(CurrentTab);
-	}
+	CurrentNote.onAfterClose = async (isClosed) => {
+		if(isClosed){
+			if(CurrentNote.needSaveOnClose && CurrentNote.note){
+				let f;
+				if(CurrentNote.note.exists){ // Update, delete
+					f = CurrentNote.note.text ? "save" : "delete"; // delete if no text
+				} else {
+					if(CurrentNote.note.text){ // Create new
+						f = "save";
+					}
+				}
 
-	CurrentNote.onAfterSave = note => {
-		qcon.debug("CurrentNote.onAfterSave", note);
-		if(Prefs.useTag){
-			tagMessage(note.keyId, true);
+				if(f){
+					qcon.debug(`CurrentNote.close() and ${f}`);
+					if(await CurrentNote.note[f]()){
+						updateDisplayedMessage(CurrentTab);
+						if(Prefs.useTag){
+							tagMessage(CurrentNote.messageId, f === "save");
+						}
+					}
+				} else {
+					qcon.debug(`CurrentNote.close() and do nothing`);
+				}
+			}
+
+			focusMessagePane();
+
+			CurrentNote.init();
+		} else {
+			qcon.debug("CurrentNote.close() - not popped");
 		}
-		updateDisplayedMessage(CurrentTab);
 	}
 }
 

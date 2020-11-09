@@ -13,27 +13,10 @@ class NoteWindow {
 		this.needSaveOnClose = true;
 	}
 
-	async saveNote(){
-		if(await this.note.save()){
-			if(this.onAfterSave){
-				await this.onAfterSave(this.note);
-			}
-			return true;
-		} else {
-			return false;
-		}
-
-	}
-
 	async deleteNote(){
-		if(await this.note.delete()){
-			if(this.onAfterDelete){
-				await this.onAfterDelete(this.note);
-			}
-			return true;
-		} else {
-			return false;
-		}
+		this.note.text = '';
+
+		return this.close();
 	}
 
 	async updateWindow(){
@@ -51,63 +34,37 @@ class NoteWindow {
 	async close(closer) {
 		let isClosed = await closer();
 
-		if(isClosed){
-			if(this.needSaveOnClose && this.note){
-				let f;
-				if(this.note.exists){ // Update, delete
-					f = this.note.text ? "saveNote" : "deleteNote"; // delete if no text
-				} else {
-					if(this.note.text){ // Create new
-						f = "saveNote";
-					}
-				}
-
-				if(f){
-					qcon.debug(`CurrentNote.close() and ${f}`);
-					await this[f]();
-				} else {
-					qcon.debug(`CurrentNote.close() and do nothing`);
-				}
-			}
-
-			focusMessagePane();
-
-			this.init();
-		} else {
-			qcon.debug("CurrentNote.close() - not popped");
-		}
-
 		if(this.onAfterClose){
-			await this.onAfterClose(isClosed, this.note);
+			await this.onAfterClose(isClosed, this);
 		}
 	}
 
 	// return true if popped
 	async pop(messageId, createNew, pop, popper) {
 		if(this.popping){
+			qcon.debug("NoteWindow.pop() - already popping");
 			return false;
 		}
 
 		await this.close();
 
-		let note = this.note = await createNoteForMessage(messageId);
+		this.popping = true;
+		this.note = await loadNoteForMessage(messageId);
 
-		if(!note.keyId){
+		if(!this.note.keyId){
 			if(createNew){
 				await browser.legacy.alert(_("no.message_id.header"));
 			}
+			this.popping = false;
 			return false;
 		}
 
-		this.popping = true;
 		this.messageId = messageId;
 
-		var data = await note.load();
-
-		if((data && pop) || createNew){
-			return popper(note).then(isPopped => {
+		if((this.note.exists && pop) || createNew){
+			return popper(this.note).then(isPopped => {
 				if(isPopped && this.onAfterPop){
-					this.onAfterPop(note);
+					this.onAfterPop(this);
 				}
 
 				return isPopped;
