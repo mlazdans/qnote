@@ -257,37 +257,27 @@ async function exportStorage(){
 	});
 }
 
-function QNoteTabPop(tab, createNew = true, doPop = true, doFocus = true) {
-	let tabId = getTabId(tab);
-	return browser.messageDisplay.getDisplayedMessage(tabId).then(message => {
-		if(!message){
-			console.debug("browser.messageDisplay.getDisplayedMessage() - message not found");
-			return false;
-		}
+function QNoteMessagePop(Message, createNew = true, doPop = true, doFocus = true) {
+	// Pop only if message changed or tab changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
+	if(
+		!CurrentNote.windowId
+		|| CurrentNote.messageId !== Message.id
+	) {
+		CurrentNote.pop(Message.id, createNew, doPop).then(isPopped => {
+			if(doFocus){
+				CurrentNote.focus();
+			}
+		});
+	}
+}
 
-		// Pop only if message changed or tab changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
-		if(
-			!CurrentNote.windowId ||
-			CurrentNote.messageId !== message.id ||
-			CurrentNote.tabId !== tabId
-		) {
-			return CurrentNote.pop(message.id, createNew, doPop).then(isPopped => {
-				if(isPopped){
-					CurrentNote.tabId = tabId;
-					if(doFocus){
-						CurrentNote.focus();
-					}
-				}
-
-				return isPopped;
-			});
-		} else {
-			return false;
-		}
+function QNoteTabPop(Tab, createNew = true, doPop = true, doFocus = true) {
+	getDisplayedMessage(Tab).then(Message => {
+		QNoteMessagePop(Message, createNew, doPop, doFocus);
 	});
 };
 
-function QNoteTabPopToggle() {
+function QNotePopToggle() {
 	return new Promise(async resolve => {
 		if(CurrentNote.windowId){
 			if(await CurrentNote.isFocused()){
