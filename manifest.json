@@ -26,6 +26,8 @@
 	],
 	"background": {
 		"scripts": [
+			"scripts/utils-note.js",
+			"scripts/utils-message.js",
 			"scripts/utils.js",
 			"scripts/menu.js",
 			"scripts/notes.js",
