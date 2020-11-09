@@ -42,7 +42,7 @@ class Note {
 		return data;
 	}
 
-	save(){
+	async save(saver){
 		let data = {
 			x: this.x,
 			y: this.y,
@@ -61,7 +61,13 @@ class Note {
 			this.created = true;
 		}
 
-		return this.reset(data);
+		this.reset(data);
+
+		if(this.modified || this.created) {
+			return await saver(data) ? data : false;
+		} else {
+			return data;
+		}
 	}
 }
 
@@ -82,12 +88,10 @@ class QNote extends Note {
 	}
 
 	async save(){
-		var data = super.save();
-
-		return browser.storage.local.set({
-			[this.keyId]: data
-		}).then(()=>{
-			return data;
+		return super.save(data => {
+			return browser.storage.local.set({
+				[this.keyId]: data
+			});
 		});
 	}
 
@@ -112,11 +116,14 @@ class XNote extends Note {
 	}
 
 	async save(){
-		var data = super.save();
-
-		return browser.xnote.saveNote(this.root, this.keyId, data).then(()=>{
-			return data;
+		return super.save(data => {
+			return browser.xnote.saveNote(this.root, this.keyId, data);
 		});
+		// var data = super.save();
+
+		// return browser.xnote.saveNote(this.root, this.keyId, data).then(()=>{
+		// 	return data;
+		// });
 	}
 
 	async delete() {
@@ -151,15 +158,9 @@ class QNoteFolder extends Note {
 	}
 
 	async save(){
-		var data = super.save();
-
-		if(this.modified || this.created) {
-			return browser.qnote.saveNote(this.root, this.keyId, data).then(()=>{
-				return data;
-			});
-		} else {
-			return data;
-		}
+		return super.save(data => {
+			return browser.qnote.saveNote(this.root, this.keyId, data);
+		});
 	}
 
 	async delete() {
