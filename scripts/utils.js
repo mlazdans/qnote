@@ -27,7 +27,9 @@ function getDefaultPrefs() {
 
 		messageAttachBottom: false,
 		messageAttachBottomTitle: true,
-		messageAttachBottomText: true
+		messageAttachBottomText: true,
+
+		enableDebug: false
 	};
 }
 

@@ -56,5 +56,6 @@
 	"attach.top": { "message": "top" },
 	"attach.title": { "message": "title" },
 	"attach.text": { "message": "text" },
-	"enable.message_attach": { "message": "Attach to message" }
+	"enable.message_attach": { "message": "Attach to message" },
+	"enable.debug.messages": { "message": "Enable debug messages" }
 }
