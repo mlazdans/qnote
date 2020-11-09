@@ -48,7 +48,7 @@ var formatQNoteData = data => {
 
 	return {
 		title: 'QNote: ' + (new Date(data.ts)).toLocaleString(),
-		text: '<pre style="margin: 0;">' + text + '</pre>'
+		text: '<pre class="moz-quote-pre" wrap="" style="margin: 0;">' + text + '</pre>'
 	}
 };
 
