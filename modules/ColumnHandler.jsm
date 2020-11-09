@@ -207,19 +207,21 @@ ColumnHandler = {
 		ColumnHandler.options.textLimit = limit;
 	},
 	attachToWindow(w){
+		console.debug("ColumnHandler.attachToWindow()");
 		w.FolderDisplayListenerManager.registerListener(DBViewListener);
 		if(w.gFolderDisplay){
 			DBViewListener.onCreatedView(w.gFolderDisplay);
 		}
 	},
 	install(options) {
+		console.debug("ColumnHandler.install()");
 		ColumnHandler.options = options;
 		noteGrabber = options.noteGrabber;
 		Services.ww.registerNotification(WindowObserver);
 		this.attachToWindow(Services.wm.getMostRecentWindow("mail:3pane"));
 	},
 	uninstall() {
-		// console.log("uninstall");
+		console.debug("ColumnHandler.uninstall()");
 		let qnoteCol;
 
 		for(let i = 0; i < ColumnHandler.handlers.length; i++){
