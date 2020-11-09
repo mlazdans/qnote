@@ -70,65 +70,58 @@ async function initExtension(){
 	});
 
 	// Change folders
-	browser.mailTabs.onDisplayedFolderChanged.addListener((tab, displayedFolder) => {
+	browser.mailTabs.onDisplayedFolderChanged.addListener(async (tab, displayedFolder) => {
 		console.debug("browser.mailTabs.onDisplayedFolderChanged()");
-		CurrentNote.close().then(() => {
-			updateDisplayedMessage(CurrentTab);
-		});
+		await CurrentNote.close();
+		updateDisplayedMessage(CurrentTab);
 	});
 
 	// Change tabs
-	browser.tabs.onActivated.addListener(activeInfo => {
+	browser.tabs.onActivated.addListener(async activeInfo => {
 		CurrentTab = activeInfo.tabId;
 		console.debug("browser.tabs.onActivated()", activeInfo);
-		CurrentNote.close();
+		await CurrentNote.close();
 		updateDisplayedMessage(CurrentTab);
 	});
 
 	// Handle keyboard shortcuts
 	var QCommands = {
 		qnote: async () => {
-			if(!CurrentTab){
-				return;
-			}
-			if(CurrentNote.windowId){
-				await CurrentNote.close();
-			} else {
-				QNoteTabPop(CurrentTab, true, true, true).then(isPopped => {
-					updateDisplayedMessage(CurrentTab);
-				});
-			}
+			QNoteTabPopToggle().then(()=>{
+				QNoteTabPop(CurrentTab, true, true, true);
+			});
 		}
 	};
 
 	browser.commands.onCommand.addListener(async command => {
 		if(QCommands[command]){
-			await QCommands[command]();
+			QCommands[command]();
 		}
 	});
 
 	// Click on main window toolbar
 	browser.browserAction.onClicked.addListener(tab => {
 		console.debug("browser.browserAction.onClicked()");
-		QNoteTabPop(tab).then(isPopped => {
-			updateDisplayedMessage(CurrentTab);
+		//QNoteTabPop(tab);
+		QNoteTabPopToggle().then(()=>{
+			QNoteTabPop(tab);
 		});
 	});
 
 	// Click on QNote button
 	browser.messageDisplayAction.onClicked.addListener(tab => {
 		console.debug("browser.messageDisplayAction.onClicked()");
-		QNoteTabPop(tab).then(isPopped => {
-			updateDisplayedMessage(CurrentTab);
+		QNoteTabPopToggle().then(()=>{
+			QNoteTabPop(tab);
 		});
+		//QNoteTabPop(tab);
 	});
 
 	// Change message
 	browser.messageDisplay.onMessageDisplayed.addListener((tab, message) => {
 		console.debug("browser.messageDisplay.onMessageDisplayed()");
-		QNoteTabPop(tab, false, Prefs.showOnSelect, false).then(isPopped => {
-			updateDisplayedMessage(CurrentTab, CurrentNote.note.exists);
-		});
+		QNoteTabPop(tab, false, Prefs.showOnSelect, false);
+		updateDisplayedMessage(CurrentTab);
 	});
 
 	browser.qapp.updateView();

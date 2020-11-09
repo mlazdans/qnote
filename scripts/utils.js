@@ -282,9 +282,21 @@ function QNoteTabPop(tab, createNew = true, doPop = true, doFocus = true) {
 				return isPopped;
 			});
 		} else {
-			return CurrentNote.close().then(() => {
-				return false;
-			});
+			return false;
 		}
 	});
 };
+
+function QNoteTabPopToggle() {
+	return new Promise(async resolve => {
+		if(CurrentNote.windowId){
+			if(await CurrentNote.isFocused()){
+				CurrentNote.close();
+			} else {
+				CurrentNote.focus();
+			}
+		} else {
+			resolve();
+		}
+	});
+}
