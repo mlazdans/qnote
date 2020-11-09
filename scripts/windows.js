@@ -9,7 +9,6 @@ class NoteWindow {
 		this.note = undefined;
 		this.messageId = undefined;
 		this.windowId = undefined;
-		this.tabId = undefined;
 		this.popping = false;
 		this.needSaveOnClose = true;
 	}
