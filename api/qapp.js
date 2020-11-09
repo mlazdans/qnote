@@ -344,8 +344,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						});
 
 						deleteButton.addEventListener("click", (e)=>{
-							wex.CurrentNote.note.text = '';
-							wex.CurrentNote.close();
+							wex.CurrentNote.deleteNote();
 						});
 
 						n.viewNode.moveTo(opt.left, opt.top);
