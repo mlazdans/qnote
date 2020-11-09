@@ -127,6 +127,8 @@ class QNote extends Note {
 		return super.save(data => {
 			return browser.storage.local.set({
 				[this.keyId]: data
+			}).then(() => {
+				return true;
 			});
 		});
 	}
