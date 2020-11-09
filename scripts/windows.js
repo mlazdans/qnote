@@ -87,7 +87,7 @@ class NoteWindow {
 
 		await this.close();
 
-		var note = await createNoteForMessage(messageId);
+		let note = this.note = await createNoteForMessage(messageId);
 
 		if(!note.keyId){
 			if(createNew){
@@ -97,7 +97,6 @@ class NoteWindow {
 		}
 
 		this.popping = true;
-		this.note = note;
 		this.messageId = messageId;
 
 		var data = await note.load();
