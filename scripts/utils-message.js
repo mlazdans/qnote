@@ -89,8 +89,11 @@ async function tagMessage(messageId, toTag = true) {
 	let message = await browser.messages.get(messageId);
 
 	if(!message){
+		qcon.debug(`tagMessage(${toTag}) - no message found`, messageId);
 		return;
 	}
+
+	qcon.debug(`tagMessage(${toTag})`, messageId);
 
 	let tags = message.tags;
 
