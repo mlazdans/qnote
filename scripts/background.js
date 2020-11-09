@@ -85,17 +85,11 @@ async function initExtension(){
 	});
 
 	// Handle keyboard shortcuts
-	var QCommands = {
-		qnote: async () => {
+	browser.commands.onCommand.addListener(command => {
+		if(command === 'qnote') {
 			QNoteTabPopToggle().then(()=>{
 				QNoteTabPop(CurrentTab, true, true, true);
 			});
-		}
-	};
-
-	browser.commands.onCommand.addListener(async command => {
-		if(QCommands[command]){
-			QCommands[command]();
 		}
 	});
 
