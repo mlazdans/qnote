@@ -1,10 +1,11 @@
 // TODO: note optionally next to message
 // TODO: check xnote version setting
+// TODO: rename xnote, qnote API
 var Prefs;
 var CurrentNote;
 var CurrentTab;
 
-async function focusCurrentWindow(){
+async function focusMessagePane(){
 	return browser.windows.getCurrent().then(async window => {
 		await browser.windows.update(window.id, {
 			focused: true
@@ -22,18 +23,25 @@ function initCurrentNote(){
 		CurrentNote = new WebExtensionNoteWindow();
 	}
 
-	CurrentNote.onAfterDelete = async note => {
-		await afterNoteDelete(note.messageId, note.note);
-		note.init();
+	CurrentNote.onAfterDelete = note => {
+		console.debug("CurrentNote.onAfterDelete", note);
+		if(Prefs.useTag){
+			tagMessage(note.keyId, false);
+		}
+		updateDisplayedMessage(CurrentTab);
 	}
 
-	CurrentNote.onAfterSave = async note => {
-		await afterNoteSave(note.messageId, note.note);
-		note.init();
+	CurrentNote.onAfterSave = note => {
+		console.debug("CurrentNote.onAfterSave", note);
+		if(Prefs.useTag){
+			tagMessage(note.keyId, true);
+		}
+		updateDisplayedMessage(CurrentTab);
 	}
 }
 
 async function initExtension(){
+	console.debug("initExtension()");
 	Prefs = await loadPrefsWithDefaults();
 
 	initCurrentNote();
@@ -62,24 +70,19 @@ async function initExtension(){
 	});
 
 	// Change folders
-	browser.mailTabs.onDisplayedFolderChanged.addListener((tab, displayedFolder)=>{
-		return CurrentNote.close().then(()=>{
-			return browser.qapp.updateView();
+	browser.mailTabs.onDisplayedFolderChanged.addListener((tab, displayedFolder) => {
+		console.debug("browser.mailTabs.onDisplayedFolderChanged()");
+		CurrentNote.close().then(() => {
+			updateDisplayedMessage(CurrentTab);
 		});
 	});
 
 	// Change tabs
 	browser.tabs.onActivated.addListener(activeInfo => {
-		browser.tabs.query({
-			mailTab: true
-		}).then(tabs => {
-			for(let tab of tabs){
-				if(tab.id === activeInfo.tabid){
-					return;
-				}
-			}
-			CurrentNote.close();
-		});
+		CurrentTab = activeInfo.tabId;
+		console.debug("browser.tabs.onActivated()", activeInfo);
+		CurrentNote.close();
+		updateDisplayedMessage(CurrentTab);
 	});
 
 	// Handle keyboard shortcuts
@@ -91,7 +94,9 @@ async function initExtension(){
 			if(CurrentNote.windowId){
 				await CurrentNote.close();
 			} else {
-				QNoteTabPop(CurrentTab, true, true, true);
+				QNoteTabPop(CurrentTab, true, true, true).then(isPopped => {
+					updateDisplayedMessage(CurrentTab);
+				});
 			}
 		}
 	};
@@ -104,18 +109,26 @@ async function initExtension(){
 
 	// Click on main window toolbar
 	browser.browserAction.onClicked.addListener(tab => {
-		return QNoteTabPop(tab);
+		console.debug("browser.browserAction.onClicked()");
+		QNoteTabPop(tab).then(isPopped => {
+			updateDisplayedMessage(CurrentTab);
+		});
 	});
 
 	// Click on QNote button
 	browser.messageDisplayAction.onClicked.addListener(tab => {
-		return QNoteTabPop(tab);
+		console.debug("browser.messageDisplayAction.onClicked()");
+		QNoteTabPop(tab).then(isPopped => {
+			updateDisplayedMessage(CurrentTab);
+		});
 	});
 
-	// Click on message
+	// Change message
 	browser.messageDisplay.onMessageDisplayed.addListener((tab, message) => {
-		CurrentTab = tab;
-		return QNoteTabPop(tab, false, Prefs.showOnSelect, false);
+		console.debug("browser.messageDisplay.onMessageDisplayed()");
+		QNoteTabPop(tab, false, Prefs.showOnSelect, false).then(isPopped => {
+			updateDisplayedMessage(CurrentTab, CurrentNote.note.exists);
+		});
 	});
 
 	browser.qapp.updateView();

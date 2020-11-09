@@ -11,12 +11,14 @@ class NoteWindow {
 		this.windowId = undefined;
 		this.tabId = undefined;
 		this.popping = false;
-		this.needSave = true;
+		this.needSaveOnClose = true;
 	}
 
-	async save(){
+	async saveNote(){
 		if(await this.note.save()){
-			this.onAfterSave(this);
+			if(this.onAfterSave){
+				await this.onAfterSave(this.note);
+			}
 			return true;
 		} else {
 			return false;
@@ -24,9 +26,11 @@ class NoteWindow {
 
 	}
 
-	async delete(){
+	async deleteNote(){
 		if(await this.note.delete()){
-			this.onAfterDelete(this);
+			if(this.onAfterDelete){
+				await this.onAfterDelete(this.note);
+			}
 			return true;
 		} else {
 			return false;
@@ -39,15 +43,46 @@ class NoteWindow {
 	async focus() {
 	}
 
-	async close() {
-		// if(this.windowId){
-		// 	focusCurrentWindow();
-		// }
+	async close(closer) {
+		let isClosed = await closer();
+
+		if(isClosed){
+			if(this.onAfterClose){
+				await this.onAfterClose({
+					keyId: this.note.keyId
+				});
+			}
+
+			if(this.needSaveOnClose && this.note){
+				let f;
+				if(this.note.exists){ // Update, delete
+					f = this.note.text ? "saveNote" : "deleteNote"; // delete if no text
+				} else {
+					if(this.note.text){ // Create new
+						f = "saveNote";
+					}
+				}
+
+				if(f){
+					console.debug(`CurrentNote.close() and ${f}`);
+					await this[f]();
+				} else {
+					console.debug(`CurrentNote.close() and do nothing`);
+				}
+			}
+
+			focusMessagePane();
+
+			this.init();
+		} else {
+			console.debug("CurrentNote.close() - not popped");
+		}
 	}
 
+	// return true if popped
 	async pop(messageId, createNew, pop, popper) {
 		if(this.popping){
-			return;
+			return false;
 		}
 
 		await this.close();
@@ -58,7 +93,7 @@ class NoteWindow {
 			if(createNew){
 				await browser.legacy.alert(_("no.message_id.header"));
 			}
-			return;
+			return false;
 		}
 
 		this.popping = true;
@@ -67,13 +102,15 @@ class NoteWindow {
 
 		var data = await note.load();
 
-		await updateMessageDisplayIcon(data?true:false);
-		await updateNoteMessage(data ? note : undefined);
-
 		if((data && pop) || createNew){
-			return popper(note).finally(data => {
+			return popper(note).then(isPopped => {
+				if(isPopped && this.onAfterPop){
+					this.onAfterPop(note);
+				}
+
+				return isPopped;
+			}).finally(() => {
 				this.popping = false;
-				return data;
 			});
 		} else {
 			this.popping = false;
@@ -85,13 +122,11 @@ class WebExtensionNoteWindow extends NoteWindow {
 	constructor() {
 		super();
 
-		browser.windows.onRemoved.addListener(async (windowId)=>{
+		browser.windows.onRemoved.addListener(windowId => {
 			// We are interested only on current popup
-			if(windowId !== this.windowId){
-				return;
+			if(windowId === this.windowId){
+				this.close(false);
 			}
-
-			this.close(false);
 		});
 	}
 
@@ -108,18 +143,17 @@ class WebExtensionNoteWindow extends NoteWindow {
 	}
 
 	async close(closeWindow = true) {
-		if(closeWindow && this.windowId){
-			return await browser.windows.remove(this.windowId);
-		}
-
-		if(this.needSave && this.note){
-			let f = this.note.text ? "save" : "delete"; // Ddelete if no text
-			await this[f]();
-		} else {
-			this.init();
-			this.focusPopup = undefined;
-		}
-		super.close();
+		super.close(() => {
+			if(closeWindow && this.windowId){
+				return browser.windows.remove(this.windowId).then(() => {
+					return true;
+				},() => {
+					return false;
+				});
+			} else {
+				return false;
+			}
+		});
 	}
 
 	async pop(messageId, createNew = false, pop = false) {
@@ -163,18 +197,14 @@ class XULNoteWindow extends NoteWindow {
 		}
 	}
 
-	async close(closeWindow = true) {
-		if(closeWindow && this.windowId){
-			await browser.qapp.popupClose(this.windowId);
-		}
-
-		if(this.needSave && this.note){
-			let f = this.note.text ? "save" : "delete"; // Ddelete if no text
-			await this[f]();
-		} else {
-			this.init();
-		}
-		super.close();
+	async close() {
+		super.close(() => {
+			if(this.windowId){
+				return browser.qapp.popupClose(this.windowId);
+			} else {
+				return false;
+			}
+		});
 	}
 
 	async pop(messageId, createNew = false, pop = false) {
