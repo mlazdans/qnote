@@ -82,15 +82,15 @@ class Note {
 			return saver(data).then(isSaved => {
 				this.exists = isSaved;
 				if(isSaved){
-					console.debug("note.save() - saved");
+					qcon.debug("note.save() - saved");
 					return data;
 				}
 
-				console.debug("note.save() - failure");
+				qcon.debug("note.save() - failure");
 				return false;
 			});
 		} else {
-			console.debug("note.save() - nothing changed, do not save");
+			qcon.debug("note.save() - nothing changed, do not save");
 			return false;
 		}
 	}

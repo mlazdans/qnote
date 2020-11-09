@@ -63,10 +63,10 @@ class NoteWindow {
 				}
 
 				if(f){
-					console.debug(`CurrentNote.close() and ${f}`);
+					qcon.debug(`CurrentNote.close() and ${f}`);
 					await this[f]();
 				} else {
-					console.debug(`CurrentNote.close() and do nothing`);
+					qcon.debug(`CurrentNote.close() and do nothing`);
 				}
 			}
 
@@ -74,7 +74,7 @@ class NoteWindow {
 
 			this.init();
 		} else {
-			console.debug("CurrentNote.close() - not popped");
+			qcon.debug("CurrentNote.close() - not popped");
 		}
 
 		if(this.onAfterClose){

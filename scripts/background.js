@@ -6,6 +6,27 @@ var Prefs;
 var CurrentNote;
 var CurrentTab;
 
+var qcon = {
+	group: (label) => {
+		if(!Prefs || Prefs.enableDebug) {
+			console.group(label);
+		}
+	},
+	groupEnd: () => {
+		if(!Prefs || Prefs.enableDebug) {
+			console.groupEnd();
+		}
+	}
+}
+
+for(let k of ["log", "debug", "error", "warn", "info"]){
+	qcon[k] = (...args) => {
+		if(!Prefs || Prefs.enableDebug) {
+			console[k](...args);
+		}
+	}
+}
+
 async function focusMessagePane(){
 	return browser.windows.getCurrent().then(async window => {
 		await browser.windows.update(window.id, {
@@ -25,7 +46,7 @@ function initCurrentNote(){
 	}
 
 	CurrentNote.onAfterDelete = note => {
-		console.debug("CurrentNote.onAfterDelete", note);
+		qcon.debug("CurrentNote.onAfterDelete", note);
 		if(Prefs.useTag){
 			tagMessage(note.keyId, false);
 		}
@@ -33,7 +54,7 @@ function initCurrentNote(){
 	}
 
 	CurrentNote.onAfterSave = note => {
-		console.debug("CurrentNote.onAfterSave", note);
+		qcon.debug("CurrentNote.onAfterSave", note);
 		if(Prefs.useTag){
 			tagMessage(note.keyId, true);
 		}
@@ -42,7 +63,7 @@ function initCurrentNote(){
 }
 
 async function initExtension(){
-	console.debug("initExtension()");
+	qcon.debug("initExtension()");
 	Prefs = await loadPrefsWithDefaults();
 
 	initCurrentNote();
@@ -70,14 +91,14 @@ async function initExtension(){
 
 	// Change folders
 	browser.mailTabs.onDisplayedFolderChanged.addListener(async (tab, displayedFolder) => {
-		console.debug("browser.mailTabs.onDisplayedFolderChanged()");
+		qcon.debug("browser.mailTabs.onDisplayedFolderChanged()");
 		await CurrentNote.close();
 		updateDisplayedMessage(tab);
 	});
 
 	// Change tabs
 	browser.tabs.onActivated.addListener(async activeInfo => {
-		console.debug("browser.tabs.onActivated()");
+		qcon.debug("browser.tabs.onActivated()");
 		CurrentTab = activeInfo.tabId;
 		await CurrentNote.close();
 		updateDisplayedMessage(CurrentTab);
@@ -94,7 +115,7 @@ async function initExtension(){
 
 	// Click on main window toolbar
 	browser.browserAction.onClicked.addListener(tab => {
-		console.debug("browser.browserAction.onClicked()");
+		qcon.debug("browser.browserAction.onClicked()");
 		QNotePopToggle().then(()=>{
 			QNoteTabPop(tab);
 		});
@@ -102,7 +123,7 @@ async function initExtension(){
 
 	// Click on QNote button
 	browser.messageDisplayAction.onClicked.addListener(tab => {
-		console.debug("browser.messageDisplayAction.onClicked()");
+		qcon.debug("browser.messageDisplayAction.onClicked()");
 		QNotePopToggle().then(()=>{
 			QNoteTabPop(tab);
 		});
@@ -110,7 +131,7 @@ async function initExtension(){
 
 	// Change message
 	browser.messageDisplay.onMessageDisplayed.addListener((tab, message) => {
-		console.debug("browser.messageDisplay.onMessageDisplayed()");
+		qcon.debug("browser.messageDisplay.onMessageDisplayed()");
 		QNoteMessagePop(message, false, Prefs.showOnSelect, false);
 		updateDisplayedMessage(tab);
 	});

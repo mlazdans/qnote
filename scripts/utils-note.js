@@ -1,5 +1,5 @@
 function createNote(keyId) {
-	console.debug("createNote()", keyId);
+	qcon.debug("createNote()", keyId);
 	if(Prefs.storageOption === 'ext'){
 		return new QNote(keyId);
 	} else if(Prefs.storageOption === 'folder'){
