@@ -1,6 +1,7 @@
 // TODO: note optionally next to message
 // TODO: check xnote version setting
 // TODO: rename xnote, qnote API
+// TODO: menu delete all notes from selected messages?
 var Prefs;
 var CurrentNote;
 var CurrentTab;
@@ -61,11 +62,9 @@ async function initExtension(){
 			return;
 		}
 
-		createNoteForMessage(Menu.getId(info)).then((note)=>{
-			note.load().then(async (data)=>{
-				Menu[data?"modify":"new"]();
-				await browser.menus.refresh();
-			});
+		loadNoteForMessage(Menu.getId(info)).then(note => {
+			Menu[note.exists ? "modify" : "new"]();
+			browser.menus.refresh();
 		});
 	});
 
@@ -73,13 +72,13 @@ async function initExtension(){
 	browser.mailTabs.onDisplayedFolderChanged.addListener(async (tab, displayedFolder) => {
 		console.debug("browser.mailTabs.onDisplayedFolderChanged()");
 		await CurrentNote.close();
-		updateDisplayedMessage(CurrentTab);
+		updateDisplayedMessage(tab);
 	});
 
 	// Change tabs
 	browser.tabs.onActivated.addListener(async activeInfo => {
+		console.debug("browser.tabs.onActivated()");
 		CurrentTab = activeInfo.tabId;
-		console.debug("browser.tabs.onActivated()", activeInfo);
 		await CurrentNote.close();
 		updateDisplayedMessage(CurrentTab);
 	});
@@ -87,7 +86,7 @@ async function initExtension(){
 	// Handle keyboard shortcuts
 	browser.commands.onCommand.addListener(command => {
 		if(command === 'qnote') {
-			QNoteTabPopToggle().then(()=>{
+			QNotePopToggle().then(()=>{
 				QNoteTabPop(CurrentTab, true, true, true);
 			});
 		}
@@ -96,8 +95,7 @@ async function initExtension(){
 	// Click on main window toolbar
 	browser.browserAction.onClicked.addListener(tab => {
 		console.debug("browser.browserAction.onClicked()");
-		//QNoteTabPop(tab);
-		QNoteTabPopToggle().then(()=>{
+		QNotePopToggle().then(()=>{
 			QNoteTabPop(tab);
 		});
 	});
@@ -105,17 +103,16 @@ async function initExtension(){
 	// Click on QNote button
 	browser.messageDisplayAction.onClicked.addListener(tab => {
 		console.debug("browser.messageDisplayAction.onClicked()");
-		QNoteTabPopToggle().then(()=>{
+		QNotePopToggle().then(()=>{
 			QNoteTabPop(tab);
 		});
-		//QNoteTabPop(tab);
 	});
 
 	// Change message
 	browser.messageDisplay.onMessageDisplayed.addListener((tab, message) => {
 		console.debug("browser.messageDisplay.onMessageDisplayed()");
-		QNoteTabPop(tab, false, Prefs.showOnSelect, false);
-		updateDisplayedMessage(CurrentTab);
+		QNoteMessagePop(message, false, Prefs.showOnSelect, false);
+		updateDisplayedMessage(tab);
 	});
 
 	browser.qapp.updateView();

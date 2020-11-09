@@ -1,8 +1,11 @@
 var _ = browser.i18n.getMessage;
 
 var Menu = {
-	getId: (info) => {
-		return info.selectedMessages.messages[0].id;
+	getMessage: info => {
+		return info.selectedMessages.messages[0];
+	},
+	getId: info => {
+		return Menu.getMessage(info).id;
 	},
 	modify: () => {
 		browser.menus.create({
@@ -10,9 +13,7 @@ var Menu = {
 			title: _("modify.note"),
 			contexts: ["message_list"],
 			onclick(info) {
-				CurrentNote.pop(Menu.getId(info), false, true).then(()=>{
-					CurrentNote.focus();
-				});
+				QNoteMessagePop(Menu.getMessage(info));
 			},
 		});
 
@@ -46,7 +47,7 @@ var Menu = {
 			title: _("create.new.note"),
 			contexts: ["message_list"],
 			async onclick(info) {
-				CurrentNote.pop(Menu.getId(info), true, true);
+				QNoteMessagePop(Menu.getMessage(info));
 			},
 		});
 	}

@@ -58,10 +58,11 @@ async function resetNoteForMessage(messageId){
 	if(CurrentNote.messageId === messageId){
 		note = CurrentNote.note;
 	} else {
-		note = await createNoteForMessage(messageId);
-		if(await note.load()){
-			return;
-		}
+		note = await loadNoteForMessage(messageId);
+	}
+
+	if(!note.exists){
+		return;
 	}
 
 	note.reset({
@@ -79,15 +80,8 @@ async function resetNoteForMessage(messageId){
 			height: note.height,
 			focused: true
 		});
-
-		return true;
 	} else {
-		return note.save();
-		// return await note.save().then(async ()=>{
-		// 	// TODO: move to createNoteForMessage as event
-		// 	await afterNoteSave(note);
-		// 	return true;
-		// });
+		note.save();
 	}
 }
 
