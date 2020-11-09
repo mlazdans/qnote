@@ -8,6 +8,7 @@ class Note {
 		this.text = '';
 		this.ts;
 		this.loadedNote;
+		this.exists = false;
 		this.modified = false;
 		this.created = false;
 		this.origin = "Note";
@@ -30,8 +31,13 @@ class Note {
 		return true;
 	}
 
-	load(data){
-		return this.loadedNote = this.reset(data);
+	async load(loader) {
+		return loader().then(data => {
+			this.loadedNote = this.reset(data);
+			this.exists = !!data;
+
+			return data;
+		});
 	}
 
 	reset(data){
@@ -66,7 +72,7 @@ class Note {
 		if(this.modified || this.created) {
 			return await saver(data) ? data : false;
 		} else {
-			return data;
+			return false;
 		}
 	}
 }
@@ -78,12 +84,14 @@ class QNote extends Note {
 	}
 
 	async load(){
-		return browser.storage.local.get([this.keyId]).then(store => {
-			if(!store || !store[this.keyId]){
-				return false;
-			}
+		return super.load(async () => {
+			return browser.storage.local.get([this.keyId]).then(store => {
+				if(!store || !store[this.keyId]){
+					return false;
+				}
 
-			return super.load(store[this.keyId]);
+				return store[this.keyId];
+			})
 		});
 	}
 
@@ -110,8 +118,8 @@ class XNote extends Note {
 	}
 
 	async load(){
-		return browser.xnote.loadNote(this.root, this.keyId).then(note => {
-			return super.load(note);
+		return super.load(async () => {
+			return browser.xnote.loadNote(this.root, this.keyId);
 		});
 	}
 
@@ -119,11 +127,6 @@ class XNote extends Note {
 		return super.save(data => {
 			return browser.xnote.saveNote(this.root, this.keyId, data);
 		});
-		// var data = super.save();
-
-		// return browser.xnote.saveNote(this.root, this.keyId, data).then(()=>{
-		// 	return data;
-		// });
 	}
 
 	async delete() {
@@ -141,20 +144,18 @@ class QNoteFolder extends Note {
 	}
 
 	async load(){
-		var note = await browser.qnote.loadNote(this.root, this.keyId);
+		return super.load(async () => {
+			let data;
 
-		// Check for legacy XNote
-		if(note){
-			this.origin = "QNoteFolder:QNote";
-		} else {
-			if(note = await browser.xnote.loadNote(this.root, this.keyId)){
+			// Check for legacy XNote
+			if(data = await browser.qnote.loadNote(this.root, this.keyId)){
+				this.origin = "QNoteFolder:QNote";
+			} else if(data = await browser.xnote.loadNote(this.root, this.keyId)){
 				this.origin = "QNoteFolder:XNote";
 			}
-		}
 
-		if(note) {
-			return super.load(note);
-		}
+			return data;
+		});
 	}
 
 	async save(){
