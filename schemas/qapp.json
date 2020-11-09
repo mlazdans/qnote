@@ -154,6 +154,16 @@
 			"description": ""
 		}]
 	},{
+		"name": "popupIsFocused",
+		"type": "function",
+		"description": "",
+		"async": true,
+		"parameters": [{
+			"name": "id",
+			"type": "string",
+			"description": ""
+		}]
+	},{
 		"name": "popupFocus",
 		"type": "function",
 		"description": "",

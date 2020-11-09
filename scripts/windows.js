@@ -38,21 +38,21 @@ class NoteWindow {
 	}
 
 	async updateWindow(){
+		console.error("Not implemented");
 	}
 
 	async focus() {
+		console.error("Not implemented");
+	}
+
+	async isFocused() {
+		console.error("Not implemented");
 	}
 
 	async close(closer) {
 		let isClosed = await closer();
 
 		if(isClosed){
-			if(this.onAfterClose){
-				await this.onAfterClose({
-					keyId: this.note.keyId
-				});
-			}
-
 			if(this.needSaveOnClose && this.note){
 				let f;
 				if(this.note.exists){ // Update, delete
@@ -76,6 +76,10 @@ class NoteWindow {
 			this.init();
 		} else {
 			console.debug("CurrentNote.close() - not popped");
+		}
+
+		if(this.onAfterClose){
+			await this.onAfterClose(isClosed, this.note);
 		}
 	}
 
@@ -135,6 +139,12 @@ class WebExtensionNoteWindow extends NoteWindow {
 		}
 	}
 
+	async isFocused() {
+		return browser.windows.get(this.windowId).then(window => {
+			return window.focused;
+		});
+	}
+
 	async focus() {
 		return this.updateWindow({
 			focused: true
@@ -188,6 +198,10 @@ class XULNoteWindow extends NoteWindow {
 			await browser.qapp.popupClose(this.windowId);
 			await this.pop(this.messageId, false, true);
 		}
+	}
+
+	async isFocused() {
+		return browser.qapp.popupIsFocused(this.windowId);
 	}
 
 	async focus() {

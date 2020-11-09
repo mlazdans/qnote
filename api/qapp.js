@@ -275,6 +275,17 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return false;
 					}
 				},
+				async popupIsFocused(id){
+					if(!this.popups.has(id)){
+						return false;
+					}
+
+					let n = this.popups.get(id);
+					let document = n.browser.contentWindow.document;
+					let YTextE = document.getElementById('qnote-text');
+
+					return (document.activeElement === YTextE);
+				},
 				async popupFocus(id){
 					if(!this.popups.has(id)){
 						return;
