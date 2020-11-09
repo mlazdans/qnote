@@ -87,18 +87,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			clearNoteCache(){
 				noteGrabber.noteCache = new Map();
 			},
-			// async getNotePromised(keyId, listener){
-			// 	return new Promise((resolve, reject) => {
-			// 		var note = noteGrabber.getNoteCache(keyId);
-			// 		if(note){
-			// 			resolve(keyId, note);
-			// 		} else {
-			// 			this.getNote(keyId, (keyId, data) => {
-			// 				resolve(keyId, data);
-			// 			})
-			// 		}
-			// 	});
-			// },
 			// function listener(keyId, data, params)
 			//  keyId - note key
 			//  data - note data
@@ -119,7 +107,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				} else {
 					blocker.set(keyId, true);
 					let onNoteRequest = async keyId => {
-						var data = await wex.loadNote(keyId);
+						var data = await wex.getNoteData(keyId);
 						if(data){
 							return {
 								keyId: keyId,
@@ -176,7 +164,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						let document = e.target;
 
 						let body = document.getElementsByTagName('body');
-						if(body){
+						if(body.length){
 							body = body[0];
 						} else {
 							console.log("Body not found");
@@ -282,6 +270,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					if(this.popups.has(id)){
 						this.popups.get(id).close();
 						this.popups.delete(id);
+						return true;
+					} else {
+						return false;
 					}
 				},
 				async popupFocus(id){
@@ -304,7 +295,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					let escaper = e => {
 						if(e.key === 'Escape'){
 							if(wex.CurrentNote.windowId){
-								wex.CurrentNote.needSave = false;
+								wex.CurrentNote.needSaveOnClose = false;
 								wex.CurrentNote.close();
 								e.preventDefault();
 							}
@@ -449,26 +440,28 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return;
 					}
 					let document = messagepane.contentDocument;
-					// let gFolderDisplay = w.gFolderDisplay;
-					// let gMessageDisplay = w.gMessageDisplay;
-					// let view;
-					// if(gFolderDisplay){
-					// 	view = gFolderDisplay.view.dbView;
-					// }
 
 					let body = document.getElementsByTagName('body');
-					if(body){
+					if(body.length){
 						body = body[0];
 					} else {
 						return;
 					}
 
+					// Cleanup attached notes
 					let domNodes = document.getElementsByClassName('qnote-insidenote');
 					while(domNodes.length){
 						domNodes[0].remove();
 					}
 
-					if(!data){
+					let aMessageDisplay = w.gMessageDisplay;
+
+					// Bail if no data or trying to attach to alien message
+					if(
+						!data || !data.exists ||
+						!aMessageDisplay ||
+						aMessageDisplay.displayedMessage.messageId !== data.keyId
+					) {
 						return;
 					}
 
@@ -526,14 +519,14 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						body.insertAdjacentHTML('beforeend', html);
 					}
 				},
-				async updateNote(note){
+				async saveNoteCache(note){
 					noteGrabber.saveNoteCache(note);
 				},
-				async deleteNote(keyId){
-					noteGrabber.deleteNoteCache(keyId);
-				},
-				async clearNotes(){
+				async clearNoteCache(){
 					noteGrabber.clearNoteCache();
+				},
+				async deleteNoteCache(keyId){
+					noteGrabber.deleteNoteCache(keyId);
 				},
 				async setColumnTextLimit(limit){
 					ColumnHandler.setTextLimit(limit);

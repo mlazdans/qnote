@@ -26,7 +26,7 @@ const popupClose = () => {
 // We need additional Escape handler here, becauce main window is blured and it's handler won't work here
 document.addEventListener('keydown', e => {
 	if(e.key == 'Escape'){
-		CurrentNote.needSave = false;
+		CurrentNote.needSaveOnClose = false;
 		CurrentNote.close();
 	}
 });

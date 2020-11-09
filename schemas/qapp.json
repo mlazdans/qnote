@@ -27,6 +27,11 @@
 					"default": "",
 					"description": ""
 				},
+				"exists": {
+					"type": "boolean",
+					"default": true,
+					"description": ""
+				},
 				"ts": {
 					"type": "integer",
 					"default": 0,
@@ -41,7 +46,13 @@
 			"description": "Note object"
 		}]
 	},{
-		"name": "updateNote",
+		"name": "clearNoteCache",
+		"type": "function",
+		"description": "",
+		"async": true,
+		"parameters": []
+	},{
+		"name": "saveNoteCache",
 		"type": "function",
 		"description": "",
 		"async": true,
@@ -72,7 +83,7 @@
 			"description": "Note object"
 		}]
 	},{
-		"name": "deleteNote",
+		"name": "deleteNoteCache",
 		"type": "function",
 		"description": "",
 		"async": true,
@@ -91,12 +102,6 @@
 			"type": "integer",
 			"description": ""
 		}]
-	},{
-		"name": "clearNotes",
-		"type": "function",
-		"description": "",
-		"async": true,
-		"parameters": []
 	},{
 		"name": "popup",
 		"type": "function",

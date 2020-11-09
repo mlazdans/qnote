@@ -110,12 +110,13 @@ async function savePrefs(){
 	}
 
 	await ext.savePrefs(Prefs).then(async (saved)=>{
+		// TODO: update settings w/o reload
 		if(saved){
 			// Update extension prefs
 			ext.Prefs = await ext.loadPrefsWithDefaults();
 
 			if(Prefs.storageOption != oldPrefs.storageOption){
-				await browser.qapp.clearNotes();
+				await browser.qapp.clearNoteCache();
 			}
 
 			if(Prefs.showFirstChars !== oldPrefs.showFirstChars){
@@ -124,7 +125,7 @@ async function savePrefs(){
 
 			// Invalidate column cache
 			if(Prefs.storageFolder !== oldPrefs.storageFolder){
-				await browser.qapp.clearNotes();
+				await browser.qapp.clearNoteCache();
 			}
 
 			if(Prefs.windowOption !== oldPrefs.windowOption){
