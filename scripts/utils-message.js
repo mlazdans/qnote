@@ -115,7 +115,8 @@ async function tagMessage(messageId, toTag = true) {
 	});
 }
 
-async function getDisplayedMessage(tabId) {
+async function getDisplayedMessage(tab) {
+	let tabId = getTabId(tab);
 	return new Promise(resolve => {
 		if(tabId){
 			browser.messageDisplay.getDisplayedMessage(tabId).then(message => {
@@ -127,8 +128,8 @@ async function getDisplayedMessage(tabId) {
 	});
 }
 
-async function updateDisplayedMessage(tabId){
-	getDisplayedMessage(tabId).then(message => {
+async function updateDisplayedMessage(tab){
+	getDisplayedMessage(tab).then(message => {
 		loadNoteForMessage(message.id).then(note => {
 			// Update icons
 			let on = note && note.exists;
