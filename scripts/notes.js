@@ -14,6 +14,15 @@ class Note {
 		this.origin = "Note";
 	}
 
+	// clone() {
+	// 	let cloned = new this.constructor;
+	// 	for(let k of Object.keys(this)){
+	// 		cloned[k] = this[k];
+	// 	}
+
+	// 	return cloned;
+	// }
+
 	isNotesEqual(n1, n2){
 		let k1 = Object.keys(n1);
 		let k2 = Object.keys(n2);
@@ -70,10 +79,29 @@ class Note {
 		this.reset(data);
 
 		if(this.modified || this.created) {
-			return await saver(data) ? data : false;
+			return saver(data).then(isSaved => {
+				this.exists = isSaved;
+				if(isSaved){
+					console.debug("note.save() - saved");
+					return data;
+				}
+
+				console.debug("note.save() - failure");
+				return false;
+			});
 		} else {
+			console.debug("note.save() - nothing changed, do not save");
 			return false;
 		}
+	}
+
+	async delete(deleter) {
+		return deleter().then(isDeleted => {
+			if(isDeleted) {
+				this.exists = false;
+			}
+			return isDeleted;
+		});
 	}
 }
 
@@ -104,8 +132,10 @@ class QNote extends Note {
 	}
 
 	async delete() {
-		return browser.storage.local.remove(this.keyId).then(()=>{
-			return true;
+		return super.delete(() => {
+			return browser.storage.local.remove(this.keyId).then(()=>{
+				return true;
+			});
 		});
 	}
 }
@@ -130,8 +160,10 @@ class XNote extends Note {
 	}
 
 	async delete() {
-		return browser.xnote.deleteNote(this.root, this.keyId).then(()=>{
-			return true;
+		return super.delete(() => {
+			return browser.xnote.deleteNote(this.root, this.keyId).then(()=>{
+				return true;
+			});
 		});
 	}
 }
@@ -165,11 +197,13 @@ class QNoteFolder extends Note {
 	}
 
 	async delete() {
-		// Remove XNote, if exists
-		await browser.xnote.deleteNote(this.root, this.keyId);
+		return super.delete(async () => {
+			// Remove XNote, if exists
+			await browser.xnote.deleteNote(this.root, this.keyId);
 
-		return browser.qnote.deleteNote(this.root, this.keyId).then(()=>{
-			return true;
+			return browser.qnote.deleteNote(this.root, this.keyId).then(()=>{
+				return true;
+			});
 		});
 	}
 }
