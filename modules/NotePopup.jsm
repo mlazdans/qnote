@@ -161,7 +161,8 @@ class NotePopup extends BasePopup {
 		let document = this.contentWindow.document;
 		let popup = document.getElementById('popup');
 
-		this.panel.sizeTo(width, height);
+		// This seems to set rather size limits
+		//this.panel.sizeTo(width, height);
 
 		popup.style.width = width + 'px';
 		popup.style.height = height + 'px';
