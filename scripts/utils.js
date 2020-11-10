@@ -304,7 +304,7 @@ async function updateIcons(on){
 function silentCatcher(){
 	//var err = new Error();
 	return (...args) => {
-		qcon.warn(...args);
+		qcon.debug(...args);
 		//qcon.warn(err.stack);
 	}
 }
