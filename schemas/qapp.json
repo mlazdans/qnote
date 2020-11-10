@@ -35,8 +35,8 @@
 		"properties": {
 			"url": {
 				"type": "string",
-				"default": "",
-				"description": ""
+				"optional": true,
+				"default": ""
 			},
 			"left": {
 				"type": "integer",
@@ -61,6 +61,11 @@
 				"optional": true,
 				"default": 0,
 				"description": "Window height"
+			},
+			"focused": {
+				"type": "boolean",
+				"optional": true,
+				"description": ""
 			}
 		}
 	}],
@@ -125,6 +130,17 @@
 		"description": "",
 		"async": true,
 		"parameters": [{
+			"$ref": "PopupOptions"
+		}]
+	},{
+		"name": "popupUpdate",
+		"type": "function",
+		"description": "",
+		"async": true,
+		"parameters": [{
+			"name": "id",
+			"type": "string"
+		},{
 			"$ref": "PopupOptions"
 		}]
 	},{

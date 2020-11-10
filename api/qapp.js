@@ -119,6 +119,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					blocker.set(keyId, true);
 					let onNoteRequest = async keyId => {
 						var data = await wex.getNoteData(keyId);
+						// TODO: use note2QappNote()?
 						if(data){
 							return {
 								keyId: keyId,
@@ -288,6 +289,39 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						//w = Services.wm.getMostRecentWindow("mail:3pane");
 					}
 				},
+				async popupUpdate(id, opt){
+					if(!this.popups.has(id)){
+						return false;
+					}
+
+					let n = this.popups.get(id);
+					let window = n.window;
+					let w = {
+						left: window.screenLeft,
+						top: window.screenTop,
+						width: window.outerWidth,
+						height: window.outerHeight
+					}
+
+					//console.log("popupUpdate", opt, p, w);
+
+					// TODO: move to separate function
+					if(!opt.left){
+						opt.left = Math.round((w.width - w.left) / 2);
+					}
+
+					if(!opt.top){
+						opt.top = Math.round((w.height - w.top) / 2);
+					}
+
+					opt.left += w.left;
+					opt.top += w.top;
+
+					n.moveTo(opt.left, opt.top);
+					n.sizeTo(opt.width, opt.height);
+
+					return true;
+				},
 				async popupClose(id){
 					if(this.popups.has(id)){
 						this.popups.get(id).close();
@@ -298,28 +332,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 				},
 				async popupIsFocused(id){
-					if(!this.popups.has(id)){
-						return false;
-					}
-
-					let n = this.popups.get(id);
-					let document = n.browser.contentWindow.document;
-					let YTextE = document.getElementById('qnote-text');
-
-					return (document.activeElement === YTextE);
+					return this.popups.get(id).isFocused();
 				},
 				async popupFocus(id){
-					if(!this.popups.has(id)){
-						return;
-					}
-
-					let n = this.popups.get(id);
-					let document = n.browser.contentWindow.document;
-					let YTextE = document.getElementById('qnote-text');
-
-					if(YTextE){
-						YTextE.focus();
-					}
+					return this.popups.get(id).focus();
 				},
 				async popup(opt){
 					var self = this;
@@ -361,16 +377,18 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						var closeButton = document.getElementById('closeButton');
 						var deleteButton = document.getElementById('deleteButton');
 
-						closeButton.addEventListener("click", (e)=>{
+						closeButton.addEventListener("click", e => {
 							wex.CurrentNote.close();
 						});
 
-						deleteButton.addEventListener("click", (e)=>{
+						deleteButton.addEventListener("click", e => {
 							wex.CurrentNote.deleteNote();
 						});
 
-						n.viewNode.moveTo(opt.left, opt.top);
+						n.moveTo(opt.left, opt.top);
+						n.sizeTo(opt.width, opt.height);
 
+						// TODO: code duplication!!
 						try {
 							let focus = wex.Prefs.focusOnDisplay || !wex.CurrentNote.note.text;
 							if(!focus && window.gFolderDisplay && window.gFolderDisplay.tree){

@@ -25,23 +25,24 @@ if(note.ts){
 	title.firstChild.textContent += (new Date(note.ts)).toLocaleString();
 }
 
-function resizePopup(w, h){
-	popup.style.width = w + 'px';
-	popup.style.height = h + 'px';
-}
+// function resizePopup(w, h){
+// 	popup.style.width = w + 'px';
+// 	popup.style.height = h + 'px';
+// }
 
-window.addEventListener('DOMContentLoaded', () => {
-	var w = note.width || 0;
-	var h = note.height || 0;
+// window.addEventListener('DOMContentLoaded', () => {
+// 	// TODO: move to separate function
+// 	var w = note.width || 0;
+// 	var h = note.height || 0;
 
-	w = w > 800 ? 800 : w;
-	w = w < 160 ? 160 : w;
+// 	w = w > 800 ? 800 : w;
+// 	w = w < 160 ? 160 : w;
 
-	h = h > 600 ? 600 : h;
-	h = h < 120 ? 120 : h;
+// 	h = h > 600 ? 600 : h;
+// 	h = h < 120 ? 120 : h;
 
-	resizePopup(w, h);
-});
+// 	resizePopup(w, h);
+// });
 
 YTextE.addEventListener("keyup", (e)=>{
 	note.text = YTextE.value;

@@ -19,11 +19,8 @@ class NotePopup extends BasePopup {
 		PopupCounter++;
 		//let id = "qnote-window-panel-" + PopupCounter;
 		let id = "qnote-window-panel";
-		//let window = Services.wm.getMostRecentWindow(null);
 		let document = window.document;
 		let windowId = makeWidgetId(id);
-
-		//let panel = document.getElementById(windowId);
 
 		let panel = document.createXULElement("panel");
 		panel.setAttribute("id", windowId);
@@ -40,37 +37,50 @@ class NotePopup extends BasePopup {
 
 		super(extension, panel, popupURL, browserStyle, fixedWidth, blockParser);
 
+		this.contentWindow = this.browser.contentWindow;
 		this.windowId = windowId;
 		this.window = window;
+		//console.log("Note", this);
+		this.attachEvents();
 
-		var self = this;
+		if(this.panel.adjustArrowPosition === undefined){
+			this.panel.adjustArrowPosition = () => {
+			};
+		}
 
-		var mDown = {};
+		this.shown = false;
+	}
 
-		mDown.titleText = (e) => {
-			var el = e.target;
-			var popup = self.viewNode;
-			var realpopup = e.target.ownerDocument.getElementById('popup');
-			var startX = e.screenX;
-			var startY = e.screenY	;
-			var startLeft = popup.screenX;
-			var startTop = popup.screenY;
+	attachEvents(){
+		let self = this;
+		let window = this.window;
+		let contentWindow = this.contentWindow;
+		let panel = this.panel;
+		let mDown = {};
+
+		mDown.titleText = e => {
+			let popup = contentWindow.document.getElementById('popup');
+			let el = e.target;
+			let startX = e.screenX;
+			let startY = e.screenY	;
+			let startLeft = panel.screenX;
+			let startTop = panel.screenY;
 
 			el.style.cursor = 'move';
 
-			var mover = (e) => {
-				self.viewNode.moveTo(e.screenX - startX + startLeft, e.screenY - startY + startTop);
+			let mover = e => {
+				panel.moveTo(e.screenX - startX + startLeft, e.screenY - startY + startTop);
 				return {
 					x: e.screenX - startX + startLeft - window.screenX,
 					y: e.screenY - startY + startTop - window.screenY
 				}
 			};
 
-			var handleDragEnd = (e) => {
+			let handleDragEnd = e => {
 				window.removeEventListener("mousemove", mover);
 				window.removeEventListener("mouseup", handleDragEnd);
-				var pos = mover(e);
-				realpopup.style.opacity = '1';
+				let pos = mover(e);
+				popup.style.opacity = '1';
 				el.style.cursor = '';
 				if(self.onMove){
 					self.onMove(pos, e);
@@ -80,26 +90,27 @@ class NotePopup extends BasePopup {
 			window.addEventListener("mouseup", handleDragEnd);
 			window.addEventListener("mousemove", mover);
 
-			realpopup.style.opacity = '0.4';
+			popup.style.opacity = '0.4';
 		};
 
 		mDown.resizeButton = (e) => {
-			var popup = e.target.ownerDocument.getElementById('popup');
-			var startX = e.screenX;
-			var startY = e.screenY;
-			var startW = popup.offsetWidth;
-			var startH = popup.offsetHeight;
+			let popup = contentWindow.document.getElementById('popup');
+			let startX = e.screenX;
+			let startY = e.screenY;
+			let startW = popup.offsetWidth;
+			let startH = popup.offsetHeight;
 
-			var rectLimit = {
+			// TODO: move to separate function
+			let rectLimit = {
 				maxWidth: 800,
 				maxHeight: 600,
 				minWidth: 160,
 				minHeight: 120
 			};
 
-			var resizer = (e) => {
-				var w = startW + e.screenX - startX;
-				var h = startH + e.screenY - startY;
+			let resizer = (e) => {
+				let w = startW + e.screenX - startX;
+				let h = startH + e.screenY - startY;
 
 				w = w > rectLimit.maxWidth ? rectLimit.maxWidth : w;
 				w = w < rectLimit.minWidth ? rectLimit.minWidth : w;
@@ -116,10 +127,10 @@ class NotePopup extends BasePopup {
 				}
 			};
 
-			var handleDragEnd = (e) => {
+			let handleDragEnd = (e) => {
 				window.removeEventListener("mousemove", resizer);
 				window.removeEventListener("mouseup", handleDragEnd);
-				var pos = resizer(e);
+				let pos = resizer(e);
 				popup.style.opacity = '1';
 
 				if(self.onResize){
@@ -133,29 +144,50 @@ class NotePopup extends BasePopup {
 			popup.style.opacity = '0.4';
 		};
 
-		var handleDragStart = (e) => {
+		let handleDragStart = e => {
 			if(mDown[e.target.id]){
 				mDown[e.target.id](e);
 			}
 		}
 
-		panel.addEventListener('mousedown', handleDragStart, false);
+		this.panel.addEventListener('mousedown', handleDragStart, false);
+	}
 
-		if(panel.adjustArrowPosition === undefined){
-			panel.adjustArrowPosition = () => {
-			};
+	moveTo(x, y){
+		this.panel.moveTo(x, y);
+	}
+
+	sizeTo(width, height){
+		let document = this.contentWindow.document;
+		let popup = document.getElementById('popup');
+
+		this.panel.sizeTo(width, height);
+
+		popup.style.width = width + 'px';
+		popup.style.height = height + 'px';
+	}
+
+	isFocused(){
+		let document = this.contentWindow.document;
+		let YTextE = document.getElementById('qnote-text');
+
+		return document.activeElement === YTextE;
+	}
+
+	focus(){
+		let document = this.contentWindow.document;
+		let YTextE = document.getElementById('qnote-text');
+
+		if(YTextE){
+			YTextE.focus();
 		}
-
-		this.shown = false;
 	}
 
 	close() {
 		this.destroy();
-		//let window = Services.wm.getMostRecentWindow("mail:3pane");
-		let window = this.window;
-		let panel = window.document.getElementById(this.windowId);
-		if(panel){
-			panel.remove();
+
+		if(this.panel){
+			this.panel.remove();
 		}
 
 		if(this.onClose){

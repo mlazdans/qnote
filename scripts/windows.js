@@ -152,11 +152,11 @@ class WebExtensionNoteWindow extends NoteWindow {
 }
 
 class XULNoteWindow extends NoteWindow {
-	// TODO: implement updateWindow() for floating panel
 	async updateWindow(opt){
 		if(this.windowId){
-			await browser.qapp.popupClose(this.windowId);
-			await this.pop(this.messageId, false, true);
+			return browser.qapp.popupUpdate(this.windowId, opt);
+			// await browser.qapp.popupClose(this.windowId);
+			// await this.pop(this.messageId, false, true);
 		}
 	}
 
@@ -193,6 +193,7 @@ class XULNoteWindow extends NoteWindow {
 				top: note.y || 0
 			};
 
+			// TODO: move to separate function
 			if(!opt.left){
 				opt.left = Math.round((w.width - w.left) / 2);
 			}
