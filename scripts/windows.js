@@ -48,32 +48,37 @@ class NoteWindow {
 
 		await this.close();
 
-		this.popping = true;
-		this.note = await loadNoteForMessage(messageId);
+		return loadNoteForMessage(messageId).then(note => {
+			console.log("loadNoteForMessage", this);
+			this.note = note;
+			this.messageId = messageId;
 
-		if(!this.note.keyId){
-			if(createNew){
-				await browser.legacy.alert(_("no.message_id.header"));
+			if((this.note.exists && pop) || createNew){
+				this.popping = true;
+				return popper(this.note).then(isPopped => {
+					if(isPopped && this.onAfterPop){
+						this.onAfterPop(this);
+					}
+
+					return isPopped;
+				}).finally(() => {
+					this.popping = false;
+				});
 			}
-			this.popping = false;
+
 			return false;
-		}
-
-		this.messageId = messageId;
-
-		if((this.note.exists && pop) || createNew){
-			return popper(this.note).then(isPopped => {
-				if(isPopped && this.onAfterPop){
-					this.onAfterPop(this);
+		}).catch(e =>{
+			if(e instanceof MissingKeyIdError){
+				if(createNew){
+					console.error(e);
+					browser.legacy.alert(_("no.message_id.header"));
 				}
+			} else {
+				console.error(e);
+			}
 
-				return isPopped;
-			}).finally(() => {
-				this.popping = false;
-			});
-		} else {
-			this.popping = false;
-		}
+			return false;
+		});
 	}
 }
 

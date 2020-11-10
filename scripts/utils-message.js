@@ -1,3 +1,10 @@
+class MissingKeyIdError extends Error {
+	constructor(message) {
+		super(message);
+		this.name = "MissingKeyIdError";
+	}
+};
+
 // messageId = int messageId from messageList
 async function getMessageKeyId(messageId) {
 	let partsParser = parts => {
@@ -15,31 +22,24 @@ async function getMessageKeyId(messageId) {
 		return id.substring(1, id.length - 1);
 	};
 
-	return new Promise(resolve => {
-		browser.messages.getFull(messageId).then(parts => {
-			resolve(partsParser(parts));
-		});
+	return browser.messages.getFull(messageId).then(parts => {
+		return partsParser(parts);
 	});
 }
 
 async function createNoteForMessage(messageId) {
-	return new Promise(resolve => {
-		getMessageKeyId(messageId).then(keyId => {
-			let note;
-			if(note = createNote(keyId)){
-				resolve(note);
-			}
-		});
+	return getMessageKeyId(messageId).then(keyId => {
+		if(!keyId){
+			throw new MissingKeyIdError;
+		}
+		return createNote(keyId);
 	});
 }
 
 async function loadNoteForMessage(messageId) {
-	return new Promise(resolve => {
-		createNoteForMessage(messageId).then(note => {
-			note.load().then(()=> {
-				resolve(note);
-			});
-		});
+	return createNoteForMessage(messageId).then(async note => {
+		await note.load();
+		return note;
 	});
 }
 
@@ -73,7 +73,7 @@ async function resetNoteForMessage(messageId){
 	});
 
 	if(CurrentNote.messageId === messageId){
-		await CurrentNote.updateWindow({
+		return CurrentNote.updateWindow({
 			left: note.x,
 			top: note.y,
 			width: note.width,
@@ -81,7 +81,7 @@ async function resetNoteForMessage(messageId){
 			focused: true
 		});
 	} else {
-		note.save();
+		return note.save();
 	}
 }
 
@@ -114,35 +114,35 @@ async function tagMessage(messageId, toTag = true) {
 
 async function getDisplayedMessage(tab) {
 	let tabId = getTabId(tab);
-	return new Promise(resolve => {
-		if(tabId){
-			browser.messageDisplay.getDisplayedMessage(tabId).then(message => {
-				if(message){
-					resolve(message);
-				}
-			});
-		}
-	});
+
+	if(tabId){
+		return browser.messageDisplay.getDisplayedMessage(tabId).then(message => {
+			return message;
+		});
+	} else {
+		return false;
+	}
 }
 
-async function updateDisplayedMessage(tab){
+function updateDisplayedMessage(tab){
+	// Marks icons inactive by default
+	updateIcons(false);
+
 	getDisplayedMessage(tab).then(message => {
-		loadNoteForMessage(message.id).then(note => {
-			// Update icons
-			let on = note && note.exists;
-			let icon = on ? "images/icon.svg" : "images/icon-disabled.svg";
+		return loadNoteForMessage(message.id)
+	}).then(note => {
+		// Marks icons active
+		if(note && note.exists) {
+			updateIcons(true);
+		}
 
-			browser.browserAction.setIcon({path: icon});
-			browser.messageDisplayAction.setIcon({path: icon});
+		// Send updated note down to qapp
+		browser.qapp.saveNoteCache(note2QappNote(note));
 
-			// Send updated note down to qapp
-			browser.qapp.saveNoteCache(note2QappNote(note));
+		// Attach note to message
+		browser.qapp.attachNoteToMessage(note2QappNote(note));
 
-			// Attach note to message
-			browser.qapp.attachNoteToMessage(note2QappNote(note));
-
-			// Update column view
-			browser.qapp.updateView();
-		});
-	});
+		// Update column view
+		browser.qapp.updateView();
+	}).catch(silentCatcher());
 }
