@@ -4,7 +4,7 @@
 		"id": "NoteData",
 		"name": "data",
 		"type": "object",
-		"description": "Note object",
+		"description": "Note data",
 		"properties": {
 			"keyId": {
 				"type": "string",
@@ -25,6 +25,42 @@
 				"type": "string",
 				"default": "",
 				"description": ""
+			}
+		}
+	},{
+		"id": "PopupOptions",
+		"name": "options",
+		"type": "object",
+		"description": "Popup options",
+		"properties": {
+			"url": {
+				"type": "string",
+				"default": "",
+				"description": ""
+			},
+			"left": {
+				"type": "integer",
+				"optional": true,
+				"default": 0,
+				"description": "Window left position"
+			},
+			"top": {
+				"type": "integer",
+				"optional": true,
+				"default": 0,
+				"description": "Window top position"
+			},
+			"width": {
+				"type": "integer",
+				"optional": true,
+				"default": 0,
+				"description": "Window width"
+			},
+			"height": {
+				"type": "integer",
+				"optional": true,
+				"default": 0,
+				"description": "Window height"
 			}
 		}
 	}],
@@ -89,40 +125,7 @@
 		"description": "",
 		"async": true,
 		"parameters": [{
-			"name": "options",
-			"type": "object",
-			"description": "Popup options",
-			"properties": {
-				"url": {
-					"type": "string",
-					"default": "",
-					"description": ""
-				},
-				"left": {
-					"type": "integer",
-					"optional": true,
-					"default": 0,
-					"description": "Windows left position"
-				},
-				"top": {
-					"type": "integer",
-					"optional": true,
-					"default": 0,
-					"description": "Windows top position"
-				},
-				"width": {
-					"type": "integer",
-					"optional": true,
-					"default": 0,
-					"description": "Windows width"
-				},
-				"height": {
-					"type": "integer",
-					"optional": true,
-					"default": 0,
-					"description": "Windows height"
-				}
-			}
+			"$ref": "PopupOptions"
 		}]
 	},{
 		"name": "popupClose",
