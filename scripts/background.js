@@ -62,7 +62,7 @@ function initCurrentNote(){
 					if(await CurrentNote.note[f]()){
 						updateDisplayedMessage(CurrentTab);
 						if(Prefs.useTag){
-							tagMessage(CurrentNote.messageId, f === "save");
+							tagMessage(CurrentNote.messageId, Prefs.tagName, f === "save");
 						}
 					}
 				} else {

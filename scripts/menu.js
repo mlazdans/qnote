@@ -22,7 +22,12 @@ var Menu = {
 			title: _("delete.note"),
 			contexts: ["message_list"],
 			onclick(info) {
-				deleteNoteForMessage(Menu.getId(info));
+				if(CurrentNote.messageId === messageId){
+					// Ensure note close and additional handling there
+					return CurrentNote.deleteNote();
+				} else {
+					return deleteNoteForMessage(Menu.getId(info));
+				}
 			},
 		});
 
@@ -37,7 +42,26 @@ var Menu = {
 			title: _("reset.note.window"),
 			contexts: ["message_list"],
 			onclick(info) {
-				resetNoteForMessage(Menu.getId(info));
+				let messageId = Menu.getId(info);
+				let data = {
+					x: undefined,
+					y: undefined,
+					width: Prefs.width,
+					height: Prefs.height
+				};
+
+				if(CurrentNote.messageId === messageId){
+					CurrentNote.note.set(data);
+					CurrentNote.updateWindow({
+						left: data.x,
+						top: data.y,
+						width: data.width,
+						height: data.height,
+						focused: true
+					});
+				} else {
+					saveNoteForMessage(messageId, data);
+				}
 			},
 		});
 	},

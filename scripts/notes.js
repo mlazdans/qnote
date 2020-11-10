@@ -42,14 +42,14 @@ class Note {
 
 	async load(loader) {
 		return loader().then(data => {
-			this.loadedNote = this.reset(data);
+			this.loadedNote = this.set(data);
 			this.exists = !!data;
 
 			return data;
 		});
 	}
 
-	reset(data){
+	set(data){
 		for(let k of Object.keys(data)){
 			this[k] = data[k];
 		}
@@ -76,7 +76,7 @@ class Note {
 			this.created = true;
 		}
 
-		this.reset(data);
+		this.set(data);
 
 		if(this.modified || this.created) {
 			return saver(data).then(isSaved => {

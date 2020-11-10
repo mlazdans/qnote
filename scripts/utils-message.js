@@ -1,9 +1,3 @@
-// class MissingKeyIdError extends Error {
-// 	constructor(message) {
-// 		super(message);
-// 		this.name = "MissingKeyIdError";
-// 	}
-// };
 class NoKeyIdError extends Error {};
 class NoMessageError extends Error {};
 class NoNoteError extends Error {};
@@ -64,60 +58,34 @@ async function loadNoteForMessage(messageId) {
 }
 
 async function deleteNoteForMessage(messageId){
-	// TODO: this logic should not be present here
-	if(CurrentNote.messageId === messageId){
-		return CurrentNote.deleteNote();
-	} else {
-		return createNoteForMessage(messageId).then(note => {
-			return note.delete();
-		});
-	}
-}
-
-async function resetNoteForMessage(messageId){
-	let note;
-	// TODO: this logic should not be present here
-	if(CurrentNote.messageId === messageId){
-		note = CurrentNote.note;
-	} else {
-		note = await loadNoteForMessage(messageId);
-	}
-
-	if(!note.exists){
-		return;
-	}
-
-	note.reset({
-		x: undefined,
-		y: undefined,
-		width: Prefs.width,
-		height: Prefs.height
+	return createNoteForMessage(messageId).then(note => {
+		return note.delete();
 	});
-
-	if(CurrentNote.messageId === messageId){
-		return CurrentNote.updateWindow({
-			left: note.x,
-			top: note.y,
-			width: note.width,
-			height: note.height,
-			focused: true
-		});
-	} else {
-		return note.save();
-	}
 }
 
-async function tagMessage(messageId, toTag = true) {
+async function saveNoteForMessage(messageId, data){
+	return loadNoteForMessage(messageId).then(note => {
+		if(!note.exists){
+			return;
+		}
+
+		note.set(data);
+
+		return note.save();
+	});
+}
+
+async function tagMessage(messageId, tagName, toTag = true) {
 	return getMessage(messageId).then(message => {
-		qcon.debug(`tagMessage(${toTag})`, messageId);
+		qcon.debug(`tagMessage(${toTag})`, messageId, tagName);
 		let tags = message.tags;
 
 		if(toTag){
-			if(!message.tags.includes(Prefs.tagName)){
-				tags.push(Prefs.tagName);
+			if(!message.tags.includes(tagName)){
+				tags.push(tagName);
 			}
 		} else {
-			tags = tags.filter(item => item !== Prefs.tagName);
+			tags = tags.filter(item => item !== tagName);
 		}
 
 		return browser.messages.update(message.id, {
