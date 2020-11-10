@@ -67,7 +67,7 @@ class NoteWindow {
 
 			return false;
 		}).catch(e =>{
-			if(e instanceof MissingKeyIdError){
+			if(e instanceof NoKeyIdError){
 				if(createNew){
 					console.error(e);
 					browser.legacy.alert(_("no.message_id.header"));

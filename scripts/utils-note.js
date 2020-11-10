@@ -35,6 +35,8 @@ async function loadAllNotes() {
 		]).then(values => {
 			return Object.assign(values[0], values[1]);
 		});
+	} else {
+		throw new TypeError("Ivalid Prefs.storageOption");
 	}
 
 	return p.then(async keys => {
