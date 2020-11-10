@@ -292,3 +292,19 @@ function QNotePopToggle() {
 		}
 	});
 }
+
+async function updateIcons(on){
+	let icon = on ? "images/icon.svg" : "images/icon-disabled.svg";
+
+	browser.browserAction.setIcon({path: icon});
+	browser.messageDisplayAction.setIcon({path: icon});
+}
+
+// Not so silent :>
+function silentCatcher(){
+	var err = new Error();
+	return (...args) => {
+		qcon.warn("silentCatcher()", ...args);
+		qcon.warn(err.stack);
+	}
+}
