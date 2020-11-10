@@ -476,10 +476,18 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 
 					let formated = formatQNoteData(data);
+					let bgText = extension.getURL("images/txt-background.png");
+					let bgTitle = extension.getURL("images/title-background.png");
 
 					let css = `<style>
+					.qnote-insidenote {
+						box-shadow: 2px 2px 2px 1px hsla(210,4%,10%,.15);
+					}
 					.qnote-title {
 						color: black;
+						background: url(${bgTitle});
+						background-repeat: repeat-x;
+						background-position: bottom;
 						background-color: #fff08d;
 						display: flex;
 						align-items: baseline;
@@ -494,21 +502,22 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						box-sizing: border-box;
 						margin: 0;
 						padding: 6px;
+						background: url(${bgText});
+						background-repeat: no-repeat;
+						background-position:right bottom;
 						background-color: #FBFEBF;
 						border: solid 1px #FAF098;
 					}
 					</style>`;
 
 					let htmlFormatter = (title, text) => {
-						let html = ['<div class="qnote-insidenote">'];
-						html.push(css);
+						let html = [css];
 						if(title){
 							html.push(`<div class="qnote-title">${title}</div>`);
 						}
 						if(text){
 							html.push(`<div class="qnote-text">${text}</div>`);
 						}
-						html.push('</div>');
 
 						return html.join("");
 					};
@@ -518,7 +527,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 							wex.Prefs.messageAttachTopTitle ? formated.title : false,
 							wex.Prefs.messageAttachTopText ? formated.text : false,
 						);
-						body.insertAdjacentHTML('afterbegin', html);
+						body.insertAdjacentHTML('afterbegin', '<div class="qnote-insidenote" style="margin-bottom: 0.5em;">' + html + '</div>');
 					}
 
 					if(wex.Prefs.messageAttachBottom){
@@ -526,7 +535,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 							wex.Prefs.messageAttachBottomTitle ? formated.title : false,
 							wex.Prefs.messageAttachBottomText ? formated.text : false,
 						);
-						body.insertAdjacentHTML('beforeend', html);
+						body.insertAdjacentHTML('beforeend', '<div class="qnote-insidenote" style="margin-top: 0.5em;">' + html + '</div>');
 					}
 				},
 				async saveNoteCache(note){
