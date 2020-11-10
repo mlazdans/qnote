@@ -1,5 +1,33 @@
 [{
 	"namespace": "qapp",
+	"types": [{
+		"id": "NoteData",
+		"name": "data",
+		"type": "object",
+		"description": "Note object",
+		"properties": {
+			"keyId": {
+				"type": "string",
+				"default": "",
+				"description": ""
+			},
+			"exists": {
+				"type": "boolean",
+				"default": true,
+				"description": ""
+			},
+			"ts": {
+				"type": "integer",
+				"default": 0,
+				"description": ""
+			},
+			"text": {
+				"type": "string",
+				"default": "",
+				"description": ""
+			}
+		}
+	}],
 	"functions": [{
 		"name": "getProfilePath",
 		"type": "function",
@@ -18,32 +46,8 @@
 		"description": "",
 		"async": true,
 		"parameters": [{
-			"name": "data",
-			"optional": true,
-			"type": "object",
-			"properties": {
-				"keyId": {
-					"type": "string",
-					"default": "",
-					"description": ""
-				},
-				"exists": {
-					"type": "boolean",
-					"default": true,
-					"description": ""
-				},
-				"ts": {
-					"type": "integer",
-					"default": 0,
-					"description": ""
-				},
-				"text": {
-					"type": "string",
-					"default": "",
-					"description": ""
-				}
-			},
-			"description": "Note object"
+			"$ref": "NoteData",
+			"optional": true
 		}]
 	},{
 		"name": "clearNoteCache",
@@ -57,30 +61,7 @@
 		"description": "",
 		"async": true,
 		"parameters": [{
-			"name": "options",
-			"type": "object",
-			"properties": {
-				"keyId": {
-					"type": "string",
-					"default": "",
-					"description": ""
-				},
-				"exists": {
-					"type": "boolean",
-					"default": true,
-					"description": ""
-				},
-				"ts": {
-					"type": "integer",
-					"description": ""
-				},
-				"text": {
-					"type": "string",
-					"default": "",
-					"description": ""
-				}
-			},
-			"description": "Note object"
+			"$ref": "NoteData"
 		}]
 	},{
 		"name": "deleteNoteCache",
