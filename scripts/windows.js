@@ -49,7 +49,6 @@ class NoteWindow {
 		await this.close();
 
 		return loadNoteForMessage(messageId).then(note => {
-			console.log("loadNoteForMessage", this);
 			this.note = note;
 			this.messageId = messageId;
 

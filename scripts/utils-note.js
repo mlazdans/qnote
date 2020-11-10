@@ -4,6 +4,8 @@ function createNote(keyId) {
 		return new QNote(keyId);
 	} else if(Prefs.storageOption === 'folder'){
 		return new QNoteFolder(keyId, Prefs.storageFolder);
+	} else {
+		throw new TypeError("Ivalid Prefs.storageOption");
 	}
 }
 

@@ -1,11 +1,29 @@
-class MissingKeyIdError extends Error {
-	constructor(message) {
-		super(message);
-		this.name = "MissingKeyIdError";
-	}
-};
+// class MissingKeyIdError extends Error {
+// 	constructor(message) {
+// 		super(message);
+// 		this.name = "MissingKeyIdError";
+// 	}
+// };
+class NoKeyIdError extends Error {};
+class NoMessageError extends Error {};
+class NoNoteError extends Error {};
 
 // messageId = int messageId from messageList
+let messagePartReturner = MessagePart => {
+	if(MessagePart){
+		return MessagePart;
+	}
+	throw new NoMessageError;
+};
+
+async function getMessage(messageId){
+	return browser.messages.get(messageId).then(messagePartReturner);
+}
+
+async function getMessageFull(messageId){
+	return browser.messages.getFull(messageId).then(messagePartReturner);
+}
+
 async function getMessageKeyId(messageId) {
 	let partsParser = parts => {
 		// if(parts.headers['x-qnote-text']){
@@ -22,28 +40,31 @@ async function getMessageKeyId(messageId) {
 		return id.substring(1, id.length - 1);
 	};
 
-	return browser.messages.getFull(messageId).then(parts => {
+	return getMessageFull(messageId).then(parts => {
 		return partsParser(parts);
 	});
 }
 
 async function createNoteForMessage(messageId) {
 	return getMessageKeyId(messageId).then(keyId => {
-		if(!keyId){
-			throw new MissingKeyIdError;
+		if(keyId){
+			return createNote(keyId);
 		}
-		return createNote(keyId);
+		throw new NoKeyIdError;
 	});
 }
 
 async function loadNoteForMessage(messageId) {
-	return createNoteForMessage(messageId).then(async note => {
-		await note.load();
-		return note;
+	return createNoteForMessage(messageId).then(note => {
+		if(note){
+			return note.load().then(() => note);
+		}
+		throw new NoNoteError;
 	});
 }
 
 async function deleteNoteForMessage(messageId){
+	// TODO: this logic should not be present here
 	if(CurrentNote.messageId === messageId){
 		return CurrentNote.deleteNote();
 	} else {
@@ -55,6 +76,7 @@ async function deleteNoteForMessage(messageId){
 
 async function resetNoteForMessage(messageId){
 	let note;
+	// TODO: this logic should not be present here
 	if(CurrentNote.messageId === messageId){
 		note = CurrentNote.note;
 	} else {
@@ -86,42 +108,26 @@ async function resetNoteForMessage(messageId){
 }
 
 async function tagMessage(messageId, toTag = true) {
-	let message = await browser.messages.get(messageId);
+	return getMessage(messageId).then(message => {
+		qcon.debug(`tagMessage(${toTag})`, messageId);
+		let tags = message.tags;
 
-	if(!message){
-		qcon.debug(`tagMessage(${toTag}) - no message found`, messageId);
-		return;
-	}
-
-	qcon.debug(`tagMessage(${toTag})`, messageId);
-
-	let tags = message.tags;
-
-	if(toTag){
-		if(!message.tags.includes(Prefs.tagName)){
-			tags.push(Prefs.tagName);
+		if(toTag){
+			if(!message.tags.includes(Prefs.tagName)){
+				tags.push(Prefs.tagName);
+			}
+		} else {
+			tags = tags.filter(item => item !== Prefs.tagName);
 		}
-	} else {
-		tags = tags.filter(item => item !== Prefs.tagName);
-	}
 
-	return browser.messages.update(message.id, {
-		tags: tags
-	}).then(()=>{
-		return true;
+		return browser.messages.update(message.id, {
+			tags: tags
+		});
 	});
 }
 
 async function getDisplayedMessage(tab) {
-	let tabId = getTabId(tab);
-
-	if(tabId){
-		return browser.messageDisplay.getDisplayedMessage(tabId).then(message => {
-			return message;
-		});
-	} else {
-		return false;
-	}
+	return browser.messageDisplay.getDisplayedMessage(getTabId(tab)).then(messagePartReturner);
 }
 
 function updateDisplayedMessage(tab){
