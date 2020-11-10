@@ -1,3 +1,42 @@
 .qnote-column-header {
 	list-style-image: url('../images/icon-column.png');
 }
+
+.qnote-insidenote {
+	box-shadow: 2px 2px 2px 1px hsla(210,4%,10%,.15);
+}
+
+.qnote-title {
+	color: black;
+	background: url('../images/title-background.png');
+	background-repeat: repeat-x;
+	background-position: bottom;
+	background-color: #fff08d;
+	display: flex;
+	align-items: baseline;
+	font-size: small;
+	font-weight: bolder;
+	border: solid 1px #d19231;
+	margin: 0;
+	padding: 6px;
+}
+
+.qnote-text {
+	color: black;
+	box-sizing: border-box;
+	margin: 0;
+	padding: 6px;
+	background: url('../images/txt-background.png');
+	background-repeat: no-repeat;
+	background-position:right bottom;
+	background-color: #FBFEBF;
+	border: solid 1px #FAF098;
+}
+
+.qnote-insidenote-top {
+	margin-bottom: 0.5em;
+}
+
+.qnote-insidenote-bottom {
+	margin-top: 0.5em;
+}

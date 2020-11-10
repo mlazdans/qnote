@@ -27,16 +27,6 @@ class QNoteColumnHandler {
 	}
 
 	setUpDOM() {
-		try {
-			let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
-			let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
-			if(!cssService.sheetRegistered(uri, cssService.USER_SHEET)){
-				cssService.loadAndRegisterSheet(uri, cssService.USER_SHEET);
-			}
-		} catch(e) {
-			console.error(e);
-		}
-
 		let w = this.window;
 		let threadCols = w.document.getElementById("threadCols");
 		let qnoteCol = w.document.getElementById("qnoteCol");

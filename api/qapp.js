@@ -54,6 +54,17 @@ var formatQNoteData = data => {
 
 var qapp = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown() {
+		try {
+			let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
+			let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
+			if(cssService.sheetRegistered(uri, cssService.USER_SHEET)){
+				console.debug("Unregistering html/background.css");
+				cssService.unregisterSheet(uri, cssService.USER_SHEET);
+			}
+		} catch(e) {
+			console.error(e);
+		}
+
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 
 		ColumnHandler.uninstall();
@@ -194,7 +205,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 							return;
 						}
 
-						let formated = formatQNoteData(note);
+						let formatted = formatQNoteData(note);
 
 						let htmlFormatter = (title, text) => {
 							let html = ['<div class="qnote-insidenote" style="margin: 0; padding: 0; border: 1px solid black;">'];
@@ -211,16 +222,16 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 						if(wex.Prefs.printAttachTop){
 							let html = htmlFormatter(
-								wex.Prefs.printAttachTopTitle ? formated.title : false,
-								wex.Prefs.printAttachTopText ? formated.text : false,
+								wex.Prefs.printAttachTopTitle ? formatted.title : false,
+								wex.Prefs.printAttachTopText ? formatted.text : false,
 							);
 							body.insertAdjacentHTML('afterbegin', html);
 						}
 
 						if(wex.Prefs.printAttachBottom){
 							let html = htmlFormatter(
-								wex.Prefs.printAttachBottomTitle ? formated.title : false,
-								wex.Prefs.printAttachBottomText ? formated.text : false,
+								wex.Prefs.printAttachBottomTitle ? formatted.title : false,
+								wex.Prefs.printAttachBottomText ? formatted.text : false,
 							);
 							body.insertAdjacentHTML('beforeend', html);
 						}
@@ -246,6 +257,17 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					aSubject.addEventListener("DOMContentLoaded", domLoadedListener);
 				},
 				async init(){
+					try {
+						let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
+						let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
+						if(!cssService.sheetRegistered(uri, cssService.USER_SHEET)){
+							console.debug("Registering html/background.css");
+							cssService.loadAndRegisterSheet(uri, cssService.USER_SHEET);
+						}
+					} catch(e) {
+						console.error(e);
+					}
+
 					this.popups = new Map();
 
 					//Services.obs.addObserver(MsgMsgDisplayed, "MsgMsgDisplayed");
@@ -475,43 +497,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return;
 					}
 
-					let formated = formatQNoteData(data);
-					let bgText = extension.getURL("images/txt-background.png");
-					let bgTitle = extension.getURL("images/title-background.png");
-
-					let css = `<style>
-					.qnote-insidenote {
-						box-shadow: 2px 2px 2px 1px hsla(210,4%,10%,.15);
-					}
-					.qnote-title {
-						color: black;
-						background: url(${bgTitle});
-						background-repeat: repeat-x;
-						background-position: bottom;
-						background-color: #fff08d;
-						display: flex;
-						align-items: baseline;
-						font-size: small;
-						font-weight: bolder;
-						border: solid 1px #d19231;
-						margin: 0;
-						padding: 6px;
-					}
-					.qnote-text {
-						color: black;
-						box-sizing: border-box;
-						margin: 0;
-						padding: 6px;
-						background: url(${bgText});
-						background-repeat: no-repeat;
-						background-position:right bottom;
-						background-color: #FBFEBF;
-						border: solid 1px #FAF098;
-					}
-					</style>`;
+					let formatted = formatQNoteData(data);
 
 					let htmlFormatter = (title, text) => {
-						let html = [css];
+						let html = [];
 						if(title){
 							html.push(`<div class="qnote-title">${title}</div>`);
 						}
@@ -524,18 +513,18 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					if(wex.Prefs.messageAttachTop){
 						let html = htmlFormatter(
-							wex.Prefs.messageAttachTopTitle ? formated.title : false,
-							wex.Prefs.messageAttachTopText ? formated.text : false,
+							wex.Prefs.messageAttachTopTitle ? formatted.title : false,
+							wex.Prefs.messageAttachTopText ? formatted.text : false,
 						);
-						body.insertAdjacentHTML('afterbegin', '<div class="qnote-insidenote" style="margin-bottom: 0.5em;">' + html + '</div>');
+						body.insertAdjacentHTML('afterbegin', '<div class="qnote-insidenote qnote-insidenote-top">' + html + '</div>');
 					}
 
 					if(wex.Prefs.messageAttachBottom){
 						let html = htmlFormatter(
-							wex.Prefs.messageAttachBottomTitle ? formated.title : false,
-							wex.Prefs.messageAttachBottomText ? formated.text : false,
+							wex.Prefs.messageAttachBottomTitle ? formatted.title : false,
+							wex.Prefs.messageAttachBottomText ? formatted.text : false,
 						);
-						body.insertAdjacentHTML('beforeend', '<div class="qnote-insidenote" style="margin-top: 0.5em;">' + html + '</div>');
+						body.insertAdjacentHTML('beforeend', '<div class="qnote-insidenote qnote-insidenote-bottom">' + html + '</div>');
 					}
 				},
 				async saveNoteCache(note){
