@@ -137,8 +137,6 @@ async function savePrefs(){
 			if(Prefs.enableSearch !== oldPrefs.enableSearch){
 				ext.reloadExtension();
 			}
-
-			await browser.qapp.updateView();
 		}
 	});
 }
