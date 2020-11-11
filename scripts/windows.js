@@ -136,7 +136,7 @@ class NoteWindow {
 
 		if(wasUpdated){
 			this.execListeners("afterupdate", listener => {
-				listener(this, wasUpdated);
+				listener(wasUpdated, this);
 			});
 		}
 
