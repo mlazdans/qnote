@@ -18,7 +18,7 @@ class QNoteColumnHandler {
 		this.setUpDOM();
 
 		this.noteRowListener = (view, row) => {
-			if(view && row){
+			if(view && Number.isInteger(row)){
 				// Asynchronically here we update note row
 				// That method is part of Mozilla API and has nothing to do with either XNote or QNote :)
 				view.NoteChange(row, 1, 2);
