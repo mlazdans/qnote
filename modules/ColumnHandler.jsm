@@ -157,12 +157,11 @@ let WindowObserver = {
 
 let DBViewListener = {
 	onCreatedView: widget => {
-		let view = widget.view.dbView;
-		let qnCH = new QNoteColumnHandler(widget);
-
-		view.addColumnHandler("qnoteCol", qnCH);
-
-		ColumnHandler.handlers.push(qnCH);
+		if(widget && widget.view && widget.view.dbView){
+			let qnCH = new QNoteColumnHandler(widget);
+			widget.view.dbView.addColumnHandler("qnoteCol", qnCH);
+			ColumnHandler.handlers.push(qnCH);
+		}
 	},
 	onActiveCreatedView: widget => {
 		widget.hintColumnsChanged();
