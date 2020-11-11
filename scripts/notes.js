@@ -20,13 +20,12 @@ class Note {
 	// 	return cloned;
 	// }
 
-	async load(loader) {
+	load(loader) {
 		return loader().then(data => {
 			this.set(data);
 			this.exists = !!data;
 
 			return this.get();
-			//return data;
 		});
 	}
 
@@ -49,7 +48,7 @@ class Note {
 		return data;
 	}
 
-	async save(saver){
+	save(saver){
 		// Prepare data to save. We do not want all note properties saved
 		let data = this.get();
 
@@ -65,7 +64,7 @@ class Note {
 		});
 	}
 
-	async delete(deleter) {
+	delete(deleter) {
 		return deleter().then(isDeleted => {
 			if(isDeleted) {
 				this.exists = false;
@@ -81,9 +80,9 @@ class QNote extends Note {
 		this.origin = "QNote";
 	}
 
-	async load(){
-		return super.load(async () => {
-			return browser.storage.local.get([this.keyId]).then(store => {
+	load(){
+		return super.load(() => {
+			return browser.storage.local.get(this.keyId).then(store => {
 				if(!store || !store[this.keyId]){
 					return false;
 				}
@@ -93,7 +92,7 @@ class QNote extends Note {
 		});
 	}
 
-	async save(){
+	save(){
 		return super.save(data => {
 			return browser.storage.local.set({
 				[this.keyId]: data
@@ -103,7 +102,7 @@ class QNote extends Note {
 		});
 	}
 
-	async delete() {
+	delete() {
 		return super.delete(() => {
 			return browser.storage.local.remove(this.keyId).then(()=>{
 				return true;
@@ -119,19 +118,19 @@ class XNote extends Note {
 		this.origin = "XNote";
 	}
 
-	async load(){
-		return super.load(async () => {
+	load(){
+		return super.load(() => {
 			return browser.xnote.loadNote(this.root, this.keyId);
 		});
 	}
 
-	async save(){
+	save(){
 		return super.save(data => {
 			return browser.xnote.saveNote(this.root, this.keyId, data);
 		});
 	}
 
-	async delete() {
+	delete() {
 		return super.delete(() => {
 			return browser.xnote.deleteNote(this.root, this.keyId).then(()=>{
 				return true;
@@ -147,7 +146,7 @@ class QNoteFolder extends Note {
 		this.origin = "QNoteFolder";
 	}
 
-	async load(){
+	load(){
 		return super.load(async () => {
 			let data;
 
@@ -162,13 +161,13 @@ class QNoteFolder extends Note {
 		});
 	}
 
-	async save(){
+	save(){
 		return super.save(data => {
 			return browser.qnote.saveNote(this.root, this.keyId, data);
 		});
 	}
 
-	async delete() {
+	delete() {
 		return super.delete(async () => {
 			// Remove XNote, if exists
 			await browser.xnote.deleteNote(this.root, this.keyId);
