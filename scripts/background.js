@@ -3,6 +3,10 @@
 // TODO: rename xnote, qnote API
 // TODO: menu delete all notes from selected messages?
 // TODO: note on new window
+// TODO: update column by findIndexOfMsgHdr
+// let db = this.view.db;
+// let hdrid = this.view.getMsgHdrAt(row).messageId;
+// console.log(db.getMsgHdrForMessageID(hdrid), this.view);
 var Prefs;
 var CurrentNote;
 var CurrentTab;
