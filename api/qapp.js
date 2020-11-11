@@ -52,19 +52,37 @@ var formatQNoteData = data => {
 	}
 };
 
+function uninstallQNoteCSS() {
+	try {
+		let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
+		let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
+		if(cssService.sheetRegistered(uri, cssService.USER_SHEET)){
+			console.debug("Unregistering html/background.css");
+			cssService.unregisterSheet(uri, cssService.USER_SHEET);
+		}
+	} catch(e) {
+		console.error(e);
+	}
+}
+
+function installQNoteCSS() {
+	try {
+		let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
+		let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
+		if(!cssService.sheetRegistered(uri, cssService.USER_SHEET)){
+			console.debug("Registering html/background.css");
+			cssService.loadAndRegisterSheet(uri, cssService.USER_SHEET);
+		}
+	} catch(e) {
+		console.error(e);
+	}
+}
+
 var qapp = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown() {
 		console.debug("QNote.shutdown()");
-		try {
-			let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
-			let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
-			if(cssService.sheetRegistered(uri, cssService.USER_SHEET)){
-				console.debug("Unregistering html/background.css");
-				cssService.unregisterSheet(uri, cssService.USER_SHEET);
-			}
-		} catch(e) {
-			console.error(e);
-		}
+
+		uninstallQNoteCSS();
 
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 
@@ -244,17 +262,12 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				},
 				async init(){
 					console.debug("qapp.init()");
+
 					wex = Components.utils.waiveXrays(context.cloneScope);
-					try {
-						let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
-						let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
-						if(!cssService.sheetRegistered(uri, cssService.USER_SHEET)){
-							console.debug("Registering html/background.css");
-							cssService.loadAndRegisterSheet(uri, cssService.USER_SHEET);
-						}
-					} catch(e) {
-						console.error(e);
-					}
+
+					// Remove old style after upgrade
+					uninstallQNoteCSS();
+					installQNoteCSS();
 
 					this.popups = new Map();
 
