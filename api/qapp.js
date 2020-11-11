@@ -103,38 +103,32 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			//  data - note data
 			//  params - misc params passed to getNote()
 			getNote(keyId, listener){
-				let blocker = noteGrabber.noteBlocker;
-
-				// Block concurrent calls on same note as we will update column once it has been loded from local cache, local storage or file
-				// Not 100% sure if necessary but calls to column update can be quite many
-				if(blocker.has(keyId)){
-					return {};
-				}
-
-				var note = noteGrabber.getNoteCache(keyId);
-
-				if(note){
-					return Object.assign({}, note);
+				let data = noteGrabber.getNoteCache(keyId);
+				if(data){
+					return Object.assign({}, data);
 				} else {
-					blocker.set(keyId, true);
-					console.log(`getNote(${keyId})`);
-					let onNoteRequest = async keyId => {
-						return wex.getQAppNoteData(keyId).then(data => {
-							console.log("onNoteRQ", data);
-							return data;
+					let blocker = noteGrabber.noteBlocker;
+
+					// Block concurrent calls on same note as we will update column once it has been loded from local cache, local storage or file
+					// Not 100% sure if necessary but calls to column update can be quite many
+					if(blocker.has(keyId)){
+						wex.qcon.debug(`blocker.has(${keyId})`);
+					} else {
+						blocker.set(keyId, true);
+						// We'll update cache and call listener once note arrives
+						wex.getQAppNoteData(keyId).then(data => {
+							noteGrabber.saveNoteCache(data);
+							if(listener){
+								listener(keyId, data);
+							}
+						}).finally(() => {
+							wex.qcon.debug(`blocker.delete(${keyId})`);
+							// Unblock concurrent calls
+							blocker.delete(keyId);
 						});
 					}
 
-					onNoteRequest(keyId).then(data => {
-						noteGrabber.saveNoteCache(data);
-
-						if(listener){
-							listener(keyId, data);
-						}
-					}).finally(() => {
-						blocker.delete(keyId);
-					});
-
+					// return empty object to keep getNote() call synchronous
 					return {};
 				}
 			}
@@ -293,8 +287,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						height: window.outerHeight
 					}
 
-					//console.log("popupUpdate", opt, p, w);
-
 					// TODO: move to separate function
 					if(!opt.left){
 						opt.left = Math.round((w.width - w.left) / 2);
@@ -408,8 +400,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						// if(!anchor){
 						// 	anchor = null;
 						// }
-
-						// console.log("anchor", anchor);
 						// n.viewNode.openPopup(anchor, "bottomcenter bottomright");
 
 						if(opt.left && opt.top) {
