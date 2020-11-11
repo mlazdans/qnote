@@ -54,6 +54,7 @@ var formatQNoteData = data => {
 
 var qapp = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown() {
+		console.debug("QNote.shutdown()");
 		try {
 			let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
 			let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
@@ -79,7 +80,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 	}
 
 	getAPI(context) {
-		var wex = Components.utils.waiveXrays(context.cloneScope);
+		var wex;
 		//var QAppWindowObserver = this.QAppWindowObserver;
 		//var MsgMsgDisplayed = this.MsgMsgDisplayed;
 
@@ -242,6 +243,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					aSubject.addEventListener("DOMContentLoaded", domLoadedListener);
 				},
 				async init(){
+					console.debug("qapp.init()");
+					wex = Components.utils.waiveXrays(context.cloneScope);
 					try {
 						let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
 						let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
