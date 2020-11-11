@@ -430,12 +430,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					});
 				},
 				async installQuickFilter(){
+					console.log("search has been temporarily disabled until we found a better solution");
 					// TODO: need to re-think better solution
-					wex.loadAllQAppNotes().then(() => {
-						NoteFilter.install({
-							noteGrabber: noteGrabber
-						});
-					});
+					// wex.loadAllQAppNotes().then(() => {
+					// 	NoteFilter.install({
+					// 		noteGrabber: noteGrabber
+					// 	});
+					// });
 				},
 				async installColumnHandler(){
 					ColumnHandler.install({
