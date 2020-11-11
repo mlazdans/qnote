@@ -28,7 +28,7 @@ var qcon = {
 for(let k of ["log", "debug", "error", "warn", "info"]){
 	qcon[k] = (...args) => {
 		if(!Prefs || Prefs.enableDebug) {
-			console[k](...args);
+			console[k]("QNote:", ...args);
 		}
 	}
 }
@@ -131,19 +131,19 @@ async function initExtension(){
 	// Click on main toolbar
 	browser.browserAction.onClicked.addListener(tab => {
 		qcon.debug("browserAction.onClicked()");
-		CurrentTab = tab;
 		QNotePopToggle().then(()=>{
 			QNoteTabPop(tab);
 		});
+		CurrentTab = tab;
 	});
 
 	// Click on QNote button
 	browser.messageDisplayAction.onClicked.addListener(tab => {
 		qcon.debug("messageDisplayAction.onClicked()");
-		CurrentTab = tab;
 		QNotePopToggle().then(()=>{
 			QNoteTabPop(tab);
 		});
+		CurrentTab = tab;
 	});
 
 	// Change message
