@@ -116,7 +116,8 @@ async function savePrefs(){
 			ext.Prefs = await ext.loadPrefsWithDefaults();
 
 			if(Prefs.storageOption != oldPrefs.storageOption){
-				await browser.qapp.clearNoteCache();
+				//await browser.qapp.clearNoteCache();
+				ext.reloadExtension();
 			}
 
 			if(Prefs.showFirstChars !== oldPrefs.showFirstChars){
@@ -125,7 +126,8 @@ async function savePrefs(){
 
 			// Invalidate column cache
 			if(Prefs.storageFolder !== oldPrefs.storageFolder){
-				await browser.qapp.clearNoteCache();
+				//await browser.qapp.clearNoteCache();
+				ext.reloadExtension();
 			}
 
 			if(Prefs.windowOption !== oldPrefs.windowOption){
