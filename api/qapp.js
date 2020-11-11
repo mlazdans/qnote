@@ -444,11 +444,22 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						noteGrabber: noteGrabber
 					});
 				},
-				async updateView(){
+				async updateView(keyId){
 					let w = this.getQNoteSuitableWindow();
-					let gFolderDisplay = w.gFolderDisplay;
-					if(gFolderDisplay){
-						let view = gFolderDisplay.view.dbView;
+					let aFolderDisplay = w.gFolderDisplay;
+					if(aFolderDisplay && aFolderDisplay.view && aFolderDisplay.view.dbView){
+						let view = aFolderDisplay.view.dbView;
+						let row;
+
+						if(keyId){
+							let msgHdr = view.db.getMsgHdrForMessageID(keyId);
+							if(msgHdr){
+								row = view.findIndexOfMsgHdr(msgHdr, false);
+							}
+						} else {
+							row = view.currentlyDisplayedMessage;
+						}
+
 						//let rangeCount = treeSelection.getRangeCount();
 						//console.log("updateView", view.rowCount, gFolderDisplay.tree.currentIndex, view.currentlyDisplayedMessage);
 						// nsIMsgDBView.idl
@@ -466,9 +477,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 						// TODO: probably a good idea to change all rows in a view or at least add func parameter
 						// https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsITreeBoxObject#invalidateCell
-						if(view){
-							view.NoteChange(view.currentlyDisplayedMessage, 1, 2);
-						}
+						view.NoteChange(row, 1, 2);
 					}
 				},
 				async attachNoteToMessage(data){
