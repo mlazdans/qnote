@@ -13,7 +13,7 @@ function getDefaultPrefs() {
 		storageFolder: "",
 		enableSearch: false, // defaults to false for now, because of poor implementation
 
-		printAttachTop: false,
+		printAttachTop: true,
 		printAttachTopTitle: true,
 		printAttachTopText: true,
 
@@ -21,7 +21,7 @@ function getDefaultPrefs() {
 		printAttachBottomTitle: true,
 		printAttachBottomText: true,
 
-		messageAttachTop: false,
+		messageAttachTop: true,
 		messageAttachTopTitle: true,
 		messageAttachTopText: true,
 
@@ -141,15 +141,14 @@ async function importXNotes(root){
 		}
 
 		let yn = new QNote(note.keyId);
-		let exists = await yn.load();
+
+		await yn.load();
+
+		let exists = yn.exists;
 
 		if(exists && !Prefs.overwriteExistingNotes){
 			stats.exist++;
 		} else {
-			// Remove loaded note information so that original ts can be saved
-			if(exists){
-				yn.loadedNote = undefined;
-			}
 			yn.x = xn.x;
 			yn.y = xn.y;
 			yn.width = xn.width;
