@@ -71,7 +71,21 @@ function note2QAppNote(note){
 async function loadAllQAppNotes(){
 	return loadAllNotes().then(notes => {
 		for(let note of notes){
-			browser.qapp.saveNoteCache(note2QAppNote(note));
+			sendNoteToQApp(note);
 		}
 	});
+}
+
+function sendNoteToQApp(note){
+	return browser.qapp.saveNoteCache(note2QAppNote(note));
+}
+
+function updateNoteView(note){
+	if(note){
+		return sendNoteToQApp(note).then(() => {
+			browser.qapp.updateView(note.keyId);
+		});
+	} else {
+		return browser.qapp.updateView();
+	}
 }

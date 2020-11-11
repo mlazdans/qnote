@@ -55,7 +55,7 @@ async function loadNoteForMessage(messageId) {
 
 async function deleteNoteForMessage(messageId){
 	return createNoteForMessage(messageId).then(note => {
-		return note.delete();
+		return note.delete().then(() => note);
 	});
 }
 
@@ -102,12 +102,9 @@ function updateDisplayedMessage(tab){
 		}
 
 		// Send updated note down to qapp
-		browser.qapp.saveNoteCache(note2QAppNote(note));
+		updateNoteView(note);
 
 		// Attach note to message
 		browser.qapp.attachNoteToMessage(note2QAppNote(note));
-
-		// Update column view
-		browser.qapp.updateView();
 	}).catch(silentCatcher());
 }

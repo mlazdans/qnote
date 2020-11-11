@@ -3,10 +3,7 @@
 // TODO: rename xnote, qnote API
 // TODO: menu delete all notes from selected messages?
 // TODO: note on new window
-// TODO: update column by findIndexOfMsgHdr
-// let db = this.view.db;
-// let hdrid = this.view.getMsgHdrAt(row).messageId;
-// db.getMsgHdrForMessageID(hdrid), this.view;
+// TODO: note on new tab after dblClick
 // TODO: suggest: nsIMsgFilterService->removeCustomAction, nsIMsgFilterService->removeCustomTerm
 // TODO: suggest: QuickFilterManager.jsm > appendTerms() > term.customId = tfDef.customId;
 var Prefs;
@@ -54,8 +51,9 @@ function initCurrentNote(){
 		throw new TypeError("Prefs.windowOption");
 	}
 
-	CurrentNote.addListener("afterupdate", action => {
+	CurrentNote.addListener("afterupdate", (action, NoteWindow) => {
 		updateDisplayedMessage(CurrentTab);
+		updateNoteView(NoteWindow.note); // In case opened NoteWindow is not for currently selected message
 		if(Prefs.useTag){
 			tagMessage(CurrentNote.messageId, Prefs.tagName, action === "save");
 		}
@@ -141,8 +139,6 @@ async function initExtension(){
 		QNoteMessagePop(message, false, Prefs.showOnSelect, false);
 		updateDisplayedMessage(tab);
 	});
-
-	browser.qapp.updateView();
 }
 
 async function waitForLoad() {
