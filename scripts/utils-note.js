@@ -9,8 +9,10 @@ function createNote(keyId) {
 	}
 }
 
-async function getNoteData(keyId) {
-	return await createNote(keyId).load();
+async function getQAppNoteData(keyId) {
+	return loadNote(keyId).then(note => {
+		return note2QAppNote(note);
+	});
 }
 
 async function loadNote(keyId) {
@@ -57,7 +59,7 @@ async function loadAllNotes() {
 }
 
 // Prepare note for sending to qapp
-function note2QappNote(note){
+function note2QAppNote(note){
 	return note ? {
 		keyId: note.keyId,
 		exists: note.exists || false,
@@ -69,7 +71,7 @@ function note2QappNote(note){
 async function loadAllQAppNotes(){
 	return loadAllNotes().then(notes => {
 		for(let note of notes){
-			browser.qapp.saveNoteCache(note2QappNote(note));
+			browser.qapp.saveNoteCache(note2QAppNote(note));
 		}
 	});
 }

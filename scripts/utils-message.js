@@ -102,10 +102,10 @@ function updateDisplayedMessage(tab){
 		}
 
 		// Send updated note down to qapp
-		browser.qapp.saveNoteCache(note2QappNote(note));
+		browser.qapp.saveNoteCache(note2QAppNote(note));
 
 		// Attach note to message
-		browser.qapp.attachNoteToMessage(note2QappNote(note));
+		browser.qapp.attachNoteToMessage(note2QAppNote(note));
 
 		// Update column view
 		browser.qapp.updateView();

@@ -117,22 +117,12 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					return Object.assign({}, note);
 				} else {
 					blocker.set(keyId, true);
+					console.log(`getNote(${keyId})`);
 					let onNoteRequest = async keyId => {
-						var data = await wex.getNoteData(keyId);
-						// TODO: use note2QappNote()?
-						if(data){
-							return {
-								keyId: keyId,
-								exists: true,
-								text: data.text,
-								ts: data.ts
-							}
-						} else {
-							return {
-								keyId: keyId,
-								exists: false
-							}
-						}
+						return wex.getQAppNoteData(keyId).then(data => {
+							console.log("onNoteRQ", data);
+							return data;
+						});
 					}
 
 					onNoteRequest(keyId).then(data => {
