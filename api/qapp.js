@@ -332,10 +332,14 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 				},
 				async popupIsFocused(id){
-					return this.popups.get(id).isFocused();
+					if(this.popups.has(id)){
+						return this.popups.get(id).isFocused();
+					}
 				},
 				async popupFocus(id){
-					return this.popups.get(id).focus();
+					if(this.popups.has(id)){
+						return this.popups.get(id).focus();
+					}
 				},
 				async popup(opt){
 					var self = this;
