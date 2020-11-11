@@ -7,6 +7,8 @@
 // let db = this.view.db;
 // let hdrid = this.view.getMsgHdrAt(row).messageId;
 // db.getMsgHdrForMessageID(hdrid), this.view;
+// TODO: suggest: nsIMsgFilterService->removeCustomAction, nsIMsgFilterService->removeCustomTerm
+// TODO: suggest: QuickFilterManager.jsm > appendTerms() > term.customId = tfDef.customId;
 var Prefs;
 var CurrentNote;
 var CurrentTab;
