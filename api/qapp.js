@@ -451,7 +451,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						let view = aFolderDisplay.view.dbView;
 						let row;
 
-						if(keyId){
+						if(keyId && view.db){
 							let msgHdr = view.db.getMsgHdrForMessageID(keyId);
 							if(msgHdr){
 								row = view.findIndexOfMsgHdr(msgHdr, false);
