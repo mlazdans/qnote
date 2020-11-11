@@ -21,7 +21,7 @@ async function getMessageKeyId(messageId) {
 	let partsParser = parts => {
 		// if(parts.headers['x-qnote-text']){
 		// 	let qtext = parts.headers['x-qnote-text'][0];
-		// 	console.log(utf8decode(qtext));
+		// 	utf8decode(qtext);
 		// }
 
 		if(!parts.headers || !parts.headers['message-id'] || !parts.headers['message-id'].length){

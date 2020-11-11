@@ -56,9 +56,6 @@ class QNoteColumnHandler {
 		}
 
 		// let cStates = w.gFolderDisplay.getColumnStates();
-
-		// console.log("view1", cStates.qnoteCol);
-
 		// if(cStates.qnoteCol === undefined){
 		// 	cStates.qnoteCol = {
 		// 		width: width,
@@ -81,7 +78,6 @@ class QNoteColumnHandler {
 			// colOrdinalStr = `ordinal="${ordinal}" style="-moz-box-ordinal-group: ${ordinal};"`;
 			// splitOrdinalStr = `style="-moz-box-ordinal-group: ${(ordinal - 1)};"`;
 		}
-		//console.log("ordinals", ordinal, colOrdinalStr, splitOrdinalStr);
 
 		let html = `<splitter class="tree-splitter" resizeafter="farthest" ${splitOrdinalStr} />
 			<treecol id="qnoteCol" persist="hidden ordinal width sortDirection" width="${width}" ${colOrdinalStr}
@@ -127,11 +123,9 @@ class QNoteColumnHandler {
 	}
 
 	// getCellProperties(row, col, props){
-	// 	console.log("getCellProperties", row, col, props);
 	// }
 
 	// getRowProperties(row, props){
-	// 	console.log("getRowProperties", row, props);
 	// }
 
 	getImageSrc(row, col) {
@@ -148,18 +142,14 @@ class QNoteColumnHandler {
 
 let WindowObserver = {
 	observe: function(aSubject, aTopic) {
-		//console.log("observe", aTopic);
 		if(aTopic === 'domwindowopened'){
 			aSubject.addEventListener("DOMContentLoaded", e => {
 				let document = e.target;
 				let threadCols = document.getElementById("threadCols");
 
-				if(!threadCols) {
-					//console.log("not interested in", document.URL);
-					return;
+				if(threadCols) {
+					ColumnHandler.attachToWindow(aSubject);
 				}
-
-				ColumnHandler.attachToWindow(aSubject);
 			});
 		}
 	}
@@ -170,23 +160,16 @@ let DBViewListener = {
 		let view = widget.view.dbView;
 		let qnCH = new QNoteColumnHandler(widget);
 
-		// widget.qnCH = qnCH;
-
 		view.addColumnHandler("qnoteCol", qnCH);
 
 		ColumnHandler.handlers.push(qnCH);
 	},
 	onActiveCreatedView: widget => {
 		widget.hintColumnsChanged();
-		//console.log("onActiveCreatedView", widget);
 	},
 	onDestroyingView: (widget, aFolderIsComingBack) => {
-		// if(widget.qnCH){
-		// 	widget.qnCH.destroy();
-		// }
 	},
 	onMessagesLoaded: (widget, aAll) => {
-		//console.log("onMessagesLoaded", arguments);
 	}
 };
 
@@ -220,7 +203,6 @@ ColumnHandler = {
 
 			view.removeColumnHandler("qnoteCol");
 
-			// console.log("uninstall", w, i);
 			if(qnoteCol = w.document.getElementById("qnoteCol")){
 				qnoteCol.parentNode.removeChild(qnoteCol.previousSibling);
 				qnoteCol.parentNode.removeChild(qnoteCol);

@@ -40,7 +40,7 @@ class NotePopup extends BasePopup {
 		this.contentWindow = this.browser.contentWindow;
 		this.windowId = windowId;
 		this.window = window;
-		//console.log("Note", this);
+
 		this.attachEvents();
 
 		if(this.panel.adjustArrowPosition === undefined){
