@@ -80,7 +80,12 @@
 		"type": "function",
 		"description": "",
 		"async": true,
-		"parameters": []
+		"parameters": [{
+			"name": "keyId",
+			"optional": true,
+			"type": "string",
+			"description": ""
+		}]
 	},{
 		"name": "attachNoteToMessage",
 		"type": "function",
