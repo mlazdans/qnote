@@ -2,6 +2,7 @@
 // TODO: check xnote version setting
 // TODO: rename xnote, qnote API
 // TODO: menu delete all notes from selected messages?
+// TODO: note on new window
 var Prefs;
 var CurrentNote;
 var CurrentTab;
@@ -43,40 +44,22 @@ function initCurrentNote(){
 		CurrentNote = new XULNoteWindow();
 	} else if(Prefs.windowOption == 'webext'){
 		CurrentNote = new WebExtensionNoteWindow();
+	} else {
+		throw new TypeError("Prefs.windowOption");
 	}
 
-	CurrentNote.onAfterClose = async (isClosed) => {
-		if(isClosed){
-			if(CurrentNote.needSaveOnClose && CurrentNote.note){
-				let f;
-				if(CurrentNote.note.exists){ // Update, delete
-					f = CurrentNote.note.text ? "save" : "delete"; // delete if no text
-				} else {
-					if(CurrentNote.note.text){ // Create new
-						f = "save";
-					}
-				}
-
-				if(f){
-					qcon.debug(`CurrentNote.close() and ${f}`);
-					if(await CurrentNote.note[f]()){
-						updateDisplayedMessage(CurrentTab);
-						if(Prefs.useTag){
-							tagMessage(CurrentNote.messageId, Prefs.tagName, f === "save");
-						}
-					}
-				} else {
-					qcon.debug(`CurrentNote.close() and do nothing`);
-				}
-			}
-
-			focusMessagePane();
-
-			CurrentNote.init();
-		} else {
-			qcon.debug("CurrentNote.close() - not popped");
+	CurrentNote.addListener("afterupdate", action => {
+		updateDisplayedMessage(CurrentTab);
+		if(Prefs.useTag){
+			tagMessage(CurrentNote.messageId, Prefs.tagName, action === "save");
 		}
-	}
+	});
+
+	CurrentNote.addListener("afterclose", isClosed => {
+		if(isClosed){
+			focusMessagePane();
+		}
+	});
 }
 
 async function initExtension(){

@@ -7,10 +7,7 @@ class Note {
 		this.height;
 		this.text = '';
 		this.ts;
-		this.loadedNote;
 		this.exists = false;
-		this.modified = false;
-		this.created = false;
 		this.origin = "Note";
 	}
 
@@ -23,30 +20,25 @@ class Note {
 	// 	return cloned;
 	// }
 
-	isNotesEqual(n1, n2){
-		let k1 = Object.keys(n1);
-		let k2 = Object.keys(n2);
-
-		if(k1.length != k2.length){
-			return false;
-		}
-
-		for(let k of k1){
-			if(n1[k] !== n2[k]){
-				return false;
-			}
-		}
-
-		return true;
-	}
-
 	async load(loader) {
 		return loader().then(data => {
-			this.loadedNote = this.set(data);
+			this.set(data);
 			this.exists = !!data;
 
-			return data;
+			return this.get();
+			//return data;
 		});
+	}
+
+	get(){
+		return {
+			x: this.x,
+			y: this.y,
+			width: this.width,
+			height: this.height,
+			text: this.text,
+			ts: this.ts
+		};
 	}
 
 	set(data){
@@ -58,41 +50,19 @@ class Note {
 	}
 
 	async save(saver){
-		let data = {
-			x: this.x,
-			y: this.y,
-			width: this.width,
-			height: this.height,
-			text: this.text,
-			ts: this.ts || Date.now()
-		};
+		// Prepare data to save. We do not want all note properties saved
+		let data = this.get();
 
-		if(this.loadedNote){
-			if(this.loadedNote.text !== this.text){
-				data.ts = Date.now();
+		return saver(data).then(isSaved => {
+			this.exists = isSaved;
+			if(isSaved){
+				qcon.debug("note.save() - saved");
+				return data;
 			}
-			this.modified = !this.isNotesEqual(this.loadedNote, data);
-		} else {
-			this.created = true;
-		}
 
-		this.set(data);
-
-		if(this.modified || this.created) {
-			return saver(data).then(isSaved => {
-				this.exists = isSaved;
-				if(isSaved){
-					qcon.debug("note.save() - saved");
-					return data;
-				}
-
-				qcon.debug("note.save() - failure");
-				return false;
-			});
-		} else {
-			qcon.debug("note.save() - nothing changed, do not save");
+			qcon.debug("note.save() - failure");
 			return false;
-		}
+		});
 	}
 
 	async delete(deleter) {

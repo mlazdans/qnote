@@ -1,6 +1,28 @@
 var _ = browser.i18n.getMessage;
 
 class NoteWindow {
+	// TODO: generalize
+	listeners = {
+		"aftersave": new Set(),
+		"afterdelete": new Set(),
+		"afterupdate": new Set(),
+		"afterclose": new Set()
+	}
+
+	removeListener(name, listener){
+		this.listeners[name].delete(listener);
+	}
+
+	addListener(name, listener){
+		this.listeners[name].add(listener);
+	}
+
+	execListeners(name, executor, ...args){
+		for (let listener of this.listeners[name]) {
+			executor(listener);
+		}
+	}
+
 	constructor() {
 		this.init();
 	}
@@ -11,6 +33,24 @@ class NoteWindow {
 		this.windowId = undefined;
 		this.popping = false;
 		this.needSaveOnClose = true;
+	}
+
+	// NOTE: probably should generalize
+	isEqual(n1, n2){
+		let k1 = Object.keys(n1);
+		let k2 = Object.keys(n2);
+
+		if(k1.length != k2.length){
+			return false;
+		}
+
+		for(let k of k1){
+			if(n1[k] !== n2[k]){
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	async deleteNote(){
@@ -31,16 +71,81 @@ class NoteWindow {
 		console.error("Not implemented");
 	}
 
+	get modified() {
+		return !this.isEqual(this.loadedNoteData, this.note.get());
+	}
+
+	// We manage saving or delete via close
 	async close(closer) {
+		let fName = `${this.constructor.name}.close()`;
 		let isClosed = await closer();
 
-		if(this.onAfterClose){
-			await this.onAfterClose(isClosed, this);
+		this.execListeners("afterclose", listener => {
+			listener(isClosed, this);
+		});
+
+		if(!isClosed){
+			return qcon.debug(`${fName}, -not popped-`);
 		}
+
+		if(!this.needSaveOnClose){
+			return qcon.debug(`${fName}, !needSaveOnClose`);
+		}
+
+		// Probably we'll need this check
+		// if(this.note)
+
+		let action;
+		if(this.note.exists){ // Update, delete
+			action = this.note.text ? "save" : "delete"; // delete if no text
+		} else {
+			if(this.note.text){ // Create new
+				action = "save";
+			}
+		}
+
+		let wasUpdated;
+		let noteData = this.note.get();
+		let defExecutor = listener => {
+			listener(this);
+		};
+
+		if(action === 'save') {
+			if(this.loadedNoteData){
+				if(this.loadedNoteData.text !== noteData.text){
+					this.note.ts = Date.now();
+				}
+			}
+
+			if(this.modified) {
+				qcon.debug(`${fName}, note.save()`);
+				this.note.save();
+				this.execListeners("aftersave", defExecutor);
+				wasUpdated = action;
+			} else {
+				qcon.debug(`${fName}, not modified`);
+			}
+		} else if(action === 'delete'){
+			qcon.debug(`${fName}, note.delete()`);
+			this.note.delete();
+			this.execListeners("afterdelete", defExecutor);
+			wasUpdated = action;
+		} else {
+			qcon.debug(`${fName}, -do nothing-`);
+		}
+
+		if(wasUpdated){
+			this.execListeners("afterupdate", listener => {
+				listener(this, wasUpdated);
+			});
+		}
+
+		this.init();
 	}
 
 	// return true if popped
 	async pop(messageId, createNew, pop, popper) {
+		// TODO: maybe return new Promise and finally() this.popping = false;
 		if(this.popping){
 			qcon.debug("NoteWindow.pop() - already popping");
 			return false;
@@ -50,6 +155,7 @@ class NoteWindow {
 
 		return loadNoteForMessage(messageId).then(note => {
 			this.note = note;
+			this.loadedNoteData = note.get();
 			this.messageId = messageId;
 
 			if((this.note.exists && pop) || createNew){
