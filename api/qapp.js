@@ -87,7 +87,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 
 		ColumnHandler.uninstall();
-		NoteFilter.uninstall();
+
+		//NoteFilter.uninstall();
 
 		Services.ww.unregisterNotification(QAppWindowObserver);
 		//Services.obs.removeObserver(this.MsgMsgDisplayed, "MsgMsgDisplayed");
