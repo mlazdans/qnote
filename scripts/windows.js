@@ -2,6 +2,7 @@ var _ = browser.i18n.getMessage;
 
 class NoteWindow {
 	// TODO: generalize
+	// TODO: move to notes?
 	listeners = {
 		"aftersave": new Set(),
 		"afterdelete": new Set(),
@@ -17,10 +18,13 @@ class NoteWindow {
 		this.listeners[name].add(listener);
 	}
 
-	execListeners(name, executor, ...args){
-		for (let listener of this.listeners[name]) {
-			executor(listener);
-		}
+	async execListeners(name, executor){
+		return new Promise(resolve => {
+			for (let listener of this.listeners[name]) {
+				executor(listener);
+			}
+			resolve();
+		});
 	}
 
 	constructor() {
@@ -80,7 +84,7 @@ class NoteWindow {
 		let fName = `${this.constructor.name}.close()`;
 		let isClosed = await closer();
 
-		this.execListeners("afterclose", listener => {
+		await this.execListeners("afterclose", listener => {
 			listener(isClosed, this);
 		});
 
@@ -120,7 +124,7 @@ class NoteWindow {
 			if(this.modified) {
 				qcon.debug(`${fName}, note.save()`);
 				this.note.save();
-				this.execListeners("aftersave", defExecutor);
+				await this.execListeners("aftersave", defExecutor);
 				wasUpdated = action;
 			} else {
 				qcon.debug(`${fName}, not modified`);
@@ -128,18 +132,17 @@ class NoteWindow {
 		} else if(action === 'delete'){
 			qcon.debug(`${fName}, note.delete()`);
 			this.note.delete();
-			this.execListeners("afterdelete", defExecutor);
+			await this.execListeners("afterdelete", defExecutor);
 			wasUpdated = action;
 		} else {
 			qcon.debug(`${fName}, -do nothing-`);
 		}
 
 		if(wasUpdated){
-			this.execListeners("afterupdate", listener => {
+			await this.execListeners("afterupdate", listener => {
 				listener(wasUpdated, this);
 			});
 		}
-
 		this.init();
 	}
 
