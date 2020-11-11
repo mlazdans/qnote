@@ -3,13 +3,6 @@ var _ = browser.i18n.getMessage;
 class NoteWindow {
 	// TODO: generalize
 	// TODO: move to notes?
-	listeners = {
-		"aftersave": new Set(),
-		"afterdelete": new Set(),
-		"afterupdate": new Set(),
-		"afterclose": new Set()
-	}
-
 	removeListener(name, listener){
 		this.listeners[name].delete(listener);
 	}
@@ -29,6 +22,12 @@ class NoteWindow {
 
 	constructor() {
 		this.init();
+		this.listeners = {
+			"aftersave": new Set(),
+			"afterdelete": new Set(),
+			"afterupdate": new Set(),
+			"afterclose": new Set()
+		}
 	}
 
 	init(){
