@@ -13,6 +13,11 @@ async function getNoteData(keyId) {
 	return await createNote(keyId).load();
 }
 
+async function loadNote(keyId) {
+	let note = createNote(keyId);
+	return note.load().then(() => note);
+}
+
 async function loadAllNotes() {
 	let p;
 	if(Prefs.storageOption === 'ext'){
@@ -42,10 +47,9 @@ async function loadAllNotes() {
 	return p.then(async keys => {
 		let Notes = [];
 		for(let k of keys){
-			var note = createNote(k.keyId);
-			if(await note.load()){
+			loadNote(k.keyId).then(note => {
 				Notes.push(note);
-			}
+			});
 		}
 
 		return Notes;
@@ -63,7 +67,7 @@ function note2QappNote(note){
 }
 
 async function loadAllQAppNotes(){
-	loadAllNotes().then(notes => {
+	return loadAllNotes().then(notes => {
 		for(let note of notes){
 			browser.qapp.saveNoteCache(note2QappNote(note));
 		}

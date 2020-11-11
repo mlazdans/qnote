@@ -1,6 +1,5 @@
 class NoKeyIdError extends Error {};
 class NoMessageError extends Error {};
-class NoNoteError extends Error {};
 
 // messageId = int messageId from messageList
 let messagePartReturner = MessagePart => {
@@ -50,10 +49,7 @@ async function createNoteForMessage(messageId) {
 
 async function loadNoteForMessage(messageId) {
 	return createNoteForMessage(messageId).then(note => {
-		if(note){
-			return note.load().then(() => note);
-		}
-		throw new NoNoteError;
+		return note.load().then(() => note);
 	});
 }
 
@@ -64,13 +60,8 @@ async function deleteNoteForMessage(messageId){
 }
 
 async function saveNoteForMessage(messageId, data){
-	return loadNoteForMessage(messageId).then(note => {
-		if(!note.exists){
-			return;
-		}
-
+	return createNoteForMessage(messageId).then(note => {
 		note.set(data);
-
 		return note.save();
 	});
 }
