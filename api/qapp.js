@@ -9,6 +9,9 @@ var { NoteColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("module
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
 var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 
+//Services.scriptloader.loadSubScript(extension.rootURI.resolve("modules/utils.js"), this, "UTF-8");
+
+var qcon = console;
 var QAppColumnHandler;
 var QAppWindowObserver = {
 	listeners: {
@@ -87,7 +90,7 @@ function uninstallQNoteCSS() {
 		let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
 		let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
 		if(cssService.sheetRegistered(uri, cssService.USER_SHEET)){
-			console.debug("Unregistering html/background.css");
+			qcon.debug("Unregistering html/background.css");
 			cssService.unregisterSheet(uri, cssService.USER_SHEET);
 		}
 	} catch(e) {
@@ -100,7 +103,7 @@ function installQNoteCSS() {
 		let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
 		let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
 		if(!cssService.sheetRegistered(uri, cssService.USER_SHEET)){
-			console.debug("Registering html/background.css");
+			qcon.debug("Registering html/background.css");
 			cssService.loadAndRegisterSheet(uri, cssService.USER_SHEET);
 		}
 	} catch(e) {
@@ -110,7 +113,7 @@ function installQNoteCSS() {
 
 var qapp = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown() {
-		console.debug("QNote.shutdown()");
+		qcon.debug("QNote.shutdown()");
 
 		uninstallQNoteCSS();
 
@@ -125,10 +128,12 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		Components.utils.unload(extension.rootURI.resolve("modules/NoteColumnHandler.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/NotePopup.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/NoteFilter.jsm"));
+		Components.utils.unload(extension.rootURI.resolve("modules/utils.js"));
 	}
 
 	getAPI(context) {
-		var wex;
+		var wex = Cu.waiveXrays(context.cloneScope);
+		qcon = wex.qcon;
 
 		var noteGrabber = {
 			noteBlocker: new Map(),
@@ -159,7 +164,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// Block concurrent calls on same note as we will update column once it has been loded from local cache, local storage or file
 					// Not 100% sure if necessary but calls to column update can be quite many
 					if(blocker.has(keyId)){
-						wex.qcon.debug(`blocker.has(${keyId})`);
+						qcon.debug(`blocker.has(${keyId})`);
 					} else {
 						blocker.set(keyId, true);
 						// We'll update cache and call listener once note arrives
@@ -169,7 +174,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 								listener(keyId, data);
 							}
 						}).finally(() => {
-							wex.qcon.debug(`blocker.delete(${keyId})`);
+							qcon.debug(`blocker.delete(${keyId})`);
 							// Unblock concurrent calls
 							blocker.delete(keyId);
 						});
@@ -191,15 +196,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			getMessageId(row, col){
 				try {
 					return this.getView(col).getMsgHdrAt(row).messageId;
-				} catch(e) {
-					// console.error(e);
+				} catch {
 				}
 			},
 			getView(col){
 				try {
 					return col.element.ownerGlobal.gDBView;
-				} catch(e) {
-					// console.error(e);
+				} catch {
 				}
 			},
 			isEditable(row, col) {
@@ -272,7 +275,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						if(body.length){
 							body = body[0];
 						} else {
-							console.log("Body not found");
+							qcon.debug("print - body not found");
 							return;
 						}
 
@@ -341,7 +344,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 						let pDocument = document.getElementById('content');
 						if(!pDocument){
-							console.log("Print content not found");
+							qcon.debug("print - content not found");
 							return;
 						}
 
@@ -351,9 +354,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					aSubject.addEventListener("DOMContentLoaded", domLoadedListener);
 				},
 				async init(){
-					console.debug("qapp.init()");
-
-					wex = Cu.waiveXrays(context.cloneScope);
+					qcon.debug("qapp.init()");
 
 					// Remove old style sheet, because it might be kept after update, for example
 					uninstallQNoteCSS();
@@ -571,7 +572,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						}
 
 						//let rangeCount = treeSelection.getRangeCount();
-						//console.log("updateView", view.rowCount, gFolderDisplay.tree.currentIndex, view.currentlyDisplayedMessage);
 						// nsIMsgDBView.idl
 						// NoteChange(nsMsgViewIndex, PRInt32, nsMsgViewNotificationCodeValue)
 						// const nsMsgViewNotificationCodeValue changed = 2;
