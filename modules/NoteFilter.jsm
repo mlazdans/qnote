@@ -4,6 +4,16 @@ var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm"
 
 var EXPORTED_SYMBOLS = ["NoteFilter"];
 
+/*
+
+Current problems:
+1) match() does not expect promises
+2) we can addCustomTerm() but can not remove
+This leads to dead object problems once extension goes away.
+Seems that this is TB core related
+
+*/
+
 var NoteFilter;
 
 {
@@ -23,6 +33,8 @@ let WindowObserver = {
 					return;
 				}
 
+				// let filterer = NoteFilter.getQF(aSubject.gFolderDisplay);
+				// console.log("Attach to win", filterer);
 				let tabmail = document.getElementById('tabmail');
 				if(tabmail){
 					NoteFilter.attachToWindow(aSubject);
@@ -56,39 +68,54 @@ let CustomTerm = {
 		return ops;
 	},
 	match: function(msgHdr, searchValue, searchOp) {
-		let note = noteGrabber.getNote(msgHdr.messageId);
+		console.log("match", msgHdr, searchValue, searchOp);
+		// // TODO: we get dead objects here because we can not unload CustomTerm
+		// let note = noteGrabber.getNote(msgHdr.messageId);
 
-		return note && note.exists && (note.text.toLowerCase().search(searchValue)>=0);
+		// return note && note.exists && (note.text.toLowerCase().search(searchValue)>=0);
 	}
 };
 
-let QuickFilter = {
+let NoteQF = {
 	name: "qnote",
 	domId: qfQnoteCheckedId,
-	// propagateState: function(aTemplState, aSticky){
-	// 	console.log("propagateState", aTemplState, aSticky);
-	// },
-	postFilterProcess: function(aState, aViewWrapper, aFiltering){
-		//console.log("postFilterProcess", aState, aViewWrapper, aFiltering);
-		return [aState, false, false];
+	propagateState: function(aTemplState, aSticky){
+		console.log("propagateState", aTemplState, aSticky);
 	},
-	// onCommand: function(aState, aNode, aEvent, aDocument){
-	// 	console.log("onCommand", aState, aNode, aEvent, aDocument);
-	// 	let qfTextBox = aDocument.getElementById('qfb-qs-textbox');
-	// 	let qfQnoteChecked = aDocument.getElementById(qfQnoteCheckedId);
-	// 	return [qfQnoteChecked.checked ? qfTextBox.value : null, true];
+	// postFilterProcess: function(aState, aViewWrapper, aFiltering){
+	// 	console.log("postFilterProcess", aState, aViewWrapper, aFiltering);
+	// 	return [aState, false, false];
 	// },
+	onCommand: function(aState, aNode, aEvent, aDocument){
+		console.log("onCommand", aState, aNode, aEvent, aDocument);
+		let qfTextBox = aDocument.getElementById('qfb-qs-textbox');
+		let qfQnoteChecked = aDocument.getElementById(qfQnoteCheckedId);
+		return [qfQnoteChecked.checked ? qfTextBox.value : null, true];
+	},
 	reflectInDOM: function(aDomNode, aFilterValue, aDocument, aMuxer){
-		if(aMuxer.activeFilterer.getFilterValue('qnote')){
-			aDomNode.checked = true;
+		let qnoteFilterer = aMuxer.getFilterValueForMutation('qnote');
+		console.log("reflectInDOM", aFilterValue, aDomNode.checked, qnoteFilterer);
+		if(qnoteFilterer === undefined){
+			aDomNode.checked = NoteFilter.getQNoteQFState()
+			let textFilter = aMuxer.getFilterValueForMutation("text");
+			console.log("restore filter", textFilter);
+			aMuxer.setFilterValue('qnote', textFilter ? textFilter.text : "");
 		} else {
-			aDomNode.checked = false;
+			aDomNode.checked = !!qnoteFilterer;
 		}
+
+		// if(aMuxer.activeFilterer.getFilterValue('qnote')){
+		// 	aDomNode.checked = true;
+		// } else {
+		// 	aDomNode.checked = false;
+		// }
 		//aDomNode.checked = !!aFilterValue;
-		//console.log("reflectInDOM", aFilterValue, aDomNode.checked, aDomNode, aDocument, aMuxer);
+		console.log("reflectInDOM - finish", aDomNode.checked);
 		NoteFilter.updateSearch(aMuxer);
 	},
 	appendTerms: function(aTermCreator, aTerms, aFilterValue) {
+		console.log("appendTerms", aFilterValue, aTerms, aTermCreator);
+
 		// Let us borrow an existing code just for a while :>
 		let phrases = MessageTextFilter._parseSearchString(aFilterValue.toLowerCase());
 		let term;
@@ -112,6 +139,7 @@ let QuickFilter = {
 
 			firstClause = false;
 		}
+
 		if (term) {
 			term.endsGrouping = true;
 		}
@@ -125,6 +153,30 @@ NoteFilter = {
 	listeners: {
 		"uninstall": new Set()
 	},
+	// TODO: probably should move to WebExtensions
+	getPrefsO(){
+		return Services.prefs.QueryInterface(Ci.nsIPrefBranch).getBranch("extensions.qnote.");
+	},
+	getQNoteQFState(){
+		let prefs = NoteFilter.getPrefsO();
+		if(prefs.prefHasUserValue("qfValue")){
+			return prefs.getBoolPref("qfValue");
+		} else {
+			return false;
+		}
+	},
+	saveQNoteQFState(state){
+		return NoteFilter.getPrefsO().setBoolPref("qfValue", state);
+	},
+	getQF(aFolderDisplay){
+		if(!aFolderDisplay){
+			return null;
+		}
+
+		let tab = aFolderDisplay._tabInfo;
+
+		return "quickFilter" in tab._ext ? tab._ext.quickFilter : null;
+	},
 	removeListener(name, listener){
 		NoteFilter.listeners[name].delete(listener);
 	},
@@ -135,6 +187,7 @@ NoteFilter = {
 		aMuxer.deferredUpdateSearch();
 	},
 	attachToWindow: w => {
+		console.debug("NoteFilter.attachToWindow()");
 		if(!w.document.getElementById(qfQnoteCheckedId)){
 			let button = w.document.createXULElement('toolbarbutton');
 			button.setAttribute('id',qfQnoteCheckedId);
@@ -173,39 +226,67 @@ NoteFilter = {
 		qfQnoteChecked.addEventListener("command", buttonHandler);
 
 		NoteFilter.addListener("uninstall", () => {
+			let filterer = NoteFilter.getQF(w.gFolderDisplay);
+			if(filterer){
+				// Should manage state persistence ourselves
+				NoteFilter.saveQNoteQFState(qfQnoteChecked.checked);
+				// We need to remove state because QF gets mad if we disable, for example, search and then leave state as is
+				filterer.setFilterValue('qnote', null);
+				console.log("unset filter", filterer, qfQnoteChecked.checked);
+			}
+
 			qfTextBox.removeEventListener("command", textHandler);
 			qfQnoteChecked.removeEventListener("command", buttonHandler);
 			qfQnoteChecked.parentNode.removeChild(qfQnoteChecked);
-			// We need to remove state, because QF gets mad if we disable search and leave state as is
-			// Should manage state ourselves
-			let aFolderDisplay = w.gFolderDisplay;
-			if(aFolderDisplay){
-				let tab = aFolderDisplay._tabInfo;
-				let filterer = "quickFilter" in tab._ext ? tab._ext.quickFilter : null;
-				if(filterer){
-					// TODO: need to save filter state myself
-					filterer.setFilterValue('qnote', null);
-				}
-			}
 		});
 
-		NoteFilter.updateSearch(aMuxer);
+		// NoteFilter.updateSearch(aMuxer);
+		// console.log("updateSearch", aMuxer);
 	},
 	install: options => {
+		console.debug("NoteFilter.install()");
 		Services.ww.registerNotification(WindowObserver);
 
 		NoteFilter.options = options;
 		noteGrabber = options.noteGrabber;
 
-		QuickFilterManager.defineFilter(QuickFilter);
+		QuickFilterManager.defineFilter(NoteQF);
 
 		if(MailServices.filters.getCustomTerm(CustomTerm.id)){
-			//console.log("CustomTerm exists");
+			//console.log("CustomTerm exists", term);
 		} else {
 			MailServices.filters.addCustomTerm(CustomTerm);
 		}
 
-		NoteFilter.attachToWindow(Services.wm.getMostRecentWindow("mail:3pane"));
+		let w = Services.wm.getMostRecentWindow("mail:3pane");
+
+		NoteFilter.attachToWindow(w);
+
+		// Restore filterer state
+		// let aMuxer = w.QuickFilterBarMuxer;
+		// let filterer = aMuxer.maybeActiveFilterer;
+		// console.log("filterer", aMuxer, filterer);
+		// if(filterer){
+		// 	if(NoteFilter.getQNoteQFState()){
+		// 		let textFilter = filterer.getFilterValue("text");
+		// 		if(textFilter.text){
+		// 			console.log("restore filter", filterer, textFilter);
+		// 			textFilter.setFilterValue('qnote', textFilter.text);
+		// 		}
+		// 	}
+		// }
+
+		// let aMuxer = w.QuickFilterBarMuxer;
+		// let filterer = NoteFilter.getQF(w.gFolderDisplay);
+		// if(filterer){
+		// 	if(NoteFilter.getQNoteQFState()){
+		// 		let textFilter = filterer.getFilterValue("text");
+		// 		if(textFilter.text){
+		// 			console.log("restore filter", filterer, textFilter);
+		// 			aMuxer.setFilterValue('qnote', textFilter.text);
+		// 		}
+		// 	}
+		// }
 
 		//var terms = MailServices.filters.getCustomTerms();
 		//var a = terms.QueryInterface(Ci.nsIMutableArray);
@@ -238,12 +319,35 @@ NoteFilter = {
 		// });
 	},
 	uninstall: () => {
+		console.debug("NoteFilter.uninstall()");
 		for (let listener of NoteFilter.listeners["uninstall"]) {
 			listener();
 		}
 		QuickFilterManager.killFilter("qnote");
 		Services.ww.unregisterNotification(WindowObserver);
+		// MailServices.filters.addCustomTerm({
+		// 	id: CustomTerm.id,
+		// 	getEnabled: function(scope, op) {
+		// 		return false;
+		// 		//return ops.includes(op);
+		// 	},
+		// 	// Currently disabled in search dialogs, because can't figure out how to add text box to the filter
+		// 	// Probably through XUL or something
+		// 	getAvailable: function(scope, op) {
+		// 		return false;
+		// 		//return ops.includes(op);
+		// 	},
+		// 	getAvailableOperators: function(scope, length) {
+		// 		if(length){
+		// 			length.value = 0;
+		// 		}
+		// 		return [];
+		// 	},
+		// 	match: function(msgHdr, searchValue, searchOp) {
+		// 		console.log("match from disabled");
+		// 		return false;
+		// 	}
+		// });
 	}
 }
-
 }
