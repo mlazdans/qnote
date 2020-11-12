@@ -26,6 +26,7 @@
 	],
 	"background": {
 		"scripts": [
+			"modules/QAppConsole.js",
 			"scripts/utils-note.js",
 			"scripts/utils-message.js",
 			"scripts/utils.js",

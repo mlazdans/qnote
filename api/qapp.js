@@ -9,9 +9,9 @@ var { NoteColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("module
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
 var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 
-//Services.scriptloader.loadSubScript(extension.rootURI.resolve("modules/utils.js"), this, "UTF-8");
+Services.scriptloader.loadSubScript(extension.rootURI.resolve("modules/QAppConsole.js"), this, "UTF-8");
 
-var qcon = console;
+var qcon = new QAppConsole(console);
 var QAppColumnHandler;
 var QAppWindowObserver = {
 	listeners: {
@@ -133,7 +133,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 	getAPI(context) {
 		var wex = Cu.waiveXrays(context.cloneScope);
-		qcon = wex.qcon;
+		qcon.debugEnabled = !!wex.Prefs.enableDebug;
+		//qcon = wex.qcon;
 
 		var noteGrabber = {
 			noteBlocker: new Map(),

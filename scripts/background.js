@@ -11,27 +11,7 @@ var Prefs;
 var CurrentNote;
 var CurrentTab;
 var CurrentWindow;
-
-var qcon = {
-	group: (label) => {
-		if(!Prefs || Prefs.enableDebug) {
-			console.group(label);
-		}
-	},
-	groupEnd: () => {
-		if(!Prefs || Prefs.enableDebug) {
-			console.groupEnd();
-		}
-	}
-}
-
-for(let k of ["log", "debug", "error", "warn", "info"]){
-	qcon[k] = (...args) => {
-		if(!Prefs || Prefs.enableDebug) {
-			console[k]("QNote:", ...args);
-		}
-	}
-}
+var qcon = new QAppConsole(console);
 
 // TODO: track window changes so we do not lose focus inside lone message window
 async function focusMessagePane(){
@@ -75,6 +55,8 @@ async function initExtension(){
 	Prefs = await loadPrefsWithDefaults();
 	CurrentTab = await browser.tabs.getCurrent();
 	CurrentWindow = await browser.windows.getCurrent();
+
+	qcon.debugEnabled = !!Prefs.enableDebug;
 
 	// window.addEventListener("unhandledrejection", event => {
 	// 	console.warn(`Unhandle: ${event.reason}`, event);
