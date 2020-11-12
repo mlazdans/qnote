@@ -13,7 +13,8 @@ var QAppColumnHandler;
 var QAppWindowObserver = {
 	listeners: {
 		"domwindowopened": new Set(),
-		"domwindowclosed": new Set()
+		"domwindowclosed": new Set(),
+		"DOMContentLoaded": new Set(),
 	},
 	removeListener(name, listener){
 		QAppWindowObserver.listeners[name].delete(listener);
@@ -26,6 +27,14 @@ var QAppWindowObserver = {
 			for (let listener of QAppWindowObserver.listeners[aTopic]) {
 				listener(aSubject, aTopic, aData);
 			}
+		}
+
+		if(aTopic === 'domwindowopened'){
+			aSubject.addEventListener("DOMContentLoaded", e => {
+				for (let listener of QAppWindowObserver.listeners.DOMContentLoaded) {
+					listener(e, aSubject, aTopic, aData);
+				}
+			});
 		}
 	}
 };
@@ -88,7 +97,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 
-		//QAppColumnHandler.uninstall();
 		QAppColumnHandler.detachFromWindow(Services.wm.getMostRecentWindow("mail:3pane"));
 
 		//NoteFilter.uninstall();
@@ -326,7 +334,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				async init(){
 					console.debug("qapp.init()");
 
-					wex = Components.utils.waiveXrays(context.cloneScope);
+					wex = Cu.waiveXrays(context.cloneScope);
 
 					// Remove old style sheet, because it might be kept after update, for example
 					uninstallQNoteCSS();
@@ -336,6 +344,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					this.popups = new Map();
 
 					Services.ww.registerNotification(QAppWindowObserver);
+
 					QAppWindowObserver.addListener('domwindowopened', this.printerQNoteAttacher);
 
 					if(wex.Prefs.enableSearch){
@@ -511,6 +520,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						columnHandler: colHandler
 					});
 					QAppColumnHandler.attachToWindow(Services.wm.getMostRecentWindow("mail:3pane"));
+
+					QAppWindowObserver.addListener('DOMContentLoaded', (e, aSubject, aTopic, aData) => {
+						QAppColumnHandler.attachToWindow(aSubject);
+					});
 				},
 				async installQuickFilter(){
 					console.log("search has been temporarily disabled until we found a better solution");
