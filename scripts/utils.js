@@ -281,10 +281,11 @@ function QNoteTabPop(Tab, createNew = true, doPop = true, doFocus = true) {
 function QNotePopToggle() {
 	return new Promise(async resolve => {
 		if(CurrentNote.windowId){
-			qcon.debug("QNotePopToggle(), windowId =", CurrentNote.windowId);
 			if(await CurrentNote.isFocused()){
+				qcon.debug(`QNotePopToggle(), windowId = ${CurrentNote.windowId} - focused, waiting to close`);
 				CurrentNote.close();
 			} else {
+				qcon.debug(`QNotePopToggle(), windowId = ${CurrentNote.windowId} - opened, waiting to gain focus`);
 				CurrentNote.focus();
 			}
 		} else {
