@@ -7,27 +7,27 @@ var EXPORTED_SYMBOLS = ["NoteColumnHandler"];
 class NoteColumnHandler {
 	constructor(options) {
 		console.debug("new NoteColumnHandler()");
-		this.windows = [];
+		this.windows = new WeakSet();
 		this.options = options;
 
 		let self = this;
 
-		this.windowObserver = {
-			observe: function(aSubject, aTopic) {
-				if(aTopic === 'domwindowopened'){
-					aSubject.addEventListener("DOMContentLoaded", e => {
-						let document = e.target;
-						let threadCols = document.getElementById("threadCols");
+		// this.windowObserver = {
+		// 	observe: function(aSubject, aTopic) {
+		// 		if(aTopic === 'domwindowopened'){
+		// 			aSubject.addEventListener("DOMContentLoaded", e => {
+		// 				let document = e.target;
+		// 				let threadCols = document.getElementById("threadCols");
 
-						if(threadCols) {
-							self.attachToWindow(aSubject);
-						}
-					});
-				}
-			}
-		};
+		// 				if(threadCols) {
+		// 					self.attachToWindow(aSubject);
+		// 				}
+		// 			});
+		// 		}
+		// 	}
+		// };
 
-		Services.ww.registerNotification(this.windowObserver);
+		// Services.ww.registerNotification(this.windowObserver);
 
 		this.dBViewListener = {
 			onCreatedView: aFolderDisplay => {
@@ -53,15 +53,45 @@ class NoteColumnHandler {
 	}
 
 	attachToWindow(w){
-		// console.debug("ColumnHandler.attachToWindow()");
+		let fName = `${this.constructor.name}.attachToWindow()`;
+
+		if(this.windows.has(w)){
+			console.debug(`${fName} - already attached`);
+			return false;
+		}
+
+		console.debug(`${fName}`);
+
 		this.setUpDOM(w);
 
 		w.FolderDisplayListenerManager.registerListener(this.dBViewListener);
-		if(w.gFolderDisplay){
-			this.dBViewListener.onActiveCreatedView(w.gFolderDisplay);
+
+		this.dBViewListener.onActiveCreatedView(w.gFolderDisplay);
+
+		return this.windows.add(w);
+	}
+
+	detachFromWindow(w){
+		let fName = `${this.constructor.name}.detachFromWindow()`;
+
+		if(!this.windows.has(w)){
+			console.debug(`${fName} - window not found`);
+			return false;
 		}
 
-		this.windows.push(w);
+		console.debug(`${fName}`);
+
+		w.FolderDisplayListenerManager.unregisterListener(this.dBViewListener);
+
+		this.removeColumnHandlerFromFolder(w.gFolderDisplay);
+
+		// If we remove from DOM then column properties does not get saved
+		// if(qnoteCol = w.document.getElementById("qnoteCol")){
+		// 	//qnoteCol.parentNode.removeChild(qnoteCol.previousSibling); // Splitter
+		// 	qnoteCol.parentNode.removeChild(qnoteCol);
+		// }
+
+		return this.windows.delete(w);
 	}
 
 	removeColumnHandlerFromFolder(aFolderDisplay){
@@ -69,24 +99,6 @@ class NoteColumnHandler {
 			aFolderDisplay.view.dbView.removeColumnHandler("qnoteCol");
 		} catch (e) {
 			console.error(e);
-		}
-	}
-
-	uninstall() {
-		console.debug("ColumnHandler.uninstall()");
-
-		Services.ww.unregisterNotification(this.windowObserver);
-
-		for(let w of this.windows){
-			w.FolderDisplayListenerManager.unregisterListener(this.dBViewListener);
-
-			this.removeColumnHandlerFromFolder(w.gFolderDisplay);
-
-			// If we remove from DOM then column properties does not get saved
-			// if(qnoteCol = w.document.getElementById("qnoteCol")){
-			// 	//qnoteCol.parentNode.removeChild(qnoteCol.previousSibling); // Splitter
-			// 	qnoteCol.parentNode.removeChild(qnoteCol);
-			// }
 		}
 	}
 

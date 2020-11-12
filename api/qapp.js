@@ -8,7 +8,7 @@ var { NoteColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("module
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
 var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 
-var ColumnHandler;
+var QAppColumnHandler;
 var QAppWindowObserver = {
 	listeners: {
 		"domwindowopened": new Set(),
@@ -87,12 +87,12 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 
-		ColumnHandler.uninstall();
+		//QAppColumnHandler.uninstall();
+		QAppColumnHandler.detachFromWindow(Services.wm.getMostRecentWindow("mail:3pane"));
 
 		//NoteFilter.uninstall();
 
 		Services.ww.unregisterNotification(QAppWindowObserver);
-		//Services.obs.removeObserver(this.MsgMsgDisplayed, "MsgMsgDisplayed");
 
 		Components.utils.unload(extension.rootURI.resolve("modules/NoteColumnHandler.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/NotePopup.jsm"));
@@ -101,8 +101,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 	getAPI(context) {
 		var wex;
-		//var QAppWindowObserver = this.QAppWindowObserver;
-		//var MsgMsgDisplayed = this.MsgMsgDisplayed;
 
 		var noteGrabber = {
 			noteBlocker: new Map(),
@@ -273,8 +271,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					installQNoteCSS();
 
 					this.popups = new Map();
-
-					//Services.obs.addObserver(MsgMsgDisplayed, "MsgMsgDisplayed");
 
 					Services.ww.registerNotification(QAppWindowObserver);
 					QAppWindowObserver.addListener('domwindowopened', this.printerQNoteAttacher);
@@ -447,7 +443,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					});
 				},
 				installColumnHandler(){
-					let columnHandler = {
+					let ch = {
 						noteRowListener(view, row) {
 							if(view && Number.isInteger(row)){
 								// That method is part of Mozilla API and has nothing to do with either XNote or QNote :)
@@ -507,11 +503,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						// getSortLongForRow(hdr) {
 						// }
 					};
-					ColumnHandler = new NoteColumnHandler({
+					QAppColumnHandler = new NoteColumnHandler({
 						textLimit: wex.Prefs.showFirstChars,
-						columnHandler: columnHandler
+						columnHandler: ch
 					});
-					ColumnHandler.attachToWindow(Services.wm.getMostRecentWindow("mail:3pane"));
+					QAppColumnHandler.attachToWindow(Services.wm.getMostRecentWindow("mail:3pane"));
 				},
 				async installQuickFilter(){
 					console.log("search has been temporarily disabled until we found a better solution");
@@ -631,7 +627,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					noteGrabber.deleteNoteCache(keyId);
 				},
 				async setColumnTextLimit(limit){
-					ColumnHandler.setTextLimit(limit);
+					QAppColumnHandler.setTextLimit(limit);
 				},
 				async getProfilePath() {
 					return Cc['@mozilla.org/file/directory_service;1']
