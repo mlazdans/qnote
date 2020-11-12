@@ -1,3 +1,4 @@
+// TODO: get rid of var wex
 var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { BasePopup, ViewPopup } = ChromeUtils.import("resource:///modules/ExtensionPopups.jsm");
@@ -153,8 +154,70 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			}
 		}
 
+		var colHandler = {
+			noteRowListener(view, row) {
+				if(view && Number.isInteger(row)){
+					// That method is part of Mozilla API and has nothing to do with either XNote or QNote :)
+					view.NoteChange(row, 1, 2);
+				}
+			},
+			getMessageId(row, col){
+				try {
+					return this.getView(col).getMsgHdrAt(row).messageId;
+				} catch(e) {
+					// console.error(e);
+				}
+			},
+			getView(col){
+				try {
+					return col.element.ownerGlobal.gDBView;
+				} catch(e) {
+					// console.error(e);
+				}
+			},
+			isEditable(row, col) {
+				return false;
+			},
+			// cycleCell(row, col) {
+			// },
+			getCellText(row, col) {
+				let note = noteGrabber.getNote(this.getMessageId(row, col), () => {
+					this.noteRowListener(this.getView(col), row);
+				});
+
+				let limit = wex.Prefs.showFirstChars;
+				if(note.exists && !note.shortText && limit && (typeof note.text === 'string')){
+					note.shortText = note.text.substring(0, limit);
+				}
+
+				return note.exists ? note.shortText : null;
+			},
+			getSortStringForRow(hdr) {
+				let note = noteGrabber.getNote(hdr.messageId);
+
+				return note.exists ? note.text : null;
+			},
+			isString() {
+				return true;
+			},
+			// getCellProperties(row, col, props){
+			// },
+			// getRowProperties(row, props){
+			// },
+			getImageSrc(row, col) {
+				let note = noteGrabber.getNote(this.getMessageId(row, col), () => {
+					this.noteRowListener(this.getView(col), row);
+				});
+
+				return note.exists ? extension.rootURI.resolve("images/icon-column.png") : null;
+			},
+			// getSortLongForRow(hdr) {
+			// }
+		};
+
 		return {
 			qapp: {
+				// TODO: keep track of windows
 				getMessageSuitableWindow(){
 					let w = Services.wm.getMostRecentWindow(null);
 
@@ -443,69 +506,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					});
 				},
 				installColumnHandler(){
-					let ch = {
-						noteRowListener(view, row) {
-							if(view && Number.isInteger(row)){
-								// That method is part of Mozilla API and has nothing to do with either XNote or QNote :)
-								view.NoteChange(row, 1, 2);
-							}
-						},
-						getMessageId(row, col){
-							try {
-								return this.getView(col).getMsgHdrAt(row).messageId;
-							} catch(e) {
-								// console.error(e);
-							}
-						},
-						getView(col){
-							try {
-								return col.element.ownerGlobal.gDBView;
-							} catch(e) {
-								// console.error(e);
-							}
-						},
-						isEditable(row, col) {
-							return false;
-						},
-						// cycleCell(row, col) {
-						// },
-						getCellText(row, col) {
-							let note = noteGrabber.getNote(this.getMessageId(row, col), () => {
-								this.noteRowListener(this.getView(col), row);
-							});
-
-							let textLimit = 6;
-							if(note.exists && !note.shortText && textLimit && (typeof note.text === 'string')){
-								note.shortText = note.text.substring(0, textLimit);
-							}
-
-							return note.exists ? note.shortText : null;
-						},
-						getSortStringForRow(hdr) {
-							let note = noteGrabber.getNote(hdr.messageId);
-
-							return note.exists ? note.text : null;
-						},
-						isString() {
-							return true;
-						},
-						// getCellProperties(row, col, props){
-						// },
-						// getRowProperties(row, props){
-						// },
-						getImageSrc(row, col) {
-							let note = noteGrabber.getNote(this.getMessageId(row, col), () => {
-								this.noteRowListener(this.getView(col), row);
-							});
-
-							return note.exists ? extension.rootURI.resolve("images/icon-column.png") : null;
-						},
-						// getSortLongForRow(hdr) {
-						// }
-					};
+					this.setColumnTextLimit(wex.Prefs.showFirstChars);
 					QAppColumnHandler = new NoteColumnHandler({
-						textLimit: wex.Prefs.showFirstChars,
-						columnHandler: ch
+						columnHandler: colHandler
 					});
 					QAppColumnHandler.attachToWindow(Services.wm.getMostRecentWindow("mail:3pane"));
 				},
@@ -627,7 +630,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					noteGrabber.deleteNoteCache(keyId);
 				},
 				async setColumnTextLimit(limit){
-					QAppColumnHandler.setTextLimit(limit);
+					// console.log(`setColumnTextLimit(${limit})`);
+					// colHandler.limit = limit;
 				},
 				async getProfilePath() {
 					return Cc['@mozilla.org/file/directory_service;1']
