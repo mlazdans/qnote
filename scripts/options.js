@@ -123,9 +123,9 @@ async function savePrefs(handler){
 			ext.reloadExtension();
 		}
 
-		if(Prefs.showFirstChars !== oldPrefs.showFirstChars){
-			await browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
-		}
+		// if(Prefs.showFirstChars !== oldPrefs.showFirstChars){
+		// 	await browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
+		// }
 
 		// Invalidate column cache
 		if(Prefs.storageFolder !== oldPrefs.storageFolder){
