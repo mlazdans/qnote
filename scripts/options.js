@@ -77,7 +77,7 @@ async function setNode(node){
 	}
 }
 
-async function savePrefs(){
+async function savePrefs(handler){
 	var oldPrefs = Object.assign({}, Prefs);
 
 	if(storageOptionValue() === 'folder'){
@@ -109,36 +109,40 @@ async function savePrefs(){
 		Prefs[key] = value;
 	}
 
-	await ext.savePrefs(Prefs).then(async (saved)=>{
+	let defaultHandler = async saved => {
 		// TODO: update settings w/o reload
-		if(saved){
-			// Update extension prefs
-			ext.Prefs = await ext.loadPrefsWithDefaults();
-
-			if(Prefs.storageOption != oldPrefs.storageOption){
-				//await browser.qapp.clearNoteCache();
-				ext.reloadExtension();
-			}
-
-			if(Prefs.showFirstChars !== oldPrefs.showFirstChars){
-				await browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
-			}
-
-			// Invalidate column cache
-			if(Prefs.storageFolder !== oldPrefs.storageFolder){
-				//await browser.qapp.clearNoteCache();
-				ext.reloadExtension();
-			}
-
-			if(Prefs.windowOption !== oldPrefs.windowOption){
-				ext.reloadExtension();
-			}
-
-			if(Prefs.enableSearch !== oldPrefs.enableSearch){
-				ext.reloadExtension();
-			}
+		if(!saved){
+			return;
 		}
-	});
+
+		// Update extension prefs
+		ext.Prefs = await ext.loadPrefsWithDefaults();
+
+		if(Prefs.storageOption != oldPrefs.storageOption){
+			//await browser.qapp.clearNoteCache();
+			ext.reloadExtension();
+		}
+
+		if(Prefs.showFirstChars !== oldPrefs.showFirstChars){
+			await browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
+		}
+
+		// Invalidate column cache
+		if(Prefs.storageFolder !== oldPrefs.storageFolder){
+			//await browser.qapp.clearNoteCache();
+			ext.reloadExtension();
+		}
+
+		if(Prefs.windowOption !== oldPrefs.windowOption){
+			ext.reloadExtension();
+		}
+
+		if(Prefs.enableSearch !== oldPrefs.enableSearch){
+			ext.reloadExtension();
+		}
+	};
+
+	await ext.savePrefs(Prefs).then(handler || defaultHandler);
 }
 
 function initTags(tags){
@@ -199,6 +203,11 @@ async function initXNoteImportButton(){
 				} else {
 					alert(_("xnote.import.fail"));
 				}
+
+				// TODO: We need to get possible new data down to qapp cache. Quick hack is just to reload.
+				savePrefs(async saved => {
+					ext.reloadExtension();
+				});
 			}).finally(()=>{
 				importXNotesButton.disabled = false;
 				importXNotesLoader.style.display = 'none';
@@ -288,7 +297,9 @@ async function initOptionsPage(){
 	initXNoteImportButton();
 	initExportStorageButton();
 
-	saveButton.addEventListener('click', savePrefs);
+	saveButton.addEventListener('click', () => {
+		savePrefs();
+	});
 	clearStorageButton.addEventListener('click', clearStorage);
 	exportStorageButton.addEventListener('click', ext.exportStorage);
 	importFile.addEventListener("change", importInternalStorage);
