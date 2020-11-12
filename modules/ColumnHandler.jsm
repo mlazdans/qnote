@@ -182,22 +182,6 @@ class QNoteColumnHandler {
 	// }
 };
 
-let WindowObserver = {
-	observe: function(aSubject, aTopic) {
-		// console.log("WindowObserver->", aTopic);
-		if(aTopic === 'domwindowopened'){
-			aSubject.addEventListener("DOMContentLoaded", e => {
-				let document = e.target;
-				let threadCols = document.getElementById("threadCols");
-
-				if(threadCols) {
-					ColumnHandler.attachToWindow(aSubject);
-				}
-			});
-		}
-	}
-}
-
 let DBViewListener = {
 	onCreatedView: aFolderDisplay => {
 		// console.log("onCreatedView");
@@ -214,11 +198,7 @@ let DBViewListener = {
 	},
 	onDestroyingView: (aFolderDisplay, aFolderIsComingBack) => {
 		// console.log("onDestroyingView");
-		try {
-			aFolderDisplay.view.dbView.removeColumnHandler("qnoteCol");
-		} catch (e) {
-			console.error(e);
-		}
+		ColumnHandler.removeColumnHandlerFromFolder(aFolderDisplay);
 	}
 	// onMessagesLoaded: (aFolderDisplay, aAll) => {
 	// 	console.log("onMessagesLoaded");
@@ -228,6 +208,21 @@ let DBViewListener = {
 ColumnHandler = {
 	options: {},
 	windows: [],
+	windowObserver: {
+		observe: function(aSubject, aTopic) {
+			// console.log("windowObserver->", aTopic);
+			if(aTopic === 'domwindowopened'){
+				aSubject.addEventListener("DOMContentLoaded", e => {
+					let document = e.target;
+					let threadCols = document.getElementById("threadCols");
+
+					if(threadCols) {
+						ColumnHandler.attachToWindow(aSubject);
+					}
+				});
+			}
+		}
+	},
 	setTextLimit(limit){
 		ColumnHandler.options.textLimit = limit;
 	},
@@ -240,12 +235,19 @@ ColumnHandler = {
 		}
 		this.windows.push(w);
 	},
+	removeColumnHandlerFromFolder(aFolderDisplay){
+		try {
+			aFolderDisplay.view.dbView.removeColumnHandler("qnoteCol");
+		} catch (e) {
+			console.error(e);
+		}
+	},
 	install(options) {
 		console.debug("ColumnHandler.install()");
 		ColumnHandler.options = options;
 		noteGrabber = options.noteGrabber;
 
-		Services.ww.registerNotification(WindowObserver);
+		Services.ww.registerNotification(ColumnHandler.windowObserver);
 
 		// TODO: pass windows parameter
 		this.attachToWindow(Services.wm.getMostRecentWindow("mail:3pane"));
@@ -257,11 +259,7 @@ ColumnHandler = {
 		for(let w of this.windows){
 			w.FolderDisplayListenerManager.unregisterListener(DBViewListener);
 
-			try {
-				w.gFolderDisplay.view.dbView.removeColumnHandler("qnoteCol");
-			} catch (e) {
-				console.error(e);
-			}
+			ColumnHandler.removeColumnHandlerFromFolder(w.gFolderDisplay);
 
 			// if(qnoteCol = w.document.getElementById("qnoteCol")){
 			// 	//qnoteCol.parentNode.removeChild(qnoteCol.previousSibling); // Splitter
@@ -282,7 +280,7 @@ ColumnHandler = {
 		// 	w.FolderDisplayListenerManager.unregisterListener(DBViewListener);
 		// }
 
-		Services.ww.unregisterNotification(WindowObserver);
+		Services.ww.unregisterNotification(ColumnHandler.windowObserver);
 	}
 };
 };
