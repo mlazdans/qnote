@@ -6,45 +6,27 @@ var EXPORTED_SYMBOLS = ["NoteColumnHandler"];
 
 class NoteColumnHandler {
 	constructor(options) {
-		console.debug("new NoteColumnHandler()");
+		console.log("new NoteColumnHandler()");
 		this.windows = new WeakSet();
 		this.options = options;
 
 		let self = this;
 
-		// this.windowObserver = {
-		// 	observe: function(aSubject, aTopic) {
-		// 		if(aTopic === 'domwindowopened'){
-		// 			aSubject.addEventListener("DOMContentLoaded", e => {
-		// 				let document = e.target;
-		// 				let threadCols = document.getElementById("threadCols");
-
-		// 				if(threadCols) {
-		// 					self.attachToWindow(aSubject);
-		// 				}
-		// 			});
-		// 		}
-		// 	}
-		// };
-
-		// Services.ww.registerNotification(this.windowObserver);
-
 		this.dBViewListener = {
-			onCreatedView: aFolderDisplay => {
-				console.log("onCreatedView");
-			},
+			// onCreatedView: aFolderDisplay => {
+			// },
 			onActiveCreatedView: aFolderDisplay => {
-				console.log("onActiveCreatedView");
+				console.log("onActiveCreatedView()");
 
 				try {
-					aFolderDisplay.view.dbView.addColumnHandler("qnoteCol", options.columnHandler);
+					self.addColumnHandler(aFolderDisplay.view.dbView);
 				} catch(e) {
 					console.error(e);
 				}
 			},
 			onDestroyingView: (aFolderDisplay, aFolderIsComingBack) => {
 				console.log("onDestroyingView");
-				self.removeColumnHandlerFromFolder(aFolderDisplay);
+				self.removeColumnHandler(aFolderDisplay.view.dbView);
 			}
 			// onMessagesLoaded: (aFolderDisplay, aAll) => {
 			// 	console.log("onMessagesLoaded");
@@ -52,21 +34,59 @@ class NoteColumnHandler {
 		};
 	}
 
+	addColumnHandler(view){
+		try {
+			if(view){
+				view.addColumnHandler("qnoteCol", this.options.columnHandler);
+			}
+		} catch(e){
+			console.error(e);
+		}
+	}
+
+	removeColumnHandler(view){
+		try {
+			if(view){
+				view.removeColumnHandler("qnoteCol");
+			}
+		} catch(e){
+			console.error(e);
+		}
+	}
+
 	attachToWindow(w){
 		let fName = `${this.constructor.name}.attachToWindow()`;
 
 		if(this.windows.has(w)){
-			console.debug(`${fName} - already attached`);
+			console.log(`${fName} - already attached`);
 			return false;
 		}
 
-		console.debug(`${fName}`);
+		if(!this.setUpDOM(w)){
+			console.log(`${fName} - not attachable`);
+			return false;
+		}
 
-		this.setUpDOM(w);
+		// if(!w.gDBView){
+		// 	console.log(`${fName} - no view present`);
+		// 	return false;
+		// }
 
-		w.FolderDisplayListenerManager.registerListener(this.dBViewListener);
+		// Keep track when changing folders
+		if(w.FolderDisplayListenerManager) {
+			// TODO: suggest listenerExists or smth
+			let idx = w.FolderDisplayListenerManager._listeners.indexOf(this.dBViewListener);
+			if (idx >= 0) {
+				console.log(`${fName} - FolderDisplayListenerManager.registerListener() - already installed`);
+			} else {
+				console.log(`${fName} - FolderDisplayListenerManager.registerListener()`);
+				w.FolderDisplayListenerManager.registerListener(this.dBViewListener);
+			}
+		} else {
+			console.log(`${fName} - FolderDisplayListenerManager -not found-`);
+		}
 
-		this.dBViewListener.onActiveCreatedView(w.gFolderDisplay);
+		this.addColumnHandler(w.gDBView);
 
 		return this.windows.add(w);
 	}
@@ -75,15 +95,18 @@ class NoteColumnHandler {
 		let fName = `${this.constructor.name}.detachFromWindow()`;
 
 		if(!this.windows.has(w)){
-			console.debug(`${fName} - window not found`);
+			console.log(`${fName} - window not found`);
 			return false;
 		}
 
-		console.debug(`${fName}`);
+		console.log(`${fName}`);
 
-		w.FolderDisplayListenerManager.unregisterListener(this.dBViewListener);
+		if(w.FolderDisplayListenerManager) {
+			console.log(`${fName} - FolderDisplayListenerManager.unregisterListener()`);
+			w.FolderDisplayListenerManager.unregisterListener(this.dBViewListener);
+		}
 
-		this.removeColumnHandlerFromFolder(w.gFolderDisplay);
+		this.removeColumnHandler(w.gDBView);
 
 		// If we remove from DOM then column properties does not get saved
 		// if(qnoteCol = w.document.getElementById("qnoteCol")){
@@ -92,14 +115,6 @@ class NoteColumnHandler {
 		// }
 
 		return this.windows.delete(w);
-	}
-
-	removeColumnHandlerFromFolder(aFolderDisplay){
-		try {
-			aFolderDisplay.view.dbView.removeColumnHandler("qnoteCol");
-		} catch (e) {
-			console.error(e);
-		}
 	}
 
 	// http://wbamberg.github.io/idl-reference/docs/nsIXULStore.html
@@ -117,21 +132,33 @@ class NoteColumnHandler {
 	}
 
 	setUpDOM(w) {
-		let threadCols = w.document.getElementById("threadCols");
 		let qnoteCol = w.document.getElementById("qnoteCol");
-		let aFolderDisplay = w.gFolderDisplay;
 
-		if(qnoteCol || !threadCols){
-			return;
+		// Don't bother if already added to DOM
+		if(qnoteCol){
+			return true;
 		}
 
-		let colStates = aFolderDisplay.getColumnStates();
-		let newState = Object.assign({}, colStates.qnoteCol);
+		let threadCols = w.document.getElementById("threadCols");
 
-		let width;
-		let { ordinal, visible } = newState;
+		// If threadCols not found, assume it is not right window
+		if(!threadCols){
+			return false;
+		}
 
 		// Not sure what and where gets saved. I'm guessing `ordinal/visible` are stored within folder column states and `width` using xulstore?
+		let width, ordinal, visible;
+		let newState, colStates;
+
+		let aFolderDisplay = w.gFolderDisplay;
+		if(aFolderDisplay){
+			colStates = aFolderDisplay.getColumnStates();
+			newState = Object.assign({}, colStates.qnoteCol);
+
+			ordinal = newState.ordinal;
+			visible = newState.visible;
+		}
+
 		ordinal = ordinal ?? this.xulStoreGet("ordinal");
 		width = (width ?? this.xulStoreGet("width")) || 24;
 		visible = visible ?? (this.xulStoreGet("hidden") !== true);
@@ -175,9 +202,10 @@ class NoteColumnHandler {
 			}
 		}
 
-		colStates.qnoteCol = newState;
-
-		aFolderDisplay.setColumnStates(colStates, true);
+		if(aFolderDisplay){
+			colStates.qnoteCol = newState;
+			aFolderDisplay.setColumnStates(colStates, true);
+		}
 
 		return true;
 	}
