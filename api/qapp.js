@@ -34,8 +34,27 @@ var QAppWindowObserver = {
 				for (let listener of QAppWindowObserver.listeners.DOMContentLoaded) {
 					listener(e, aSubject, aTopic, aData);
 				}
+
+				// let document = e.target;
+				// console.log("DOMContentLoaded", e, document);
+				// document.activeElement.addEventListener("DOMContentLoaded", e => {
+				// 	console.log("document.loaded", e, document);
+				// });
+				// if(!document.URL.includes('chrome://messenger/content/msgPrintEngine')){
+				// 	return;
+				// }
+
+				// messageUrisToPrint = document.defaultView.arguments[1];
+
+				// let pDocument = document.getElementById('content');
+				// if(!pDocument){
+				// 	console.log("Print content not found");
+				// 	return;
+				// }
 			});
 		}
+
+		//let document = e.target;
 	}
 };
 
