@@ -4,7 +4,7 @@ var { BasePopup, ViewPopup } = ChromeUtils.import("resource:///modules/Extension
 
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { NoteColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/ColumnHandler.jsm"));
+var { NoteColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteColumnHandler.jsm"));
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
 var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 
@@ -94,7 +94,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		Services.ww.unregisterNotification(QAppWindowObserver);
 		//Services.obs.removeObserver(this.MsgMsgDisplayed, "MsgMsgDisplayed");
 
-		Components.utils.unload(extension.rootURI.resolve("modules/ColumnHandler.jsm"));
+		Components.utils.unload(extension.rootURI.resolve("modules/NoteColumnHandler.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/NotePopup.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 	}
@@ -267,8 +267,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					wex = Components.utils.waiveXrays(context.cloneScope);
 
-					// Remove old style after upgrade
+					// Remove old style sheet, because it might be kept after update, for example
 					uninstallQNoteCSS();
+
 					installQNoteCSS();
 
 					this.popups = new Map();
@@ -282,12 +283,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						this.installQuickFilter();
 					}
 
-					ColumnHandler = new NoteColumnHandler({
-						textLimit: wex.Prefs.showFirstChars,
-						noteGrabber: noteGrabber
-					});
-
-					ColumnHandler.attachToWindow(Services.wm.getMostRecentWindow("mail:3pane"));
+					this.installColumnHandler();
 				},
 				async messagesFocus(){
 					let w = this.getQNoteSuitableWindow();
@@ -296,6 +292,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						//w = Services.wm.getMostRecentWindow("mail:3pane");
 					}
 				},
+				// TODO: move to NotePopup
 				async popupUpdate(id, opt){
 					if(!this.popups.has(id)){
 						return false;
@@ -449,6 +446,73 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						});
 					});
 				},
+				installColumnHandler(){
+					let columnHandler = {
+						noteRowListener(view, row) {
+							if(view && Number.isInteger(row)){
+								// That method is part of Mozilla API and has nothing to do with either XNote or QNote :)
+								view.NoteChange(row, 1, 2);
+							}
+						},
+						getMessageId(row, col){
+							try {
+								return this.getView(col).getMsgHdrAt(row).messageId;
+							} catch(e) {
+								// console.error(e);
+							}
+						},
+						getView(col){
+							try {
+								return col.element.ownerGlobal.gDBView;
+							} catch(e) {
+								// console.error(e);
+							}
+						},
+						isEditable(row, col) {
+							return false;
+						},
+						// cycleCell(row, col) {
+						// },
+						getCellText(row, col) {
+							let note = noteGrabber.getNote(this.getMessageId(row, col), () => {
+								this.noteRowListener(this.getView(col), row);
+							});
+
+							let textLimit = 6;
+							if(note.exists && !note.shortText && textLimit && (typeof note.text === 'string')){
+								note.shortText = note.text.substring(0, textLimit);
+							}
+
+							return note.exists ? note.shortText : null;
+						},
+						getSortStringForRow(hdr) {
+							let note = noteGrabber.getNote(hdr.messageId);
+
+							return note.exists ? note.text : null;
+						},
+						isString() {
+							return true;
+						},
+						// getCellProperties(row, col, props){
+						// },
+						// getRowProperties(row, props){
+						// },
+						getImageSrc(row, col) {
+							let note = noteGrabber.getNote(this.getMessageId(row, col), () => {
+								this.noteRowListener(this.getView(col), row);
+							});
+
+							return note.exists ? extension.rootURI.resolve("images/icon-column.png") : null;
+						},
+						// getSortLongForRow(hdr) {
+						// }
+					};
+					ColumnHandler = new NoteColumnHandler({
+						textLimit: wex.Prefs.showFirstChars,
+						columnHandler: columnHandler
+					});
+					ColumnHandler.attachToWindow(Services.wm.getMostRecentWindow("mail:3pane"));
+				},
 				async installQuickFilter(){
 					console.log("search has been temporarily disabled until we found a better solution");
 					// TODO: need to re-think better solution
@@ -458,6 +522,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// 	});
 					// });
 				},
+				// TODO: keep track of windows
 				async updateView(keyId){
 					let w = this.getQNoteSuitableWindow();
 					let aFolderDisplay = w.gFolderDisplay;

@@ -10,7 +10,6 @@ class NoteColumnHandler {
 		this.windows = [];
 		this.options = options;
 
-		let noteGrabber = options.noteGrabber;
 		let self = this;
 
 		this.windowObserver = {
@@ -33,64 +32,15 @@ class NoteColumnHandler {
 		this.dBViewListener = {
 			onCreatedView: aFolderDisplay => {
 				console.log("onCreatedView");
-				//ColumnHandler.handlers.push(qnCH);
 			},
 			onActiveCreatedView: aFolderDisplay => {
 				console.log("onActiveCreatedView");
-				//let qnCH = new NoteColumnHandler(aFolderDisplay);
 
-				let noteRowListener = (view, row) => {
-					if(view && Number.isInteger(row)){
-						// That method is part of Mozilla API and has nothing to do with either XNote or QNote :)
-						view.NoteChange(row, 1, 2);
-					}
+				try {
+					aFolderDisplay.view.dbView.addColumnHandler("qnoteCol", options.columnHandler);
+				} catch(e) {
+					console.error(e);
 				}
-
-				//this.view = folder.view.dbView
-				let dbView = aFolderDisplay.view.dbView;
-
-				let handler = {
-					isEditable(row, col) {
-						return false;
-					},
-					// cycleCell(row, col) {
-					// },
-					getCellText(row, col) {
-						let note = noteGrabber.getNote(dbView.getMsgHdrAt(row).messageId, () => {
-							noteRowListener(dbView, row);
-						});
-
-						let textLimit = 6;
-						if(note.exists && !note.shortText && textLimit && (typeof note.text === 'string')){
-							note.shortText = note.text.substring(0, textLimit);
-						}
-
-						return note.exists ? note.shortText : null;
-					},
-					getSortStringForRow(hdr) {
-						let note = noteGrabber.getNote(hdr.messageId);
-
-						return note.exists ? note.text : null;
-					},
-					isString() {
-						return true;
-					},
-					// getCellProperties(row, col, props){
-					// },
-					// getRowProperties(row, props){
-					// },
-					getImageSrc(row, col) {
-						let note = noteGrabber.getNote(dbView.getMsgHdrAt(row).messageId, () => {
-							noteRowListener(dbView, row);
-						});
-
-						return note.exists ? extension.rootURI.resolve("images/icon-column.png") : null;
-					},
-					// getSortLongForRow(hdr) {
-					// }
-				};
-
-				dbView.addColumnHandler("qnoteCol", handler);
 			},
 			onDestroyingView: (aFolderDisplay, aFolderIsComingBack) => {
 				console.log("onDestroyingView");
