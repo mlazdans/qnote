@@ -4,10 +4,11 @@ var { BasePopup, ViewPopup } = ChromeUtils.import("resource:///modules/Extension
 
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { ColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/ColumnHandler.jsm"));
+var { NoteColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/ColumnHandler.jsm"));
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
 var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 
+var ColumnHandler;
 var QAppWindowObserver = {
 	listeners: {
 		"domwindowopened": new Set(),
@@ -281,7 +282,12 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						this.installQuickFilter();
 					}
 
-					this.installColumnHandler();
+					ColumnHandler = new NoteColumnHandler({
+						textLimit: wex.Prefs.showFirstChars,
+						noteGrabber: noteGrabber
+					});
+
+					ColumnHandler.attachToWindow(Services.wm.getMostRecentWindow("mail:3pane"));
 				},
 				async messagesFocus(){
 					let w = this.getQNoteSuitableWindow();
@@ -451,12 +457,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// 		noteGrabber: noteGrabber
 					// 	});
 					// });
-				},
-				async installColumnHandler(){
-					ColumnHandler.install({
-						textLimit: wex.Prefs.showFirstChars,
-						noteGrabber: noteGrabber
-					});
 				},
 				async updateView(keyId){
 					let w = this.getQNoteSuitableWindow();

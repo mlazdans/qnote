@@ -2,29 +2,141 @@ var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
-var EXPORTED_SYMBOLS = ["ColumnHandler"];
+var EXPORTED_SYMBOLS = ["NoteColumnHandler"];
 
-var ColumnHandler;
+class NoteColumnHandler {
+	constructor(options) {
+		console.debug("new NoteColumnHandler()");
+		this.windows = [];
+		this.options = options;
 
-{
+		let noteGrabber = options.noteGrabber;
+		let self = this;
 
-// TODO: try
-// class MozThreadPaneTreecols extends customElements.get("treecols") {
-let noteGrabber;
+		this.windowObserver = {
+			observe: function(aSubject, aTopic) {
+				if(aTopic === 'domwindowopened'){
+					aSubject.addEventListener("DOMContentLoaded", e => {
+						let document = e.target;
+						let threadCols = document.getElementById("threadCols");
 
-class QNoteColumnHandler {
-	constructor(folder) {
-		// console.log("new QNoteColumnHandler");
-		this.folder = folder;
-		this.window = folder.msgWindow.domWindow;
-		this.view = folder.view.dbView;
-		this.installed = this.setUpDOM();
-
-		this.noteRowListener = (view, row) => {
-			if(view && Number.isInteger(row)){
-				// That method is part of Mozilla API and has nothing to do with either XNote or QNote :)
-				view.NoteChange(row, 1, 2);
+						if(threadCols) {
+							self.attachToWindow(aSubject);
+						}
+					});
+				}
 			}
+		};
+
+		Services.ww.registerNotification(this.windowObserver);
+
+		this.dBViewListener = {
+			onCreatedView: aFolderDisplay => {
+				console.log("onCreatedView");
+				//ColumnHandler.handlers.push(qnCH);
+			},
+			onActiveCreatedView: aFolderDisplay => {
+				console.log("onActiveCreatedView");
+				//let qnCH = new NoteColumnHandler(aFolderDisplay);
+
+				let noteRowListener = (view, row) => {
+					if(view && Number.isInteger(row)){
+						// That method is part of Mozilla API and has nothing to do with either XNote or QNote :)
+						view.NoteChange(row, 1, 2);
+					}
+				}
+
+				//this.view = folder.view.dbView
+				let dbView = aFolderDisplay.view.dbView;
+
+				let handler = {
+					isEditable(row, col) {
+						return false;
+					},
+					// cycleCell(row, col) {
+					// },
+					getCellText(row, col) {
+						let note = noteGrabber.getNote(dbView.getMsgHdrAt(row).messageId, () => {
+							noteRowListener(dbView, row);
+						});
+
+						let textLimit = 6;
+						if(note.exists && !note.shortText && textLimit && (typeof note.text === 'string')){
+							note.shortText = note.text.substring(0, textLimit);
+						}
+
+						return note.exists ? note.shortText : null;
+					},
+					getSortStringForRow(hdr) {
+						let note = noteGrabber.getNote(hdr.messageId);
+
+						return note.exists ? note.text : null;
+					},
+					isString() {
+						return true;
+					},
+					// getCellProperties(row, col, props){
+					// },
+					// getRowProperties(row, props){
+					// },
+					getImageSrc(row, col) {
+						let note = noteGrabber.getNote(dbView.getMsgHdrAt(row).messageId, () => {
+							noteRowListener(dbView, row);
+						});
+
+						return note.exists ? extension.rootURI.resolve("images/icon-column.png") : null;
+					},
+					// getSortLongForRow(hdr) {
+					// }
+				};
+
+				dbView.addColumnHandler("qnoteCol", handler);
+			},
+			onDestroyingView: (aFolderDisplay, aFolderIsComingBack) => {
+				console.log("onDestroyingView");
+				self.removeColumnHandlerFromFolder(aFolderDisplay);
+			}
+			// onMessagesLoaded: (aFolderDisplay, aAll) => {
+			// 	console.log("onMessagesLoaded");
+			// }
+		};
+	}
+
+	attachToWindow(w){
+		// console.debug("ColumnHandler.attachToWindow()");
+		this.setUpDOM(w);
+
+		w.FolderDisplayListenerManager.registerListener(this.dBViewListener);
+		if(w.gFolderDisplay){
+			this.dBViewListener.onActiveCreatedView(w.gFolderDisplay);
+		}
+
+		this.windows.push(w);
+	}
+
+	removeColumnHandlerFromFolder(aFolderDisplay){
+		try {
+			aFolderDisplay.view.dbView.removeColumnHandler("qnoteCol");
+		} catch (e) {
+			console.error(e);
+		}
+	}
+
+	uninstall() {
+		console.debug("ColumnHandler.uninstall()");
+
+		Services.ww.unregisterNotification(this.windowObserver);
+
+		for(let w of this.windows){
+			w.FolderDisplayListenerManager.unregisterListener(this.dBViewListener);
+
+			this.removeColumnHandlerFromFolder(w.gFolderDisplay);
+
+			// If we remove from DOM then column properties does not get saved
+			// if(qnoteCol = w.document.getElementById("qnoteCol")){
+			// 	//qnoteCol.parentNode.removeChild(qnoteCol.previousSibling); // Splitter
+			// 	qnoteCol.parentNode.removeChild(qnoteCol);
+			// }
 		}
 	}
 
@@ -42,50 +154,25 @@ class QNoteColumnHandler {
 		}
 	}
 
-	setUpDOM() {
-		let w = this.window;
+	setUpDOM(w) {
 		let threadCols = w.document.getElementById("threadCols");
 		let qnoteCol = w.document.getElementById("qnoteCol");
-
-		// if(qnoteCol){
-		// 	console.log("setUpDOM() - qnoteCol defined");
-		// }
-
-		// if(!threadCols){
-		// 	console.log("setUpDOM() - threadCols not defined");
-		// }
+		let aFolderDisplay = w.gFolderDisplay;
 
 		if(qnoteCol || !threadCols){
 			return;
 		}
 
-		let colStates = this.folder.getColumnStates();
+		let colStates = aFolderDisplay.getColumnStates();
 		let newState = Object.assign({}, colStates.qnoteCol);
 
 		let width;
 		let { ordinal, visible } = newState;
 
-		// console.log("before parse", colStates, newState, width, ordinal, visible);
-
 		// Not sure what and where gets saved. I'm guessing `ordinal/visible` are stored within folder column states and `width` using xulstore?
-		if(ordinal === undefined){
-			ordinal = this.xulStoreGet("ordinal");
-			// console.log(`ColumnHandler.setUpDOM XUL: ordinal=${ordinal}`);
-		}
-
-		if(width === undefined){
-			width = this.xulStoreGet("width");
-			// console.log(`ColumnHandler.setUpDOM XUL: width=${width}`);
-		}
-
-		if(visible === undefined){
-			visible = this.xulStoreGet("hidden") !== true;
-			// console.log(`ColumnHandler.setUpDOM XUL: visible =`, visible);
-		}
-
-		if(!width){
-			width = 24;
-		}
+		ordinal = ordinal ?? this.xulStoreGet("ordinal");
+		width = (width ?? this.xulStoreGet("width")) || 24;
+		visible = visible ?? (this.xulStoreGet("hidden") !== true);
 
 		// Some casts
 		visible = !!visible;
@@ -93,8 +180,6 @@ class QNoteColumnHandler {
 		width = width + "";
 
 		newState = { visible, ordinal };
-
-		// console.log("after parse", colStates, newState, width, ordinal, visible);
 
 		let widthStr = '';
 		let colOrdinalStr = '';
@@ -130,157 +215,8 @@ class QNoteColumnHandler {
 
 		colStates.qnoteCol = newState;
 
-		this.folder.setColumnStates(colStates, true);
+		aFolderDisplay.setColumnStates(colStates, true);
 
 		return true;
 	}
-
-	isEditable(row, col) {
-		return false;
-	}
-
-	// cycleCell(row, col) {
-	// }
-
-	getCellText(row, col) {
-		let note = noteGrabber.getNote(this.view.getMsgHdrAt(row).messageId, () => {
-			this.noteRowListener(this.view, row);
-		});
-
-		if(note.exists && !note.shortText && ColumnHandler.options.textLimit && (typeof note.text === 'string')){
-			note.shortText = note.text.substring(0, ColumnHandler.options.textLimit);
-		}
-
-		return note.exists ? note.shortText : null;
-	}
-
-	getSortStringForRow(hdr) {
-		let note = noteGrabber.getNote(hdr.messageId);
-
-		return note.exists ? note.text : null;
-	}
-
-	isString() {
-		return true;
-	}
-
-	// getCellProperties(row, col, props){
-	// }
-
-	// getRowProperties(row, props){
-	// }
-
-	getImageSrc(row, col) {
-		let note = noteGrabber.getNote(this.view.getMsgHdrAt(row).messageId, () => {
-			this.noteRowListener(this.view, row);
-		});
-
-		return note.exists ? extension.rootURI.resolve("images/icon-column.png") : null;
-	}
-
-	// getSortLongForRow(hdr) {
-	// }
-};
-
-let DBViewListener = {
-	onCreatedView: aFolderDisplay => {
-		// console.log("onCreatedView");
-		//ColumnHandler.handlers.push(qnCH);
-	},
-	onActiveCreatedView: aFolderDisplay => {
-		// console.log("onActiveCreatedView");
-		let qnCH = new QNoteColumnHandler(aFolderDisplay);
-		aFolderDisplay.view.dbView.addColumnHandler("qnoteCol", qnCH);
-		// if(aFolderDisplay.view.dbView.refresh){
-		// 	console.log("refresh");
-		// 	aFolderDisplay.view.dbView.refresh();
-		// }
-	},
-	onDestroyingView: (aFolderDisplay, aFolderIsComingBack) => {
-		// console.log("onDestroyingView");
-		ColumnHandler.removeColumnHandlerFromFolder(aFolderDisplay);
-	}
-	// onMessagesLoaded: (aFolderDisplay, aAll) => {
-	// 	console.log("onMessagesLoaded");
-	// }
-};
-
-ColumnHandler = {
-	options: {},
-	windows: [],
-	windowObserver: {
-		observe: function(aSubject, aTopic) {
-			// console.log("windowObserver->", aTopic);
-			if(aTopic === 'domwindowopened'){
-				aSubject.addEventListener("DOMContentLoaded", e => {
-					let document = e.target;
-					let threadCols = document.getElementById("threadCols");
-
-					if(threadCols) {
-						ColumnHandler.attachToWindow(aSubject);
-					}
-				});
-			}
-		}
-	},
-	setTextLimit(limit){
-		ColumnHandler.options.textLimit = limit;
-	},
-	attachToWindow(w){
-		// console.debug("ColumnHandler.attachToWindow()");
-		w.FolderDisplayListenerManager.registerListener(DBViewListener);
-		if(w.gFolderDisplay){
-			//DBViewListener.onCreatedView(w.gFolderDisplay);
-			DBViewListener.onActiveCreatedView(w.gFolderDisplay);
-		}
-		this.windows.push(w);
-	},
-	removeColumnHandlerFromFolder(aFolderDisplay){
-		try {
-			aFolderDisplay.view.dbView.removeColumnHandler("qnoteCol");
-		} catch (e) {
-			console.error(e);
-		}
-	},
-	install(options) {
-		console.debug("ColumnHandler.install()");
-		ColumnHandler.options = options;
-		noteGrabber = options.noteGrabber;
-
-		Services.ww.registerNotification(ColumnHandler.windowObserver);
-
-		// TODO: pass windows parameter
-		this.attachToWindow(Services.wm.getMostRecentWindow("mail:3pane"));
-	},
-	uninstall() {
-		console.debug("ColumnHandler.uninstall()");
-		let qnoteCol;
-
-		for(let w of this.windows){
-			w.FolderDisplayListenerManager.unregisterListener(DBViewListener);
-
-			ColumnHandler.removeColumnHandlerFromFolder(w.gFolderDisplay);
-
-			// if(qnoteCol = w.document.getElementById("qnoteCol")){
-			// 	//qnoteCol.parentNode.removeChild(qnoteCol.previousSibling); // Splitter
-			// 	qnoteCol.parentNode.removeChild(qnoteCol);
-			// }
-		}
-		// for(let i = 0; i < ColumnHandler.handlers.length; i++){
-		// 	let w = ColumnHandler.handlers[i].window;
-		// 	let view = ColumnHandler.handlers[i].view;
-
-		// 	//view.removeColumnHandler("qnoteCol");
-
-		// 	if(qnoteCol = w.document.getElementById("qnoteCol")){
-		// 		//qnoteCol.parentNode.removeChild(qnoteCol.previousSibling); // Splitter
-		// 		qnoteCol.parentNode.removeChild(qnoteCol);
-		// 	}
-
-		// 	w.FolderDisplayListenerManager.unregisterListener(DBViewListener);
-		// }
-
-		Services.ww.unregisterNotification(ColumnHandler.windowObserver);
-	}
-};
 };
