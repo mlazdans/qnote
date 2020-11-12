@@ -1,12 +1,9 @@
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
-var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
 var EXPORTED_SYMBOLS = ["NoteColumnHandler"];
 
 class NoteColumnHandler {
 	constructor(options) {
-		console.log("new NoteColumnHandler()");
 		this.windows = new WeakSet();
 		this.options = options;
 
@@ -16,8 +13,6 @@ class NoteColumnHandler {
 			// onCreatedView: aFolderDisplay => {
 			// },
 			onActiveCreatedView: aFolderDisplay => {
-				console.log("onActiveCreatedView()");
-
 				try {
 					self.addColumnHandler(aFolderDisplay.view.dbView);
 				} catch(e) {
@@ -25,11 +20,9 @@ class NoteColumnHandler {
 				}
 			},
 			onDestroyingView: (aFolderDisplay, aFolderIsComingBack) => {
-				console.log("onDestroyingView");
 				self.removeColumnHandler(aFolderDisplay.view.dbView);
 			}
 			// onMessagesLoaded: (aFolderDisplay, aAll) => {
-			// 	console.log("onMessagesLoaded");
 			// }
 		};
 	}
@@ -58,32 +51,27 @@ class NoteColumnHandler {
 		let fName = `${this.constructor.name}.attachToWindow()`;
 
 		if(this.windows.has(w)){
-			console.log(`${fName} - already attached`);
+			console.debug(`${fName} - already attached`);
 			return false;
 		}
 
 		if(!this.setUpDOM(w)){
-			console.log(`${fName} - not attachable`);
+			console.debug(`${fName} - not attachable`);
 			return false;
 		}
-
-		// if(!w.gDBView){
-		// 	console.log(`${fName} - no view present`);
-		// 	return false;
-		// }
 
 		// Keep track when changing folders
 		if(w.FolderDisplayListenerManager) {
 			// TODO: suggest listenerExists or smth
 			let idx = w.FolderDisplayListenerManager._listeners.indexOf(this.dBViewListener);
 			if (idx >= 0) {
-				console.log(`${fName} - FolderDisplayListenerManager.registerListener() - already installed`);
+				console.debug(`${fName} - FolderDisplayListenerManager.registerListener() - already installed`);
 			} else {
-				console.log(`${fName} - FolderDisplayListenerManager.registerListener()`);
+				console.debug(`${fName} - FolderDisplayListenerManager.registerListener()`);
 				w.FolderDisplayListenerManager.registerListener(this.dBViewListener);
 			}
 		} else {
-			console.log(`${fName} - FolderDisplayListenerManager -not found-`);
+			console.debug(`${fName} - FolderDisplayListenerManager -not found-`);
 		}
 
 		this.addColumnHandler(w.gDBView);
@@ -95,14 +83,14 @@ class NoteColumnHandler {
 		let fName = `${this.constructor.name}.detachFromWindow()`;
 
 		if(!this.windows.has(w)){
-			console.log(`${fName} - window not found`);
+			console.debug(`${fName} - window not found`);
 			return false;
 		}
 
-		console.log(`${fName}`);
+		console.debug(`${fName}`);
 
 		if(w.FolderDisplayListenerManager) {
-			console.log(`${fName} - FolderDisplayListenerManager.unregisterListener()`);
+			console.debug(`${fName} - FolderDisplayListenerManager.unregisterListener()`);
 			w.FolderDisplayListenerManager.unregisterListener(this.dBViewListener);
 		}
 
@@ -159,9 +147,10 @@ class NoteColumnHandler {
 			visible = newState.visible;
 		}
 
-		ordinal = ordinal ?? this.xulStoreGet("ordinal");
-		width = (width ?? this.xulStoreGet("width")) || 24;
-		visible = visible ?? (this.xulStoreGet("hidden") !== true);
+		// Can't use ?? here because of TB68
+		ordinal = ordinal === undefined || ordinal === null ? this.xulStoreGet("ordinal") : ordinal;
+		width = (width === undefined || width === null ? this.xulStoreGet("width") : width) || 24;
+		visible = visible === undefined || visible ===null ? (this.xulStoreGet("hidden") !== true) : visible;
 
 		// Some casts
 		visible = !!visible;
