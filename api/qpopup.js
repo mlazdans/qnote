@@ -10,7 +10,7 @@ var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePo
 var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 
-var PopupEventDispatcher = new QEventDispatcher(["oncreated", "onremoved"]);
+var PopupEventDispatcher = new QEventDispatcher(["oncreated", "onremoved", "onmove", "onresize"]);
 
 var qpopup = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown() {
@@ -80,6 +80,36 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						};
 					}
 				}).api(),
+				onMove: new ExtensionCommon.EventManager({
+					context,
+					name: "qpopup.onMove",
+					register: fire => {
+						const l = value => {
+							fire.async(value);
+						};
+
+						PopupEventDispatcher.addListener("onmove", l);
+
+						return () => {
+							PopupEventDispatcher.removeListener("onmove", l);
+						};
+					}
+				}).api(),
+				onResize: new ExtensionCommon.EventManager({
+					context,
+					name: "qpopup.onResize",
+					register: fire => {
+						const l = value => {
+							fire.async(value);
+						};
+
+						PopupEventDispatcher.addListener("onresize", l);
+
+						return () => {
+							PopupEventDispatcher.removeListener("onresize", l);
+						};
+					}
+				}).api(),
 				async remove(id){
 					let popup = popupManager.get(id);
 
@@ -91,8 +121,17 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 
 					return false;
 				},
+				async update(id, data){
+					let popup = popupManager.get(id);
+
+					if(popup){
+						console.log("update", popup);
+					}
+
+					return false;
+				},
 				async create(options){
-					let { windowId, top, left, width, height, url } = options;
+					let { windowId, top, left, width, height, url, title } = options;
 					let window = id2RealWindow(windowId);
 
 					// let escaper = e => {
@@ -106,19 +145,29 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					// };
 
 					// window.addEventListener("keydown", escaper);
-
 					var popup = new NotePopup({
 						window: window,
+						title: title,
 						top: top,
 						left: left,
 						width: width,
 						height: height
 					});
 
-					popup.popupInfo = {
-						id: popupManager.add(popup),
-						windowId: windowId
+					popup.onResize = p => {
+						popup.popupInfo.width = p.width;
+						popup.popupInfo.height = p.height;
+						PopupEventDispatcher.fireListeners("onresize", popup.popupInfo);
 					};
+
+					popup.onMove = p => {
+						popup.popupInfo.left = p.x;
+						popup.popupInfo.top = p.y;
+						PopupEventDispatcher.fireListeners("onmove", popup.popupInfo);
+					};
+
+					popup.popupInfo = options;
+					popup.popupInfo.id = popupManager.add(popup);
 
 					PopupEventDispatcher.fireListeners("oncreated", popup.popupInfo);
 
@@ -129,12 +178,11 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 
 						popup.iframeEl.addEventListener("load", e => {
 							let MutationObserver = popup.iframeWindow.MutationObserver;
-
 							// Watch title change
 							if(MutationObserver){
 								new MutationObserver(function(mutations) {
 									try {
-										popup.title = mutations[0].target.text;
+										popup.popupInfo.title = popup.title = mutations[0].target.text;
 									} catch {
 									}
 								}).observe(
@@ -144,7 +192,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 							}
 
 							// Set title from iframe document
-							popup.title = popup.iframeDocument.title;
+							popup.popupInfo.title = popup.title = popup.iframeDocument.title;
 						});
 
 						popup.closeEl.addEventListener("click", e => {
