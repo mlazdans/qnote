@@ -27,6 +27,7 @@
 	"background": {
 		"scripts": [
 			"modules/QConsole.js",
+			"modules/QEventDispatcher.js",
 			"scripts/utils-note.js",
 			"scripts/utils-message.js",
 			"scripts/utils.js",

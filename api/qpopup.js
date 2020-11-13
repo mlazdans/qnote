@@ -8,17 +8,15 @@ var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var { NoteColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteColumnHandler.jsm"));
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
 var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
-var { QDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QDispatcher.js"));
+var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 
-var PopupEventDispatcher = new QDispatcher(["oncreated"]);
+var PopupEventDispatcher = new QEventDispatcher(["oncreated"]);
 
 var qpopup = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown() {
 	}
 
 	getAPI(context) {
-
-		//QDispatcher
 
 		function id2RealWindow(windowId){
 			try {
@@ -47,7 +45,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 
 						return () => {
 							console.log("unregister");
-							QPopupDispatcher.removeListener("oncreated", l);
+							PopupEventDispatcher.removeListener("oncreated", l);
 						};
 					}
 				}).api(),

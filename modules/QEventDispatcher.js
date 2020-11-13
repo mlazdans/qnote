@@ -1,6 +1,6 @@
-var EXPORTED_SYMBOLS = ["QDispatcher"];
+var EXPORTED_SYMBOLS = ["QEventDispatcher"];
 
-class QDispatcher {
+class QEventDispatcher {
 	constructor(listenerDef){
 		this.listeners = {};
 		for(let name of listenerDef){

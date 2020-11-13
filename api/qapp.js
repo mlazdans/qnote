@@ -8,10 +8,12 @@ var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var { NoteColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteColumnHandler.jsm"));
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
 var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
+var { QConsole } = ChromeUtils.import(extension.rootURI.resolve("modules/QConsole.js"));
 
-Services.scriptloader.loadSubScript(extension.rootURI.resolve("modules/QAppConsole.js"), this, "UTF-8");
+//if(!this["QConsole"]){ Services.scriptloader.loadSubScript(extension.rootURI.resolve("modules/QConsole.js"), this, "UTF-8"); }
 
-var qcon = new QAppConsole(console);
+// TODO: get rid of globals
+var qcon = new QConsole(console);
 var QAppColumnHandler;
 var QAppWindowObserver = {
 	listeners: {
@@ -128,7 +130,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		Components.utils.unload(extension.rootURI.resolve("modules/NoteColumnHandler.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/NotePopup.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/NoteFilter.jsm"));
-		Components.utils.unload(extension.rootURI.resolve("modules/utils.js"));
+		Components.utils.unload(extension.rootURI.resolve("modules/QConsole.js"));
+		Components.utils.unload(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 	}
 
 	getAPI(context) {
