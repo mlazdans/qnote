@@ -1,4 +1,6 @@
-class QAppConsole {
+var EXPORTED_SYMBOLS = ["QConsole"];
+
+class QConsole {
 	constructor(oldcon){
 		this.oldcon = oldcon;
 		for(let k of ["log", "debug", "error", "warn", "info"]){
