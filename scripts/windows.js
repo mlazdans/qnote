@@ -273,9 +273,7 @@ class XULNoteWindow extends NoteWindow {
 
 	async updateWindow(opt){
 		if(this.popupId){
-			// return browser.qapp.popupUpdate(this.windowId, opt);
-			// await browser.qapp.popupClose(this.windowId);
-			// await this.pop(this.messageId, false, true);
+			return browser.qpopup.update(this.popupId, opt);
 		}
 	}
 
@@ -309,6 +307,7 @@ class XULNoteWindow extends NoteWindow {
 			let opt = {
 				windowId: CurrentWindow.id,
 				url: "html/popup4.html",
+				title: "QNote",
 				width: note.width || Prefs.width,
 				height: note.height || Prefs.height,
 				left: note.x || 0,

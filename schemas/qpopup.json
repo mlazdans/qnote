@@ -55,12 +55,24 @@
 			"minimum": 1
 		}]
 	},{
+		"name": "update",
+		"type": "function",
+		"async": "callback",
+		"parameters": [{
+			"name": "popupId",
+			"type": "integer",
+			"minimum": 1
+		},{
+			"name": "popup",
+			"$ref": "Popup"
+		}]
+	},{
 		"name": "remove",
 		"type": "function",
 		"async": "callback",
 		"parameters": [{
-			"type": "integer",
 			"name": "popupId",
+			"type": "integer",
 			"minimum": 1
 		}]
 	},{
@@ -68,7 +80,6 @@
 		"type": "function",
 		"async": "callback",
 		"parameters": [{
-			"type": "object",
 			"name": "popup",
 			"$ref": "Popup"
 		}]
@@ -78,8 +89,8 @@
 		"type": "function",
 		"description": "Fired when a popup is created.",
 		"parameters": [{
-			"$ref": "Popup",
 			"name": "popup",
+			"$ref": "Popup",
 			"description": "Details of the popup that was created."
 		}]
 	},{
@@ -87,9 +98,27 @@
 		"type": "function",
 		"description": "Fired when a popup is removed.",
 		"parameters": [{
-			"$ref": "Popup",
 			"name": "popup",
+			"$ref": "Popup",
 			"description": "Details of the popup that was removed."
+		}]
+	},{
+		"name": "onMove",
+		"type": "function",
+		"description": "Fired when a popup is moved.",
+		"parameters": [{
+			"name": "popup",
+			"$ref": "Popup",
+			"description": "Details of the popup that was removed."
+		}]
+	},{
+		"name": "onResize",
+		"type": "function",
+		"description": "Fired when a popup is resized.",
+		"parameters": [{
+			"name": "popup",
+			"$ref": "Popup",
+			"description": "Details of the popup that was resized."
 		}]
 	}]
 }]
