@@ -150,12 +150,10 @@ class NotePopup extends BasePopup {
 
 	pop(){
 		let self = this;
-		let { left, top, width, height } = this.options;
+		let { left, top, width, height, title } = this.options;
 
 		var initNote = () => {
-			// var closeButton = this.closeEl;
-			//var deleteButton = document.getElementById('deleteButton');
-
+			// TODO: maybe insall default .close();
 			// closeButton.addEventListener("click", e => {
 			// 	console.log("close", e);
 			// });
@@ -180,25 +178,35 @@ class NotePopup extends BasePopup {
 		};
 
 		return new Promise(function(resolve) {
-			self.browser.addEventListener("DOMContentLoaded", () => {
-				//self.browser.style.border = "1px solid red";
-				// We are not interested when about:blank been loaded
+			let loadListener = (e0) => {
 				// TODO: hide, until loaded
 				//self.browser.style.display = "none";
-				if(self.contentDocument.URL !== self.popupURL){
+				//self.contentDocument.URL
+
+				// if(self.contentDocument.URL !== self.popupURL){
+				// 	return;
+				// }
+				//if(!e0.target || !e0.target.document || e0.target.document.URL !== self.popupURL){
+				// We are not interested when about:blank been loaded
+				if(e0.target.URL !== self.popupURL){
 					return;
 				}
 
-				self.browserLoaded.then(() => {
+				self.contentReady.then((e1, e2) => {
+					self.title = title;
+					self.browser.removeEventListener("DOMContentLoaded", loadListener);
 					initNote();
 					resolve(true);
 					//self.browser.display = "none";
 				});
+				// browserLoaded
 				// n.contentReady.then(()=>{
 				// });
 				// n.browserReady.then(()=>{
 				// });
-			});
+			};
+
+			self.browser.addEventListener("DOMContentLoaded", loadListener);
 
 			let anchor = null;
 
@@ -241,11 +249,10 @@ class NotePopup extends BasePopup {
 			let handleDragEnd = e => {
 				window.removeEventListener("mousemove", mover);
 				window.removeEventListener("mouseup", handleDragEnd);
-				let pos = mover(e);
 				popup.style.opacity = '1';
 				el.style.cursor = '';
 				if(self.onMove){
-					self.onMove(pos, e);
+					self.onMove(mover(e), e);
 				}
 			}
 
@@ -289,14 +296,13 @@ class NotePopup extends BasePopup {
 				}
 			};
 
-			let handleDragEnd = (e) => {
+			let handleDragEnd = e => {
 				window.removeEventListener("mousemove", resizer);
 				window.removeEventListener("mouseup", handleDragEnd);
-				let pos = resizer(e);
 				popup.style.opacity = '1';
 
 				if(self.onResize){
-					self.onResize(pos, e);
+					self.onResize(resizer(e), e);
 				}
 			}
 
