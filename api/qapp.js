@@ -1,8 +1,4 @@
-// TODO: get rid of var wex
-var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-var { BasePopup, ViewPopup } = ChromeUtils.import("resource:///modules/ExtensionPopups.jsm");
-
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var { NoteColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteColumnHandler.jsm"));
@@ -10,11 +6,11 @@ var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePo
 var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 var { QConsole } = ChromeUtils.import(extension.rootURI.resolve("modules/QConsole.js"));
 
-//if(!this["QConsole"]){ Services.scriptloader.loadSubScript(extension.rootURI.resolve("modules/QConsole.js"), this, "UTF-8"); }
-
+// TODO: get rid of wex
 // TODO: get rid of globals
 var qcon = new QConsole(console);
 var QAppColumnHandler;
+// TODO: use QEventDispatcher
 var QAppWindowObserver = {
 	listeners: {
 		"domwindowopened": new Set(),
@@ -39,27 +35,8 @@ var QAppWindowObserver = {
 				for (let listener of QAppWindowObserver.listeners.DOMContentLoaded) {
 					listener(e, aSubject, aTopic, aData);
 				}
-
-				// let document = e.target;
-				// console.log("DOMContentLoaded", e, document);
-				// document.activeElement.addEventListener("DOMContentLoaded", e => {
-				// 	console.log("document.loaded", e, document);
-				// });
-				// if(!document.URL.includes('chrome://messenger/content/msgPrintEngine')){
-				// 	return;
-				// }
-
-				// messageUrisToPrint = document.defaultView.arguments[1];
-
-				// let pDocument = document.getElementById('content');
-				// if(!pDocument){
-				// 	console.log("Print content not found");
-				// 	return;
-				// }
 			});
 		}
-
-		//let document = e.target;
 	}
 };
 
@@ -136,8 +113,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 	getAPI(context) {
 		var wex = Cu.waiveXrays(context.cloneScope);
+
 		qcon.debugEnabled = !!wex.Prefs.enableDebug;
-		//qcon = wex.qcon;
 
 		var noteGrabber = {
 			noteBlocker: new Map(),
@@ -360,9 +337,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				async init(){
 					qcon.debug("qapp.init()");
 
-					// Remove old style sheet, because it might be kept after update, for example
+					// Remove old style sheet in case it still lay around, for example, after update
 					uninstallQNoteCSS();
-
 					installQNoteCSS();
 
 					this.popups = new Map();
@@ -377,6 +353,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					this.installColumnHandler();
 				},
+				// TODO: pass window parameter
 				async messagesFocus(){
 					let w = this.getQNoteSuitableWindow();
 					if(w.gFolderDisplay && w.gFolderDisplay.tree){
@@ -384,160 +361,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						//w = Services.wm.getMostRecentWindow("mail:3pane");
 					}
 				},
-				// TODO: move to NotePopup
-				// async popupUpdate(id, opt){
-				// 	if(!this.popups.has(id)){
-				// 		return false;
-				// 	}
-
-				// 	let n = this.popups.get(id);
-				// 	let window = n.window;
-				// 	let w = {
-				// 		left: window.screenLeft,
-				// 		top: window.screenTop,
-				// 		width: window.outerWidth,
-				// 		height: window.outerHeight
-				// 	}
-
-				// 	// TODO: move to separate function
-				// 	if(!opt.left){
-				// 		opt.left = Math.round((w.width - w.left) / 2);
-				// 	}
-
-				// 	if(!opt.top){
-				// 		opt.top = Math.round((w.height - w.top) / 2);
-				// 	}
-
-				// 	opt.left += w.left;
-				// 	opt.top += w.top;
-
-				// 	n.moveTo(opt.left, opt.top);
-				// 	n.sizeTo(opt.width, opt.height);
-
-				// 	return true;
-				// },
-				// async popupClose(id){
-				// 	if(this.popups.has(id)){
-				// 		this.popups.get(id).close();
-				// 		this.popups.delete(id);
-				// 		return true;
-				// 	} else {
-				// 		return false;
-				// 	}
-				// },
-				// async popupIsFocused(id){
-				// 	if(this.popups.has(id)){
-				// 		return this.popups.get(id).isFocused();
-				// 	}
-				// },
-				// async popupFocus(id){
-				// 	if(this.popups.has(id)){
-				// 		return this.popups.get(id).focus();
-				// 	}
-				// },
-				// async popup(opt){
-				// 	var self = this;
-				// 	var window = this.getQNoteSuitableWindow();
-
-				// 	let escaper = e => {
-				// 		if(e.key === 'Escape'){
-				// 			if(wex.CurrentNote.windowId){
-				// 				wex.CurrentNote.needSaveOnClose = false;
-				// 				wex.CurrentNote.close();
-				// 				e.preventDefault();
-				// 			}
-				// 		}
-				// 	};
-
-				// 	window.addEventListener("keydown", escaper);
-
-				// 	var n = new NotePopup(
-				// 		extension.getURL(opt.url),
-				// 		window
-				// 	);
-
-				// 	n.onResize = e => {
-				// 		wex.CurrentNote.note.width = e.width;
-				// 		wex.CurrentNote.note.height = e.height;
-				// 	};
-
-				// 	n.onMove = e => {
-				// 		wex.CurrentNote.note.x = e.x;
-				// 		wex.CurrentNote.note.y = e.y;
-				// 	};
-
-				// 	n.onClose = () => {
-				// 		window.removeEventListener("keydown", escaper);
-				// 	};
-
-				// 	var initNote = () => {
-				// 		var document = n.browser.contentWindow.document;
-				// 		var closeButton = document.getElementById('closeButton');
-				// 		var deleteButton = document.getElementById('deleteButton');
-
-				// 		closeButton.addEventListener("click", e => {
-				// 			wex.CurrentNote.close();
-				// 		});
-
-				// 		deleteButton.addEventListener("click", e => {
-				// 			wex.CurrentNote.deleteNote();
-				// 		});
-
-				// 		n.moveTo(opt.left, opt.top);
-				// 		n.sizeTo(opt.width, opt.height);
-
-				// 		// TODO: code duplication!!
-				// 		try {
-				// 			let focus = wex.Prefs.focusOnDisplay || !wex.CurrentNote.note.text;
-				// 			if(!focus && window.gFolderDisplay && window.gFolderDisplay.tree){
-				// 				window.gFolderDisplay.tree.focus();
-				// 			}
-				// 		} catch(e) {
-				// 			console.error(e);
-				// 		}
-				// 	};
-
-				// 	return new Promise(function(resolve) {
-				// 		// https://developer.mozilla.org/en-US/docs/Archive/Mozilla/XUL/Method/openPopup
-				// 		// https://developer.mozilla.org/en-US/docs/Archive/Mozilla/XUL/PopupGuide/Positioning
-				// 		// Possible values for position are:
-				// 		// before_start, before_end, after_start, after_end,
-				// 		// start_before, start_after, end_before, end_after
-				// 		// overlap, after_pointer
-
-				// 		let anchor = null;
-
-				// 		// threadPaneBox, messagepanewrapper, status-bar, folderPaneBox
-				// 		// anchor = window.document.getElementById('folderPaneBox');
-				// 		// if(!anchor){
-				// 		// 	anchor = null;
-				// 		// }
-				// 		// n.viewNode.openPopup(anchor, "bottomcenter bottomright");
-
-				// 		if(opt.left && opt.top) {
-				// 			n.viewNode.openPopup(anchor, "topleft", opt.left, opt.top);
-				// 		} else {
-				// 			n.viewNode.openPopup(anchor, "topleft");
-				// 		}
-
-				// 		n.browser.addEventListener("DOMContentLoaded", ()=>{
-				// 			// We are not interested when about:blank been loaded
-				// 			if(n.browser.contentWindow.document.URL !== extension.getURL(opt.url)){
-				// 				return;
-				// 			}
-
-				// 			n.browserLoaded.then(()=>{
-				// 				initNote();
-				// 				self.popups.set(n.windowId, n);
-				// 				resolve(n.windowId);
-				// 			});
-				// 			// n.contentReady.then(()=>{
-				// 			// });
-				// 			// n.browserReady.then(()=>{
-				// 			// });
-				// 		});
-				// 	});
-				// },
 				installColumnHandler(){
 					this.setColumnTextLimit(wex.Prefs.showFirstChars);
 					QAppColumnHandler = new NoteColumnHandler({
@@ -594,6 +417,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						view.NoteChange(row, 1, 2);
 					}
 				},
+				// TODO: pass wex parameters instead reading them
 				async attachNoteToMessage(data){
 					let w = this.getMessageSuitableWindow();
 					let messagepane = w.document.getElementById('messagepane');

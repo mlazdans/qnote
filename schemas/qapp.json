@@ -27,47 +27,6 @@
 				"description": ""
 			}
 		}
-	},{
-		"id": "PopupOptions",
-		"name": "options",
-		"type": "object",
-		"description": "Popup options",
-		"properties": {
-			"url": {
-				"type": "string",
-				"optional": true,
-				"default": ""
-			},
-			"left": {
-				"type": "integer",
-				"optional": true,
-				"default": 0,
-				"description": "Window left position"
-			},
-			"top": {
-				"type": "integer",
-				"optional": true,
-				"default": 0,
-				"description": "Window top position"
-			},
-			"width": {
-				"type": "integer",
-				"optional": true,
-				"default": 0,
-				"description": "Window width"
-			},
-			"height": {
-				"type": "integer",
-				"optional": true,
-				"default": 0,
-				"description": "Window height"
-			},
-			"focused": {
-				"type": "boolean",
-				"optional": true,
-				"description": ""
-			}
-		}
 	}],
 	"functions": [{
 		"name": "getProfilePath",
@@ -127,55 +86,6 @@
 		"parameters": [{
 			"name": "limit",
 			"type": "integer",
-			"description": ""
-		}]
-	},{
-		"name": "popup",
-		"type": "function",
-		"description": "",
-		"async": true,
-		"parameters": [{
-			"$ref": "PopupOptions"
-		}]
-	},{
-		"name": "popupUpdate",
-		"type": "function",
-		"description": "",
-		"async": true,
-		"parameters": [{
-			"name": "id",
-			"type": "string"
-		},{
-			"$ref": "PopupOptions"
-		}]
-	},{
-		"name": "popupClose",
-		"type": "function",
-		"description": "",
-		"async": true,
-		"parameters": [{
-			"name": "id",
-			"type": "string",
-			"description": ""
-		}]
-	},{
-		"name": "popupIsFocused",
-		"type": "function",
-		"description": "",
-		"async": true,
-		"parameters": [{
-			"name": "id",
-			"type": "string",
-			"description": ""
-		}]
-	},{
-		"name": "popupFocus",
-		"type": "function",
-		"description": "",
-		"async": true,
-		"parameters": [{
-			"name": "id",
-			"type": "string",
 			"description": ""
 		}]
 	},{

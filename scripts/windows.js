@@ -264,15 +264,14 @@ class XULNoteWindow extends NoteWindow {
 		super();
 
 		// TODO: need to add some filters to the events
-		browser.qpopup.onRemoved.addListener(windowId => {
-			if(windowId === this.popupId){
+		browser.qpopup.onRemoved.addListener(popupId => {
+			if(popupId === this.popupId){
 				this.close(false);
 			}
 		});
 
 		browser.qpopup.onMove.addListener(popup => {
 			if(popup.id === this.popupId){
-				console.log("qpopup.onMove()", popup);
 				let { top, left } = popup;
 				this.note.x = left;
 				this.note.y = top;
@@ -281,7 +280,6 @@ class XULNoteWindow extends NoteWindow {
 
 		browser.qpopup.onResize.addListener(popup => {
 			if(popup.id === this.popupId){
-				console.log("qpopup.onResize()", popup);
 				let { width, height } = popup;
 				this.note.width = width;
 				this.note.height = height;
@@ -295,11 +293,39 @@ class XULNoteWindow extends NoteWindow {
 		}
 	}
 
+	// let escaper = e => {
+	// 	if(e.key === 'Escape'){
+	// 		if(wex.CurrentNote.windowId){
+	// 			wex.CurrentNote.needSaveOnClose = false;
+	// 			wex.CurrentNote.close();
+	// 			e.preventDefault();
+	// 		}
+	// 	}
+	// };
+
+	// window.addEventListener("keydown", escaper);
+
+	// n.onClose = () => {
+	// 	window.removeEventListener("keydown", escaper);
+	// };
+	// async popupIsFocused(id){
+	// 	if(this.popups.has(id)){
+	// 		return this.popups.get(id).isFocused();
+	// 	}
+	// },
+	// async popupFocus(id){
+	// 	if(this.popups.has(id)){
+	// 		return this.popups.get(id).focus();
+	// 	}
+	// },
+
 	async isFocused() {
+		console.log("isFocused() - implement");
 		// return browser.qapp.popupIsFocused(this.windowId);
 	}
 
 	async focus() {
+		console.log("focus() - implement");
 		if(this.popupId){
 			// await browser.qapp.popupFocus(this.windowId);
 		}

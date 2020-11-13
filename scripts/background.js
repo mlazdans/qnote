@@ -137,6 +137,7 @@ async function initExtension(){
 	});
 
 	// Create window
+	// TODO: check, if window id is current popupid
 	browser.windows.onCreated.addListener(async window => {
 		qcon.debug("windows.onCreated()", window);
 		CurrentWindow = window;
@@ -144,9 +145,9 @@ async function initExtension(){
 		updateDisplayedMessage(CurrentTab);
 	});
 
-	browser.qpopup.onCreated.addListener(popup => {
-		console.log("qpopup.onCreated()", popup);
-	});
+	// browser.qpopup.onCreated.addListener(popup => {
+	// 	console.log("qpopup.onCreated()", popup);
+	// });
 
 	// let a = browser.qpopup.create({
 	// 	windowId: CurrentWindow.id,
