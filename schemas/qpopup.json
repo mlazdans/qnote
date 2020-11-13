@@ -1,0 +1,77 @@
+[{
+	"namespace": "qpopup",
+	"types": [{
+		"id": "Popup",
+		"type": "object",
+		"properties": {
+			"id": {
+				"type": "integer",
+				"optional": true,
+				"description": "Unique popup id",
+				"minimum": 0
+			},
+			"windowId": {
+				"type": "integer",
+				"description": "windowId from windows API",
+				"minimum": 0
+			},
+			"focused": {
+				"type": "boolean",
+				"optional": true
+			},
+			"top": {
+				"type": "integer",
+				"optional": true
+			},
+			"left": {
+				"type": "integer",
+				"optional": true
+			},
+			"width": {
+				"type": "integer",
+				"optional": true
+			},
+			"height": {
+				"type": "integer",
+				"optional": true
+			},
+			"title": {
+				"type": "string",
+				"optional": true
+			}
+		}
+	}],
+	"functions": [{
+		"name": "get",
+		"type": "function",
+		"async": "callback",
+		"parameters": [{
+			"type": "integer",
+			"name": "popupId",
+			"minimum": 1
+		}]
+	},{
+		"name": "getAll",
+		"type": "function",
+		"async": "callback"
+	},{
+		"name": "create",
+		"type": "function",
+		"async": "callback",
+		"parameters": [{
+			"type": "object",
+			"name": "popup",
+			"$ref": "Popup"
+		}]
+	}],
+	"events": [{
+		"name": "onCreated",
+		"type": "function",
+		"description": "Fired when a popup is created.",
+		"parameters": [{
+			"$ref": "Popup",
+			"name": "popup",
+			"description": "Details of the popup that was created."
+		}]
+	}]
+}]

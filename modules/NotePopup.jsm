@@ -9,39 +9,29 @@ var { makeWidgetId } = ExtensionCommon;
 
 var PopupCounter = 0;
 class NotePopup extends BasePopup {
-	constructor(
-		popupURL,
-		window
-		// browserStyle,
-		// fixedWidth,
-		// blockParser
-	) {
-		PopupCounter++;
-		//let id = "qnote-window-panel-" + PopupCounter;
-		let id = "qnote-window-panel";
+	constructor(options) {
+		let id = "qnote-window-panel-" + (++PopupCounter);
+
+		let { window } = options;
 		let document = window.document;
-		let windowId = makeWidgetId(id);
+		let popupId = makeWidgetId(id);
 
 		let panel = document.createXULElement("panel");
-		panel.setAttribute("id", windowId);
-		//panel.setAttribute("class", "mail-extension-panel panel-no-padding");
+		panel.setAttribute("id", popupId);
 		panel.setAttribute("noautohide", true);
-		//panel.setAttribute("type", "arrow");
-		//panel.setAttribute("role", "group");
 		document.getElementById("mainPopupSet").appendChild(panel);
 
-		//let popupURL = extension.getURL("html/popup3.html");
+		let popupURL = extension.getURL("html/qpopup.html");
 		let browserStyle = false;
 		let fixedWidth = false;
 		let blockParser = false;
 
 		super(extension, panel, popupURL, browserStyle, fixedWidth, blockParser);
 
-		this.contentWindow = this.browser.contentWindow;
-		this.windowId = windowId;
+		this.popupURL = popupURL;
+		this.options = options;
+		this.popupId = popupId;
 		this.window = window;
-
-		this.attachEvents();
 
 		if(this.panel.adjustArrowPosition === undefined){
 			this.panel.adjustArrowPosition = () => {
@@ -51,15 +41,100 @@ class NotePopup extends BasePopup {
 		this.shown = false;
 	}
 
+	getFirstElementByClassName(className){
+		try {
+			var document = this.browser.contentWindow.document;
+			return document.getElementsByClassName(className).item(0);
+		} catch (e) {
+			console.error(e);
+		}
+	}
+
+	getPopupEl(){
+		return this.getFirstElementByClassName("qpopup");
+	}
+
+	getTitleEl(){
+		return this.getFirstElementByClassName("qpopup-title");
+	}
+
+	getCloseEl(){
+		return this.getFirstElementByClassName("qpopup-title-closebutton");
+	}
+
+	getResizeEl(){
+		return this.getFirstElementByClassName("qpopup-controls-resize");
+	}
+
+	pop(){
+		let anchor = null;
+		let { left, top, width, height } = this.options;
+
+		var initNote = () => {
+			var closeButton = this.getCloseEl();
+			//var deleteButton = document.getElementById('deleteButton');
+
+			closeButton.addEventListener("click", e => {
+				console.log("close", e);
+			});
+
+			// deleteButton.addEventListener("click", e => {
+			// 	wex.CurrentNote.deleteNote();
+			// });
+
+			this.attachEvents();
+
+			this.moveTo(left, top);
+			this.sizeTo(width, height);
+
+			// // TODO: code duplication!!
+			// try {
+			// 	let focus = wex.Prefs.focusOnDisplay || !wex.CurrentNote.note.text;
+			// 	if(!focus && window.gFolderDisplay && window.gFolderDisplay.tree){
+			// 		window.gFolderDisplay.tree.focus();
+			// 	}
+			// } catch(e) {
+			// 	console.error(e);
+			// }
+		};
+
+		this.browser.addEventListener("DOMContentLoaded", () => {
+			// We are not interested when about:blank been loaded
+			if(this.browser.contentWindow.document.URL !== this.popupURL){
+				return;
+			}
+
+			this.browserLoaded.then(() => {
+				initNote();
+				//self.popups.set(n.windowId, n);
+				//resolve(n.windowId);
+			});
+			// n.contentReady.then(()=>{
+			// });
+			// n.browserReady.then(()=>{
+			// });
+		});
+
+		if(left && top) {
+			this.viewNode.openPopup(anchor, "topleft", left, top);
+		} else {
+			this.viewNode.openPopup(anchor, "topleft");
+		}
+	}
+
 	attachEvents(){
 		let self = this;
 		let window = this.window;
-		let contentWindow = this.contentWindow;
-		let panel = this.panel;
-		let mDown = {};
+		//let contentWindow = this.browser.contentWindow;
+		let panel = this.panel; // TODO: panel should be same as this? Test!
+		let mDown = new WeakMap();
 
-		mDown.titleText = e => {
-			let popup = contentWindow.document.getElementById('popup');
+		let titleEl = this.getTitleEl();
+		let resizeEl = this.getResizeEl();
+
+		//mDown.titleText = e => {
+		mDown.set(titleEl, e => {
+			let popup = self.getPopupEl();
 			let el = e.target;
 			let startX = e.screenX;
 			let startY = e.screenY	;
@@ -91,10 +166,11 @@ class NotePopup extends BasePopup {
 			window.addEventListener("mousemove", mover);
 
 			popup.style.opacity = '0.4';
-		};
+		});
 
-		mDown.resizeButton = (e) => {
-			let popup = contentWindow.document.getElementById('popup');
+		//mDown.resizeButton = (e) => {
+		mDown.set(resizeEl, e => {
+			let popup = self.getPopupEl();
 			let startX = e.screenX;
 			let startY = e.screenY;
 			let startW = popup.offsetWidth;
@@ -142,12 +218,15 @@ class NotePopup extends BasePopup {
 			window.addEventListener("mousemove", resizer);
 
 			popup.style.opacity = '0.4';
-		};
+		});
 
 		let handleDragStart = e => {
-			if(mDown[e.target.id]){
-				mDown[e.target.id](e);
+			if(mDown.has(e.target)){
+				mDown.get(e.target)(e);
 			}
+			// if(mDown[e.target.id]){
+			// 	mDown[e.target.id](e);
+			// }
 		}
 
 		this.panel.addEventListener('mousedown', handleDragStart, false);
@@ -158,8 +237,11 @@ class NotePopup extends BasePopup {
 	}
 
 	sizeTo(width, height){
-		let document = this.contentWindow.document;
-		let popup = document.getElementById('popup');
+		//this.panel.sizeTo(width, height);
+		let document = this.browser.contentWindow.document;
+		let win = this.browser.contentWindow;
+		//let popup = document.getElementById('popup');
+		let popup = this.getPopupEl();
 
 		// This seems to set rather size limits
 		//this.panel.sizeTo(width, height);
@@ -169,14 +251,14 @@ class NotePopup extends BasePopup {
 	}
 
 	isFocused(){
-		let document = this.contentWindow.document;
+		let document = this.browser.contentWindow.document;
 		let YTextE = document.getElementById('qnote-text');
 
 		return document.activeElement === YTextE;
 	}
 
 	focus(){
-		let document = this.contentWindow.document;
+		let document = this.browser.contentWindow.document;
 		let YTextE = document.getElementById('qnote-text');
 
 		if(YTextE){
