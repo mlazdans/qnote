@@ -25,17 +25,20 @@ img {
 	height: 32px;
 	background-color: #fff08d;
 	display: flex;
-	/* align-items: baseline; */
+	align-items: baseline;
 	font-size: small;
 	font-weight: bolder;
 	border-bottom: solid 1px #d19231;
 }
 .qpopup-title-text {
-	margin: auto 0 auto 6px;
+	display: flex;
+	align-items: baseline;
+	margin-left: 7px;
 	flex-grow: 100;
 }
 
 .qpopup-title-closebutton {
+	display: flex;
 	margin: 7px;
 	flex-grow: 0;
 }
