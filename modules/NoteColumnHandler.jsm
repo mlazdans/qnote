@@ -119,15 +119,22 @@ class NoteColumnHandler {
 		}
 	}
 
+	getElementById(w, id){
+		try {
+			return w.document.getElementById(id);
+		} catch {
+		}
+	}
+
 	setUpDOM(w) {
-		let qnoteCol = w.document.getElementById("qnoteCol");
+		let qnoteCol = this.getElementById(w, "qnoteCol");
 
 		// Don't bother if already added to DOM
 		if(qnoteCol){
 			return true;
 		}
 
-		let threadCols = w.document.getElementById("threadCols");
+		let threadCols = this.getElementById("threadCols");
 
 		// If threadCols not found, assume it is not right window
 		if(!threadCols){
