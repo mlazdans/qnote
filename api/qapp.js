@@ -5,36 +5,22 @@ var { NoteColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("module
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
 var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 var { QConsole } = ChromeUtils.import(extension.rootURI.resolve("modules/QConsole.js"));
+var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 
 // TODO: get rid of wex
 // TODO: get rid of globals
 var qcon = new QConsole(console);
 var QAppColumnHandler;
-// TODO: use QEventDispatcher
+var QAppEventDispatcher = new QEventDispatcher(["domwindowopened","domwindowclosed","DOMContentLoaded",]);
 var QAppWindowObserver = {
-	listeners: {
-		"domwindowopened": new Set(),
-		"domwindowclosed": new Set(),
-		"DOMContentLoaded": new Set(),
-	},
-	removeListener(name, listener){
-		QAppWindowObserver.listeners[name].delete(listener);
-	},
-	addListener(name, listener){
-		QAppWindowObserver.listeners[name].add(listener);
-	},
 	observe: function(aSubject, aTopic, aData) {
 		if(aTopic === 'domwindowopened' || aTopic === 'domwindowclosed'){
-			for (let listener of QAppWindowObserver.listeners[aTopic]) {
-				listener(aSubject, aTopic, aData);
-			}
+			QAppEventDispatcher.fireListeners(aTopic, aSubject, aTopic, aData);
 		}
 
 		if(aTopic === 'domwindowopened'){
 			aSubject.addEventListener("DOMContentLoaded", e => {
-				for (let listener of QAppWindowObserver.listeners.DOMContentLoaded) {
-					listener(e, aSubject, aTopic, aData);
-				}
+				QAppEventDispatcher.fireListeners("DOMContentLoaded", aSubject, aTopic, aData);
 			});
 		}
 	}
@@ -303,7 +289,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 								wex.Prefs.printAttachTopTitle ? formatted.title : false,
 								wex.Prefs.printAttachTopText ? formatted.text : false,
 							);
-							body.insertAdjacentHTML('afterbegin', html);
+							body.insertAdjacentHTML('afterbegin', html + "<br>");
 						}
 
 						if(wex.Prefs.printAttachBottom){
@@ -311,7 +297,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 								wex.Prefs.printAttachBottomTitle ? formatted.title : false,
 								wex.Prefs.printAttachBottomText ? formatted.text : false,
 							);
-							body.insertAdjacentHTML('beforeend', html);
+							body.insertAdjacentHTML('beforeend', "<br>" + html);
 						}
 					};
 
@@ -345,7 +331,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					Services.ww.registerNotification(QAppWindowObserver);
 
-					QAppWindowObserver.addListener('domwindowopened', this.printerQNoteAttacher);
+					QAppEventDispatcher.addListener('domwindowopened', this.printerQNoteAttacher);
 
 					if(wex.Prefs.enableSearch){
 						this.installQuickFilter();
@@ -368,7 +354,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					});
 					QAppColumnHandler.attachToWindow(Services.wm.getMostRecentWindow("mail:3pane"));
 
-					QAppWindowObserver.addListener('DOMContentLoaded', (e, aSubject, aTopic, aData) => {
+					QAppEventDispatcher.addListener('DOMContentLoaded', (e, aSubject, aTopic, aData) => {
 						QAppColumnHandler.attachToWindow(aSubject);
 					});
 				},
