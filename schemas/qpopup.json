@@ -15,6 +15,10 @@
 				"description": "windowId from windows API",
 				"minimum": 0
 			},
+			"url": {
+				"type": "string",
+				"optional": true
+			},
 			"focused": {
 				"type": "boolean",
 				"optional": true
