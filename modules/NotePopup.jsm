@@ -39,19 +39,21 @@ class NotePopup extends BasePopup {
 		this.shown = false;
 	}
 
-	setContents(contents){
-		this.getClontentsEl().innerHTML = contents;
+	/**
+	 * @param {string} contents
+	 */
+	set contents(contents) {
+		this.clontentsEl.innerHTML = contents;
 	}
 
-	setTitle(title){
-		this.getTitleTextEl().innerHTML = title;
+	/**
+	 * @param {string} title
+	 */
+	set title(title){
+		this.titleTextEl.innerHTML = title;
 	}
 
-	addControl(domEl){
-		this.getCustomControlsEl().appendChild(domEl);
-	}
-
-	getContentDocument(){
+	get contentDocument(){
 		try {
 			return this.browser.contentWindow.document;
 		} catch (e) {
@@ -59,41 +61,74 @@ class NotePopup extends BasePopup {
 		}
 	}
 
-	getFirstElementByClassName(className){
-		try {
-			return this.getContentDocument().querySelectorAll('.' + className).item(0);
-		} catch (e) {
-			console.error(e);
-		}
-	}
-
-	getPopupEl(){
+	get popupEl(){
 		return this.getFirstElementByClassName("qpopup");
 	}
 
-	getTitleEl(){
+	get titleEl(){
 		return this.getFirstElementByClassName("qpopup-title");
 	}
 
-	getTitleTextEl(){
+	get titleTextEl(){
 		return this.getFirstElementByClassName("qpopup-title-text");
 	}
 
-	getCloseEl(){
+	get closeEl(){
 		return this.getFirstElementByClassName("qpopup-title-closebutton");
 	}
 
-	getClontentsEl(){
+	get clontentsEl(){
 		return this.getFirstElementByClassName("qpopup-contents");
 	}
 
-
-	getResizeEl(){
+	get resizeEl(){
 		return this.getFirstElementByClassName("qpopup-controls-resize");
 	}
 
-	getCustomControlsEl(){
+	get customControlsEl(){
 		return this.getFirstElementByClassName("qpopup-custom-controls");
+	}
+
+	moveTo(x, y){
+		this.panel.moveTo(x, y);
+	}
+
+	sizeTo(width, height){
+		let popup = this.popupEl;
+
+		// This seems to set rather size limits?
+		//this.panel.sizeTo(width, height);
+
+		popup.style.width = width + 'px';
+		popup.style.height = height + 'px';
+	}
+
+	isFocused(){
+		// let document = this.browser.contentWindow.document;
+		// let YTextE = document.getElementById('qnote-text');
+
+		// return document.activeElement === YTextE;
+	}
+
+	focus(){
+		// let document = this.browser.contentWindow.document;
+		// let YTextE = document.getElementById('qnote-text');
+
+		// if(YTextE){
+		// 	YTextE.focus();
+		// }
+	}
+
+	close() {
+		this.destroy();
+
+		if(this.panel){
+			this.panel.remove();
+		}
+
+		if(this.onClose){
+			this.onClose();
+		}
 	}
 
 	pop(){
@@ -101,7 +136,7 @@ class NotePopup extends BasePopup {
 		let { left, top, width, height } = this.options;
 
 		var initNote = () => {
-			var closeButton = this.getCloseEl();
+			var closeButton = this.closeEl;
 			//var deleteButton = document.getElementById('deleteButton');
 
 			closeButton.addEventListener("click", e => {
@@ -130,7 +165,7 @@ class NotePopup extends BasePopup {
 		return new Promise(function(resolve) {
 			self.browser.addEventListener("DOMContentLoaded", () => {
 				// We are not interested when about:blank been loaded
-				if(self.getContentDocument().URL !== self.popupURL){
+				if(self.contentDocument.URL !== self.popupURL){
 					return;
 				}
 
@@ -160,12 +195,12 @@ class NotePopup extends BasePopup {
 		let panel = this.panel;
 		let mDown = new WeakMap();
 
-		let titleTextEl = this.getTitleTextEl();
-		let titleEl = this.getTitleEl();
-		let resizeEl = this.getResizeEl();
+		let titleTextEl = this.titleTextEl;
+		let titleEl = this.titleEl;
+		let resizeEl = this.resizeEl;
 
 		let tDrag = e => {
-			let popup = self.getPopupEl();
+			let popup = self.popupEl;
 			let el = e.target;
 			let startX = e.screenX;
 			let startY = e.screenY	;
@@ -200,7 +235,7 @@ class NotePopup extends BasePopup {
 		};
 
 		let tResize =  e => {
-			let popup = self.getPopupEl();
+			let popup = self.popupEl;
 			let startX = e.screenX;
 			let startY = e.screenY;
 			let startW = popup.offsetWidth;
@@ -263,45 +298,15 @@ class NotePopup extends BasePopup {
 		this.panel.addEventListener('mousedown', handleDragStart, false);
 	}
 
-	moveTo(x, y){
-		this.panel.moveTo(x, y);
+	addControl(domEl){
+		this.customControlsEl.appendChild(domEl);
 	}
 
-	sizeTo(width, height){
-		let popup = this.getPopupEl();
-
-		// This seems to set rather size limits?
-		//this.panel.sizeTo(width, height);
-
-		popup.style.width = width + 'px';
-		popup.style.height = height + 'px';
-	}
-
-	isFocused(){
-		// let document = this.browser.contentWindow.document;
-		// let YTextE = document.getElementById('qnote-text');
-
-		// return document.activeElement === YTextE;
-	}
-
-	focus(){
-		// let document = this.browser.contentWindow.document;
-		// let YTextE = document.getElementById('qnote-text');
-
-		// if(YTextE){
-		// 	YTextE.focus();
-		// }
-	}
-
-	close() {
-		this.destroy();
-
-		if(this.panel){
-			this.panel.remove();
-		}
-
-		if(this.onClose){
-			this.onClose();
+	getFirstElementByClassName(className){
+		try {
+			return this.contentDocument.querySelectorAll('.' + className).item(0);
+		} catch (e) {
+			console.error(e);
 		}
 	}
 }
