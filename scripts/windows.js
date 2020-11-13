@@ -280,11 +280,11 @@ class XULNoteWindow extends NoteWindow {
 
 	async close() {
 		super.close(() => {
-			// if(this.popupId){
-			// 	return browser.qapp.popupClose(this.windowId);
-			// } else {
-			// 	return false;
-			// }
+			if(this.popupId){
+				return browser.qpopup.close(this.popupId);
+			} else {
+				return false;
+			}
 		});
 	}
 
@@ -293,6 +293,7 @@ class XULNoteWindow extends NoteWindow {
 			let w = await browser.windows.get(CurrentWindow.id);
 			let opt = {
 				windowId: CurrentWindow.id,
+				url: "html/popup4.html",
 				width: note.width || Prefs.width,
 				height: note.height || Prefs.height,
 				left: note.x || 0,
@@ -313,7 +314,6 @@ class XULNoteWindow extends NoteWindow {
 
 			return browser.qpopup.create(opt).then(popupInfo => {
 				this.popupId = popupInfo.id;
-				console.log("popup", popupInfo);
 				return true;
 			});
 

@@ -42,9 +42,9 @@ class NotePopup extends BasePopup {
 	/**
 	 * @param {string} contents
 	 */
-	set contents(contents) {
-		this.clontentsEl.innerHTML = contents;
-	}
+	// set contents(contents) {
+	// 	this.clontentsEl.innerHTML = contents;
+	// }
 
 	/**
 	 * @param {string} title
@@ -77,9 +77,9 @@ class NotePopup extends BasePopup {
 		return this.getFirstElementByClassName("qpopup-title-closebutton");
 	}
 
-	get clontentsEl(){
-		return this.getFirstElementByClassName("qpopup-contents");
-	}
+	// get clontentsEl(){
+	// 	return this.getFirstElementByClassName("qpopup-contents");
+	// }
 
 	get resizeEl(){
 		return this.getFirstElementByClassName("qpopup-controls-resize");
@@ -87,6 +87,10 @@ class NotePopup extends BasePopup {
 
 	get customControlsEl(){
 		return this.getFirstElementByClassName("qpopup-custom-controls");
+	}
+
+	get contentsFrame() {
+		return this.getFirstElementByClassName("qpopup-contents-frame");
 	}
 
 	moveTo(x, y){
@@ -126,9 +130,10 @@ class NotePopup extends BasePopup {
 			this.panel.remove();
 		}
 
-		if(this.onClose){
-			this.onClose();
-		}
+		// if(this.onClose){
+		// 	this.onClose();
+		// }
+		return true;
 	}
 
 	pop(){
@@ -136,12 +141,12 @@ class NotePopup extends BasePopup {
 		let { left, top, width, height } = this.options;
 
 		var initNote = () => {
-			var closeButton = this.closeEl;
+			// var closeButton = this.closeEl;
 			//var deleteButton = document.getElementById('deleteButton');
 
-			closeButton.addEventListener("click", e => {
-				console.log("close", e);
-			});
+			// closeButton.addEventListener("click", e => {
+			// 	console.log("close", e);
+			// });
 
 			// deleteButton.addEventListener("click", e => {
 			// 	wex.CurrentNote.deleteNote();

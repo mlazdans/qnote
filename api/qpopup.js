@@ -30,9 +30,26 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 			// context.extension.windowManager.getAll();
 		}
 
+		var popupManager = {
+			counter: 0,
+			popups: new Map(),
+			add(popup) {
+				this.popups.set(++this.counter, popup);
+				return this.counter;
+			},
+			remove(id){
+				return this.popups.delete(id);
+			},
+			get(id){
+				return this.popups.get(id);
+			},
+			has(id){
+				return this.popups.has(id);
+			}
+		}
+
 		return {
 			qpopup: {
-				counter: 0,
 				onCreated: new ExtensionCommon.EventManager({
 					context,
 					name: "qpopup.onCreated",
@@ -49,6 +66,17 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						};
 					}
 				}).api(),
+				async close(id){
+					let popup = popupManager.get(id);
+
+					if(popup){
+						popup.close();
+						popupManager.remove(id);
+						return true;
+					}
+
+					return false;
+				},
 				async create(options){
 					let { windowId, top, left, width, height } = options;
 					let window = id2RealWindow(windowId);
@@ -65,7 +93,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 
 					// window.addEventListener("keydown", escaper);
 
-					var n = new NotePopup({
+					var popup = new NotePopup({
 						window: window,
 						top: top,
 						left: left,
@@ -73,14 +101,32 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						height: height
 					});
 
-					PopupEventDispatcher.fireListeners("oncreated", {
-						popupId: ++this.counter
-					});
+					let popupInfo = {
+						id: popupManager.add(popup),
+						windowId: windowId
+					};
 
-					n.pop().then(() => {
-						let newEl = n.getContentDocument().createElement('div');
-						newEl.innerHTML = "Hello";
-						n.addControl(newEl);
+					PopupEventDispatcher.fireListeners("oncreated", popupInfo);
+
+					return popup.pop().then(status => {
+						popup.contentsFrame.src = extension.getURL('html/popup4.html');
+						popup.closeEl.addEventListener("click", e => {
+							popup.close();
+							//console.log("click from api", e);
+						});
+						// let newEl = n.contentDocument.createElement('div');
+						// newEl.innerHTML = "Hello";
+						// n.addControl(newEl);
+						// let html = `<textarea id="qnote-text"></textarea>`;
+						// let cssU = extension.getURL('html/popup4.css');
+						// //let jsU = extension.getURL('scripts/popup4.js');
+						// html += `<link rel="stylesheet" href="${cssU}" type="text/css">`;
+						// //html += `<script src="../scripts/popup3.js"></script>`
+
+						// n.contents = html;
+						popup.title = "Qnote: ";
+
+						return popupInfo;
 					});
 
 					return;

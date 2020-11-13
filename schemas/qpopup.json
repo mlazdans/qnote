@@ -55,6 +55,15 @@
 			"minimum": 1
 		}]
 	},{
+		"name": "close",
+		"type": "function",
+		"async": "callback",
+		"parameters": [{
+			"type": "integer",
+			"name": "popupId",
+			"minimum": 1
+		}]
+	},{
 		"name": "getAll",
 		"type": "function",
 		"async": "callback"
