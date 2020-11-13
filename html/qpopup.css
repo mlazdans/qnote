@@ -25,7 +25,7 @@ img {
 	height: 32px;
 	background-color: #fff08d;
 	display: flex;
-	align-items: baseline;
+	/* align-items: baseline; */
 	font-size: small;
 	font-weight: bolder;
 	border-bottom: solid 1px #d19231;
@@ -36,7 +36,7 @@ img {
 }
 
 .qpopup-title-closebutton {
-	margin: 6px 4px 4px 4px;
+	margin: 7px;
 	flex-grow: 0;
 }
 
@@ -54,17 +54,24 @@ img {
 .qpopup-controls {
 	height: 26px;
 	display: flex;
-	justify-content: space-between;
-	align-items: flex-end;
+	/* justify-content: space-between; */
+	/* align-items: flex-end; */
 	background-color: #FBFEBF;
+}
+
+.qpopup-custom-controls {
+	flex-grow: 100;
+	height: 26px;
+	display: flex;
+	/* align-items: baseline; */
 }
 
 .qpopup-controls-resize {
 	flex-basis: bottom;
-	/* flex-grow: 1; */
+	flex-grow: 1;
 	cursor: nwse-resize;
 	width: 14px;
-	height: 14px;
+	height: 26px;
 	background: url(../images/redim.png);
 	background-repeat: no-repeat;
 	background-position: bottom right;
