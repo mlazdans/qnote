@@ -48,6 +48,13 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 			}
 		}
 
+		function coalesce(...args){
+			for(let a of args)
+				if(a !== null)
+					return a;
+			return null;
+		}
+
 		return {
 			qpopup: {
 				onCreated: new ExtensionCommon.EventManager({
@@ -113,22 +120,48 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				async remove(id){
 					let popup = popupManager.get(id);
 
-					if(popup){
-						popup.close();
-						popupManager.remove(id);
-						return popup.popupInfo;
+					if(!popup){
+						return false;
 					}
 
-					return false;
+					popup.close();
+					popupManager.remove(id);
+
+					return popup.popupInfo;
 				},
-				async update(id, data){
+				async update(id, options){
 					let popup = popupManager.get(id);
+					let pi = popup.popupInfo;
 
-					if(popup){
-						console.log("update() - implement", popup);
+					if(!popup){
+						return false;
 					}
 
-					return false;
+					// options come in null-ed
+					let { top, left, width, height, url, title, focused } = options;
+
+					if(top !== null || left !== null){
+						pi.top = coalesce(top, pi.top);
+						pi.left = coalesce(left, pi.left);
+						popup.moveTo(pi.left, pi.top);
+					}
+
+					if(width !== null || height !== null){
+						pi.width = coalesce(width, pi.width);
+						pi.height = coalesce(height, pi.height);
+						popup.sizeTo(pi.width, pi.height);
+					}
+
+					// TODO: maybe implement lose focus too
+					if(focused){
+						popup.focus();
+					}
+
+					if(title){
+						popup.title = title;
+					}
+
+					return true;
 				},
 				async create(options){
 					let { windowId, top, left, width, height, url, title } = options;
@@ -154,6 +187,17 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						popup.popupInfo.top = p.y;
 						PopupEventDispatcher.fireListeners("onmove", popup.popupInfo);
 					};
+
+					// TODO: implement
+					// popup.onFocus = e => {
+					// 	console.log("popup.onFocus");
+					// 	popup.popupInfo.focused = true;
+					// 	PopupEventDispatcher.fireListeners("onfocus", popup.popupInfo);
+					// };
+					// popup.onBlur = e => {
+					// 	popup.popupInfo.focused = false;
+					// 	PopupEventDispatcher.fireListeners("onblur", popup.popupInfo);
+					// };
 
 					popup.popupInfo = options;
 					popup.popupInfo.id = popupManager.add(popup);
@@ -181,7 +225,9 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 							}
 
 							// Set title from iframe document
-							popup.popupInfo.title = popup.title = popup.iframeDocument.title;
+							if(popup.iframeDocument.title){
+								popup.popupInfo.title = popup.title = popup.iframeDocument.title;
+							}
 						});
 
 						popup.closeEl.addEventListener("click", e => {

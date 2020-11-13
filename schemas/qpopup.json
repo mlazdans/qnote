@@ -12,6 +12,7 @@
 			},
 			"windowId": {
 				"type": "integer",
+				"optional": true,
 				"description": "windowId from windows API",
 				"minimum": 0
 			},
