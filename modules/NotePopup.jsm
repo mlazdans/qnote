@@ -39,6 +39,14 @@ class NotePopup extends BasePopup {
 		this.shown = false;
 	}
 
+	setContents(contents){
+		this.getClontentsEl().innerHTML = contents;
+	}
+
+	setTitle(title){
+		this.getTitleTextEl().innerHTML = title;
+	}
+
 	addControl(domEl){
 		this.getCustomControlsEl().appendChild(domEl);
 	}
@@ -67,9 +75,18 @@ class NotePopup extends BasePopup {
 		return this.getFirstElementByClassName("qpopup-title");
 	}
 
+	getTitleTextEl(){
+		return this.getFirstElementByClassName("qpopup-title-text");
+	}
+
 	getCloseEl(){
 		return this.getFirstElementByClassName("qpopup-title-closebutton");
 	}
+
+	getClontentsEl(){
+		return this.getFirstElementByClassName("qpopup-contents");
+	}
+
 
 	getResizeEl(){
 		return this.getFirstElementByClassName("qpopup-controls-resize");
@@ -119,7 +136,7 @@ class NotePopup extends BasePopup {
 
 				self.browserLoaded.then(() => {
 					initNote();
-					resolve();
+					resolve(true);
 				});
 				// n.contentReady.then(()=>{
 				// });
@@ -143,10 +160,11 @@ class NotePopup extends BasePopup {
 		let panel = this.panel;
 		let mDown = new WeakMap();
 
+		let titleTextEl = this.getTitleTextEl();
 		let titleEl = this.getTitleEl();
 		let resizeEl = this.getResizeEl();
 
-		mDown.set(titleEl, e => {
+		let tDrag = e => {
 			let popup = self.getPopupEl();
 			let el = e.target;
 			let startX = e.screenX;
@@ -179,9 +197,9 @@ class NotePopup extends BasePopup {
 			window.addEventListener("mousemove", mover);
 
 			popup.style.opacity = '0.4';
-		});
+		};
 
-		mDown.set(resizeEl, e => {
+		let tResize =  e => {
 			let popup = self.getPopupEl();
 			let startX = e.screenX;
 			let startY = e.screenY;
@@ -230,7 +248,11 @@ class NotePopup extends BasePopup {
 			window.addEventListener("mousemove", resizer);
 
 			popup.style.opacity = '0.4';
-		});
+		};
+
+		mDown.set(titleEl, tDrag);
+		mDown.set(titleTextEl, tDrag);
+		mDown.set(resizeEl, tResize);
 
 		let handleDragStart = e => {
 			if(mDown.has(e.target)){
