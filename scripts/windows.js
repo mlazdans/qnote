@@ -33,7 +33,7 @@ class NoteWindow {
 	init(){
 		this.note = undefined;
 		this.messageId = undefined;
-		this.windowId = undefined;
+		this.popupId = undefined;
 		this.popping = false;
 		this.needSaveOnClose = true;
 	}
@@ -195,20 +195,20 @@ class WebExtensionNoteWindow extends NoteWindow {
 
 		browser.windows.onRemoved.addListener(windowId => {
 			// We are interested only on current popup
-			if(windowId === this.windowId){
+			if(windowId === this.popupId){
 				this.close(false);
 			}
 		});
 	}
 
 	async updateWindow(opt){
-		if(this.windowId){
-			return browser.windows.update(this.windowId, opt);
+		if(this.popupId){
+			return browser.windows.update(this.popupId, opt);
 		}
 	}
 
 	async isFocused() {
-		return browser.windows.get(this.windowId).then(window => {
+		return browser.windows.get(this.popupId).then(window => {
 			return window.focused;
 		});
 	}
@@ -221,8 +221,8 @@ class WebExtensionNoteWindow extends NoteWindow {
 
 	async close(closeWindow = true) {
 		super.close(() => {
-			if(closeWindow && this.windowId){
-				return browser.windows.remove(this.windowId).then(() => {
+			if(closeWindow && this.popupId){
+				return browser.windows.remove(this.popupId).then(() => {
 					return true;
 				},() => {
 					return false;
@@ -249,7 +249,7 @@ class WebExtensionNoteWindow extends NoteWindow {
 			};
 
 			return browser.windows.create(opt).then(windowInfo => {
-				this.windowId = windowInfo.id;
+				this.popupId = windowInfo.id;
 
 				return true;
 			});
@@ -261,42 +261,40 @@ class WebExtensionNoteWindow extends NoteWindow {
 
 class XULNoteWindow extends NoteWindow {
 	async updateWindow(opt){
-		if(this.windowId){
-			return browser.qapp.popupUpdate(this.windowId, opt);
+		if(this.popupId){
+			// return browser.qapp.popupUpdate(this.windowId, opt);
 			// await browser.qapp.popupClose(this.windowId);
 			// await this.pop(this.messageId, false, true);
 		}
 	}
 
 	async isFocused() {
-		return browser.qapp.popupIsFocused(this.windowId);
+		// return browser.qapp.popupIsFocused(this.windowId);
 	}
 
 	async focus() {
-		if(this.windowId){
-			await browser.qapp.popupFocus(this.windowId);
+		if(this.popupId){
+			// await browser.qapp.popupFocus(this.windowId);
 		}
 	}
 
 	async close() {
 		super.close(() => {
-			if(this.windowId){
-				return browser.qapp.popupClose(this.windowId);
-			} else {
-				return false;
-			}
+			// if(this.popupId){
+			// 	return browser.qapp.popupClose(this.windowId);
+			// } else {
+			// 	return false;
+			// }
 		});
 	}
 
 	async pop(messageId, createNew = false, pop = false) {
 		let popper = async note => {
-			let w = await browser.windows.getCurrent();
-			note.width = note.width || Prefs.width;
-			note.height = note.height || Prefs.height;
+			let w = await browser.windows.get(CurrentWindow.id);
 			let opt = {
-				url: "html/popup3.html",
-				width: note.width,
-				height: note.height,
+				windowId: CurrentWindow.id,
+				width: note.width || Prefs.width,
+				height: note.height || Prefs.height,
 				left: note.x || 0,
 				top: note.y || 0
 			};
@@ -313,11 +311,40 @@ class XULNoteWindow extends NoteWindow {
 			opt.left += w.left;
 			opt.top += w.top;
 
-			return browser.qapp.popup(opt).then(windowId => {
-				this.windowId = windowId;
-
+			return browser.qpopup.create(opt).then(popupInfo => {
+				this.popupId = popupInfo.id;
+				console.log("popup", popupInfo);
 				return true;
 			});
+
+			// let w = await browser.windows.getCurrent();
+			// note.width = note.width || Prefs.width;
+			// note.height = note.height || Prefs.height;
+			// let opt = {
+			// 	url: "html/popup3.html",
+			// 	width: note.width,
+			// 	height: note.height,
+			// 	left: note.x || 0,
+			// 	top: note.y || 0
+			// };
+
+			// // TODO: move to separate function
+			// if(!opt.left){
+			// 	opt.left = Math.round((w.width - w.left) / 2);
+			// }
+
+			// if(!opt.top){
+			// 	opt.top = Math.round((w.height - w.top) / 2);
+			// }
+
+			// opt.left += w.left;
+			// opt.top += w.top;
+
+			// return browser.qapp.popup(opt).then(windowId => {
+			// 	this.windowId = windowId;
+
+			// 	return true;
+			// });
 		};
 
 		return super.pop(messageId, createNew, pop, popper);
