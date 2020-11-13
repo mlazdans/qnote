@@ -263,10 +263,28 @@ class XULNoteWindow extends NoteWindow {
 	constructor() {
 		super();
 
+		// TODO: need to add some filters to the events
 		browser.qpopup.onRemoved.addListener(windowId => {
-			// We are interested only on current popup
 			if(windowId === this.popupId){
 				this.close(false);
+			}
+		});
+
+		browser.qpopup.onMove.addListener(popup => {
+			if(popup.id === this.popupId){
+				console.log("qpopup.onMove()", popup);
+				let { top, left } = popup;
+				this.note.x = left;
+				this.note.y = top;
+			}
+		});
+
+		browser.qpopup.onResize.addListener(popup => {
+			if(popup.id === this.popupId){
+				console.log("qpopup.onResize()", popup);
+				let { width, height } = popup;
+				this.note.width = width;
+				this.note.height = height;
 			}
 		});
 	}
@@ -330,35 +348,6 @@ class XULNoteWindow extends NoteWindow {
 				this.popupId = popupInfo.id;
 				return true;
 			});
-
-			// let w = await browser.windows.getCurrent();
-			// note.width = note.width || Prefs.width;
-			// note.height = note.height || Prefs.height;
-			// let opt = {
-			// 	url: "html/popup3.html",
-			// 	width: note.width,
-			// 	height: note.height,
-			// 	left: note.x || 0,
-			// 	top: note.y || 0
-			// };
-
-			// // TODO: move to separate function
-			// if(!opt.left){
-			// 	opt.left = Math.round((w.width - w.left) / 2);
-			// }
-
-			// if(!opt.top){
-			// 	opt.top = Math.round((w.height - w.top) / 2);
-			// }
-
-			// opt.left += w.left;
-			// opt.top += w.top;
-
-			// return browser.qapp.popup(opt).then(windowId => {
-			// 	this.windowId = windowId;
-
-			// 	return true;
-			// });
 		};
 
 		return super.pop(messageId, createNew, pop, popper);
