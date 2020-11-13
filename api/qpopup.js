@@ -92,7 +92,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					return false;
 				},
 				async create(options){
-					let { windowId, top, left, width, height } = options;
+					let { windowId, top, left, width, height, url } = options;
 					let window = id2RealWindow(windowId);
 
 					// let escaper = e => {
@@ -123,23 +123,33 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					PopupEventDispatcher.fireListeners("oncreated", popup.popupInfo);
 
 					return popup.pop().then(status => {
-						popup.contentsFrame.src = extension.getURL('html/popup4.html');
-						// popup.contentsFrame.contentWindow.popup = popup;
-						// console.log("pop", popup.contentsFrame);
+						if(url){
+							popup.iframeEl.src = extension.getURL(url);
+						}
+
+						popup.iframeEl.addEventListener("load", e => {
+							let MutationObserver = popup.iframeWindow.MutationObserver;
+
+							// Watch title change
+							if(MutationObserver){
+								new MutationObserver(function(mutations) {
+									try {
+										popup.title = mutations[0].target.text;
+									} catch {
+									}
+								}).observe(
+									popup.iframeDocument.querySelector('title'),
+									{ subtree: true, characterData: true, childList: true }
+								);
+							}
+
+							// Set title from iframe document
+							popup.title = popup.iframeDocument.title;
+						});
+
 						popup.closeEl.addEventListener("click", e => {
 							popup.close();
 						});
-						// let newEl = n.contentDocument.createElement('div');
-						// newEl.innerHTML = "Hello";
-						// n.addControl(newEl);
-						// let html = `<textarea id="qnote-text"></textarea>`;
-						// let cssU = extension.getURL('html/popup4.css');
-						// //let jsU = extension.getURL('scripts/popup4.js');
-						// html += `<link rel="stylesheet" href="${cssU}" type="text/css">`;
-						// //html += `<script src="../scripts/popup3.js"></script>`
-
-						// n.contents = html;
-						popup.title = "Qnote: ";
 
 						return popup.popupInfo;
 					});

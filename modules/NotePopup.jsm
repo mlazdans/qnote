@@ -53,6 +53,10 @@ class NotePopup extends BasePopup {
 		this.titleTextEl.innerHTML = title;
 	}
 
+	get title(){
+		return this.titleTextEl.innerHTML;
+	}
+
 	get contentDocument(){
 		try {
 			return this.browser.contentWindow.document;
@@ -89,8 +93,16 @@ class NotePopup extends BasePopup {
 		return this.getFirstElementByClassName("qpopup-custom-controls");
 	}
 
-	get contentsFrame() {
+	get iframeEl() {
 		return this.getFirstElementByClassName("qpopup-contents-frame");
+	}
+
+	get iframeWindow() {
+		return this.iframeEl.contentWindow;
+	}
+
+	get iframeDocument() {
+		return this.iframeWindow.document;
 	}
 
 	moveTo(x, y){
@@ -169,7 +181,10 @@ class NotePopup extends BasePopup {
 
 		return new Promise(function(resolve) {
 			self.browser.addEventListener("DOMContentLoaded", () => {
+				//self.browser.style.border = "1px solid red";
 				// We are not interested when about:blank been loaded
+				// TODO: hide, until loaded
+				//self.browser.style.display = "none";
 				if(self.contentDocument.URL !== self.popupURL){
 					return;
 				}
@@ -177,6 +192,7 @@ class NotePopup extends BasePopup {
 				self.browserLoaded.then(() => {
 					initNote();
 					resolve(true);
+					//self.browser.display = "none";
 				});
 				// n.contentReady.then(()=>{
 				// });
