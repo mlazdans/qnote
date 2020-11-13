@@ -2,22 +2,20 @@ var EXPORTED_SYMBOLS = ["NotePopup"];
 
 const { BasePopup } = ChromeUtils.import("resource:///modules/ExtensionPopups.jsm");
 const { ExtensionCommon } = ChromeUtils.import("resource://gre/modules/ExtensionCommon.jsm");
-const { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 const { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
-var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { makeWidgetId } = ExtensionCommon;
 
+var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var PopupCounter = 0;
+
 class NotePopup extends BasePopup {
 	constructor(options) {
-		let id = "qnote-window-panel-" + (++PopupCounter);
+		let domId = "qnote-window-panel-" + (++PopupCounter);
 
 		let { window } = options;
 		let document = window.document;
-		let popupId = makeWidgetId(id);
 
 		let panel = document.createXULElement("panel");
-		panel.setAttribute("id", popupId);
+		panel.setAttribute("id", domId);
 		panel.setAttribute("noautohide", true);
 		document.getElementById("mainPopupSet").appendChild(panel);
 
@@ -30,7 +28,7 @@ class NotePopup extends BasePopup {
 
 		this.popupURL = popupURL;
 		this.options = options;
-		this.popupId = popupId;
+		this.domId = domId;
 		this.window = window;
 
 		if(this.panel.adjustArrowPosition === undefined){
@@ -41,10 +39,21 @@ class NotePopup extends BasePopup {
 		this.shown = false;
 	}
 
+	addControl(domEl){
+		this.getCustomControlsEl().appendChild(domEl);
+	}
+
+	getContentDocument(){
+		try {
+			return this.browser.contentWindow.document;
+		} catch (e) {
+			console.error(e);
+		}
+	}
+
 	getFirstElementByClassName(className){
 		try {
-			var document = this.browser.contentWindow.document;
-			return document.getElementsByClassName(className).item(0);
+			return this.getContentDocument().querySelectorAll('.' + className).item(0);
 		} catch (e) {
 			console.error(e);
 		}
@@ -66,8 +75,12 @@ class NotePopup extends BasePopup {
 		return this.getFirstElementByClassName("qpopup-controls-resize");
 	}
 
+	getCustomControlsEl(){
+		return this.getFirstElementByClassName("qpopup-custom-controls");
+	}
+
 	pop(){
-		let anchor = null;
+		let self = this;
 		let { left, top, width, height } = this.options;
 
 		var initNote = () => {
@@ -86,7 +99,6 @@ class NotePopup extends BasePopup {
 
 			this.moveTo(left, top);
 			this.sizeTo(width, height);
-
 			// // TODO: code duplication!!
 			// try {
 			// 	let focus = wex.Prefs.focusOnDisplay || !wex.CurrentNote.note.text;
@@ -98,41 +110,42 @@ class NotePopup extends BasePopup {
 			// }
 		};
 
-		this.browser.addEventListener("DOMContentLoaded", () => {
-			// We are not interested when about:blank been loaded
-			if(this.browser.contentWindow.document.URL !== this.popupURL){
-				return;
-			}
+		return new Promise(function(resolve) {
+			self.browser.addEventListener("DOMContentLoaded", () => {
+				// We are not interested when about:blank been loaded
+				if(self.getContentDocument().URL !== self.popupURL){
+					return;
+				}
 
-			this.browserLoaded.then(() => {
-				initNote();
-				//self.popups.set(n.windowId, n);
-				//resolve(n.windowId);
+				self.browserLoaded.then(() => {
+					initNote();
+					resolve();
+				});
+				// n.contentReady.then(()=>{
+				// });
+				// n.browserReady.then(()=>{
+				// });
 			});
-			// n.contentReady.then(()=>{
-			// });
-			// n.browserReady.then(()=>{
-			// });
-		});
 
-		if(left && top) {
-			this.viewNode.openPopup(anchor, "topleft", left, top);
-		} else {
-			this.viewNode.openPopup(anchor, "topleft");
-		}
+			let anchor = null;
+
+			if(left && top) {
+				self.panel.openPopup(anchor, "topleft", left, top);
+			} else {
+				self.panel.openPopup(anchor, "topleft");
+			}
+		});
 	}
 
 	attachEvents(){
 		let self = this;
 		let window = this.window;
-		//let contentWindow = this.browser.contentWindow;
-		let panel = this.panel; // TODO: panel should be same as this? Test!
+		let panel = this.panel;
 		let mDown = new WeakMap();
 
 		let titleEl = this.getTitleEl();
 		let resizeEl = this.getResizeEl();
 
-		//mDown.titleText = e => {
 		mDown.set(titleEl, e => {
 			let popup = self.getPopupEl();
 			let el = e.target;
@@ -168,7 +181,6 @@ class NotePopup extends BasePopup {
 			popup.style.opacity = '0.4';
 		});
 
-		//mDown.resizeButton = (e) => {
 		mDown.set(resizeEl, e => {
 			let popup = self.getPopupEl();
 			let startX = e.screenX;
@@ -224,9 +236,6 @@ class NotePopup extends BasePopup {
 			if(mDown.has(e.target)){
 				mDown.get(e.target)(e);
 			}
-			// if(mDown[e.target.id]){
-			// 	mDown[e.target.id](e);
-			// }
 		}
 
 		this.panel.addEventListener('mousedown', handleDragStart, false);
@@ -237,13 +246,9 @@ class NotePopup extends BasePopup {
 	}
 
 	sizeTo(width, height){
-		//this.panel.sizeTo(width, height);
-		let document = this.browser.contentWindow.document;
-		let win = this.browser.contentWindow;
-		//let popup = document.getElementById('popup');
 		let popup = this.getPopupEl();
 
-		// This seems to set rather size limits
+		// This seems to set rather size limits?
 		//this.panel.sizeTo(width, height);
 
 		popup.style.width = width + 'px';
@@ -251,19 +256,19 @@ class NotePopup extends BasePopup {
 	}
 
 	isFocused(){
-		let document = this.browser.contentWindow.document;
-		let YTextE = document.getElementById('qnote-text');
+		// let document = this.browser.contentWindow.document;
+		// let YTextE = document.getElementById('qnote-text');
 
-		return document.activeElement === YTextE;
+		// return document.activeElement === YTextE;
 	}
 
 	focus(){
-		let document = this.browser.contentWindow.document;
-		let YTextE = document.getElementById('qnote-text');
+		// let document = this.browser.contentWindow.document;
+		// let YTextE = document.getElementById('qnote-text');
 
-		if(YTextE){
-			YTextE.focus();
-		}
+		// if(YTextE){
+		// 	YTextE.focus();
+		// }
 	}
 
 	close() {

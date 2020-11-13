@@ -73,9 +73,15 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						height: height
 					});
 
-					PopupEventDispatcher.fireListeners("oncreated", "tuc tuc");
+					PopupEventDispatcher.fireListeners("oncreated", {
+						popupId: ++this.counter
+					});
 
-					n.pop();
+					n.pop().then(() => {
+						let newEl = n.getContentDocument().createElement('div');
+						newEl.innerHTML = "Hello";
+						n.addControl(newEl);
+					});
 
 					return;
 
