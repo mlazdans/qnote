@@ -264,12 +264,15 @@ class XULNoteWindow extends NoteWindow {
 		super();
 
 		// TODO: need to add some filters to the events
+
+		// Close
 		browser.qpopup.onRemoved.addListener(popupId => {
 			if(popupId === this.popupId){
 				this.close(false);
 			}
 		});
 
+		// Move around
 		browser.qpopup.onMove.addListener(popup => {
 			if(popup.id === this.popupId){
 				let { top, left } = popup;
@@ -278,6 +281,7 @@ class XULNoteWindow extends NoteWindow {
 			}
 		});
 
+		// Resize
 		browser.qpopup.onResize.addListener(popup => {
 			if(popup.id === this.popupId){
 				let { width, height } = popup;
@@ -325,10 +329,9 @@ class XULNoteWindow extends NoteWindow {
 	}
 
 	async focus() {
-		console.log("focus() - implement");
-		if(this.popupId){
-			// await browser.qapp.popupFocus(this.windowId);
-		}
+		return this.updateWindow({
+			focused: true
+		});
 	}
 
 	async close() {

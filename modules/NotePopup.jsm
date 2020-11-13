@@ -120,6 +120,7 @@ class NotePopup extends BasePopup {
 	}
 
 	isFocused(){
+		console.log("NotePopup.isFocused()",);
 		// let document = this.browser.contentWindow.document;
 		// let YTextE = document.getElementById('qnote-text');
 
@@ -127,12 +128,7 @@ class NotePopup extends BasePopup {
 	}
 
 	focus(){
-		// let document = this.browser.contentWindow.document;
-		// let YTextE = document.getElementById('qnote-text');
-
-		// if(YTextE){
-		// 	YTextE.focus();
-		// }
+		this.iframeWindow.focus();
 	}
 
 	close() {
@@ -181,12 +177,7 @@ class NotePopup extends BasePopup {
 			let loadListener = (e0) => {
 				// TODO: hide, until loaded
 				//self.browser.style.display = "none";
-				//self.contentDocument.URL
 
-				// if(self.contentDocument.URL !== self.popupURL){
-				// 	return;
-				// }
-				//if(!e0.target || !e0.target.document || e0.target.document.URL !== self.popupURL){
 				// We are not interested when about:blank been loaded
 				if(e0.target.URL !== self.popupURL){
 					return;
@@ -194,10 +185,21 @@ class NotePopup extends BasePopup {
 
 				self.contentReady.then((e1, e2) => {
 					self.title = title;
-					self.browser.removeEventListener("DOMContentLoaded", loadListener);
+					self.contentDocument.addEventListener("focus", e => {
+						if(self.onFocus){
+							self.onFocus(e);
+						}
+						self.iframeWindow.focus();
+					});
+
+					self.contentDocument.addEventListener("blur", e => {
+						if(self.onBlur){
+							self.onBlur(e);
+						}
+					});
+
 					initNote();
 					resolve(true);
-					//self.browser.display = "none";
 				});
 				// browserLoaded
 				// n.contentReady.then(()=>{
