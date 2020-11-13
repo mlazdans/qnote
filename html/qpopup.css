@@ -80,9 +80,9 @@ img {
 	background-position: bottom right;
 }
 
-.qpopup-contents-wrap {
+/* 26px (controls) + 32px (title) + 1px (border) */
+/* .qpopup-contents-wrap {
 	display: flex;
-	/* 26px (controls) + 32px (title) + 1px (border) */
 	height: calc(100% - 59px);
 	overflow: auto;
 	background: url(../images/txt-background.png);
@@ -99,8 +99,35 @@ img {
 	height: 100%;
 	box-sizing: border-box;
 	margin: 0;
-	padding: 4px;
+	padding: 0;
 	border: solid 1px #FAF098;
+}
+
+.qpopup-contents > iframe {
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+*/
+
+.qpopup-contents-wrap,
+.qpopup-contents-wrap > iframe {
+	width: 100%;
+	box-sizing: border-box;
+	line-height: 0;
+	margin: 0;
+	padding: 0;
+	border: none;
+}
+
+.qpopup-contents-wrap {
+	width: 100%;
+	display: flex;
+	height: calc(100% - 59px);
+}
+
+.qpopup-contents-wrap > iframe {
+	display: block;
 }
 
 .unselectable {
