@@ -55,7 +55,7 @@
 			"minimum": 1
 		}]
 	},{
-		"name": "close",
+		"name": "remove",
 		"type": "function",
 		"async": "callback",
 		"parameters": [{
@@ -63,10 +63,6 @@
 			"name": "popupId",
 			"minimum": 1
 		}]
-	},{
-		"name": "getAll",
-		"type": "function",
-		"async": "callback"
 	},{
 		"name": "create",
 		"type": "function",
@@ -85,6 +81,15 @@
 			"$ref": "Popup",
 			"name": "popup",
 			"description": "Details of the popup that was created."
+		}]
+	},{
+		"name": "onRemoved",
+		"type": "function",
+		"description": "Fired when a popup is removed.",
+		"parameters": [{
+			"$ref": "Popup",
+			"name": "popup",
+			"description": "Details of the popup that was removed."
 		}]
 	}]
 }]

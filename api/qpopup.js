@@ -10,7 +10,7 @@ var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePo
 var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 
-var PopupEventDispatcher = new QEventDispatcher(["oncreated"]);
+var PopupEventDispatcher = new QEventDispatcher(["oncreated", "onremoved"]);
 
 var qpopup = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown() {
@@ -61,18 +61,32 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						PopupEventDispatcher.addListener("oncreated", l);
 
 						return () => {
-							console.log("unregister");
 							PopupEventDispatcher.removeListener("oncreated", l);
 						};
 					}
 				}).api(),
-				async close(id){
+				onRemoved: new ExtensionCommon.EventManager({
+					context,
+					name: "qpopup.onRemoved",
+					register: fire => {
+						const l = value => {
+							fire.async(value);
+						};
+
+						PopupEventDispatcher.addListener("onremoved", l);
+
+						return () => {
+							PopupEventDispatcher.removeListener("onremoved", l);
+						};
+					}
+				}).api(),
+				async remove(id){
 					let popup = popupManager.get(id);
 
 					if(popup){
 						popup.close();
 						popupManager.remove(id);
-						return true;
+						return popup.popupInfo;
 					}
 
 					return false;
@@ -101,18 +115,19 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						height: height
 					});
 
-					let popupInfo = {
+					popup.popupInfo = {
 						id: popupManager.add(popup),
 						windowId: windowId
 					};
 
-					PopupEventDispatcher.fireListeners("oncreated", popupInfo);
+					PopupEventDispatcher.fireListeners("oncreated", popup.popupInfo);
 
 					return popup.pop().then(status => {
 						popup.contentsFrame.src = extension.getURL('html/popup4.html');
+						// popup.contentsFrame.contentWindow.popup = popup;
+						// console.log("pop", popup.contentsFrame);
 						popup.closeEl.addEventListener("click", e => {
 							popup.close();
-							//console.log("click from api", e);
 						});
 						// let newEl = n.contentDocument.createElement('div');
 						// newEl.innerHTML = "Hello";
@@ -126,7 +141,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						// n.contents = html;
 						popup.title = "Qnote: ";
 
-						return popupInfo;
+						return popup.popupInfo;
 					});
 
 					return;

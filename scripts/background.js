@@ -11,7 +11,7 @@ var Prefs;
 var CurrentNote;
 var CurrentTab;
 var CurrentWindow;
-var qcon = new QAppConsole(console);
+var qcon = new QConsole(console);
 
 // TODO: track window changes so we do not lose focus inside lone message window
 async function focusMessagePane(){
@@ -143,6 +143,19 @@ async function initExtension(){
 		await CurrentNote.close();
 		updateDisplayedMessage(CurrentTab);
 	});
+
+	browser.qpopup.onCreated.addListener(popup => {
+		console.log("qpopup.onCreated()", popup);
+	});
+
+	// let a = browser.qpopup.create({
+	// 	windowId: CurrentWindow.id,
+	// 	url: "html/popup4.html",
+	// 	width: 320,
+	// 	height: 200,
+	// 	top: 100,
+	// 	left: 200
+	// });
 }
 
 async function waitForLoad() {

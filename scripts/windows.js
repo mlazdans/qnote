@@ -260,6 +260,17 @@ class WebExtensionNoteWindow extends NoteWindow {
 }
 
 class XULNoteWindow extends NoteWindow {
+	constructor() {
+		super();
+
+		browser.qpopup.onRemoved.addListener(windowId => {
+			// We are interested only on current popup
+			if(windowId === this.popupId){
+				this.close(false);
+			}
+		});
+	}
+
 	async updateWindow(opt){
 		if(this.popupId){
 			// return browser.qapp.popupUpdate(this.windowId, opt);
@@ -281,7 +292,11 @@ class XULNoteWindow extends NoteWindow {
 	async close() {
 		super.close(() => {
 			if(this.popupId){
-				return browser.qpopup.close(this.popupId);
+				return browser.qpopup.remove(this.popupId).then(() => {
+					return true;
+				},() => {
+					return false;
+				});
 			} else {
 				return false;
 			}
