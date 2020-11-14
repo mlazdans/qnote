@@ -6,6 +6,7 @@ var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePo
 var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 var { QConsole } = ChromeUtils.import(extension.rootURI.resolve("modules/QConsole.js"));
 var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
+var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js"));
 
 // TODO: get rid of wex
 // TODO: get rid of globals
@@ -95,6 +96,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		Components.utils.unload(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/QConsole.js"));
 		Components.utils.unload(extension.rootURI.resolve("modules/QEventDispatcher.js"));
+		Components.utils.unload(extension.rootURI.resolve("modules/QCache.js"));
 	}
 
 	getAPI(context) {
@@ -102,56 +104,16 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		qcon.debugEnabled = !!wex.Prefs.enableDebug;
 
-		var noteGrabber = {
-			noteBlocker: new Map(),
-			noteCache: new Map(),
-			saveNoteCache(note){
-				noteGrabber.noteCache.set(note.keyId, note);
-			},
-			getNoteCache(keyId){
-				return noteGrabber.noteCache.get(keyId);
-			},
-			deleteNoteCache(keyId){
-				noteGrabber.noteCache.delete(keyId);
-			},
-			clearNoteCache(){
-				noteGrabber.noteCache = new Map();
-			},
-			// function listener(keyId, data, params)
-			//  keyId - note key
-			//  data - note data
-			//  params - misc params passed to getNote()
-			getNote(keyId, listener){
-				let data = noteGrabber.getNoteCache(keyId);
-				if(data){
-					return Object.assign({}, data);
-				} else {
-					let blocker = noteGrabber.noteBlocker;
-
-					// Block concurrent calls on same note as we will update column once it has been loded from local cache, local storage or file
-					// Not 100% sure if necessary but calls to column update can be quite many
-					if(blocker.has(keyId)){
-						qcon.debug(`blocker.has(${keyId})`);
-					} else {
-						blocker.set(keyId, true);
-						// We'll update cache and call listener once note arrives
-						wex.getQAppNoteData(keyId).then(data => {
-							noteGrabber.saveNoteCache(data);
-							if(listener){
-								listener(keyId, data);
-							}
-						}).finally(() => {
-							qcon.debug(`blocker.delete(${keyId})`);
-							// Unblock concurrent calls
-							blocker.delete(keyId);
-						});
-					}
-
-					// return empty object to keep getNote() call synchronous
-					return {};
-				}
-			}
-		}
+		// We'll update cache and call listener once note arrives
+		var noteGrabber = new QCache(wex.getQAppNoteData);
+		// var noteGrabber = new QCache(keyId => {
+		// 	return wex.getQAppNoteData(keyId);
+		// 	// return wex.getQAppNoteData(keyId).then(data => {
+		// 	// 	// Clone data TODO: test if necessary
+		// 	// 	// return Object.assign({}, data);
+		// 	// 	return data;
+		// 	// });
+		// });
 
 		var colHandler = {
 			noteRowListener(view, row) {
@@ -178,7 +140,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			// cycleCell(row, col) {
 			// },
 			getCellText(row, col) {
-				let note = noteGrabber.getNote(this.getMessageId(row, col), () => {
+				let note = noteGrabber.get(this.getMessageId(row, col), () => {
 					this.noteRowListener(this.getView(col), row);
 				});
 
@@ -190,7 +152,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				return note.exists ? note.shortText : null;
 			},
 			getSortStringForRow(hdr) {
-				let note = noteGrabber.getNote(hdr.messageId);
+				let note = noteGrabber.get(hdr.messageId);
 
 				return note.exists ? note.text : null;
 			},
@@ -202,7 +164,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			// getRowProperties(row, props){
 			// },
 			getImageSrc(row, col) {
-				let note = noteGrabber.getNote(this.getMessageId(row, col), () => {
+				let note = noteGrabber.get(this.getMessageId(row, col), () => {
 					this.noteRowListener(this.getView(col), row);
 				});
 
@@ -264,7 +226,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						let messenger = aSubject.opener.messenger;
 
 						let msg = messenger.msgHdrFromURI(messageUrisToPrint.shift());
-						let note = noteGrabber.getNote(msg.messageId);
+						let note = noteGrabber.get(msg.messageId);
 						if(!note || !note.exists){
 							return;
 						}
@@ -352,6 +314,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					QAppColumnHandler = new NoteColumnHandler({
 						columnHandler: colHandler
 					});
+
+					// TODO: window handle
 					QAppColumnHandler.attachToWindow(Services.wm.getMostRecentWindow("mail:3pane"));
 
 					QAppEventDispatcher.addListener('DOMContentLoaded', (e, aSubject, aTopic, aData) => {
@@ -467,13 +431,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 				},
 				async saveNoteCache(note){
-					noteGrabber.saveNoteCache(note);
+					noteGrabber.set(note.keyId, note);
 				},
 				async clearNoteCache(){
-					noteGrabber.clearNoteCache();
+					noteGrabber.clear();
 				},
 				async deleteNoteCache(keyId){
-					noteGrabber.deleteNoteCache(keyId);
+					noteGrabber.delete(keyId);
 				},
 				async setColumnTextLimit(limit){
 					// console.log(`setColumnTextLimit(${limit})`);
