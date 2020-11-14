@@ -142,6 +142,8 @@ class NotePopup extends BasePopup {
 			this.onClose();
 		}
 
+		this.shown = false;
+
 		return true;
 	}
 
@@ -163,6 +165,7 @@ class NotePopup extends BasePopup {
 
 			this.moveTo(left, top);
 			this.sizeTo(width, height);
+			this.shown = true;
 			// // TODO: code duplication!!
 			// try {
 			// 	let focus = wex.Prefs.focusOnDisplay || !wex.CurrentNote.note.text;
