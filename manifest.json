@@ -33,7 +33,9 @@
 			"scripts/utils.js",
 			"scripts/menu.js",
 			"scripts/notes.js",
-			"scripts/windows.js",
+			"scripts/windows/NoteWindow.js",
+			"scripts/windows/WebExtensionNoteWindow.js",
+			"scripts/windows/XULNoteWindow.js",
 			"scripts/background.js"
 		]
 	},
