@@ -1,33 +1,9 @@
 var _ = browser.i18n.getMessage;
 
-class NoteWindow {
-	// TODO: generalize
-	// TODO: move to notes?
-	removeListener(name, listener){
-		this.listeners[name].delete(listener);
-	}
-
-	addListener(name, listener){
-		this.listeners[name].add(listener);
-	}
-
-	async execListeners(name, executor){
-		return new Promise(resolve => {
-			for (let listener of this.listeners[name]) {
-				executor(listener);
-			}
-			resolve();
-		});
-	}
-
+class NoteWindow extends QEventDispatcher {
 	constructor() {
+		super(["aftersave","afterdelete","afterupdate","afterclose"]);
 		this.init();
-		this.listeners = {
-			"aftersave": new Set(),
-			"afterdelete": new Set(),
-			"afterupdate": new Set(),
-			"afterclose": new Set()
-		}
 	}
 
 	init(){
@@ -83,9 +59,10 @@ class NoteWindow {
 		let fName = `${this.constructor.name}.close()`;
 		let isClosed = await closer();
 
-		await this.execListeners("afterclose", listener => {
-			listener(isClosed, this);
-		});
+		await this.fireListeners("afterclose", isClosed, this);
+		// await this.execListeners("afterclose", listener => {
+		// 	listener(isClosed, this);
+		// });
 
 		if(!isClosed){
 			return qcon.debug(`${fName}, -not popped-`);
@@ -109,9 +86,9 @@ class NoteWindow {
 
 		let wasUpdated;
 		let noteData = this.note.get();
-		let defExecutor = listener => {
-			listener(this);
-		};
+		// let defExecutor = listener => {
+		// 	listener(this);
+		// };
 
 		if(action === 'save') {
 			if(this.loadedNoteData){
@@ -123,7 +100,8 @@ class NoteWindow {
 			if(this.modified) {
 				qcon.debug(`${fName}, note.save()`);
 				this.note.save();
-				await this.execListeners("aftersave", defExecutor);
+				//await this.execListeners("aftersave", defExecutor);
+				await this.fireListeners("aftersave", this);
 				wasUpdated = action;
 			} else {
 				qcon.debug(`${fName}, not modified`);
@@ -131,16 +109,18 @@ class NoteWindow {
 		} else if(action === 'delete'){
 			qcon.debug(`${fName}, note.delete()`);
 			this.note.delete();
-			await this.execListeners("afterdelete", defExecutor);
+			//await this.execListeners("afterdelete", defExecutor);
+			await this.fireListeners("afterdelete", this);
 			wasUpdated = action;
 		} else {
 			qcon.debug(`${fName}, -do nothing-`);
 		}
 
 		if(wasUpdated){
-			await this.execListeners("afterupdate", listener => {
-				listener(wasUpdated, this);
-			});
+			await this.fireListeners("afterupdate", wasUpdated, this);
+			// await this.execListeners("afterupdate", listener => {
+			// 	listener(wasUpdated, this);
+			// });
 		}
 		this.init();
 	}
@@ -162,11 +142,8 @@ class NoteWindow {
 
 			if((this.note.exists && pop) || createNew){
 				this.popping = true;
+				// TODO: remove .then()
 				return popper(this.note).then(isPopped => {
-					if(isPopped && this.onAfterPop){
-						this.onAfterPop(this);
-					}
-
 					return isPopped;
 				}).finally(() => {
 					this.popping = false;
@@ -361,7 +338,8 @@ class XULNoteWindow extends NoteWindow {
 				top: note.y || 0
 			};
 
-			// TODO: move to separate function
+			// Center
+			// TODO: preconfigured positions?
 			if(!opt.left){
 				opt.left = Math.round((w.width - w.left) / 2);
 			}
