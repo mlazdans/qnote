@@ -127,6 +127,8 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					popup.close();
 					popupManager.remove(id);
 
+					PopupEventDispatcher.fireListeners("onremoved", popup.popupInfo);
+
 					return popup.popupInfo;
 				},
 				async update(id, options){
@@ -186,6 +188,10 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						popup.popupInfo.left = p.x;
 						popup.popupInfo.top = p.y;
 						PopupEventDispatcher.fireListeners("onmove", popup.popupInfo);
+					};
+
+					popup.onClose = e => {
+						this.remove(popup.popupInfo.id);
 					};
 
 					// TODO: implement
