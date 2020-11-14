@@ -22,15 +22,6 @@ class QEventDispatcher {
 		this.listeners[name].delete(listener);
 	}
 
-	// async execListeners(name, executor, ...args){
-	// 	return new Promise(resolve => {
-	// 		for (let listener of this.listeners[name]) {
-	// 			executor(listener);
-	// 		}
-	// 		resolve();
-	// 	});
-	// }
-
 	async fireListeners(name, ...args){
 		return new Promise(resolve => {
 			for (let listener of this.listeners[name]) {
