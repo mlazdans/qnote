@@ -122,7 +122,8 @@ class NoteColumnHandler {
 	getElementById(w, id){
 		try {
 			return w.document.getElementById(id);
-		} catch {
+		} catch (e) {
+			console.error(e);
 		}
 	}
 
@@ -134,7 +135,7 @@ class NoteColumnHandler {
 			return true;
 		}
 
-		let threadCols = this.getElementById("threadCols");
+		let threadCols = this.getElementById(w, "threadCols");
 
 		// If threadCols not found, assume it is not right window
 		if(!threadCols){
