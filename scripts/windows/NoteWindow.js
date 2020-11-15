@@ -125,11 +125,7 @@ class NoteWindow extends QEventDispatcher {
 
 		return closer().then(async isClosed => {
 			await this.fireListeners("afterclose", this, isClosed);
-			if(isClosed){
-				return this._close();
-			} else {
-				return false;
-			}
+			return this._close();
 		});
 	}
 
@@ -142,11 +138,16 @@ class NoteWindow extends QEventDispatcher {
 		});
 	}
 
+	async loadNoteForMessage(messageId) {
+		return getMessageKeyId(messageId).then(keyId => {
+			return this.loadNote(keyId);
+		});
+	}
+
 	// return true if popped
 	async pop(popper) {
 		return popper().then(isPopped => {
-			this.shown = isPopped;
-			return isPopped;
+			return this.shown = isPopped;
 		});
 		// if(this.popping){
 		// 	qcon.debug("NoteWindow.pop() - already popping");
