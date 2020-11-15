@@ -122,8 +122,7 @@ class NoteColumnHandler {
 	getElementById(w, id){
 		try {
 			return w.document.getElementById(id);
-		} catch (e) {
-			console.error(e);
+		} catch {
 		}
 	}
 
