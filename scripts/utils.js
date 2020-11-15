@@ -258,41 +258,76 @@ async function exportStorage(){
 	});
 }
 
-function QNoteMessagePop(Message, createNew = true, doPop = true, doFocus = true) {
+async function QNotePopForMessage(messageId, createNew = true, doPop = true, doFocus = true) {
 	// Pop only if message changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
-	if(
-		!CurrentNote.popupId
-		|| CurrentNote.messageId !== Message.id
-	) {
-		CurrentNote.pop(Message.id, createNew, doPop).then(isPopped => {
-			if(doFocus){
-				CurrentNote.focus();
+	// if(
+	// 	!CurrentNote.popupId
+	// 	|| CurrentNote.messageId !== Message.id
+	// ) {
+
+	return getMessageKeyId(messageId).then(keyId => {
+		return CurrentNote.loadNote(keyId).then(note => {
+			if(note.exists || createNew){
+				return CurrentNote.pop();
 			}
 		});
-	}
+	}).catch(e => {
+		if(e instanceof NoKeyIdError){
+			if(createNew){
+				browser.legacy.alert(_("no.message_id.header"));
+			}
+		} else {
+			console.error(e);
+		}
+	});
 }
 
-function QNoteTabPop(Tab, createNew = true, doPop = true, doFocus = true) {
-	getDisplayedMessage(Tab).then(Message => {
-		QNoteMessagePop(Message, createNew, doPop, doFocus);
+async function QNotePopForTab(Tab, createNew = true, doPop = true, doFocus = true) {
+	return getDisplayedMessageForTab(Tab).then(async Message => {
+		await CurrentNote.close();
+
+		// CurrentTabId = getTabId(Tab);
+		// CurrentWindowId = Tab.windowId;
+		initCurrentNote();
+
+		return QNotePopForMessage(Message.id, createNew);
 	});
 };
 
-function QNotePopToggle() {
-	return new Promise(async resolve => {
-		if(CurrentNote.popupId){
-			if(await CurrentNote.isFocused()){
-				qcon.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - focused, waiting to close`);
-				CurrentNote.close();
-			} else {
-				qcon.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - opened, waiting to gain focus`);
+async function QNotePopToggle(Tab) {
+	if(CurrentNote.shown){
+		if(await CurrentNote.isFocused()){
+			qcon.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - focused, waiting to close`);
+			CurrentNote.close();
+		} else {
+			qcon.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - opened, waiting to gain focus`);
+			CurrentNote.focus();
+		}
+	} else {
+		qcon.debug("QNotePopToggle(), popupId = -not set-");
+		QNotePopForTab(Tab, true).then(isPopped => {
+			qcon.debug("QNotePopToggle(), isPopped =", isPopped);
+			if(isPopped){
 				CurrentNote.focus();
 			}
-		} else {
-			qcon.debug("QNotePopToggle(), popupId = -not set-");
-			resolve();
-		}
-	});
+		});
+		//resolve();
+	}
+
+	// return new Promise(async resolve => {
+	// 	if(CurrentNote.popupId){
+	// 		if(await CurrentNote.isFocused()){
+	// 			qcon.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - focused, waiting to close`);
+	// 			CurrentNote.close();
+	// 		} else {
+	// 			qcon.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - opened, waiting to gain focus`);
+	// 			CurrentNote.focus();
+	// 		}
+	// 	} else {
+	// 		qcon.debug("QNotePopToggle(), popupId = -not set-");
+	// 		resolve();
+	// 	}
+	// });
 }
 
 async function updateIcons(on){
@@ -308,3 +343,31 @@ function silentCatcher(){
 		qcon.debug(...args);
 	}
 }
+
+// async function updateCurrentMessage(){
+// 	if(CurrentNote.popupId){
+// 		console.log("updateCurrentMessage", CurrentNote.popupId);
+// 		await CurrentNote.close();
+// 	}
+
+// 	// Marks icons inactive by default
+// 	updateIcons(false);
+
+// 	return getDisplayedMessageForTab(CurrentTab).then(message => {
+// 		return loadNoteForMessage(message.id)
+// 	}).then(note => {
+// 		// Marks icons active
+// 		if(note && note.exists) {
+// 			updateIcons(true);
+// 		}
+
+// 		// Send updated note down to qapp
+// 		updateNoteView(note);
+
+// 		// Attach note to message
+// 		browser.qapp.attachNoteToMessage(note2QAppNote(note));
+
+// 		//this.init();
+
+// 	}).catch(silentCatcher());
+// }

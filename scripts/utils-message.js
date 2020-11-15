@@ -34,16 +34,19 @@ async function getMessageKeyId(messageId) {
 	};
 
 	return getMessageFull(messageId).then(parts => {
-		return partsParser(parts);
+		let mid = partsParser(parts);
+
+		if(mid){
+			return mid;
+		}
+
+		throw new NoKeyIdError;
 	});
 }
 
 async function createNoteForMessage(messageId) {
 	return getMessageKeyId(messageId).then(keyId => {
-		if(keyId){
-			return createNote(keyId);
-		}
-		throw new NoKeyIdError;
+		return createNote(keyId);
 	});
 }
 
@@ -85,26 +88,6 @@ async function tagMessage(messageId, tagName, toTag = true) {
 	});
 }
 
-async function getDisplayedMessage(tab) {
+async function getDisplayedMessageForTab(tab) {
 	return browser.messageDisplay.getDisplayedMessage(getTabId(tab)).then(messagePartReturner);
-}
-
-function updateDisplayedMessage(tab){
-	// Marks icons inactive by default
-	updateIcons(false);
-
-	getDisplayedMessage(tab).then(message => {
-		return loadNoteForMessage(message.id)
-	}).then(note => {
-		// Marks icons active
-		if(note && note.exists) {
-			updateIcons(true);
-		}
-
-		// Send updated note down to qapp
-		updateNoteView(note);
-
-		// Attach note to message
-		browser.qapp.attachNoteToMessage(note2QAppNote(note));
-	}).catch(silentCatcher());
 }
