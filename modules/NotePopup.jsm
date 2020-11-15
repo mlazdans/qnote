@@ -57,6 +57,12 @@ class NotePopup extends BasePopup {
 		return this.titleTextEl.innerHTML;
 	}
 
+	get isFocused(){
+		let cae = this.contentDocument.activeElement;
+
+		return cae ? cae.tagName !== 'BODY' : false;
+	}
+
 	get contentDocument(){
 		try {
 			return this.browser.contentWindow.document;
@@ -117,14 +123,6 @@ class NotePopup extends BasePopup {
 
 		popup.style.width = width + 'px';
 		popup.style.height = height + 'px';
-	}
-
-	isFocused(){
-		console.log("NotePopup.isFocused()",);
-		// let document = this.browser.contentWindow.document;
-		// let YTextE = document.getElementById('qnote-text');
-
-		// return document.activeElement === YTextE;
 	}
 
 	focus(){
