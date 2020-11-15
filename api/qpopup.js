@@ -124,20 +124,27 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						return false;
 					}
 
-					popup.close();
 					popupManager.remove(id);
 
-					PopupEventDispatcher.fireListeners("onremoved", popup.popupInfo);
+					// if(popup.shown){
+					// 	console.log("show");
+						popup.close();
+					// } else {
+					// 	console.log("closed");
+					// }
 
-					return popup.popupInfo;
+					PopupEventDispatcher.fireListeners("onremoved", id);
+
+					return true;
 				},
 				async update(id, options){
 					let popup = popupManager.get(id);
-					let pi = popup.popupInfo;
 
 					if(!popup){
 						return false;
 					}
+
+					let pi = popup.popupInfo;
 
 					// options come in null-ed
 					let { top, left, width, height, url, title, focused } = options;
@@ -190,7 +197,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						PopupEventDispatcher.fireListeners("onmove", popup.popupInfo);
 					};
 
-					popup.onClose = e => {
+					popup.onClose = () => {
 						this.remove(popup.popupInfo.id);
 					};
 
