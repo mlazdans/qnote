@@ -116,6 +116,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		// 	// });
 		// });
 
+		function id2RealWindow(windowId){
+			try {
+				return extension.windowManager.get(windowId).window;
+			} catch {
+			}
+		}
+
 		var colHandler = {
 			noteRowListener(view, row) {
 				if(view && Number.isInteger(row)){
@@ -302,12 +309,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					this.installColumnHandler();
 				},
-				// TODO: pass window parameter
-				async messagesFocus(){
-					let w = this.getQNoteSuitableWindow();
-					if(w.gFolderDisplay && w.gFolderDisplay.tree){
+				async messagePaneFocus(windowId){
+					let w = id2RealWindow(windowId);
+					if(w && w.gFolderDisplay && w.gFolderDisplay.tree){
 						w.gFolderDisplay.tree.focus();
-						//w = Services.wm.getMostRecentWindow("mail:3pane");
 					}
 				},
 				installColumnHandler(){
@@ -396,6 +401,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					if(
 						!data || !data.exists ||
 						!aMessageDisplay ||
+						!aMessageDisplay.displayedMessage ||
 						aMessageDisplay.displayedMessage.messageId !== data.keyId
 					) {
 						return;
