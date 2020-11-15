@@ -10,6 +10,7 @@ var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js
 
 // TODO: get rid of wex
 // TODO: get rid of globals
+// TODO: reimplement qcon.log as console.log(qcon.log(), etc)
 var qcon = new QConsole(console);
 var QAppColumnHandler;
 var QAppEventDispatcher = new QEventDispatcher(["domwindowopened","domwindowclosed","DOMContentLoaded",]);
