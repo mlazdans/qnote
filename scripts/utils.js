@@ -1,3 +1,7 @@
+const POP_NONE = 0;
+const POP_FOCUS = (1<<0);
+const POP_EXISTING = (1<<1);
+
 function getDefaultPrefs() {
 	return {
 		useTag: false,
@@ -258,19 +262,26 @@ async function exportStorage(){
 	});
 }
 
-async function QNotePopForMessage(messageId, createNew = true, doPop = true, doFocus = true) {
+async function QNotePopForMessage(messageId, flags = POP_NONE) {
 	// Pop only if message changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
 	// if(
 	// 	!CurrentNote.popupId
 	// 	|| CurrentNote.messageId !== Message.id
-	// ) {
+	// )
 
-	return getMessageKeyId(messageId).then(keyId => {
-		return CurrentNote.loadNote(keyId).then(note => {
-			if(note.exists || createNew){
-				return CurrentNote.pop();
-			}
-		});
+	let createNew = !(flags & POP_EXISTING);
+	let setFocus = flags & POP_FOCUS;
+
+	return CurrentNote.loadNoteForMessage(messageId).then(note => {
+		CurrentNote.messageId = messageId;
+		if(note.exists || createNew){
+			return CurrentNote.pop().then(isPopped => {
+				if(setFocus && isPopped){
+					CurrentNote.focus();
+				}
+				return isPopped;
+			});
+		}
 	}).catch(e => {
 		if(e instanceof NoKeyIdError){
 			if(createNew){
@@ -282,7 +293,7 @@ async function QNotePopForMessage(messageId, createNew = true, doPop = true, doF
 	});
 }
 
-async function QNotePopForTab(Tab, createNew = true, doPop = true, doFocus = true) {
+async function QNotePopForTab(Tab, flags = POP_NONE) {
 	return getDisplayedMessageForTab(Tab).then(async Message => {
 		await CurrentNote.close();
 
@@ -290,7 +301,7 @@ async function QNotePopForTab(Tab, createNew = true, doPop = true, doFocus = tru
 		// CurrentWindowId = Tab.windowId;
 		initCurrentNote();
 
-		return QNotePopForMessage(Message.id, createNew);
+		return QNotePopForMessage(Message.id, flags);
 	});
 };
 
@@ -305,29 +316,13 @@ async function QNotePopToggle(Tab) {
 		}
 	} else {
 		qcon.debug("QNotePopToggle(), popupId = -not set-");
-		QNotePopForTab(Tab, true).then(isPopped => {
+		QNotePopForTab(Tab, POP_FOCUS).then(isPopped => {
 			qcon.debug("QNotePopToggle(), isPopped =", isPopped);
 			if(isPopped){
 				CurrentNote.focus();
 			}
-		});
-		//resolve();
+		}).catch(silentCatcher());
 	}
-
-	// return new Promise(async resolve => {
-	// 	if(CurrentNote.popupId){
-	// 		if(await CurrentNote.isFocused()){
-	// 			qcon.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - focused, waiting to close`);
-	// 			CurrentNote.close();
-	// 		} else {
-	// 			qcon.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - opened, waiting to gain focus`);
-	// 			CurrentNote.focus();
-	// 		}
-	// 	} else {
-	// 		qcon.debug("QNotePopToggle(), popupId = -not set-");
-	// 		resolve();
-	// 	}
-	// });
 }
 
 async function updateIcons(on){
@@ -344,30 +339,49 @@ function silentCatcher(){
 	}
 }
 
-// async function updateCurrentMessage(){
-// 	if(CurrentNote.popupId){
-// 		console.log("updateCurrentMessage", CurrentNote.popupId);
-// 		await CurrentNote.close();
-// 	}
+// mp = message pane
+async function mpUpdateForMessage(messageId){
+	return loadNoteForMessage(messageId).then(note => {
+		// Marks icons active
+		updateIcons(note && note.exists);
 
-// 	// Marks icons inactive by default
-// 	updateIcons(false);
+		// Send updated note down to qapp
+		updateNoteView(note);
 
-// 	return getDisplayedMessageForTab(CurrentTab).then(message => {
-// 		return loadNoteForMessage(message.id)
-// 	}).then(note => {
-// 		// Marks icons active
-// 		if(note && note.exists) {
-// 			updateIcons(true);
-// 		}
+		// Attach note to message
+		browser.qapp.attachNoteToMessage(note2QAppNote(note));
+	});
+}
 
-// 		// Send updated note down to qapp
-// 		updateNoteView(note);
+async function mpUpdateCurrent(){
+	// if(CurrentNote.popupId){
+	// 	console.log("updateCurrentMessage", CurrentNote.popupId);
+	// 	await CurrentNote.close();
+	// }
 
-// 		// Attach note to message
-// 		browser.qapp.attachNoteToMessage(note2QAppNote(note));
+	// return getCurrentTabId().then(tabId => {
+	// 	console.log("mpUpdateCurrent", tabId);
+	return getDisplayedMessageForTab(CurrentTabId).then(message => {
+		return mpUpdateForMessage(message.id);
+	}).catch(silentCatcher());
+}
 
-// 		//this.init();
+async function getCurrentWindow(){
+	return browser.windows.getCurrent();
+}
 
-// 	}).catch(silentCatcher());
-// }
+async function getCurrentWindowId(){
+	return getCurrentWindow().then(Window => {
+		return Window.id;
+	});
+}
+
+async function getCurrentTab(){
+	return browser.tabs.getCurrent();
+}
+
+async function getCurrentTabId(){
+	return getCurrentTab().then(Tab => {
+		return getTabId(Tab);
+	});
+}
