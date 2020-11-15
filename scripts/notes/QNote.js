@@ -1,7 +1,6 @@
 class QNote extends Note {
 	constructor(keyId) {
 		super(keyId);
-		this.origin = "QNote";
 	}
 
 	load(){

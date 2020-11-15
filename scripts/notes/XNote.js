@@ -2,7 +2,6 @@ class XNote extends Note {
 	constructor(keyId, root) {
 		super(keyId);
 		this.root = root;
-		this.origin = "XNote";
 	}
 
 	load(){

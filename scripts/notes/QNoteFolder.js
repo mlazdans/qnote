@@ -2,7 +2,6 @@ class QNoteFolder extends Note {
 	constructor(keyId, root) {
 		super(keyId);
 		this.root = root;
-		this.origin = "QNoteFolder";
 	}
 
 	load(){
@@ -11,9 +10,7 @@ class QNoteFolder extends Note {
 
 			// Check for legacy XNote
 			if(data = await browser.qnote.loadNote(this.root, this.keyId)){
-				this.origin = "QNoteFolder:QNote";
 			} else if(data = await browser.xnote.loadNote(this.root, this.keyId)){
-				this.origin = "QNoteFolder:XNote";
 			}
 
 			return data;

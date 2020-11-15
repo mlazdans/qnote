@@ -2,12 +2,8 @@ var _ = browser.i18n.getMessage;
 
 class NoteWindow extends QEventDispatcher {
 	constructor() {
-		super(["aftersave","afterdelete","afterupdate","afterclose"]);
-		this.init();
-	}
-
-	init(){
-		console.log(this.listeners);
+		// afterclose fires after closed but before save/delete/update
+		super(["aftersave", "afterdelete", "afterupdate", "afterclose"]);
 		this.note = undefined;
 		this.messageId = undefined;
 		this.popupId = undefined;
@@ -15,7 +11,9 @@ class NoteWindow extends QEventDispatcher {
 		this.needSaveOnClose = true;
 	}
 
-	// NOTE: probably should generalize
+	// init(){
+	// }
+
 	isEqual(n1, n2){
 		let k1 = Object.keys(n1);
 		let k2 = Object.keys(n2);
@@ -31,12 +29,6 @@ class NoteWindow extends QEventDispatcher {
 		}
 
 		return true;
-	}
-
-	async deleteNote(){
-		this.note.text = '';
-
-		return this.close();
 	}
 
 	async updateWindow(){
@@ -55,26 +47,52 @@ class NoteWindow extends QEventDispatcher {
 		return !this.isEqual(this.loadedNoteData, this.note.get());
 	}
 
-	// We currently manage saving or delete via close
-	// TODO: make a batter design
-	async close(closer) {
-		let fName = `${this.constructor.name}.close()`;
-		let isClosed = closer ? await closer() : true;
+	async deleteNote(){
+		qcon.debug(`win.deleteNote()`);
+		return this.note.delete().then(async isDeleted => {
+			await this.fireListeners("afterdelete", this, isDeleted);
+			await this.fireListeners("afterupdate", this, isDeleted);
+			return isDeleted;
+		});
+		// this.note.text = '';
+		// return this.close();
+	}
 
-		await this.fireListeners("afterclose", isClosed, this);
+	async saveNote(){
+		let noteData = this.note.get();
 
-		if(!isClosed){
-			return qcon.debug(`${fName}, -not popped-`);
+		if(this.loadedNoteData){
+			if(this.loadedNoteData.text !== noteData.text){
+				this.note.ts = Date.now();
+			}
 		}
 
+		qcon.debug("win.saveNote()");
+		if(this.modified) {
+			qcon.debug("-saving");
+			return this.note.save().then(async isSaved => {
+				await this.fireListeners("aftersave", this, isSaved);
+				await this.fireListeners("afterupdate", this, isSaved);
+				return isSaved;
+			});
+		} else {
+			qcon.debug("-not modified");
+		}
+
+		return false;
+	}
+
+	async _close(){
+		qcon.debug("win._close()");
+
+		// TODO: get rid off needSaveOnClose property
 		if(!this.needSaveOnClose){
-			return qcon.debug(`${fName}, !needSaveOnClose`);
+			qcon.debug("-!needSaveOnClose");
+			return false;
 		}
-
-		// Probably we'll need this check
-		// if(this.note)
 
 		let action;
+
 		if(this.note.exists){ // Update, delete
 			action = this.note.text ? "save" : "delete"; // delete if no text
 		} else {
@@ -83,46 +101,31 @@ class NoteWindow extends QEventDispatcher {
 			}
 		}
 
-		let wasUpdated;
-		let noteData = this.note.get();
-		// let defExecutor = listener => {
-		// 	listener(this);
-		// };
-
 		if(action === 'save') {
-			console.log(action);
-			if(this.loadedNoteData){
-				if(this.loadedNoteData.text !== noteData.text){
-					this.note.ts = Date.now();
-				}
-			}
-
-			if(this.modified) {
-				qcon.debug(`${fName}, note.save()`);
-				this.note.save();
-				//await this.execListeners("aftersave", defExecutor);
-				await this.fireListeners("aftersave", this);
-				wasUpdated = action;
-			} else {
-				qcon.debug(`${fName}, not modified`);
-			}
+			qcon.debug(`-save`);
+			return this.saveNote();
 		} else if(action === 'delete'){
-			qcon.debug(`${fName}, note.delete()`);
-			this.note.delete();
-			//await this.execListeners("afterdelete", defExecutor);
-			await this.fireListeners("afterdelete", this);
-			wasUpdated = action;
+			qcon.debug(`-delete`);
+			return this.deleteNote();
 		} else {
-			qcon.debug(`${fName}, -do nothing-`);
+			qcon.debug(`-do nothing`);
+		}
+	}
+
+	// TODO: make a better design
+	async close(closer) {
+		if(!closer){
+			return this._close();
 		}
 
-		if(wasUpdated){
-			await this.fireListeners("afterupdate", wasUpdated, this);
-			// await this.execListeners("afterupdate", listener => {
-			// 	listener(wasUpdated, this);
-			// });
-		}
-		this.init();
+		return closer().then(async isClosed => {
+			await this.fireListeners("afterclose", this, isClosed);
+			if(isClosed){
+				return this._close();
+			} else {
+				return false;
+			}
+		});
 	}
 
 	// return true if popped

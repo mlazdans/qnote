@@ -6,7 +6,6 @@ class XULNoteWindow extends NoteWindow {
 
 		// Close
 		browser.qpopup.onRemoved.addListener(popupId => {
-			console.log("browser.qpopup.onRemoved");
 			if(popupId === this.popupId){
 				console.log("browser.qpopup.onRemoved", popupId);
 				super.close();
@@ -76,16 +75,19 @@ class XULNoteWindow extends NoteWindow {
 	}
 
 	async close() {
-		super.close(() => {
+		super.close(async () => {
 			if(this.popupId){
-				return browser.qpopup.remove(this.popupId).then(() => {
-					return true;
-				},() => {
-					return false;
-				});
-			} else {
-				return false;
+				return browser.qpopup.remove(this.popupId);
 			}
+			// if(this.popupId){
+			// 	return browser.qpopup.remove(this.popupId).then(() => {
+			// 		return true;
+			// 	},() => {
+			// 		return false;
+			// 	});
+			// } else {
+			// 	return false;
+			// }
 		});
 	}
 
