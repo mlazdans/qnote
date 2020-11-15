@@ -149,16 +149,6 @@ class NoteWindow extends QEventDispatcher {
 		return popper().then(isPopped => {
 			return this.shown = isPopped;
 		});
-		// if(this.popping){
-		// 	qcon.debug("NoteWindow.pop() - already popping");
-		// 	return false;
-		// }
-
-		// this.popping = true;
-		// return popper().finally(() => {
-		// 	this.shown = true;
-		// 	delete this["popping"];
-		// });
 	}
 
 }
