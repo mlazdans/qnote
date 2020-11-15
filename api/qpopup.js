@@ -126,16 +126,22 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 
 					popupManager.remove(id);
 
-					// if(popup.shown){
-					// 	console.log("show");
-						popup.close();
-					// } else {
-					// 	console.log("closed");
-					// }
+					popup.close();
 
 					PopupEventDispatcher.fireListeners("onremoved", id);
 
 					return true;
+				},
+				async get(id){
+					let popup = popupManager.get(id);
+
+					if(!popup){
+						return null;
+					}
+
+					popup.popupInfo.focused = popup.isFocused;
+
+					return popup.popupInfo;
 				},
 				async update(id, options){
 					let popup = popupManager.get(id);
