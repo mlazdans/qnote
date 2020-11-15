@@ -118,28 +118,29 @@ async function savePrefs(handler){
 		// Update extension prefs
 		ext.Prefs = await ext.loadPrefsWithDefaults();
 
-		if(Prefs.storageOption != oldPrefs.storageOption){
-			//await browser.qapp.clearNoteCache();
-			ext.reloadExtension();
-		}
-
-		// if(Prefs.showFirstChars !== oldPrefs.showFirstChars){
-		// 	await browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
+		ext.reloadExtension();
+		// if(Prefs.storageOption != oldPrefs.storageOption){
+		// 	//await browser.qapp.clearNoteCache();
+		// 	ext.reloadExtension();
 		// }
 
-		// Invalidate column cache
-		if(Prefs.storageFolder !== oldPrefs.storageFolder){
-			//await browser.qapp.clearNoteCache();
-			ext.reloadExtension();
-		}
+		// // if(Prefs.showFirstChars !== oldPrefs.showFirstChars){
+		// // 	await browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
+		// // }
 
-		if(Prefs.windowOption !== oldPrefs.windowOption){
-			ext.reloadExtension();
-		}
+		// // Invalidate column cache
+		// if(Prefs.storageFolder !== oldPrefs.storageFolder){
+		// 	//await browser.qapp.clearNoteCache();
+		// 	ext.reloadExtension();
+		// }
 
-		if(Prefs.enableSearch !== oldPrefs.enableSearch){
-			ext.reloadExtension();
-		}
+		// if(Prefs.windowOption !== oldPrefs.windowOption){
+		// 	ext.reloadExtension();
+		// }
+
+		// if(Prefs.enableSearch !== oldPrefs.enableSearch){
+		// 	ext.reloadExtension();
+		// }
 	};
 
 	await ext.savePrefs(Prefs).then(handler || defaultHandler);
