@@ -1,14 +1,13 @@
-var _ = browser.i18n.getMessage;
-
 class NoteWindow extends QEventDispatcher {
-	constructor() {
+	constructor(windowId) {
 		// afterclose fires after closed but before save/delete/update
 		super(["aftersave", "afterdelete", "afterupdate", "afterclose"]);
-		this.note = undefined;
-		this.messageId = undefined;
-		this.popupId = undefined;
-		this.popping = false;
+
+		this.note;
+		this.popupId;
 		this.needSaveOnClose = true;
+		this.shown = false;
+		this.windowId = windowId;
 	}
 
 	// init(){
@@ -85,6 +84,9 @@ class NoteWindow extends QEventDispatcher {
 	async _close(){
 		qcon.debug("win._close()");
 
+		this.shown = false;
+		// this.popupId = undefined;
+
 		// TODO: get rid off needSaveOnClose property
 		if(!this.needSaveOnClose){
 			qcon.debug("-!needSaveOnClose");
@@ -112,8 +114,11 @@ class NoteWindow extends QEventDispatcher {
 		}
 	}
 
-	// TODO: make a better design
 	async close(closer) {
+		if(!this.shown){
+			return false;
+		}
+
 		if(!closer){
 			return this._close();
 		}
@@ -128,44 +133,31 @@ class NoteWindow extends QEventDispatcher {
 		});
 	}
 
-	// return true if popped
-	async pop(messageId, createNew, pop, popper) {
-		// TODO: maybe return new Promise and finally() this.popping = false;
-		if(this.popping){
-			qcon.debug("NoteWindow.pop() - already popping");
-			return false;
-		}
-
-		await this.close();
-
-		return loadNoteForMessage(messageId).then(note => {
+	async loadNote(keyId) {
+		return loadNote(keyId).then(note => {
 			this.note = note;
 			this.loadedNoteData = note.get();
-			this.messageId = messageId;
 
-			if((this.note.exists && pop) || createNew){
-				this.popping = true;
-				// TODO: remove .then()
-				return popper(this.note).then(isPopped => {
-					return isPopped;
-				}).finally(() => {
-					this.popping = false;
-				});
-			}
-
-			return false;
-		}).catch(e =>{
-			if(e instanceof NoKeyIdError){
-				if(createNew){
-					console.error(e);
-					// TODO: move to app level
-					browser.legacy.alert(_("no.message_id.header"));
-				}
-			} else {
-				console.error(e);
-			}
-
-			return false;
+			return note;
 		});
 	}
+
+	// return true if popped
+	async pop(popper) {
+		return popper().then(isPopped => {
+			this.shown = isPopped;
+			return isPopped;
+		});
+		// if(this.popping){
+		// 	qcon.debug("NoteWindow.pop() - already popping");
+		// 	return false;
+		// }
+
+		// this.popping = true;
+		// return popper().finally(() => {
+		// 	this.shown = true;
+		// 	delete this["popping"];
+		// });
+	}
+
 }

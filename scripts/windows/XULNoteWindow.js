@@ -1,13 +1,12 @@
 class XULNoteWindow extends NoteWindow {
-	constructor() {
-		super();
+	constructor(windowId) {
+		super(windowId);
 
 		// TODO: need to add some filters to the events
 
 		// Close
 		browser.qpopup.onRemoved.addListener(popupId => {
 			if(popupId === this.popupId){
-				console.log("browser.qpopup.onRemoved", popupId);
 				super.close();
 			}
 		});
@@ -64,8 +63,9 @@ class XULNoteWindow extends NoteWindow {
 	// },
 
 	async isFocused() {
-		console.log("isFocused() - implement");
-		// return browser.qapp.popupIsFocused(this.windowId);
+		return browser.qpopup.get(this.popupId).then(popupInfo => {
+			return popupInfo ? popupInfo.focused : false;
+		});
 	}
 
 	async focus() {
@@ -91,11 +91,13 @@ class XULNoteWindow extends NoteWindow {
 		});
 	}
 
-	async pop(messageId, createNew = false, pop = false) {
-		let popper = async note => {
-			let w = await browser.windows.get(CurrentWindow.id);
+	async pop() {
+		return super.pop(async () => {
+			let w = await browser.windows.get(this.windowId);
+
+			let note = this.note;
 			let opt = {
-				windowId: CurrentWindow.id,
+				windowId: this.windowId,
 				url: "html/popup4.html",
 				title: "QNote",
 				width: note.width || Prefs.width,
@@ -121,8 +123,6 @@ class XULNoteWindow extends NoteWindow {
 				this.popupId = popupInfo.id;
 				return true;
 			});
-		};
-
-		return super.pop(messageId, createNew, pop, popper);
+		});
 	}
 }
