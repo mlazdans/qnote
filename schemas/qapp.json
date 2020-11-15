@@ -89,11 +89,15 @@
 			"description": ""
 		}]
 	},{
-		"name": "messagesFocus",
+		"name": "messagePaneFocus",
 		"type": "function",
 		"description": "Focus message pane",
 		"async": true,
-		"parameters": []
+		"parameters": [{
+			"name": "windowId",
+			"type": "integer",
+			"description": "windowId from windows API"
+		}]
 	},{
 		"name": "init",
 		"type": "function",
