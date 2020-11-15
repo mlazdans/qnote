@@ -136,10 +136,9 @@ class NotePopup extends BasePopup {
 
 		if(this.panel){
 			this.panel.remove();
-		}
-
-		if(this.onClose){
-			this.onClose();
+			if(this.onClose){
+				this.onClose();
+			}
 		}
 
 		this.shown = false;
@@ -155,10 +154,6 @@ class NotePopup extends BasePopup {
 			// TODO: maybe insall default .close();
 			// closeButton.addEventListener("click", e => {
 			// 	console.log("close", e);
-			// });
-
-			// deleteButton.addEventListener("click", e => {
-			// 	wex.CurrentNote.deleteNote();
 			// });
 
 			this.attachEvents();
