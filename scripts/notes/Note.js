@@ -1,14 +1,15 @@
 class Note {
 	constructor(keyId) {
 		this.keyId = keyId; // message-id header or another unique id
+		this.exists = false;
+
+		// Note properties
 		this.x;
 		this.y;
 		this.width;
 		this.height;
 		this.text = '';
 		this.ts;
-		this.exists = false;
-		this.origin = "Note";
 	}
 
 	// clone() {
@@ -56,11 +57,10 @@ class Note {
 			this.exists = isSaved;
 			if(isSaved){
 				qcon.debug("note.save() - saved");
-				return data;
+			} else {
+				qcon.debug("note.save() - failure");
 			}
-
-			qcon.debug("note.save() - failure");
-			return false;
+			return isSaved;
 		});
 	}
 
