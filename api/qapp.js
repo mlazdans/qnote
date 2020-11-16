@@ -318,7 +318,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						columnHandler: colHandler
 					});
 
-					// TODO: window handle
+					QAppColumnHandler.setDebug(QDEB);
 					QAppColumnHandler.attachToWindow(Services.wm.getMostRecentWindow("mail:3pane"));
 
 					QAppEventDispatcher.addListener('DOMContentLoaded', (aSubject, aTopic, aData) => {
@@ -326,7 +326,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					});
 				},
 				async installQuickFilter(){
-					console.log("search has been temporarily disabled until we found a better solution");
+					console.warn("search has been temporarily disabled until we found a better solution");
 					// TODO: need to re-think better solution
 					// wex.loadAllQAppNotes().then(() => {
 					// 	NoteFilter.install({

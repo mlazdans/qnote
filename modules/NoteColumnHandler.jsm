@@ -2,6 +2,8 @@ var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var EXPORTED_SYMBOLS = ["NoteColumnHandler"];
 
+var QDEB = true;
+
 class NoteColumnHandler {
 	constructor(options) {
 		this.windows = new WeakSet();
@@ -25,6 +27,10 @@ class NoteColumnHandler {
 			// onMessagesLoaded: (aFolderDisplay, aAll) => {
 			// }
 		};
+	}
+
+	setDebug(doDebubMsg){
+		QDEB = doDebubMsg;
 	}
 
 	addColumnHandler(view){
@@ -51,12 +57,12 @@ class NoteColumnHandler {
 		let fName = `${this.constructor.name}.attachToWindow()`;
 
 		if(this.windows.has(w)){
-			console.debug(`${fName} - already attached`);
+			QDEB&&console.debug(`${fName} - already attached`);
 			return false;
 		}
 
 		if(!this.setUpDOM(w)){
-			console.debug(`${fName} - not attachable`);
+			QDEB&&console.debug(`${fName} - not attachable`);
 			return false;
 		}
 
@@ -65,13 +71,13 @@ class NoteColumnHandler {
 			// TODO: suggest listenerExists or smth
 			let idx = w.FolderDisplayListenerManager._listeners.indexOf(this.dBViewListener);
 			if (idx >= 0) {
-				console.debug(`${fName} - FolderDisplayListenerManager.registerListener() - already installed`);
+				QDEB&&console.debug(`${fName} - FolderDisplayListenerManager.registerListener() - already installed`);
 			} else {
-				console.debug(`${fName} - FolderDisplayListenerManager.registerListener()`);
+				QDEB&&console.debug(`${fName} - FolderDisplayListenerManager.registerListener()`);
 				w.FolderDisplayListenerManager.registerListener(this.dBViewListener);
 			}
 		} else {
-			console.debug(`${fName} - FolderDisplayListenerManager -not found-`);
+			QDEB&&console.debug(`${fName} - FolderDisplayListenerManager -not found-`);
 		}
 
 		this.addColumnHandler(w.gDBView);
@@ -83,14 +89,14 @@ class NoteColumnHandler {
 		let fName = `${this.constructor.name}.detachFromWindow()`;
 
 		if(!this.windows.has(w)){
-			console.debug(`${fName} - window not found`);
+			QDEB&&console.debug(`${fName} - window not found`);
 			return false;
 		}
 
-		console.debug(`${fName}`);
+		QDEB&&console.debug(`${fName}`);
 
 		if(w.FolderDisplayListenerManager) {
-			console.debug(`${fName} - FolderDisplayListenerManager.unregisterListener()`);
+			QDEB&&console.debug(`${fName} - FolderDisplayListenerManager.unregisterListener()`);
 			w.FolderDisplayListenerManager.unregisterListener(this.dBViewListener);
 		}
 
