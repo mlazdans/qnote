@@ -9,6 +9,7 @@ var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js
 
 // TODO: get rid of wex
 // TODO: get rid of globals
+var QDEB = true;
 var QAppColumnHandler;
 var QAppEventDispatcher = new QEventDispatcher(["domwindowopened","domwindowclosed","DOMContentLoaded",]);
 var QAppWindowObserver = {
@@ -54,7 +55,7 @@ function uninstallQNoteCSS() {
 		let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
 		let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
 		if(cssService.sheetRegistered(uri, cssService.USER_SHEET)){
-			qcon.debug("Unregistering html/background.css");
+			QDEB&&console.debug("Unregistering html/background.css");
 			cssService.unregisterSheet(uri, cssService.USER_SHEET);
 		}
 	} catch(e) {
@@ -67,7 +68,7 @@ function installQNoteCSS() {
 		let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
 		let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
 		if(!cssService.sheetRegistered(uri, cssService.USER_SHEET)){
-			qcon.debug("Registering html/background.css");
+			QDEB&&console.debug("Registering html/background.css");
 			cssService.loadAndRegisterSheet(uri, cssService.USER_SHEET);
 		}
 	} catch(e) {
@@ -77,7 +78,7 @@ function installQNoteCSS() {
 
 var qapp = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown() {
-		qcon.debug("QNote.shutdown()");
+		QDEB&&console.debug("QNote.shutdown()");
 
 		uninstallQNoteCSS();
 
@@ -99,7 +100,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 	getAPI(context) {
 		var wex = Cu.waiveXrays(context.cloneScope);
 
-		qcon.debugEnabled = !!wex.Prefs.enableDebug;
+		QDEB = !!wex.Prefs.enableDebug;
 
 		// We'll update cache and call listener once note arrives
 		var noteGrabber = new QCache(wex.getQAppNoteData);
@@ -208,7 +209,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						if(body.length){
 							body = body[0];
 						} else {
-							qcon.debug("print - body not found");
+							QDEB&&console.debug("print - body not found");
 							return;
 						}
 
@@ -277,7 +278,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 						let pDocument = document.getElementById('content');
 						if(!pDocument){
-							qcon.debug("print - content not found");
+							QDEB&&console.debug("print - content not found");
 							return;
 						}
 
@@ -287,7 +288,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					aSubject.addEventListener("DOMContentLoaded", domLoadedListener);
 				},
 				async init(){
-					qcon.debug("qapp.init()");
+					QDEB&&console.debug("qapp.init()");
 
 					// Remove old style sheet in case it still lay around, for example, after update
 					uninstallQNoteCSS();

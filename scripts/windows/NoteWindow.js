@@ -66,7 +66,7 @@ class NoteWindow extends QEventDispatcher {
 	}
 
 	async deleteNote(){
-		qcon.debug(`win.deleteNote()`);
+		QDEB&&console.debug(`win.deleteNote()`);
 		return this.note.delete().then(async isDeleted => {
 			await this.fireListeners("afterdelete", this, isDeleted);
 			await this.fireListeners("afterupdate", this, "delete", isDeleted);
@@ -83,30 +83,30 @@ class NoteWindow extends QEventDispatcher {
 			}
 		}
 
-		qcon.debug("win.saveNote()");
+		QDEB&&console.debug("win.saveNote()");
 		if(this.modified) {
-			qcon.debug("-saving");
+			QDEB&&console.debug("-saving");
 			return this.note.save().then(async isSaved => {
 				await this.fireListeners("aftersave", this, isSaved);
 				await this.fireListeners("afterupdate", this, "save", isSaved);
 				return isSaved;
 			});
 		} else {
-			qcon.debug("-not modified");
+			QDEB&&console.debug("-not modified");
 		}
 
 		return false;
 	}
 
 	async _close(){
-		qcon.debug("win._close()");
+		QDEB&&console.debug("win._close()");
 
 		this.shown = false;
 		// this.popupId = undefined;
 
 		// TODO: get rid off needSaveOnClose property
 		if(!this.needSaveOnClose){
-			qcon.debug("-!needSaveOnClose");
+			QDEB&&console.debug("-!needSaveOnClose");
 			return false;
 		}
 
@@ -121,13 +121,13 @@ class NoteWindow extends QEventDispatcher {
 		}
 
 		if(action === 'save') {
-			qcon.debug(`-save`);
+			QDEB&&console.debug(`-save`);
 			return this.saveNote();
 		} else if(action === 'delete'){
-			qcon.debug(`-delete`);
+			QDEB&&console.debug(`-delete`);
 			return this.deleteNote();
 		} else {
-			qcon.debug(`-do nothing`);
+			QDEB&&console.debug(`-do nothing`);
 		}
 	}
 

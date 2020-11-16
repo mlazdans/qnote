@@ -13,7 +13,7 @@ var Prefs;
 var CurrentNote;
 var CurrentTabId;
 var CurrentWindowId;
-var DEBLOG = true;
+var QDEB = true;
 
 async function focusMessagePane(windowId){
 	await browser.qapp.messagePaneFocus(windowId);
@@ -50,13 +50,13 @@ function initCurrentNote(){
 }
 
 async function initExtension(){
-	qcon.debug("initExtension()");
+	QDEB&&console.debug("initExtension()");
 
 	Prefs = await loadPrefsWithDefaults();
 
 	CurrentWindowId = await getCurrentWindowId();
 
-	qcon.debugEnabled = !!Prefs.enableDebug;
+	QDEB = !!Prefs.enableDebug;
 
 	// window.addEventListener("unhandledrejection", event => {
 	// 	console.warn(`Unhandle: ${event.reason}`, event);
@@ -68,7 +68,7 @@ async function initExtension(){
 
 	// Change folders
 	browser.mailTabs.onDisplayedFolderChanged.addListener(async (Tab, displayedFolder) => {
-		qcon.debug("mailTabs.onDisplayedFolderChanged()");
+		QDEB&&console.debug("mailTabs.onDisplayedFolderChanged()");
 		await CurrentNote.close();
 
 		// CurrentTabId = getTabId(Tab);
@@ -79,7 +79,7 @@ async function initExtension(){
 
 	// Change tabs
 	browser.tabs.onActivated.addListener(async activeInfo => {
-		qcon.debug("tabs.onActivated()", activeInfo);
+		QDEB&&console.debug("tabs.onActivated()", activeInfo);
 		await CurrentNote.close();
 
 		CurrentTabId = activeInfo.tabId;
@@ -91,7 +91,7 @@ async function initExtension(){
 	// Create window
 	// TODO: check, if window id is current popupid
 	browser.windows.onCreated.addListener(async Window => {
-		qcon.debug("windows.onCreated()");
+		QDEB&&console.debug("windows.onCreated()");
 		await CurrentNote.close();
 
 		CurrentWindowId = Window.id;
@@ -101,7 +101,7 @@ async function initExtension(){
 
 	// Change focus
 	browser.windows.onFocusChanged.addListener(async windowId => {
-		qcon.debug("windows.onFocusChanged(), windowId:", windowId, ", current windowId:", CurrentNote.windowId);
+		QDEB&&console.debug("windows.onFocusChanged(), windowId:", windowId, ", current windowId:", CurrentNote.windowId);
 		if(
 			windowId === browser.windows.WINDOW_ID_NONE ||
 			windowId === CurrentNote.windowId
@@ -109,7 +109,7 @@ async function initExtension(){
 			return;
 		}
 
-		qcon.debug("windows.onFocusChanged()", windowId, CurrentNote.windowId);
+		QDEB&&console.debug("windows.onFocusChanged()", windowId, CurrentNote.windowId);
 		await CurrentNote.close();
 
 		CurrentWindowId = windowId;
@@ -119,7 +119,7 @@ async function initExtension(){
 
 	// Change message
 	browser.messageDisplay.onMessageDisplayed.addListener(async (Tab, Message) => {
-		qcon.debug("messageDisplay.onMessageDisplayed()");
+		QDEB&&console.debug("messageDisplay.onMessageDisplayed()");
 		//updateCurrentMessage(CurrentTab);
 
 		await CurrentNote.close();
@@ -146,7 +146,7 @@ async function initExtension(){
 	// Click on main toolbar
 	// TODO: when multiple windows are involved, Tab comes in undefined
 	browser.browserAction.onClicked.addListener(Tab => {
-		qcon.debug("browserAction.onClicked()");
+		QDEB&&console.debug("browserAction.onClicked()");
 		QNotePopToggle(Tab);
 		// QNotePopToggle().then(()=>{
 		// 	QNoteTabPop(tab);
@@ -156,7 +156,7 @@ async function initExtension(){
 
 	// // Click on QNote button
 	browser.messageDisplayAction.onClicked.addListener(Tab => {
-		qcon.debug("messageDisplayAction.onClicked()", Tab, CurrentTabId);
+		QDEB&&console.debug("messageDisplayAction.onClicked()", Tab, CurrentTabId);
 		QNotePopToggle(Tab);
 		// QNotePopToggle().then(()=>{
 		// 	QNoteTabPop(tab);

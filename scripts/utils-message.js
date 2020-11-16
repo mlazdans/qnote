@@ -71,7 +71,7 @@ async function saveNoteForMessage(messageId, data){
 
 async function 	tagMessage(messageId, tagName, toTag = true) {
 	return getMessage(messageId).then(message => {
-		qcon.debug(`tagMessage(messageId:${messageId}, tagName:${tagName}, toTag:${toTag})`);
+		QDEB&&console.debug(`tagMessage(messageId:${messageId}, tagName:${tagName}, toTag:${toTag})`);
 		let tags = message.tags;
 
 		if(toTag){

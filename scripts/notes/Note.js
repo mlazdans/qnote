@@ -57,9 +57,9 @@ class Note {
 		return saver(data).then(isSaved => {
 			this.exists = isSaved;
 			if(isSaved){
-				qcon.debug("note.save() - saved");
+				QDEB&&console.debug("note.save() - saved");
 			} else {
-				qcon.debug("note.save() - failure");
+				QDEB&&console.debug("note.save() - failure");
 			}
 			return isSaved;
 		});

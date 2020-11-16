@@ -310,16 +310,16 @@ async function QNotePopToggle(Tab) {
 		// This logic won't work with WebExtensionNoteWindow when clicking on buttons
 		// Window will loose focus hence report no focus
 		if(await CurrentNote.isFocused()){
-			qcon.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - focused, waiting to close`);
+			QDEB&&console.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - focused, waiting to close`);
 			CurrentNote.close();
 		} else {
-			qcon.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - opened, waiting to gain focus`);
+			QDEB&&console.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - opened, waiting to gain focus`);
 			CurrentNote.focus();
 		}
 	} else {
-		qcon.debug("QNotePopToggle(), popupId = -not set-");
+		QDEB&&console.debug("QNotePopToggle(), popupId = -not set-");
 		QNotePopForTab(Tab, POP_FOCUS).then(isPopped => {
-			qcon.debug("QNotePopToggle(), isPopped =", isPopped);
+			QDEB&&console.debug("QNotePopToggle(), isPopped =", isPopped);
 			if(isPopped){
 				CurrentNote.focus();
 			}
@@ -337,7 +337,7 @@ async function updateIcons(on){
 // Not so silent :>
 function silentCatcher(){
 	return (...args) => {
-		qcon.debug(...args);
+		QDEB&&console.debug(...args);
 	}
 }
 
