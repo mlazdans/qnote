@@ -307,6 +307,8 @@ async function QNotePopForTab(Tab, flags = POP_NONE) {
 
 async function QNotePopToggle(Tab) {
 	if(CurrentNote.shown){
+		// This logic won't work with WebExtensionNoteWindow when clicking on buttons
+		// Window will loose focus hence report no focus
 		if(await CurrentNote.isFocused()){
 			qcon.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - focused, waiting to close`);
 			CurrentNote.close();
