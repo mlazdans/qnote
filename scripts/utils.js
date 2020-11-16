@@ -17,19 +17,13 @@ function getDefaultPrefs() {
 		storageFolder: "",
 		enableSearch: false, // defaults to false for now, because of poor implementation
 
-		printAttachTop: true,
 		printAttachTopTitle: true,
 		printAttachTopText: true,
-
-		printAttachBottom: false,
 		printAttachBottomTitle: true,
 		printAttachBottomText: true,
 
-		messageAttachTop: true,
 		messageAttachTopTitle: true,
 		messageAttachTopText: true,
-
-		messageAttachBottom: false,
 		messageAttachBottomTitle: true,
 		messageAttachBottomText: true,
 
@@ -351,7 +345,13 @@ async function mpUpdateForMessage(messageId){
 		updateNoteView(note);
 
 		// Attach note to message
-		browser.qapp.attachNoteToMessage(CurrentWindowId, note2QAppNote(note));
+		let prefs = {
+			topTitle: Prefs.messageAttachTopTitle,
+			topText: Prefs.messageAttachTopText,
+			bottomTitle: Prefs.messageAttachBottomTitle,
+			bottomText: Prefs.messageAttachBottomText
+		};
+		browser.qapp.attachNoteToMessage(CurrentWindowId, note2QAppNote(note), prefs);
 	});
 }
 
