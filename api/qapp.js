@@ -10,8 +10,9 @@ var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js
 // TODO: get rid of wex
 // TODO: get rid of globals
 var QDEB = true;
+var QAppNoteRequester;
 var QAppColumnHandler;
-var QAppEventDispatcher = new QEventDispatcher(["domwindowopened","domwindowclosed","DOMContentLoaded",]);
+var QAppEventDispatcher = new QEventDispatcher(["domwindowopened","domwindowclosed","DOMContentLoaded"]);
 var QAppWindowObserver = {
 	observe: function(aSubject, aTopic, aData) {
 		if(aTopic === 'domwindowopened' || aTopic === 'domwindowclosed'){
@@ -104,7 +105,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		// We'll update cache and call listener once item arrives
 		// MAYBE: send down function from WebExtension
-		var noteGrabber = new QCache(wex.getQAppNoteData);
+		var noteGrabber;
 
 		function id2RealWindow(windowId){
 			try {
@@ -174,6 +175,39 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		return {
 			qapp: {
+				onNoteRequest: new ExtensionCommon.EventManager({
+					context,
+					name: "qapp.onNoteRequest",
+					register: fire => {
+						// It makes sense to allow only one note requester
+						QAppNoteRequester = (keyId) => {
+							return fire.async(keyId);
+						}
+						return () => {
+						}
+					}
+				}).api(),
+				async init(){
+					QDEB&&console.debug("qapp.init()");
+
+					// Remove old style sheet in case it still lay around, for example, after update
+					uninstallQNoteCSS();
+					installQNoteCSS();
+
+					noteGrabber = new QCache(QAppNoteRequester);
+
+					this.popups = new Map();
+
+					Services.ww.registerNotification(QAppWindowObserver);
+
+					QAppEventDispatcher.addListener('domwindowopened', this.printerQNoteAttacher);
+
+					// if(wex.Prefs.enableSearch){
+					// 	this.installQuickFilter();
+					// }
+
+					this.installColumnHandler();
+				},
 				printerQNoteAttacher(aSubject) {
 					var messageUrisToPrint;
 					let printerWindowDOMListener = e => {
@@ -261,25 +295,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					aSubject.addEventListener("DOMContentLoaded", domLoadedListener);
 				},
-				async init(){
-					QDEB&&console.debug("qapp.init()");
-
-					// Remove old style sheet in case it still lay around, for example, after update
-					uninstallQNoteCSS();
-					installQNoteCSS();
-
-					this.popups = new Map();
-
-					Services.ww.registerNotification(QAppWindowObserver);
-
-					QAppEventDispatcher.addListener('domwindowopened', this.printerQNoteAttacher);
-
-					if(wex.Prefs.enableSearch){
-						this.installQuickFilter();
-					}
-
-					this.installColumnHandler();
-				},
 				async messagePaneFocus(windowId){
 					let w = id2RealWindow(windowId);
 					if(w && w.gFolderDisplay && w.gFolderDisplay.tree){
@@ -287,7 +302,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 				},
 				installColumnHandler(){
-					this.setColumnTextLimit(wex.Prefs.showFirstChars);
+					//this.setColumnTextLimit(wex.Prefs.showFirstChars);
 					QAppColumnHandler = new NoteColumnHandler({
 						columnHandler: colHandler
 					});

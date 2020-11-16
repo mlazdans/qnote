@@ -60,6 +60,9 @@ async function initExtension(){
 
 	CurrentWindowId = await getCurrentWindowId();
 
+	// Return notes to qapp on request
+	browser.qapp.onNoteRequest.addListener(getQAppNoteData);
+
 	QDEB = !!Prefs.enableDebug;
 
 	// window.addEventListener("unhandledrejection", event => {

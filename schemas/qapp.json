@@ -112,5 +112,15 @@
 		"description": "Initialize extension",
 		"async": true,
 		"parameters": []
+	}],
+	"events": [{
+		"name": "onNoteRequest",
+		"type": "function",
+		"description": "Fired when a qapp needs note from addon.",
+		"parameters": [{
+			"name": "keyId",
+			"type": "string",
+			"description": ""
+		}]
 	}]
 }]
