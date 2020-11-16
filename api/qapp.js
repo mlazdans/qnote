@@ -329,7 +329,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				},
 				// TODO: keep track of windows
 				async updateView(windowId, keyId){
-					let fName = `${this.constructor.name}.updateView()`;
+					let fName = "qapp.updateView()";
 
 					let w = id2RealWindow(windowId);
 					if(!w || !w.document){
@@ -379,8 +379,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsITreeBoxObject#invalidateCell
 					view.NoteChange(row, 1, 2);
 				},
-				async attachNoteToMessage(windowId, data){
-					let fName = `${this.constructor.name}.attachNoteToMessage()`;
+				async attachNoteToMessage(windowId, data, prefs){
+					let fName = "qapp.attachNoteToMessage()";
+
+					if(!prefs){
+						QDEB&&console.debug(`${fName} - no prefs`);
+						return;
+					}
 
 					let w = id2RealWindow(windowId);
 					if(!w || !w.document){
@@ -403,24 +408,29 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return;
 					}
 
-					QDEB&&console.debug(`${fName}, windowId:`, windowId);
+					if(!(data && data.exists)){
+						QDEB&&console.debug(`${fName} - no note`);
+						return;
+					}
+
+					let aMessageDisplay = w.gMessageDisplay;
+					if(!(aMessageDisplay && aMessageDisplay.displayedMessage)) {
+						QDEB&&console.debug(`${fName} - no MessageDisplay`);
+						return;
+					}
+
+					// Bail if no data or trying to attach to alien message
+					if(aMessageDisplay.displayedMessage.messageId !== data.keyId){
+						QDEB&&console.debug(`${fName} - trying to attach to alien message`);
+						return
+					}
+
+					QDEB&&console.debug(`${fName}`);
 
 					// Cleanup attached notes
 					let domNodes = document.getElementsByClassName('qnote-insidenote');
 					while(domNodes.length){
 						domNodes[0].remove();
-					}
-
-					let aMessageDisplay = w.gMessageDisplay;
-
-					// Bail if no data or trying to attach to alien message
-					if(
-						!data || !data.exists ||
-						!aMessageDisplay ||
-						!aMessageDisplay.displayedMessage ||
-						aMessageDisplay.displayedMessage.messageId !== data.keyId
-					) {
-						return;
 					}
 
 					let formatted = formatQNoteData(data);
@@ -437,18 +447,18 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return html.join("");
 					};
 
-					if(wex.Prefs.messageAttachTop){
+					if(prefs.topTitle || prefs.topText){
 						let html = htmlFormatter(
-							wex.Prefs.messageAttachTopTitle ? formatted.title : false,
-							wex.Prefs.messageAttachTopText ? formatted.text : false,
+							prefs.topTitle ? formatted.title : false,
+							prefs.topText ? formatted.text : false,
 						);
 						body.insertAdjacentHTML('afterbegin', '<div class="qnote-insidenote qnote-insidenote-top">' + html + '</div>');
 					}
 
-					if(wex.Prefs.messageAttachBottom){
+					if(prefs.bottomTitle || prefs.bottomText){
 						let html = htmlFormatter(
-							wex.Prefs.messageAttachBottomTitle ? formatted.title : false,
-							wex.Prefs.messageAttachBottomText ? formatted.text : false,
+							prefs.bottomTitle ? formatted.title : false,
+							prefs.bottomText ? formatted.text : false,
 						);
 						body.insertAdjacentHTML('beforeend', '<div class="qnote-insidenote qnote-insidenote-bottom">' + html + '</div>');
 					}

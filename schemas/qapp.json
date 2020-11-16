@@ -59,8 +59,37 @@
 			"type": "integer",
 			"description": "windowId from windows API"
 		},{
-			"$ref": "NoteData",
-			"optional": true
+			"$ref": "NoteData"
+		},{
+			"name": "prefs",
+			"type": "object",
+			"optional": true,
+			"properties": {
+				"topTitle": {
+					"type": "boolean",
+					"optional": true,
+					"default": false,
+					"description": ""
+				},
+				"topText": {
+					"type": "boolean",
+					"optional": true,
+					"default": false,
+					"description": ""
+				},
+				"bottomTitle": {
+					"type": "boolean",
+					"optional": true,
+					"default": false,
+					"description": ""
+				},
+				"bottomText": {
+					"type": "boolean",
+					"optional": true,
+					"default": false,
+					"description": ""
+				}
+			}
 		}]
 	},{
 		"name": "clearNoteCache",
