@@ -13,7 +13,7 @@ var Menu = {
 			title: _("modify.note"),
 			contexts: ["message_list"],
 			onclick(info) {
-				QNoteMessagePop(Menu.getMessage(info));
+				QNotePopForMessage(Menu.getMessage(info));
 			},
 		});
 
@@ -44,24 +44,16 @@ var Menu = {
 			contexts: ["message_list"],
 			onclick(info) {
 				let messageId = Menu.getId(info);
-				let data = {
-					x: undefined,
-					y: undefined,
-					width: Prefs.width,
-					height: Prefs.height
-				};
 
 				if(CurrentNote.messageId === messageId){
-					CurrentNote.note.set(data);
-					CurrentNote.updateWindow({
-						left: data.x,
-						top: data.y,
-						width: data.width,
-						height: data.height,
-						focused: true
-					});
+					CurrentNote.reset();
 				} else {
-					saveNoteForMessage(messageId, data);
+					saveNoteForMessage(messageId, {
+						x: undefined,
+						y: undefined,
+						width: Prefs.width,
+						height: Prefs.height
+					});
 				}
 			},
 		});
@@ -72,7 +64,7 @@ var Menu = {
 			title: _("create.new.note"),
 			contexts: ["message_list"],
 			async onclick(info) {
-				QNoteMessagePop(Menu.getMessage(info));
+				QNotePopForMessage(Menu.getId(info), POP_FOCUS);
 			},
 		});
 	}
