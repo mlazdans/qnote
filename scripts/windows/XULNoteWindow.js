@@ -72,25 +72,6 @@ class XULNoteWindow extends NoteWindow {
 		});
 	}
 
-	async reset(){
-		let inBox = {
-			focused: true,
-			width: Prefs.width,
-			height: Prefs.height
-		};
-
-		inBox = Object.assign(inBox, this._center(inBox, await this._getWindowRect()));
-
-		this.note.set({
-			x: inBox.left,
-			y: inBox.top,
-			width: inBox.width,
-			height: inBox.height
-		});
-
-		return this.update(inBox);
-	}
-
 	async close() {
 		super.close(async () => {
 			if(this.popupId){

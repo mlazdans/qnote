@@ -34,10 +34,6 @@ class NoteWindow extends QEventDispatcher {
 		console.error("Not implemented");
 	}
 
-	async reset(){
-		console.error("Not implemented");
-	}
-
 	async focus() {
 		console.error("Not implemented");
 	}
@@ -50,11 +46,30 @@ class NoteWindow extends QEventDispatcher {
 		return !this.isEqual(this.loadedNoteData, this.note.get());
 	}
 
+	async reset(){
+		let inBox = {
+			focused: true,
+			width: Prefs.width,
+			height: Prefs.height
+		};
+
+		inBox = Object.assign(inBox, this._center(inBox, await this._getWindowRect()));
+
+		this.note.set({
+			x: inBox.left,
+			y: inBox.top,
+			width: inBox.width,
+			height: inBox.height
+		});
+
+		return this.update(inBox);
+	}
+
 	async deleteNote(){
 		qcon.debug(`win.deleteNote()`);
 		return this.note.delete().then(async isDeleted => {
 			await this.fireListeners("afterdelete", this, isDeleted);
-			await this.fireListeners("afterupdate", this, isDeleted);
+			await this.fireListeners("afterupdate", this, "delete", isDeleted);
 			return isDeleted;
 		});
 	}
@@ -73,7 +88,7 @@ class NoteWindow extends QEventDispatcher {
 			qcon.debug("-saving");
 			return this.note.save().then(async isSaved => {
 				await this.fireListeners("aftersave", this, isSaved);
-				await this.fireListeners("afterupdate", this, isSaved);
+				await this.fireListeners("afterupdate", this, "save", isSaved);
 				return isSaved;
 			});
 		} else {
