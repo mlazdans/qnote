@@ -387,3 +387,13 @@ async function getCurrentTabId(){
 		return getTabId(Tab);
 	});
 }
+
+function updateNoteView(note){
+	if(note){
+		return sendNoteToQApp(note).then(() => {
+			browser.qapp.updateView(CurrentWindowId, note.keyId);
+		});
+	} else {
+		return browser.qapp.updateView(CurrentWindowId);
+	}
+}
