@@ -40,6 +40,10 @@
 		"description": "",
 		"async": true,
 		"parameters": [{
+			"name": "windowId",
+			"type": "integer",
+			"description": "windowId from windows API"
+		},{
 			"name": "keyId",
 			"optional": true,
 			"type": "string",

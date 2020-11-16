@@ -332,40 +332,56 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// });
 				},
 				// TODO: keep track of windows
-				async updateView(keyId){
-					let w = this.getQNoteSuitableWindow();
-					let aFolderDisplay = w.gFolderDisplay;
-					if(aFolderDisplay && aFolderDisplay.view && aFolderDisplay.view.dbView){
-						let view = aFolderDisplay.view.dbView;
-						let row;
+				async updateView(windowId, keyId){
+					let fName = `${this.constructor.name}.updateView()`;
 
-						if(keyId && view.db){
-							let msgHdr = view.db.getMsgHdrForMessageID(keyId);
-							if(msgHdr){
-								row = view.findIndexOfMsgHdr(msgHdr, false);
-							}
-						} else {
-							row = view.currentlyDisplayedMessage;
-						}
-
-						//let rangeCount = treeSelection.getRangeCount();
-						// nsIMsgDBView.idl
-						// NoteChange(nsMsgViewIndex, PRInt32, nsMsgViewNotificationCodeValue)
-						// const nsMsgViewNotificationCodeValue changed = 2;
-						/**
-						 * Notify tree that rows have changed.
-						 *
-						 * @param aFirstLineChanged   first view index for changed rows.
-						 * @param aNumRows            number of rows changed; < 0 means removed.
-						 * @param aChangeType         changeType.
-						 */
-						// void NoteChange(in nsMsgViewIndex aFirstLineChanged, in long aNumRows,
-						// 	in nsMsgViewNotificationCodeValue aChangeType);
-
-						// TODO: probably a good idea to change all rows in a view or at least add func parameter
-						// https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsITreeBoxObject#invalidateCell
-						view.NoteChange(row, 1, 2);
+					let w = id2RealWindow(windowId);
+					if(!w || !w.document){
+						QDEB&&console.debug(`${fName} - no window`);
+						return;
 					}
+
+					let mainPopupSet = w.document.getElementById('mainPopupSet');
+					if(!mainPopupSet){
+						QDEB&&console.debug(`${fName} - no mainPopupSet`);
+						return;
+					}
+
+					let aFolderDisplay = w.gFolderDisplay;
+					if(!(aFolderDisplay && aFolderDisplay.view && aFolderDisplay.view.dbView)){
+						QDEB&&console.debug(`${fName} - no dbView`);
+						return;
+					}
+
+					let view = aFolderDisplay.view.dbView;
+					let row;
+
+					if(keyId && view.db){
+						let msgHdr = view.db.getMsgHdrForMessageID(keyId);
+						if(msgHdr){
+							row = view.findIndexOfMsgHdr(msgHdr, false);
+						}
+					} else {
+						row = view.currentlyDisplayedMessage;
+					}
+
+					//let rangeCount = treeSelection.getRangeCount();
+					// nsIMsgDBView.idl
+					// NoteChange(nsMsgViewIndex, PRInt32, nsMsgViewNotificationCodeValue)
+					// const nsMsgViewNotificationCodeValue changed = 2;
+					/**
+					 * Notify tree that rows have changed.
+					 *
+					 * @param aFirstLineChanged   first view index for changed rows.
+					 * @param aNumRows            number of rows changed; < 0 means removed.
+					 * @param aChangeType         changeType.
+					 */
+					// void NoteChange(in nsMsgViewIndex aFirstLineChanged, in long aNumRows,
+					// 	in nsMsgViewNotificationCodeValue aChangeType);
+
+					// TODO: probably a good idea to change all rows in a view or at least add func parameter
+					// https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsITreeBoxObject#invalidateCell
+					view.NoteChange(row, 1, 2);
 				},
 				async attachNoteToMessage(windowId, data){
 					let fName = `${this.constructor.name}.attachNoteToMessage()`;
@@ -373,7 +389,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					//let w = this.getMessageSuitableWindow();
 					let w = id2RealWindow(windowId);
 					if(!w || !w.document){
-						QDEB&&console.debug(`${fName} - not attachable`);
+						QDEB&&console.debug(`${fName} - no window`);
 						return;
 					}
 
