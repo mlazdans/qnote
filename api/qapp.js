@@ -174,25 +174,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		return {
 			qapp: {
-				// TODO: keep track of windows
-				getMessageSuitableWindow(){
-					let w = Services.wm.getMostRecentWindow(null);
-
-					if(w.document.getElementById("messagepane")){
-						return w;
-					}
-
-					return Services.wm.getMostRecentWindow("mail:3pane");
-				},
-				getQNoteSuitableWindow(){
-					let w = Services.wm.getMostRecentWindow(null);
-
-					if(w.document.getElementById("mainPopupSet")){
-						return w;
-					}
-
-					return Services.wm.getMostRecentWindow("mail:3pane");
-				},
 				printerQNoteAttacher(aSubject) {
 					var messageUrisToPrint;
 					let printerWindowDOMListener = e => {
@@ -386,7 +367,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				async attachNoteToMessage(windowId, data){
 					let fName = `${this.constructor.name}.attachNoteToMessage()`;
 
-					//let w = this.getMessageSuitableWindow();
 					let w = id2RealWindow(windowId);
 					if(!w || !w.document){
 						QDEB&&console.debug(`${fName} - no window`);
@@ -467,6 +447,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				async deleteNoteCache(keyId){
 					noteGrabber.delete(keyId);
 				},
+				// MAYBE: remove?
 				async setColumnTextLimit(limit){
 					// console.log(`setColumnTextLimit(${limit})`);
 					// colHandler.limit = limit;
