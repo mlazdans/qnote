@@ -9,6 +9,9 @@
 // TODO: multiple notes simultaneously
 // TODO: save note pos and dims locally, outside note
 // TODO: create a solid blocker for pop/close
+// TODO: esc
+// TODO: hide popup while loading
+// TODO: delete button
 var Prefs;
 var CurrentNote;
 var CurrentTabId;
@@ -34,6 +37,7 @@ function initCurrentNote(){
 	}
 
 	CurrentNote.addListener("afterupdate", (NoteWindow, action, isOk) => {
+		QDEB&&console.debug("afterupdate", action, isOk);
 		if(isOk && CurrentNote.messageId){
 			mpUpdateForMessage(CurrentNote.messageId);
 			if(Prefs.useTag){
@@ -119,12 +123,12 @@ async function initExtension(){
 
 	// Change message
 	browser.messageDisplay.onMessageDisplayed.addListener(async (Tab, Message) => {
-		QDEB&&console.debug("messageDisplay.onMessageDisplayed()");
+		QDEB&&console.debug("messageDisplay.onMessageDisplayed(), messageId:", Message.id);
 		//updateCurrentMessage(CurrentTab);
 
 		await CurrentNote.close();
 
-		// CurrentTabId = getTabId(Tab);
+		CurrentTabId = getTabId(Tab);
 		// CurrentWindowId = Tab.windowId;
 		// CurrentWindowId = await getCurrentWindowId();
 		initCurrentNote();
@@ -135,7 +139,8 @@ async function initExtension(){
 		}
 
 		QNotePopForMessage(Message.id, flags).then(isPopped =>{
-			mpUpdateCurrent();
+			mpUpdateForMessage(Message.id);
+			//mpUpdateCurrent();
 			// Focus message pane in case popped
 			if(isPopped && !Prefs.focusOnDisplay){
 				focusMessagePane(CurrentNote.windowId);
