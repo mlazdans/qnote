@@ -10,7 +10,6 @@ var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js
 // TODO: get rid of wex
 // TODO: get rid of globals
 var QDEB = true;
-var QAppNoteRequester;
 var QAppColumnHandler;
 var QAppEventDispatcher = new QEventDispatcher(["domwindowopened","domwindowclosed","DOMContentLoaded"]);
 var QAppWindowObserver = {
@@ -100,12 +99,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 	getAPI(context) {
 		var wex = Cu.waiveXrays(context.cloneScope);
+		var noteRequester;
+		var noteGrabber;
 
 		QDEB = !!wex.Prefs.enableDebug;
-
-		// We'll update cache and call listener once item arrives
-		// MAYBE: send down function from WebExtension
-		var noteGrabber;
 
 		function id2RealWindow(windowId){
 			try {
@@ -115,6 +112,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		}
 
 		var colHandler = {
+			limit: wex.Prefs.showFirstChars,
 			noteRowListener(view, row) {
 				if(view && Number.isInteger(row)){
 					// That method is part of Mozilla API and has nothing to do with either XNote or QNote :)
@@ -143,9 +141,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					this.noteRowListener(this.getView(col), row);
 				});
 
-				let limit = wex.Prefs.showFirstChars;
-				if(note.exists && !note.shortText && limit && (typeof note.text === 'string')){
-					note.shortText = note.text.substring(0, limit);
+				if(note.exists && !note.shortText && this.limit && (typeof note.text === 'string')){
+					note.shortText = note.text.substring(0, this.limit);
 				}
 
 				return note.exists ? note.shortText : null;
@@ -180,7 +177,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					name: "qapp.onNoteRequest",
 					register: fire => {
 						// It makes sense to allow only one note requester
-						QAppNoteRequester = (keyId) => {
+						noteRequester = (keyId) => {
 							return fire.async(keyId);
 						}
 						return () => {
@@ -194,7 +191,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					uninstallQNoteCSS();
 					installQNoteCSS();
 
-					noteGrabber = new QCache(QAppNoteRequester);
+					// We'll update cache and call listener once item arrives
+					// init() caller must install onNoteRequest listener
+					noteGrabber = new QCache(noteRequester);
 
 					this.popups = new Map();
 
