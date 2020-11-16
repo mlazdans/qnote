@@ -172,6 +172,7 @@ async function initExtension(){
 	// Handle keyboard shortcuts
 	browser.commands.onCommand.addListener(command => {
 		if(command === 'qnote') {
+			QDEB&&console.debug("commands.onCommand()", command);
 			QNotePopToggle(CurrentTabId);
 		}
 	});
