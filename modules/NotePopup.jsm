@@ -209,6 +209,7 @@ class NotePopup extends BasePopup {
 
 			let anchor = null;
 
+			// TODO: handle relative coords
 			if(left && top) {
 				self.panel.openPopup(anchor, "topleft", left, top);
 			} else {
@@ -240,8 +241,10 @@ class NotePopup extends BasePopup {
 			let mover = e => {
 				panel.moveTo(e.screenX - startX + startLeft, e.screenY - startY + startTop);
 				return {
-					x: e.screenX - startX + startLeft - window.screenX,
-					y: e.screenY - startY + startTop - window.screenY
+					x: e.screenX - startX + startLeft,
+					y: e.screenY - startY + startTop
+					// x: e.screenX - startX + startLeft - window.screenX,
+					// y: e.screenY - startY + startTop - window.screenY
 				}
 			};
 
