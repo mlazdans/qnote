@@ -7,44 +7,44 @@
 // TODO: suggest: nsIMsgFilterService->removeCustomAction, nsIMsgFilterService->removeCustomTerm
 // TODO: suggest: QuickFilterManager.jsm > appendTerms() > term.customId = tfDef.customId;
 // TODO: multiple notes simultaneously
+// TODO: save note pos and dims locally, outside note
+// TODO: create a solid blocker for pop/close
 var Prefs;
 var CurrentNote;
-var CurrentTab;
-var CurrentWindow;
+var CurrentTabId;
+var CurrentWindowId;
 var qcon = new QConsole(console);
 
-// TODO: track window changes so we do not lose focus inside lone message window
-async function focusMessagePane(){
-	return browser.windows.getCurrent().then(async window => {
-		await browser.windows.update(window.id, {
-			focused: true
-		});
-
-		// browser.windows.update() will focus main window, but not message list
-		await browser.qapp.messagesFocus();
-	});
+async function focusMessagePane(windowId){
+	await browser.qapp.messagePaneFocus(windowId);
 }
 
 function initCurrentNote(){
+	if(CurrentNote){
+		CurrentNote.windowId = CurrentWindowId;
+		return;
+	}
+
 	if(Prefs.windowOption === 'xul'){
-		CurrentNote = new XULNoteWindow();
+		CurrentNote = new XULNoteWindow(CurrentWindowId);
 	} else if(Prefs.windowOption == 'webext'){
-		CurrentNote = new WebExtensionNoteWindow();
+		CurrentNote = new WebExtensionNoteWindow(CurrentWindowId);
 	} else {
 		throw new TypeError("Prefs.windowOption");
 	}
 
-	CurrentNote.addListener("afterupdate", (action, NoteWindow) => {
-		updateDisplayedMessage(CurrentTab);
-		updateNoteView(NoteWindow.note); // In case opened NoteWindow is not for currently selected message
-		if(Prefs.useTag){
-			tagMessage(CurrentNote.messageId, Prefs.tagName, action === "save");
+	CurrentNote.addListener("afterupdate", (NoteWindow, action, isOk) => {
+		if(isOk && CurrentNote.messageId){
+			mpUpdateForMessage(CurrentNote.messageId);
+			if(Prefs.useTag){
+				tagMessage(CurrentNote.messageId, Prefs.tagName, action === "save");
+			}
 		}
 	});
 
-	CurrentNote.addListener("afterclose", isClosed => {
+	CurrentNote.addListener("afterclose", (NoteWindow, isClosed) => {
 		if(isClosed){
-			focusMessagePane();
+			focusMessagePane(CurrentNote.windowId);
 		}
 	});
 }
@@ -53,8 +53,8 @@ async function initExtension(){
 	qcon.debug("initExtension()");
 
 	Prefs = await loadPrefsWithDefaults();
-	CurrentTab = await browser.tabs.getCurrent();
-	CurrentWindow = await browser.windows.getCurrent();
+
+	CurrentWindowId = await getCurrentWindowId();
 
 	qcon.debugEnabled = !!Prefs.enableDebug;
 
@@ -65,6 +65,110 @@ async function initExtension(){
 	initCurrentNote();
 
 	await browser.qapp.init();
+
+	// Change folders
+	browser.mailTabs.onDisplayedFolderChanged.addListener(async (Tab, displayedFolder) => {
+		qcon.debug("mailTabs.onDisplayedFolderChanged()");
+		await CurrentNote.close();
+
+		// CurrentTabId = getTabId(Tab);
+		// CurrentWindowId = Tab.windowId;
+		initCurrentNote();
+		//updateCurrentMessage(CurrentTab);
+	});
+
+	// Change tabs
+	browser.tabs.onActivated.addListener(async activeInfo => {
+		qcon.debug("tabs.onActivated()", activeInfo);
+		await CurrentNote.close();
+
+		CurrentTabId = activeInfo.tabId;
+		// CurrentWindowId = activeInfo.windowId;
+		initCurrentNote();
+		//updateCurrentMessage(CurrentTab);
+	});
+
+	// Create window
+	// TODO: check, if window id is current popupid
+	browser.windows.onCreated.addListener(async Window => {
+		qcon.debug("windows.onCreated()");
+		await CurrentNote.close();
+
+		CurrentWindowId = Window.id;
+		initCurrentNote();
+		//updateCurrentMessage(CurrentTab);
+	});
+
+	// Change focus
+	browser.windows.onFocusChanged.addListener(async windowId => {
+		if(
+			windowId === browser.windows.WINDOW_ID_NONE ||
+			windowId === CurrentNote.windowId ||
+			windowId === 3 // Probably not such a good idea
+		){
+			return;
+		}
+
+		qcon.debug("windows.onFocusChanged()", windowId, CurrentNote.windowId);
+		await CurrentNote.close();
+
+		CurrentWindowId = windowId;
+		initCurrentNote();
+		mpUpdateCurrent();
+	});
+
+	// Change message
+	browser.messageDisplay.onMessageDisplayed.addListener(async (Tab, Message) => {
+		qcon.debug("messageDisplay.onMessageDisplayed()");
+		//updateCurrentMessage(CurrentTab);
+
+		await CurrentNote.close();
+
+		// CurrentTabId = getTabId(Tab);
+		// CurrentWindowId = Tab.windowId;
+		// CurrentWindowId = await getCurrentWindowId();
+		initCurrentNote();
+
+		let flags = POP_EXISTING;
+		if(Prefs.focusOnDisplay){
+			flags |= POP_FOCUS;
+		}
+
+		QNotePopForMessage(Message.id, flags).then(isPopped =>{
+			mpUpdateCurrent();
+			// Focus message pane in case popped
+			if(isPopped && !Prefs.focusOnDisplay){
+				focusMessagePane(CurrentNote.windowId);
+			}
+		});
+	});
+
+	// Click on main toolbar
+	browser.browserAction.onClicked.addListener(Tab => {
+		qcon.debug("browserAction.onClicked()");
+		QNotePopToggle(Tab);
+		// QNotePopToggle().then(()=>{
+		// 	QNoteTabPop(tab);
+		// });
+		// CurrentTab = tab;
+	});
+
+	// // Click on QNote button
+	browser.messageDisplayAction.onClicked.addListener(Tab => {
+		qcon.debug("messageDisplayAction.onClicked()", Tab, CurrentTabId);
+		QNotePopToggle(Tab);
+		// QNotePopToggle().then(()=>{
+		// 	QNoteTabPop(tab);
+		// });
+		// CurrentTab = tab;
+	});
+
+	// Handle keyboard shortcuts
+	browser.commands.onCommand.addListener(command => {
+		if(command === 'qnote') {
+			QNotePopToggle(CurrentTabId);
+		}
+	});
 
 	// Context menu on message
 	browser.menus.onShown.addListener(info => {
@@ -85,77 +189,48 @@ async function initExtension(){
 		});
 	});
 
-	// Change folders
-	browser.mailTabs.onDisplayedFolderChanged.addListener(async (tab, displayedFolder) => {
-		qcon.debug("mailTabs.onDisplayedFolderChanged()");
-		CurrentTab = tab;
-		await CurrentNote.close();
-		updateDisplayedMessage(CurrentTab);
-	});
-
-	// Change tabs
-	browser.tabs.onActivated.addListener(async activeInfo => {
-		qcon.debug("tabs.onActivated()");
-		CurrentTab = activeInfo.tabId;
-		await CurrentNote.close();
-		updateDisplayedMessage(CurrentTab);
-	});
-
-	// Handle keyboard shortcuts
-	browser.commands.onCommand.addListener(command => {
-		if(command === 'qnote') {
-			QNotePopToggle().then(()=>{
-				QNoteTabPop(CurrentTab, true, true, true);
-			});
-		}
-	});
-
-	// Click on main toolbar
-	browser.browserAction.onClicked.addListener(tab => {
-		qcon.debug("browserAction.onClicked()");
-		QNotePopToggle().then(()=>{
-			QNoteTabPop(tab);
-		});
-		CurrentTab = tab;
-	});
-
-	// Click on QNote button
-	browser.messageDisplayAction.onClicked.addListener(tab => {
-		qcon.debug("messageDisplayAction.onClicked()");
-		QNotePopToggle().then(()=>{
-			QNoteTabPop(tab);
-		});
-		CurrentTab = tab;
-	});
-
-	// Change message
-	browser.messageDisplay.onMessageDisplayed.addListener((tab, message) => {
-		qcon.debug("messageDisplay.onMessageDisplayed()");
-		CurrentTab = tab;
-		QNoteMessagePop(message, false, Prefs.showOnSelect, false);
-		updateDisplayedMessage(CurrentTab);
-	});
-
-	// Create window
-	// TODO: check, if window id is current popupid
-	browser.windows.onCreated.addListener(async window => {
-		qcon.debug("windows.onCreated()", window);
-		CurrentWindow = window;
-		await CurrentNote.close();
-		updateDisplayedMessage(CurrentTab);
-	});
 
 	// browser.qpopup.onCreated.addListener(popup => {
 	// 	console.log("qpopup.onCreated()", popup);
 	// });
 
-	// let a = browser.qpopup.create({
+	// browser.qpopup.onRemoved.addListener(popup => {
+	// 	console.log("qpopup.onRemoved()", popup);
+	// });
+
+	// browser.qpopup.create({
 	// 	windowId: CurrentWindow.id,
 	// 	url: "html/popup4.html",
 	// 	width: 320,
 	// 	height: 200,
 	// 	top: 100,
 	// 	left: 200
+	// }).then(data => {
+	// 	console.log("created", data);
+	// 	let statuslogger = () => {
+	// 		browser.qpopup.get(data.id).then(info => {
+	// 			console.log("get", info);
+	// 		});
+	// 	}
+	// 	statuslogger();
+
+	// 	setTimeout(statuslogger, 2000);
+	// 	// setTimeout(() => {
+	// 	// 	console.log("setTimeout.remove");
+	// 	// 	browser.qpopup.remove(data.id).then(r => {
+	// 	// 		console.log("setTimeout.removed -", r);
+	// 	// 	});
+	// 	// }, 1250);
+	// 	// setTimeout(() => {
+	// 	// 	browser.qpopup.update(data.id, {
+	// 	// 		// title: "dada",
+	// 	// 		focused: true,
+	// 	// 		// width: 600,
+	// 	// 		// height: 600,
+	// 	// 		// top: 600,
+	// 	// 		// left: 600,
+	// 	// 	});
+	// 	// }, 1250);
 	// });
 }
 
