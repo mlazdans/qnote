@@ -30,7 +30,11 @@ class NoteWindow extends QEventDispatcher {
 		return true;
 	}
 
-	async updateWindow(){
+	async update(){
+		console.error("Not implemented");
+	}
+
+	async reset(){
 		console.error("Not implemented");
 	}
 
@@ -53,8 +57,6 @@ class NoteWindow extends QEventDispatcher {
 			await this.fireListeners("afterupdate", this, isDeleted);
 			return isDeleted;
 		});
-		// this.note.text = '';
-		// return this.close();
 	}
 
 	async saveNote(){
@@ -148,6 +150,39 @@ class NoteWindow extends QEventDispatcher {
 	async pop(popper) {
 		return popper().then(isPopped => {
 			return this.shown = isPopped;
+		});
+	}
+
+	// box = { top, left, width, height }
+	_center(innerBox, outerBox){
+		let retBox = {};
+
+		let iWidth = innerBox.width||0;
+		let iHeight = innerBox.height||0;
+		let oWidth = outerBox.width||0;
+		let oHeight = outerBox.height||0;
+
+		retBox.left = Math.round((oWidth - iWidth) / 2);
+		retBox.top = Math.round((oHeight - iHeight) / 2);
+
+		retBox.left += outerBox.left||0;
+		retBox.top += outerBox.top||0;
+
+		// console.log("_center", innerBox);
+		// console.log("_center", outerBox);
+		// console.log("_center", retBox);
+
+		return retBox;
+	}
+
+	async _getWindowRect(){
+		return browser.windows.get(this.windowId).then(Window => {
+			return {
+				top: Window.top,
+				left: Window.left,
+				width: Window.width,
+				height: Window.height
+			};
 		});
 	}
 

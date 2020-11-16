@@ -30,10 +30,8 @@ class XULNoteWindow extends NoteWindow {
 		});
 	}
 
-	async updateWindow(opt){
-		if(this.popupId){
-			return browser.qpopup.update(this.popupId, opt);
-		}
+	async update(opt){
+		return browser.qpopup.update(this.popupId, opt);
 	}
 
 	// let escaper = e => {
@@ -69,9 +67,28 @@ class XULNoteWindow extends NoteWindow {
 	}
 
 	async focus() {
-		return this.updateWindow({
+		return this.update({
 			focused: true
 		});
+	}
+
+	async reset(){
+		let inBox = {
+			focused: true,
+			width: Prefs.width,
+			height: Prefs.height
+		};
+
+		inBox = Object.assign(inBox, this._center(inBox, await this._getWindowRect()));
+
+		this.note.set({
+			x: inBox.left,
+			y: inBox.top,
+			width: inBox.width,
+			height: inBox.height
+		});
+
+		return this.update(inBox);
 	}
 
 	async close() {
@@ -93,8 +110,6 @@ class XULNoteWindow extends NoteWindow {
 
 	async pop() {
 		return super.pop(async () => {
-			let w = await browser.windows.get(this.windowId);
-
 			let note = this.note;
 			let opt = {
 				windowId: this.windowId,
@@ -106,18 +121,17 @@ class XULNoteWindow extends NoteWindow {
 				top: note.y || 0
 			};
 
-			// Center
 			// TODO: preconfigured positions?
+			let centeredBox = this._center(opt, await this._getWindowRect());
+
+			// TODO: we really should rename this x,y to left,top :E
 			if(!opt.left){
-				opt.left = Math.round((w.width - w.left) / 2);
+				opt.left = centeredBox.left;
 			}
 
 			if(!opt.top){
-				opt.top = Math.round((w.height - w.top) / 2);
+				opt.top = centeredBox.top;
 			}
-
-			opt.left += w.left;
-			opt.top += w.top;
 
 			return browser.qpopup.create(opt).then(popupInfo => {
 				this.popupId = popupInfo.id;

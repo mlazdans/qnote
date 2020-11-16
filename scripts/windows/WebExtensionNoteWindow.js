@@ -10,10 +10,8 @@ class WebExtensionNoteWindow extends NoteWindow {
 		});
 	}
 
-	async updateWindow(opt){
-		// if(this.popupId){
-			return browser.windows.update(this.popupId, opt);
-		// }
+	async update(opt){
+		return browser.windows.update(this.popupId, opt);
 	}
 
 	async isFocused() {
@@ -23,7 +21,7 @@ class WebExtensionNoteWindow extends NoteWindow {
 	}
 
 	async focus() {
-		return this.updateWindow({
+		return this.update({
 			focused: true
 		});
 	}
