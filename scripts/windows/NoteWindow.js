@@ -10,9 +10,6 @@ class NoteWindow extends QEventDispatcher {
 		this.windowId = windowId;
 	}
 
-	// init(){
-	// }
-
 	isEqual(n1, n2){
 		let k1 = Object.keys(n1);
 		let k2 = Object.keys(n2);
@@ -132,6 +129,8 @@ class NoteWindow extends QEventDispatcher {
 		if(!this.shown){
 			return false;
 		}
+
+		this.shown = false;
 
 		if(!closer){
 			return this._close();
