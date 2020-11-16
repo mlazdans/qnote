@@ -20,7 +20,7 @@ var QAppWindowObserver = {
 
 		if(aTopic === 'domwindowopened'){
 			aSubject.addEventListener("DOMContentLoaded", e => {
-				QAppEventDispatcher.fireListeners("DOMContentLoaded", aSubject, aTopic, aData);
+				QAppEventDispatcher.fireListeners("DOMContentLoaded", aSubject, aTopic, aData, e);
 			});
 		}
 	}
@@ -102,16 +102,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		QDEB = !!wex.Prefs.enableDebug;
 
-		// We'll update cache and call listener once note arrives
+		// We'll update cache and call listener once item arrives
+		// MAYBE: send down function from WebExtension
 		var noteGrabber = new QCache(wex.getQAppNoteData);
-		// var noteGrabber = new QCache(keyId => {
-		// 	return wex.getQAppNoteData(keyId);
-		// 	// return wex.getQAppNoteData(keyId).then(data => {
-		// 	// 	// Clone data TODO: test if necessary
-		// 	// 	// return Object.assign({}, data);
-		// 	// 	return data;
-		// 	// });
-		// });
 
 		function id2RealWindow(windowId){
 			try {
@@ -324,6 +317,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					QAppEventDispatcher.addListener('DOMContentLoaded', (aSubject, aTopic, aData) => {
 						QAppColumnHandler.attachToWindow(aSubject);
 					});
+
+					QAppEventDispatcher.addListener('domwindowclosed', (aSubject, aTopic, aData) => {
+						QAppColumnHandler.detachFromWindow(aSubject);
+					});
 				},
 				async installQuickFilter(){
 					console.warn("search has been temporarily disabled until we found a better solution");
@@ -370,11 +367,19 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						view.NoteChange(row, 1, 2);
 					}
 				},
-				// TODO: pass wex parameters instead reading them
-				async attachNoteToMessage(data){
-					let w = this.getMessageSuitableWindow();
+				async attachNoteToMessage(windowId, data){
+					let fName = `${this.constructor.name}.attachNoteToMessage()`;
+
+					//let w = this.getMessageSuitableWindow();
+					let w = id2RealWindow(windowId);
+					if(!w || !w.document){
+						QDEB&&console.debug(`${fName} - not attachable`);
+						return;
+					}
+
 					let messagepane = w.document.getElementById('messagepane');
 					if(!messagepane){
+						QDEB&&console.debug(`${fName} - no messagepane`);
 						return;
 					}
 					let document = messagepane.contentDocument;
@@ -383,8 +388,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					if(body.length){
 						body = body[0];
 					} else {
+						QDEB&&console.debug(`${fName} - no BODY`);
 						return;
 					}
+
+					QDEB&&console.debug(`${fName}, windowId:`, windowId);
 
 					// Cleanup attached notes
 					let domNodes = document.getElementsByClassName('qnote-insidenote');
