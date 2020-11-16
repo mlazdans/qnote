@@ -68,7 +68,7 @@ class NoteColumnHandler {
 
 		// Keep track when changing folders
 		if(w.FolderDisplayListenerManager) {
-			// TODO: suggest listenerExists or smth
+			// MAYBE: suggest listenerExists or smth
 			let idx = w.FolderDisplayListenerManager._listeners.indexOf(this.dBViewListener);
 			if (idx >= 0) {
 				QDEB&&console.debug(`${fName} - FolderDisplayListenerManager.registerListener() - already installed`);

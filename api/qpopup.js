@@ -160,7 +160,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						popup.sizeTo(pi.width, pi.height);
 					}
 
-					// TODO: maybe implement lose focus too
+					// MAYBE: implement lose focus too
 					if(focused){
 						popup.focus();
 					}

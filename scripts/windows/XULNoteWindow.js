@@ -102,10 +102,9 @@ class XULNoteWindow extends NoteWindow {
 				top: note.top || 0
 			};
 
-			// TODO: preconfigured positions?
+			// MAYBE: preconfigured positions?
 			let centeredBox = this._center(opt, await this._getWindowRect());
 
-			// TODO: we really should rename this x,y to left,top :E
 			if(!opt.left){
 				opt.left = centeredBox.left;
 			}
