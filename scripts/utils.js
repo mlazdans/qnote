@@ -351,7 +351,7 @@ async function mpUpdateForMessage(messageId){
 		updateNoteView(note);
 
 		// Attach note to message
-		browser.qapp.attachNoteToMessage(note2QAppNote(note));
+		browser.qapp.attachNoteToMessage(CurrentWindowId, note2QAppNote(note));
 	});
 }
 

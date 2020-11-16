@@ -51,6 +51,10 @@
 		"description": "",
 		"async": true,
 		"parameters": [{
+			"name": "windowId",
+			"type": "integer",
+			"description": "windowId from windows API"
+		},{
 			"$ref": "NoteData",
 			"optional": true
 		}]
