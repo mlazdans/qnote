@@ -4,6 +4,7 @@ class Note {
 		this.exists = false;
 
 		// Note properties
+		// TODO: rename x,y to top,left
 		this.x;
 		this.y;
 		this.width;
