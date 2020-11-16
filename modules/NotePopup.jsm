@@ -159,20 +159,10 @@ class NotePopup extends BasePopup {
 			this.moveTo(left, top);
 			this.sizeTo(width, height);
 			this.shown = true;
-			// // TODO: code duplication!!
-			// try {
-			// 	let focus = wex.Prefs.focusOnDisplay || !wex.CurrentNote.note.text;
-			// 	if(!focus && window.gFolderDisplay && window.gFolderDisplay.tree){
-			// 		window.gFolderDisplay.tree.focus();
-			// 	}
-			// } catch(e) {
-			// 	console.error(e);
-			// }
 		};
 
 		return new Promise(function(resolve) {
 			let loadListener = (e0) => {
-				// TODO: hide, until loaded
 				//self.browser.style.display = "none";
 
 				// We are not interested when about:blank been loaded
@@ -241,8 +231,8 @@ class NotePopup extends BasePopup {
 			let mover = e => {
 				panel.moveTo(e.screenX - startX + startLeft, e.screenY - startY + startTop);
 				return {
-					x: e.screenX - startX + startLeft,
-					y: e.screenY - startY + startTop
+					left: e.screenX - startX + startLeft,
+					top: e.screenY - startY + startTop
 					// x: e.screenX - startX + startLeft - window.screenX,
 					// y: e.screenY - startY + startTop - window.screenY
 				}

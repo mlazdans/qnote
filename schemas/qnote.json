@@ -55,13 +55,13 @@
 			"name": "data",
 			"type": "object",
 			"properties": {
-				"x": {
+				"left": {
 					"type": "integer",
 					"optional": true,
 					"default": 0,
 					"description": "Windows left position"
 				},
-				"y": {
+				"top": {
 					"type": "integer",
 					"optional": true,
 					"default": 0,

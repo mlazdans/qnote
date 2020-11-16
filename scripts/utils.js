@@ -153,8 +153,8 @@ async function importXNotes(root){
 		if(exists && !Prefs.overwriteExistingNotes){
 			stats.exist++;
 		} else {
-			yn.x = xn.x;
-			yn.y = xn.y;
+			yn.left = xn.left;
+			yn.top = xn.top;
 			yn.width = xn.width;
 			yn.height = xn.height;
 			yn.text = xn.text;

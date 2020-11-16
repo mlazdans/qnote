@@ -15,8 +15,8 @@ class XULNoteWindow extends NoteWindow {
 		browser.qpopup.onMove.addListener(popup => {
 			if(popup.id === this.popupId){
 				let { top, left } = popup;
-				this.note.x = left;
-				this.note.y = top;
+				this.note.left = left;
+				this.note.top = top;
 			}
 		});
 
@@ -98,8 +98,8 @@ class XULNoteWindow extends NoteWindow {
 				title: "QNote",
 				width: note.width || Prefs.width,
 				height: note.height || Prefs.height,
-				left: note.x || 0,
-				top: note.y || 0
+				left: note.left || 0,
+				top: note.top || 0
 			};
 
 			// TODO: preconfigured positions?

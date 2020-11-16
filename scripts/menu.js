@@ -49,8 +49,8 @@ var Menu = {
 					CurrentNote.reset();
 				} else {
 					saveNoteForMessage(messageId, {
-						x: undefined,
-						y: undefined,
+						left: undefined,
+						top: undefined,
 						width: Prefs.width,
 						height: Prefs.height
 					});

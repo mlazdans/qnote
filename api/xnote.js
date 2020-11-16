@@ -211,8 +211,8 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 					let fileOutStream = Components.classes['@mozilla.org/network/file-output-stream;1'].createInstance(Components.interfaces.nsIFileOutputStream);
 
 					fileOutStream.init(tempFile, 2, 0x200, false); // Opens for writing only
-					fileOutStream.write(String(note.x), 4);
-					fileOutStream.write(String(note.y), 4);
+					fileOutStream.write(String(note.left), 4);
+					fileOutStream.write(String(note.top), 4);
 					fileOutStream.write(String(note.width), 4);
 					fileOutStream.write(String(note.height), 4);
 
@@ -254,8 +254,8 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 					fileScriptableIO.init(fileInStream);
 
 					//note.keyId = file.leafName.substring(0, file.leafName.length - 6);
-					note.x = parseInt(fileScriptableIO.read(4));
-					note.y = parseInt(fileScriptableIO.read(4));
+					note.left = parseInt(fileScriptableIO.read(4));
+					note.top = parseInt(fileScriptableIO.read(4));
 					note.width = parseInt(fileScriptableIO.read(4));
 					note.height = parseInt(fileScriptableIO.read(4));
 					let tsPart = fileScriptableIO.read(32);

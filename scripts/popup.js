@@ -16,8 +16,8 @@ if(note.ts){
 }
 
 const popupClose = () => {
-	note.x = window.screenX;
-	note.y = window.screenY;
+	note.left = window.screenX;
+	note.top = window.screenY;
 	note.height = window.outerHeight;
 	note.width = window.outerWidth;
 	note.text = YTextE.value;

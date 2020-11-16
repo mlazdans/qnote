@@ -56,8 +56,8 @@ class NoteWindow extends QEventDispatcher {
 		inBox = Object.assign(inBox, this._center(inBox, await this._getWindowRect()));
 
 		this.note.set({
-			x: inBox.left,
-			y: inBox.top,
+			left: inBox.left,
+			top: inBox.top,
 			width: inBox.width,
 			height: inBox.height
 		});

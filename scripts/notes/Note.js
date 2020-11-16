@@ -4,26 +4,27 @@ class Note {
 		this.exists = false;
 
 		// Note properties
-		// TODO: rename x,y to top,left
-		this.x;
-		this.y;
+		this.left;
+		this.top;
 		this.width;
 		this.height;
 		this.text = '';
 		this.ts;
 	}
 
-	// clone() {
-	// 	let cloned = new this.constructor;
-	// 	for(let k of Object.keys(this)){
-	// 		cloned[k] = this[k];
-	// 	}
-
-	// 	return cloned;
-	// }
-
 	load(loader) {
 		return loader().then(data => {
+			// NOTE: convert x -> left and y -> top
+			if(data.left === undefined && data.x !== undefined){
+				data.left = data.x;
+				delete data.x;
+			}
+
+			if(data.top === undefined && data.y !== undefined){
+				data.top = data.y;
+				delete data.y;
+			}
+
 			this.set(data);
 			this.exists = !!data;
 
@@ -33,8 +34,8 @@ class Note {
 
 	get(){
 		return {
-			x: this.x,
-			y: this.y,
+			left: this.left,
+			top: this.top,
 			width: this.width,
 			height: this.height,
 			text: this.text,

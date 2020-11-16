@@ -60,8 +60,8 @@ class WebExtensionNoteWindow extends NoteWindow {
 				type: "popup",
 				width: note.width || Prefs.width,
 				height: note.height || Prefs.height,
-				left: note.x || Prefs.x,
-				top: note.y || Prefs.y
+				left: note.left || 0,
+				top: note.top || 0
 			};
 
 			return browser.windows.create(opt).then(windowInfo => {
