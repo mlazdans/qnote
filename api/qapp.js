@@ -4,14 +4,11 @@ var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var { NoteColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteColumnHandler.jsm"));
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
 var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
-var { QConsole } = ChromeUtils.import(extension.rootURI.resolve("modules/QConsole.js"));
 var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js"));
 
 // TODO: get rid of wex
 // TODO: get rid of globals
-// TODO: reimplement qcon.log as console.log(qcon.log(), etc)
-var qcon = new QConsole(console);
 var QAppColumnHandler;
 var QAppEventDispatcher = new QEventDispatcher(["domwindowopened","domwindowclosed","DOMContentLoaded",]);
 var QAppWindowObserver = {
@@ -95,7 +92,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		Components.utils.unload(extension.rootURI.resolve("modules/NoteColumnHandler.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/NotePopup.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/NoteFilter.jsm"));
-		Components.utils.unload(extension.rootURI.resolve("modules/QConsole.js"));
 		Components.utils.unload(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 		Components.utils.unload(extension.rootURI.resolve("modules/QCache.js"));
 	}
@@ -324,7 +320,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// TODO: window handle
 					QAppColumnHandler.attachToWindow(Services.wm.getMostRecentWindow("mail:3pane"));
 
-					QAppEventDispatcher.addListener('DOMContentLoaded', (e, aSubject, aTopic, aData) => {
+					QAppEventDispatcher.addListener('DOMContentLoaded', (aSubject, aTopic, aData) => {
 						QAppColumnHandler.attachToWindow(aSubject);
 					});
 				},

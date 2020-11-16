@@ -13,7 +13,7 @@ var Prefs;
 var CurrentNote;
 var CurrentTabId;
 var CurrentWindowId;
-var qcon = new QConsole(console);
+var DEBLOG = true;
 
 async function focusMessagePane(windowId){
 	await browser.qapp.messagePaneFocus(windowId);
@@ -101,10 +101,10 @@ async function initExtension(){
 
 	// Change focus
 	browser.windows.onFocusChanged.addListener(async windowId => {
+		qcon.debug("windows.onFocusChanged(), windowId:", windowId, ", current windowId:", CurrentNote.windowId);
 		if(
 			windowId === browser.windows.WINDOW_ID_NONE ||
-			windowId === CurrentNote.windowId ||
-			windowId === 3 // Probably not such a good idea
+			windowId === CurrentNote.windowId
 		){
 			return;
 		}
@@ -144,6 +144,7 @@ async function initExtension(){
 	});
 
 	// Click on main toolbar
+	// TODO: when multiple windows are involved, Tab comes in undefined
 	browser.browserAction.onClicked.addListener(Tab => {
 		qcon.debug("browserAction.onClicked()");
 		QNotePopToggle(Tab);
