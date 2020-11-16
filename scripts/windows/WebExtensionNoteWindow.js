@@ -15,8 +15,8 @@ class WebExtensionNoteWindow extends NoteWindow {
 	}
 
 	async isFocused() {
-		return browser.windows.get(this.popupId).then(window => {
-			return window.focused;
+		return browser.windows.get(this.popupId).then(Window => {
+			return Window.focused;
 		});
 	}
 
