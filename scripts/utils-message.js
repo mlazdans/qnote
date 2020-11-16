@@ -63,15 +63,15 @@ async function deleteNoteForMessage(messageId){
 }
 
 async function saveNoteForMessage(messageId, data){
-	return createNoteForMessage(messageId).then(note => {
+	return loadNoteForMessage(messageId).then(note => {
 		note.set(data);
 		return note.save();
 	});
 }
 
-async function tagMessage(messageId, tagName, toTag = true) {
+async function 	tagMessage(messageId, tagName, toTag = true) {
 	return getMessage(messageId).then(message => {
-		qcon.debug(`tagMessage(${messageId}, ${tagName}, ${toTag})`);
+		qcon.debug(`tagMessage(messageId:${messageId}, tagName:${tagName}, toTag:${toTag})`);
 		let tags = message.tags;
 
 		if(toTag){
