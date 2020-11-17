@@ -7,8 +7,6 @@ var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteF
 var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js"));
 
-// TODO: get rid of globals
-// TODO: printer domloaded via obs
 var QDEB = true;
 var QAppColumnHandler;
 var QAppEventDispatcher = new QEventDispatcher(["domwindowopened","domwindowclosed","DOMContentLoaded"]);
@@ -87,8 +85,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		if(QAppColumnHandler){
 			QAppColumnHandler.detachFromWindow(Services.wm.getMostRecentWindow("mail:3pane"));
 		}
-
-		//NoteFilter.uninstall();
 
 		Services.ww.unregisterNotification(QAppWindowObserver);
 
@@ -205,10 +201,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					this.popups = new Map();
 
 					Services.ww.registerNotification(QAppWindowObserver);
-
-					// if(wex.Prefs.enableSearch){
-					// 	this.installQuickFilter();
-					// }
 
 					this.installColumnHandler();
 				},
