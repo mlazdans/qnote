@@ -1,0 +1,16 @@
+#note-delete {
+	height: 22px;
+	cursor: pointer;
+	flex-basis: bottom;
+}
+
+#note-delete > div {
+	width: 14px;
+	height: 14px;
+	margin: auto;
+	background: url(../images/supprimer.png) 14px 14px;
+}
+
+#note-delete > div:hover {
+	background: url(../images/supprimer.png) 0 0;
+}

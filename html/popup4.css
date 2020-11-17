@@ -25,3 +25,7 @@ html, body, img {
 	background-color: #FBFEBF;
 	border: solid 1px #FAF098;
 }
+
+.qpopup-user-controls {
+	display: none;
+}
