@@ -15,7 +15,7 @@ var CurrentWindowId;
 var QDEB = true;
 
 async function focusMessagePane(windowId){
-	await browser.qapp.messagePaneFocus(windowId);
+	browser.qapp.messagePaneFocus(windowId);
 }
 
 function initCurrentNote(){
