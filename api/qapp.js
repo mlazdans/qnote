@@ -8,21 +8,6 @@ var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules
 var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js"));
 
 var QDEB = true;
-var QAppEventDispatcher = new QEventDispatcher(["domwindowopened","domwindowclosed","DOMContentLoaded"]);
-var QAppWindowObserver = {
-	observe: function(aSubject, aTopic, aData) {
-		if(aTopic === 'domwindowopened' || aTopic === 'domwindowclosed'){
-			QAppEventDispatcher.fireListeners(aTopic, aSubject, aTopic, aData);
-		}
-
-		if(aTopic === 'domwindowopened'){
-			aSubject.addEventListener("DOMContentLoaded", e => {
-				QAppEventDispatcher.fireListeners("DOMContentLoaded", aSubject, aTopic, aData, e);
-			});
-		}
-	}
-};
-
 var formatQNoteData = data => {
 	// https://searchfox.org/mozilla-central/source/dom/base/nsIDocumentEncoder.idl
 	let flags =
@@ -80,11 +65,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 	installKeyboardHandler(w){
 		this.KeyboardHandler.addTo(w);
 
-		QAppEventDispatcher.addListener('DOMContentLoaded', aWindow => {
+		this.EventDispatcher.addListener('DOMContentLoaded', aWindow => {
 			this.KeyboardHandler.addTo(aWindow);
 		});
 
-		QAppEventDispatcher.addListener('domwindowclosed', aWindow => {
+		this.EventDispatcher.addListener('domwindowclosed', aWindow => {
 			this.KeyboardHandler.removeFrom(aWindow);
 		});
 	}
@@ -161,11 +146,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		this.ColumnHandler.setDebug(QDEB);
 		this.ColumnHandler.attachToWindow(w);
 
-		QAppEventDispatcher.addListener('DOMContentLoaded', aWindow => {
+		this.EventDispatcher.addListener('DOMContentLoaded', aWindow => {
 			this.ColumnHandler.attachToWindow(aWindow);
 		});
 
-		QAppEventDispatcher.addListener('domwindowclosed', aWindow => {
+		this.EventDispatcher.addListener('domwindowclosed', aWindow => {
 			this.ColumnHandler.detachFromWindow(aWindow);
 		});
 	}
@@ -181,7 +166,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		this.uninstallColumnHandler(w);
 		this.uninstallKeyboardHandler(w);
 
-		Services.ww.unregisterNotification(QAppWindowObserver);
+		Services.ww.unregisterNotification(this.WindowObserver);
 
 		Components.utils.unload(extension.rootURI.resolve("modules/NoteColumnHandler.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/NotePopup.jsm"));
@@ -194,8 +179,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		var API = this;
 		// We'll update cache and call listener once item arrives
 		// init() caller must install onNoteRequest listener
-		API.noteGrabber = new QCache();
-		API.KeyboardHandler = {
+		this.noteGrabber = new QCache();
+		this.EventDispatcher = new QEventDispatcher(["domwindowopened","domwindowclosed","DOMContentLoaded"]);
+		this.KeyboardHandler = {
 			elements: new WeakSet(),
 			addTo: elem => {
 				let self = API.KeyboardHandler;
@@ -219,6 +205,20 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				console.log("keydown", e);
 			}
 		}
+
+		this.WindowObserver = {
+			observe: function(aSubject, aTopic, aData) {
+				if(aTopic === 'domwindowopened' || aTopic === 'domwindowclosed'){
+					API.EventDispatcher.fireListeners(aTopic, aSubject, aTopic, aData);
+				}
+
+				if(aTopic === 'domwindowopened'){
+					aSubject.addEventListener("DOMContentLoaded", e => {
+						API.EventDispatcher.fireListeners("DOMContentLoaded", aSubject, aTopic, aData, e);
+					});
+				}
+			}
+		};
 
 		function id2RealWindow(windowId){
 			try {
@@ -258,7 +258,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					this.popups = new Map();
 
-					Services.ww.registerNotification(QAppWindowObserver);
+					Services.ww.registerNotification(API.WindowObserver);
 
 					let w = Services.wm.getMostRecentWindow("mail:3pane");
 
@@ -270,7 +270,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				},
 				async enablePrintAttacher(prefs){
 					QDEB&&console.debug("qapp.enablePrintAttacher()", prefs);
-					QAppEventDispatcher.addListener('domwindowopened', aSubject => {
+					API.EventDispatcher.addListener('domwindowopened', aSubject => {
 						this.printerAttacher(aSubject, prefs);
 					});
 				},
