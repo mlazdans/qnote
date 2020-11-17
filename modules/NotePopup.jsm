@@ -30,12 +30,6 @@ class NotePopup extends BasePopup {
 		this.options = options;
 		this.domId = domId;
 		this.window = window;
-
-		if(this.panel.adjustArrowPosition === undefined){
-			this.panel.adjustArrowPosition = () => {
-			};
-		}
-
 		this.shown = false;
 	}
 
@@ -264,9 +258,9 @@ class NotePopup extends BasePopup {
 			// TODO: move to separate function
 			let rectLimit = {
 				maxWidth: 800,
-				maxHeight: 600,
-				minWidth: 160,
-				minHeight: 120
+				maxHeight: 500,
+				minWidth: 200,
+				minHeight: 125
 			};
 
 			let resizer = (e) => {
