@@ -34,32 +34,6 @@ class XULNoteWindow extends NoteWindow {
 		return browser.qpopup.update(this.popupId, opt);
 	}
 
-	// let escaper = e => {
-	// 	if(e.key === 'Escape'){
-	// 		if(wex.CurrentNote.windowId){
-	// 			wex.CurrentNote.needSaveOnClose = false;
-	// 			wex.CurrentNote.close();
-	// 			e.preventDefault();
-	// 		}
-	// 	}
-	// };
-
-	// window.addEventListener("keydown", escaper);
-
-	// n.onClose = () => {
-	// 	window.removeEventListener("keydown", escaper);
-	// };
-	// async popupIsFocused(id){
-	// 	if(this.popups.has(id)){
-	// 		return this.popups.get(id).isFocused();
-	// 	}
-	// },
-	// async popupFocus(id){
-	// 	if(this.popups.has(id)){
-	// 		return this.popups.get(id).focus();
-	// 	}
-	// },
-
 	async isFocused() {
 		return browser.qpopup.get(this.popupId).then(popupInfo => {
 			return popupInfo ? popupInfo.focused : false;
@@ -77,15 +51,6 @@ class XULNoteWindow extends NoteWindow {
 			if(this.popupId){
 				return browser.qpopup.remove(this.popupId);
 			}
-			// if(this.popupId){
-			// 	return browser.qpopup.remove(this.popupId).then(() => {
-			// 		return true;
-			// 	},() => {
-			// 		return false;
-			// 	});
-			// } else {
-			// 	return false;
-			// }
 		});
 	}
 
