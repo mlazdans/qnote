@@ -60,6 +60,7 @@ class XULNoteWindow extends NoteWindow {
 			let opt = {
 				windowId: this.windowId,
 				url: "html/popup4.html",
+				controlsCSS: '../html/popup4-controls.css',
 				title: "QNote",
 				width: note.width || Prefs.width,
 				height: note.height || Prefs.height,

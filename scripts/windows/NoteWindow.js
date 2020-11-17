@@ -100,7 +100,6 @@ class NoteWindow extends QEventDispatcher {
 
 		this.shown = false;
 
-		// TODO: get rid off needSaveOnClose property
 		if(!this.needSaveOnClose){
 			QDEB&&console.debug(`${fName}, needSaveOnClose = false, do nothing`);
 			return false;

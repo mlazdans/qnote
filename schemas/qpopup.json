@@ -43,6 +43,10 @@
 			"title": {
 				"type": "string",
 				"optional": true
+			},
+			"controlsCSS": {
+				"type": "string",
+				"optional": true
 			}
 		}
 	}],
@@ -117,6 +121,21 @@
 		"type": "function",
 		"description": "Fired when a popup is resized.",
 		"parameters": [{
+			"name": "popup",
+			"$ref": "Popup",
+			"description": "Details of the popup that was resized."
+		}]
+	},{
+		"name": "onControls",
+		"type": "function",
+		"description": "Fired when interacts with user controls.",
+		"parameters": [{
+			"name": "controlId",
+			"type": "string"
+		},{
+			"name": "action",
+			"type": "string"
+		},{
 			"name": "popup",
 			"$ref": "Popup",
 			"description": "Details of the popup that was resized."

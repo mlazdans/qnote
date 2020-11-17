@@ -3,7 +3,7 @@ var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
 var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 
-var PopupEventDispatcher = new QEventDispatcher(["oncreated", "onremoved", "onmove", "onresize"]);
+var PopupEventDispatcher = new QEventDispatcher(["oncreated", "onremoved", "onmove", "onresize", "oncontrols"]);
 
 var qpopup = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown() {
@@ -110,6 +110,21 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						};
 					}
 				}).api(),
+				onControls: new ExtensionCommon.EventManager({
+					context,
+					name: "qpopup.onControls",
+					register: fire => {
+						const l = (action, controlId, popupInfo) => {
+							fire.async(action, controlId, popupInfo);
+						};
+
+						PopupEventDispatcher.addListener("oncontrols", l);
+
+						return () => {
+							PopupEventDispatcher.removeListener("oncontrols", l);
+						};
+					}
+				}).api(),
 				async remove(id){
 					let popup = popupManager.get(id);
 
@@ -172,7 +187,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					return true;
 				},
 				async create(options){
-					let { windowId, top, left, width, height, url, title } = options;
+					let { windowId, top, left, width, height, url, title, controlsCSS } = options;
 					let window = id2RealWindow(windowId);
 
 					var popup = new NotePopup({
@@ -222,7 +237,23 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						}
 
 						popup.iframeEl.addEventListener("load", e => {
+							if(controlsCSS){
+								let head = popup.getFirstElementByTagName('head');
+								let html = `<link rel="stylesheet" href="${controlsCSS}" type="text/css">`
+								head.insertAdjacentHTML('beforeend', html);
+							}
+
+							let uControls = popup.iframeDocument.querySelector('.qpopup-user-controls');
+							for(let el of uControls.children){
+								popup.addControl(el);
+								el.addEventListener('click', e => {
+									PopupEventDispatcher.fireListeners("oncontrols", "click", el.id, popup.popupInfo);
+								});
+							}
+
 							let MutationObserver = popup.iframeWindow.MutationObserver;
+
+							// TODO: watch controls change
 							// Watch title change
 							if(MutationObserver){
 								new MutationObserver(function(mutations) {

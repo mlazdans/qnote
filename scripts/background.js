@@ -20,6 +20,7 @@ async function focusMessagePane(windowId){
 
 function initCurrentNote(){
 	if(CurrentNote){
+		CurrentNote.needSaveOnClose = true;
 		CurrentNote.windowId = CurrentWindowId;
 		return;
 	}
@@ -31,6 +32,19 @@ function initCurrentNote(){
 	} else {
 		throw new TypeError("Prefs.windowOption");
 	}
+
+	browser.qpopup.onControls.addListener((action, id, pi) => {
+		if(id !== 'note-delete' || action !== 'click' || pi.id != CurrentNote.popupId){
+			return;
+		}
+
+		CurrentNote.needSaveOnClose = false;
+		CurrentNote.close().then(() => {
+			return CurrentNote.deleteNote();
+		}).then(()=>{
+			initCurrentNote();
+		});
+	});
 
 	CurrentNote.addListener("afterupdate", (NoteWindow, action, isOk) => {
 		QDEB&&console.debug("afterupdate", action, isOk);
