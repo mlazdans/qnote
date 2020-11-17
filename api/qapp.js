@@ -8,7 +8,6 @@ var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules
 var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js"));
 
 var QDEB = true;
-var QAppColumnHandler;
 var QAppEventDispatcher = new QEventDispatcher(["domwindowopened","domwindowclosed","DOMContentLoaded"]);
 var QAppWindowObserver = {
 	observe: function(aSubject, aTopic, aData) {
@@ -23,6 +22,31 @@ var QAppWindowObserver = {
 		}
 	}
 };
+
+var QAppKeyboardHandler = {
+	elements: new WeakSet(),
+	addTo: elem => {
+		let self = QAppKeyboardHandler;
+		if(self.elements.has(elem)){
+			console.log("adding key handler - already exists");
+		} else {
+			console.log("adding key handler...");
+			elem.addEventListener("keydown", self.handler);
+			self.elements.add(elem);
+		}
+	},
+	removeFrom: elem => {
+		let self = QAppKeyboardHandler;
+		if(self.elements.has(elem)){
+		} else {
+			elem.removeEventListener("keydown", self.handler)
+			self.elements.delete(elem);
+		}
+	},
+	handler: e => {
+		console.log("keydown", e);
+	}
+}
 
 var formatQNoteData = data => {
 	// https://searchfox.org/mozilla-central/source/dom/base/nsIDocumentEncoder.idl
@@ -74,45 +98,28 @@ function installQNoteCSS() {
 }
 
 var qapp = class extends ExtensionCommon.ExtensionAPI {
-	onShutdown() {
-		QDEB&&console.debug("QNote.shutdown()");
-
-		uninstallQNoteCSS();
-
-		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
-
-		if(QAppColumnHandler){
-			QAppColumnHandler.detachFromWindow(Services.wm.getMostRecentWindow("mail:3pane"));
-		}
-
-		Services.ww.unregisterNotification(QAppWindowObserver);
-
-		Components.utils.unload(extension.rootURI.resolve("modules/NoteColumnHandler.jsm"));
-		Components.utils.unload(extension.rootURI.resolve("modules/NotePopup.jsm"));
-		Components.utils.unload(extension.rootURI.resolve("modules/NoteFilter.jsm"));
-		Components.utils.unload(extension.rootURI.resolve("modules/QEventDispatcher.js"));
-		Components.utils.unload(extension.rootURI.resolve("modules/QCache.js"));
+	uninstallKeyboardHandler(w){
+		QAppKeyboardHandler.removeFrom(w);
 	}
 
-	getAPI(context) {
-		// var wex = Cu.waiveXrays(context.cloneScope);
-		var noteRequester;
-		var noteGrabber;
+	installKeyboardHandler(w){
+		QAppKeyboardHandler.addTo(w);
 
-		function id2RealWindow(windowId){
-			try {
-				return extension.windowManager.get(windowId).window;
-			} catch {
-			}
-		}
+		QAppEventDispatcher.addListener('DOMContentLoaded', aWindow => {
+			QAppKeyboardHandler.addTo(aWindow);
+		});
 
-		function realWindowWrap(realWindow){
-			try {
-				return extension.windowManager.getWrapper(realWindow);
-			} catch {
-			}
-		}
+		QAppEventDispatcher.addListener('domwindowclosed', aWindow => {
+			QAppKeyboardHandler.removeFrom(aWindow);
+		});
+	}
 
+	uninstallColumnHandler(w){
+		this.ColumnHandler.detachFromWindow(w);
+	}
+
+	installColumnHandler(w){
+		var API = this;
 		var colHandler = {
 			limit: 0,
 			noteRowListener(view, row) {
@@ -139,7 +146,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			// cycleCell(row, col) {
 			// },
 			getCellText(row, col) {
-				let note = noteGrabber.get(this.getMessageId(row, col), () => {
+				let note = API.noteGrabber.get(this.getMessageId(row, col), () => {
 					this.noteRowListener(this.getView(col), row);
 				});
 
@@ -150,7 +157,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				return note.exists ? note.shortText : null;
 			},
 			getSortStringForRow(hdr) {
-				let note = noteGrabber.get(hdr.messageId);
+				let note = API.noteGrabber.get(hdr.messageId);
 
 				return note.exists ? note.text : null;
 			},
@@ -162,7 +169,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			// getRowProperties(row, props){
 			// },
 			getImageSrc(row, col) {
-				let note = noteGrabber.get(this.getMessageId(row, col), () => {
+				let note = API.noteGrabber.get(this.getMessageId(row, col), () => {
 					this.noteRowListener(this.getView(col), row);
 				});
 
@@ -172,6 +179,64 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			// }
 		};
 
+		this.ColumnHandler = new NoteColumnHandler({
+			columnHandler: colHandler
+		});
+
+		this.ColumnHandler.setDebug(QDEB);
+		this.ColumnHandler.attachToWindow(w);
+
+		QAppEventDispatcher.addListener('DOMContentLoaded', aWindow => {
+			this.ColumnHandler.attachToWindow(aWindow);
+		});
+
+		QAppEventDispatcher.addListener('domwindowclosed', aWindow => {
+			this.ColumnHandler.detachFromWindow(aWindow);
+		});
+	}
+
+	onShutdown() {
+		QDEB&&console.debug("QNote.shutdown()");
+
+		uninstallQNoteCSS();
+
+		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
+
+		let w = Services.wm.getMostRecentWindow("mail:3pane");
+		this.uninstallColumnHandler(w);
+		this.uninstallKeyboardHandler(w);
+
+		Services.ww.unregisterNotification(QAppWindowObserver);
+
+		Components.utils.unload(extension.rootURI.resolve("modules/NoteColumnHandler.jsm"));
+		Components.utils.unload(extension.rootURI.resolve("modules/NotePopup.jsm"));
+		Components.utils.unload(extension.rootURI.resolve("modules/NoteFilter.jsm"));
+		Components.utils.unload(extension.rootURI.resolve("modules/QEventDispatcher.js"));
+		Components.utils.unload(extension.rootURI.resolve("modules/QCache.js"));
+	}
+
+	getAPI(context) {
+		var API = this;
+		// API.noteRequester = undefined;
+		//API.noteGrabber = undefined;
+		// We'll update cache and call listener once item arrives
+		// init() caller must install onNoteRequest listener
+		API.noteGrabber = new QCache();
+
+		function id2RealWindow(windowId){
+			try {
+				return extension.windowManager.get(windowId).window;
+			} catch {
+			}
+		}
+
+		function realWindowWrap(realWindow){
+			try {
+				return extension.windowManager.getWrapper(realWindow);
+			} catch {
+			}
+		}
+
 		return {
 			qapp: {
 				onNoteRequest: new ExtensionCommon.EventManager({
@@ -179,9 +244,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					name: "qapp.onNoteRequest",
 					register: fire => {
 						// It makes sense to allow only one note requester
-						noteRequester = (keyId) => {
+						API.noteGrabber.setProvider(keyId => {
 							return fire.async(keyId);
-						}
+						});
+
 						return () => {
 						}
 					}
@@ -193,15 +259,14 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					uninstallQNoteCSS();
 					installQNoteCSS();
 
-					// We'll update cache and call listener once item arrives
-					// init() caller must install onNoteRequest listener
-					noteGrabber = new QCache(noteRequester);
-
 					this.popups = new Map();
 
 					Services.ww.registerNotification(QAppWindowObserver);
 
-					this.installColumnHandler();
+					let w = Services.wm.getMostRecentWindow("mail:3pane");
+
+					API.installColumnHandler(w);
+					API.installKeyboardHandler(w);
 				},
 				async setDebug(on){
 					QDEB = on;
@@ -305,7 +370,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						// let msg = messenger.msgHdrFromURI(messageUrisToPrint.shift());
 						let msg = messenger.msgHdrFromURI(messageUrisToPrint[0]);
 
-						self.attachNoteToPrinter(document.defaultView, noteGrabber.get(msg.messageId), prefs);
+						self.attachNoteToPrinter(document.defaultView, API.noteGrabber.get(msg.messageId), prefs);
 					};
 
 					let domLoadedListener = e => {
@@ -333,22 +398,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					if(w && w.gFolderDisplay && w.gFolderDisplay.tree){
 						w.gFolderDisplay.tree.focus();
 					}
-				},
-				installColumnHandler(){
-					QAppColumnHandler = new NoteColumnHandler({
-						columnHandler: colHandler
-					});
-
-					QAppColumnHandler.setDebug(QDEB);
-					QAppColumnHandler.attachToWindow(Services.wm.getMostRecentWindow("mail:3pane"));
-
-					QAppEventDispatcher.addListener('DOMContentLoaded', (aSubject, aTopic, aData) => {
-						QAppColumnHandler.attachToWindow(aSubject);
-					});
-
-					QAppEventDispatcher.addListener('domwindowclosed', (aSubject, aTopic, aData) => {
-						QAppColumnHandler.detachFromWindow(aSubject);
-					});
 				},
 				async installQuickFilter(){
 					console.warn("search has been temporarily disabled until we found a better solution");
@@ -495,16 +544,16 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 				},
 				async saveNoteCache(note){
-					noteGrabber.set(note.keyId, note);
+					API.noteGrabber.set(note.keyId, note);
 				},
 				async clearNoteCache(){
-					noteGrabber.clear();
+					API.noteGrabber.clear();
 				},
 				async deleteNoteCache(keyId){
-					noteGrabber.delete(keyId);
+					API.noteGrabber.delete(keyId);
 				},
 				async setColumnTextLimit(limit){
-					colHandler.limit = limit;
+					API.ColumnHandler.columnHandler.limit = limit;
 				},
 				async getProfilePath() {
 					return Cc['@mozilla.org/file/directory_service;1']
