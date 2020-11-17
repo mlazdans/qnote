@@ -23,31 +23,6 @@ var QAppWindowObserver = {
 	}
 };
 
-var QAppKeyboardHandler = {
-	elements: new WeakSet(),
-	addTo: elem => {
-		let self = QAppKeyboardHandler;
-		if(self.elements.has(elem)){
-			console.log("adding key handler - already exists");
-		} else {
-			console.log("adding key handler...");
-			elem.addEventListener("keydown", self.handler);
-			self.elements.add(elem);
-		}
-	},
-	removeFrom: elem => {
-		let self = QAppKeyboardHandler;
-		if(self.elements.has(elem)){
-		} else {
-			elem.removeEventListener("keydown", self.handler)
-			self.elements.delete(elem);
-		}
-	},
-	handler: e => {
-		console.log("keydown", e);
-	}
-}
-
 var formatQNoteData = data => {
 	// https://searchfox.org/mozilla-central/source/dom/base/nsIDocumentEncoder.idl
 	let flags =
@@ -99,18 +74,18 @@ function installQNoteCSS() {
 
 var qapp = class extends ExtensionCommon.ExtensionAPI {
 	uninstallKeyboardHandler(w){
-		QAppKeyboardHandler.removeFrom(w);
+		this.KeyboardHandler.removeFrom(w);
 	}
 
 	installKeyboardHandler(w){
-		QAppKeyboardHandler.addTo(w);
+		this.KeyboardHandler.addTo(w);
 
 		QAppEventDispatcher.addListener('DOMContentLoaded', aWindow => {
-			QAppKeyboardHandler.addTo(aWindow);
+			this.KeyboardHandler.addTo(aWindow);
 		});
 
 		QAppEventDispatcher.addListener('domwindowclosed', aWindow => {
-			QAppKeyboardHandler.removeFrom(aWindow);
+			this.KeyboardHandler.removeFrom(aWindow);
 		});
 	}
 
@@ -217,11 +192,33 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 	getAPI(context) {
 		var API = this;
-		// API.noteRequester = undefined;
-		//API.noteGrabber = undefined;
 		// We'll update cache and call listener once item arrives
 		// init() caller must install onNoteRequest listener
 		API.noteGrabber = new QCache();
+		API.KeyboardHandler = {
+			elements: new WeakSet(),
+			addTo: elem => {
+				let self = API.KeyboardHandler;
+				if(self.elements.has(elem)){
+					console.log("adding key handler - already exists");
+				} else {
+					console.log("adding key handler...");
+					elem.addEventListener("keydown", self.handler);
+					self.elements.add(elem);
+				}
+			},
+			removeFrom: elem => {
+				let self = API.KeyboardHandler;
+				if(self.elements.has(elem)){
+				} else {
+					elem.removeEventListener("keydown", self.handler)
+					self.elements.delete(elem);
+				}
+			},
+			handler: e => {
+				console.log("keydown", e);
+			}
+		}
 
 		function id2RealWindow(windowId){
 			try {
