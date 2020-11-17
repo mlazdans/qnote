@@ -1,14 +1,13 @@
 // TODO: note optionally next to message
-// TODO: check xnote version setting
 // TODO: menu delete all notes from selected messages?
 // TODO: suggest: nsIMsgFilterService->removeCustomAction, nsIMsgFilterService->removeCustomTerm
 // TODO: suggest: QuickFilterManager.jsm > appendTerms() > term.customId = tfDef.customId;
 // MAYBE: multiple notes simultaneously
 // TODO: save note pos and dims locally, outside note
 // TODO: create a solid blocker for pop/close
-// TODO: esc
 // TODO: hide popup while loading
 // TODO: delete button
+// TODO: structure app code separately
 var Prefs;
 var CurrentNote;
 var CurrentTabId;
@@ -57,18 +56,19 @@ async function initExtension(){
 
 	QDEB = !!Prefs.enableDebug;
 
+	browser.qapp.setDebug(QDEB);
+
 	CurrentWindowId = await getCurrentWindowId();
 
 	// Return notes to qapp on request
 	browser.qapp.onNoteRequest.addListener(getQAppNoteData);
+
 	browser.qapp.enablePrintAttacher({
 		topTitle: Prefs.printAttachTopTitle,
 		topText: Prefs.printAttachTopText,
 		bottomTitle: Prefs.printAttachBottomTitle,
 		bottomText: Prefs.printAttachBottomText
 	});
-	browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
-	browser.qapp.setDebug(QDEB);
 
 	// window.addEventListener("unhandledrejection", event => {
 	// 	console.warn(`Unhandle: ${event.reason}`, event);
@@ -77,6 +77,21 @@ async function initExtension(){
 	initCurrentNote();
 
 	await browser.qapp.init();
+
+	browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
+
+	// KeyDown from qapp
+	browser.qapp.onKeyDown.addListener(e => {
+		let ret = {};
+		if(e.key === 'Escape'){
+			if(CurrentNote.shown){
+				CurrentNote.needSaveOnClose = false;
+				CurrentNote.close();
+				ret.preventDefault = true;
+			}
+		}
+		return ret;
+	});
 
 	// Change folders
 	browser.mailTabs.onDisplayedFolderChanged.addListener(async (Tab, displayedFolder) => {

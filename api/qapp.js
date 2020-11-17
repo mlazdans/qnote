@@ -174,9 +174,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			addTo: elem => {
 				let self = API.KeyboardHandler;
 				if(self.elements.has(elem)){
-					console.log("adding key handler - already exists");
+					QDEB&&console.debug("adding key handler - already exists");
 				} else {
-					console.log("adding key handler...", elem);
+					QDEB&&console.debug("adding key handler...", elem);
 					elem.addEventListener("keydown", self.handler);
 					self.elements.add(elem);
 				}
@@ -184,9 +184,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			removeFrom: elem => {
 				let self = API.KeyboardHandler;
 				if(self.elements.has(elem)){
-					console.log("removing key handler - does not exist");
+					QDEB&&console.debug("removing key handler - does not exist");
 				} else {
-					console.log("removing key handler...", elem);
+					QDEB&&console.debug("removing key handler...", elem);
 					elem.removeEventListener("keydown", self.handler)
 					self.elements.delete(elem);
 				}
@@ -243,13 +243,23 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					context,
 					name: "qapp.onKeyDown",
 					register: fire => {
-						const l = value => {
-							// TODO: pass safe event object
-							let res = fire.sync({});
-							// TODO: modify event if needed
-							console.log("res", res, value);
-							return res;
-							//fire.async(value);
+						let interested = ["altKey", "code", "ctrlKey", "isComposing", "key", "location", "metaKey", "repeat", "shiftKey"];
+						const l = e => {
+							let e1 = {};
+							for(let k of interested){
+								e1[k] = e[k] !== undefined ? e[k] : undefined;
+							}
+
+							let e2 = fire.sync(e1);
+
+							// MAYBE: implement some other features
+							if(e2.preventDefault){
+								e.preventDefault();
+							}
+
+							// console.log("res", e, e1, e2);
+
+							return e2;
 						};
 
 						API.EventDispatcher.addListener("keydown", l);
