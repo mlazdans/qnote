@@ -55,7 +55,7 @@ img {
 }
 
 .qpopup-controls {
-	height: 26px;
+	height: 22px;
 	display: flex;
 	/* justify-content: space-between; */
 	/* align-items: flex-end; */
@@ -64,9 +64,14 @@ img {
 
 .qpopup-custom-controls {
 	flex-grow: 100;
-	height: 26px;
+	height: 22px;
 	display: flex;
-	/* align-items: baseline; */
+	align-items: baseline;
+}
+.qpopup-custom-controls > div {
+	display: flex;
+	height: 22px;
+	margin-left: 4px;
 }
 
 .qpopup-controls-resize {
@@ -74,7 +79,7 @@ img {
 	flex-grow: 1;
 	cursor: nwse-resize;
 	width: 14px;
-	height: 26px;
+	height: 22px;
 	background: url(../images/redim.png);
 	background-repeat: no-repeat;
 	background-position: bottom right;
@@ -123,7 +128,7 @@ img {
 .qpopup-contents-wrap {
 	width: 100%;
 	display: flex;
-	height: calc(100% - 59px);
+	height: calc(100% - 55px);
 }
 
 .qpopup-contents-wrap > iframe {
