@@ -35,24 +35,27 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		}
 	}
 
-	uninstallKeyboardHandler(w){
-		this.KeyboardHandler.removeFrom(w);
-	}
-
 	installKeyboardHandler(w){
+		var API = this;
+
+		// Keyboard attach and later remove on shutdown
 		this.KeyboardHandler.addTo(w);
+		this.EventDispatcher.addListener('onShutdown', () => {
+			API.KeyboardHandler.removeFrom(w);
+		});
 
 		this.EventDispatcher.addListener('DOMContentLoaded', aWindow => {
-			this.KeyboardHandler.addTo(aWindow);
+			API.KeyboardHandler.addTo(aWindow);
 		});
 
 		this.EventDispatcher.addListener('domwindowclosed', aWindow => {
-			this.KeyboardHandler.removeFrom(aWindow);
+			API.KeyboardHandler.removeFrom(aWindow);
 		});
+
 	}
 
-	uninstallColumnHandler(w){
-		this.ColumnHandler.detachFromWindow(w);
+	uninstallKeyboardHandler(w){
+		this.KeyboardHandler.removeFrom(w);
 	}
 
 	installColumnHandler(w){
@@ -121,15 +124,25 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		});
 
 		this.ColumnHandler.setDebug(QDEB);
+
+		// Column attach and later remove on shutdown
 		this.ColumnHandler.attachToWindow(w);
+		this.EventDispatcher.addListener('onShutdown', () => {
+			API.ColumnHandler.detachFromWindow(w);
+		});
 
 		this.EventDispatcher.addListener('DOMContentLoaded', aWindow => {
-			this.ColumnHandler.attachToWindow(aWindow);
+			API.ColumnHandler.attachToWindow(aWindow);
 		});
 
 		this.EventDispatcher.addListener('domwindowclosed', aWindow => {
-			this.ColumnHandler.detachFromWindow(aWindow);
+			API.ColumnHandler.detachFromWindow(aWindow);
 		});
+
+	}
+
+	uninstallColumnHandler(w){
+		this.ColumnHandler.detachFromWindow(w);
 	}
 
 	onShutdown() {
@@ -139,9 +152,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 
-		let w = Services.wm.getMostRecentWindow("mail:3pane");
-		this.uninstallColumnHandler(w);
-		this.uninstallKeyboardHandler(w);
+		this.EventDispatcher.fireListeners("onShutdown");
 
 		Services.ww.unregisterNotification(this.WindowObserver);
 
@@ -157,7 +168,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		// We'll update cache and call listener once item arrives
 		// init() caller must install onNoteRequest listener
 		this.noteGrabber = new QCache();
-		this.EventDispatcher = new QEventDispatcher(["domwindowopened","domwindowclosed","DOMContentLoaded"]);
+		this.EventDispatcher = new QEventDispatcher(["domwindowopened", "domwindowclosed", "DOMContentLoaded", "keydown", "onShutdown"]);
 		this.KeyboardHandler = {
 			elements: new WeakSet(),
 			addTo: elem => {
@@ -165,7 +176,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				if(self.elements.has(elem)){
 					console.log("adding key handler - already exists");
 				} else {
-					console.log("adding key handler...");
+					console.log("adding key handler...", elem);
 					elem.addEventListener("keydown", self.handler);
 					self.elements.add(elem);
 				}
@@ -173,13 +184,15 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			removeFrom: elem => {
 				let self = API.KeyboardHandler;
 				if(self.elements.has(elem)){
+					console.log("removing key handler - does not exist");
 				} else {
+					console.log("removing key handler...", elem);
 					elem.removeEventListener("keydown", self.handler)
 					self.elements.delete(elem);
 				}
 			},
 			handler: e => {
-				console.log("keydown", e);
+				API.EventDispatcher.fireListeners("keydown", e);
 			}
 		}
 
@@ -224,6 +237,26 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 						return () => {
 						}
+					}
+				}).api(),
+				onKeyDown: new ExtensionCommon.EventManager({
+					context,
+					name: "qapp.onKeyDown",
+					register: fire => {
+						const l = value => {
+							// TODO: pass safe event object
+							let res = fire.sync({});
+							// TODO: modify event if needed
+							console.log("res", res, value);
+							return res;
+							//fire.async(value);
+						};
+
+						API.EventDispatcher.addListener("keydown", l);
+
+						return () => {
+							API.EventDispatcher.removeListener("keydown", l);
+						};
 					}
 				}).api(),
 				async init(){

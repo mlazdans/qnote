@@ -178,5 +178,9 @@
 			"type": "string",
 			"description": ""
 		}]
+	},{
+		"name": "onKeyDown",
+		"type": "function",
+		"parameters": []
 	}]
 }]
