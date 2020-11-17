@@ -18,6 +18,9 @@ class NotePopup extends BasePopup {
 		panel.setAttribute("id", domId);
 		panel.setAttribute("noautohide", true);
 		panel.setAttribute("noautofocus", true);
+		panel.setAttribute("class", "mail-extension-panel panel-no-padding");
+		// panel.setAttribute("type", "arrow");
+		// panel.setAttribute("role", "group");
 
 		document.getElementById("mainPopupSet").appendChild(panel);
 
