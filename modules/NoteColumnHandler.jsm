@@ -8,6 +8,7 @@ class NoteColumnHandler {
 	constructor(options) {
 		this.windows = new WeakSet();
 		this.options = options;
+		this.columnHandler = options.columnHandler;
 
 		let self = this;
 
@@ -36,7 +37,7 @@ class NoteColumnHandler {
 	addColumnHandler(view){
 		try {
 			if(view){
-				view.addColumnHandler("qnoteCol", this.options.columnHandler);
+				view.addColumnHandler("qnoteCol", this.columnHandler);
 			}
 		} catch(e){
 			console.error(e);
