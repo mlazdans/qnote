@@ -136,6 +136,9 @@
 		"parameters": [{
 			"name": "limit",
 			"type": "integer",
+			"optional": true,
+			"default": 0,
+			"minimum": 0,
 			"description": ""
 		}]
 	},{

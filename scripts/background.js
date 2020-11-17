@@ -58,6 +58,8 @@ async function initExtension(){
 
 	Prefs = await loadPrefsWithDefaults();
 
+	QDEB = !!Prefs.enableDebug;
+
 	CurrentWindowId = await getCurrentWindowId();
 
 	// Return notes to qapp on request
@@ -68,8 +70,7 @@ async function initExtension(){
 		bottomTitle: Prefs.printAttachBottomTitle,
 		bottomText: Prefs.printAttachBottomText
 	});
-
-	QDEB = !!Prefs.enableDebug;
+	browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
 
 	// window.addEventListener("unhandledrejection", event => {
 	// 	console.warn(`Unhandle: ${event.reason}`, event);

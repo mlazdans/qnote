@@ -9,6 +9,8 @@ var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js
 
 // TODO: get rid of wex
 // TODO: get rid of globals
+// TODO: setDebug()
+// TODO: printer domloaded via obs
 var QDEB = true;
 var QAppColumnHandler;
 var QAppEventDispatcher = new QEventDispatcher(["domwindowopened","domwindowclosed","DOMContentLoaded"]);
@@ -84,7 +86,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 
-		QAppColumnHandler.detachFromWindow(Services.wm.getMostRecentWindow("mail:3pane"));
+		if(QAppColumnHandler){
+			QAppColumnHandler.detachFromWindow(Services.wm.getMostRecentWindow("mail:3pane"));
+		}
 
 		//NoteFilter.uninstall();
 
@@ -119,7 +123,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		}
 
 		var colHandler = {
-			limit: wex.Prefs.showFirstChars,
+			limit: 0,
 			noteRowListener(view, row) {
 				if(view && Number.isInteger(row)){
 					// That method is part of Mozilla API and has nothing to do with either XNote or QNote :)
@@ -341,7 +345,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 				},
 				installColumnHandler(){
-					//this.setColumnTextLimit(wex.Prefs.showFirstChars);
 					QAppColumnHandler = new NoteColumnHandler({
 						columnHandler: colHandler
 					});
@@ -511,10 +514,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				async deleteNoteCache(keyId){
 					noteGrabber.delete(keyId);
 				},
-				// MAYBE: remove?
 				async setColumnTextLimit(limit){
-					// console.log(`setColumnTextLimit(${limit})`);
-					// colHandler.limit = limit;
+					colHandler.limit = limit;
 				},
 				async getProfilePath() {
 					return Cc['@mozilla.org/file/directory_service;1']
