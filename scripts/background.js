@@ -4,7 +4,6 @@
 // TODO: suggest: QuickFilterManager.jsm > appendTerms() > term.customId = tfDef.customId;
 // MAYBE: multiple notes simultaneously
 // TODO: save note pos and dims locally, outside note
-// TODO: hide popup while loading
 // TODO: structure app code separately
 var Prefs;
 var CurrentNote;
@@ -139,7 +138,6 @@ async function initExtension(){
 	});
 
 	// Create window
-	// TODO: check, if window id is current popupid
 	browser.windows.onCreated.addListener(async Window => {
 		QDEB&&console.debug("windows.onCreated()");
 		await CurrentNote.close();
@@ -196,7 +194,6 @@ async function initExtension(){
 	});
 
 	// Click on main toolbar
-	// TODO: when multiple windows are involved, Tab comes in undefined
 	browser.browserAction.onClicked.addListener(Tab => {
 		QDEB&&console.debug("browserAction.onClicked()");
 		QNotePopToggle(Tab);
@@ -243,49 +240,6 @@ async function initExtension(){
 		});
 	});
 
-
-	// browser.qpopup.onCreated.addListener(popup => {
-	// 	console.log("qpopup.onCreated()", popup);
-	// });
-
-	// browser.qpopup.onRemoved.addListener(popup => {
-	// 	console.log("qpopup.onRemoved()", popup);
-	// });
-
-	// browser.qpopup.create({
-	// 	windowId: CurrentWindow.id,
-	// 	url: "html/popup4.html",
-	// 	width: 320,
-	// 	height: 200,
-	// 	top: 100,
-	// 	left: 200
-	// }).then(data => {
-	// 	console.log("created", data);
-	// 	let statuslogger = () => {
-	// 		browser.qpopup.get(data.id).then(info => {
-	// 			console.log("get", info);
-	// 		});
-	// 	}
-	// 	statuslogger();
-
-	// 	setTimeout(statuslogger, 2000);
-	// 	// setTimeout(() => {
-	// 	// 	console.log("setTimeout.remove");
-	// 	// 	browser.qpopup.remove(data.id).then(r => {
-	// 	// 		console.log("setTimeout.removed -", r);
-	// 	// 	});
-	// 	// }, 1250);
-	// 	// setTimeout(() => {
-	// 	// 	browser.qpopup.update(data.id, {
-	// 	// 		// title: "dada",
-	// 	// 		focused: true,
-	// 	// 		// width: 600,
-	// 	// 		// height: 600,
-	// 	// 		// top: 600,
-	// 	// 		// left: 600,
-	// 	// 	});
-	// 	// }, 1250);
-	// });
 }
 
 async function waitForLoad() {
