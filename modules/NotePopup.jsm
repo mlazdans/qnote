@@ -17,6 +17,8 @@ class NotePopup extends BasePopup {
 		let panel = document.createXULElement("panel");
 		panel.setAttribute("id", domId);
 		panel.setAttribute("noautohide", true);
+		panel.setAttribute("noautofocus", true);
+
 		document.getElementById("mainPopupSet").appendChild(panel);
 
 		let popupURL = extension.getURL("html/qpopup.html");
