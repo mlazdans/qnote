@@ -157,6 +157,17 @@
 		"description": "Initialize extension",
 		"async": true,
 		"parameters": []
+	},{
+		"name": "setDebug",
+		"type": "function",
+		"description": "Initialize extension",
+		"async": true,
+		"parameters": [{
+			"name": "on",
+			"type": "boolean",
+			"optional": true,
+			"default": false
+		}]
 	}],
 	"events": [{
 		"name": "onNoteRequest",

@@ -7,9 +7,7 @@ var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteF
 var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js"));
 
-// TODO: get rid of wex
 // TODO: get rid of globals
-// TODO: setDebug()
 // TODO: printer domloaded via obs
 var QDEB = true;
 var QAppColumnHandler;
@@ -102,11 +100,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 	}
 
 	getAPI(context) {
-		var wex = Cu.waiveXrays(context.cloneScope);
+		// var wex = Cu.waiveXrays(context.cloneScope);
 		var noteRequester;
 		var noteGrabber;
-
-		QDEB = !!wex.Prefs.enableDebug;
 
 		function id2RealWindow(windowId){
 			try {
@@ -215,6 +211,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// }
 
 					this.installColumnHandler();
+				},
+				async setDebug(on){
+					QDEB = on;
 				},
 				async enablePrintAttacher(prefs){
 					QDEB&&console.debug("qapp.enablePrintAttacher()", prefs);

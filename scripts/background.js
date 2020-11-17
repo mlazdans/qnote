@@ -71,6 +71,7 @@ async function initExtension(){
 		bottomText: Prefs.printAttachBottomText
 	});
 	browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
+	browser.qapp.setDebug(QDEB);
 
 	// window.addEventListener("unhandledrejection", event => {
 	// 	console.warn(`Unhandle: ${event.reason}`, event);
