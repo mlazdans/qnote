@@ -176,7 +176,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				if(self.elements.has(elem)){
 					QDEB&&console.debug("adding key handler - already exists");
 				} else {
-					QDEB&&console.debug("adding key handler...", elem);
+					QDEB&&console.debug("adding key handler...");
 					elem.addEventListener("keydown", self.handler);
 					self.elements.add(elem);
 				}
