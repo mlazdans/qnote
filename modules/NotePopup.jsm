@@ -36,6 +36,12 @@ class NotePopup extends BasePopup {
 		this.domId = domId;
 		this.window = window;
 		this.shown = false;
+
+		// TB68
+		if(this.panel.adjustArrowPosition === undefined){
+			this.panel.adjustArrowPosition = () => {
+			};
+		}
 	}
 
 	/**
