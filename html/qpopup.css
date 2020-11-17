@@ -25,7 +25,8 @@ img {
 	height: 32px;
 	background-color: #fff08d;
 	display: flex;
-	align-items: baseline;
+	/* align-items: baseline; */
+	line-height: 32px;
 	font-size: small;
 	font-weight: bolder;
 	border-bottom: solid 1px #d19231;
@@ -33,13 +34,13 @@ img {
 .qpopup-title-text {
 	display: flex;
 	align-items: baseline;
-	margin-left: 7px;
+	margin-left: 9px;
 	flex-grow: 100;
 }
 
 .qpopup-title-closebutton {
 	display: flex;
-	margin: 7px;
+	margin: 9px;
 	flex-grow: 0;
 }
 
@@ -55,7 +56,7 @@ img {
 }
 
 .qpopup-controls {
-	height: 22px;
+	height: 24px;
 	display: flex;
 	/* justify-content: space-between; */
 	/* align-items: flex-end; */
@@ -64,14 +65,14 @@ img {
 
 .qpopup-custom-controls {
 	flex-grow: 100;
-	height: 22px;
+	height: 24px;
 	display: flex;
 	align-items: baseline;
 }
 .qpopup-custom-controls > div {
 	display: flex;
-	height: 22px;
-	margin-left: 4px;
+	height: 24px;
+	margin-left: 5px;
 }
 
 .qpopup-controls-resize {
@@ -79,16 +80,16 @@ img {
 	flex-grow: 1;
 	cursor: nwse-resize;
 	width: 14px;
-	height: 22px;
+	height: 24px;
 	background: url(../images/redim.png);
 	background-repeat: no-repeat;
 	background-position: bottom right;
 }
 
-/* 26px (controls) + 32px (title) + 1px (border) */
+/* 24px (controls) + 32px (title) + 1px (border) */
 /* .qpopup-contents-wrap {
 	display: flex;
-	height: calc(100% - 59px);
+	height: calc(100% - 57px);
 	overflow: auto;
 	background: url(../images/txt-background.png);
 	background-repeat: no-repeat;
@@ -128,7 +129,7 @@ img {
 .qpopup-contents-wrap {
 	width: 100%;
 	display: flex;
-	height: calc(100% - 55px);
+	height: calc(100% - 57px);
 }
 
 .qpopup-contents-wrap > iframe {
