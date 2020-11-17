@@ -4,9 +4,7 @@
 // TODO: suggest: QuickFilterManager.jsm > appendTerms() > term.customId = tfDef.customId;
 // MAYBE: multiple notes simultaneously
 // TODO: save note pos and dims locally, outside note
-// TODO: create a solid blocker for pop/close
 // TODO: hide popup while loading
-// TODO: delete button
 // TODO: structure app code separately
 var Prefs;
 var CurrentNote;
@@ -114,6 +112,17 @@ async function initExtension(){
 
 		// CurrentTabId = getTabId(Tab);
 		// CurrentWindowId = Tab.windowId;
+		initCurrentNote();
+		//updateCurrentMessage(CurrentTab);
+	});
+
+	// Create tabs
+	browser.tabs.onCreated.addListener(async Tab => {
+		QDEB&&console.debug("tabs.onCreated()", Tab);
+		await CurrentNote.close();
+
+		// CurrentTabId = activeInfo.tabId;
+		// CurrentWindowId = activeInfo.windowId;
 		initCurrentNote();
 		//updateCurrentMessage(CurrentTab);
 	});
