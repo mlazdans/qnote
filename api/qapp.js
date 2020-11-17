@@ -8,29 +8,6 @@ var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules
 var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js"));
 
 var QDEB = true;
-var formatQNoteData = data => {
-	// https://searchfox.org/mozilla-central/source/dom/base/nsIDocumentEncoder.idl
-	let flags =
-		Ci.nsIDocumentEncoder.OutputPreformatted
-		| Ci.nsIDocumentEncoder.OutputForPlainTextClipboardCopy
-		// Ci.nsIDocumentEncoder.OutputDropInvisibleBreak
-		// | Ci.nsIDocumentEncoder.OutputFormatFlowed
-		// | Ci.nsIDocumentEncoder.OutputFormatted
-		// | Ci.nsIDocumentEncoder.OutputLFLineBreak
-		;
-
-	// Strip tags, etc
-	let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
-	let text = parserUtils.convertToPlainText(data.text, flags, 0);
-	// text = text.replace(/\r\n/g, "<br>");
-	// text = text.replace(/\n/g, "<br>");
-
-	return {
-		title: 'QNote: ' + (new Date(data.ts)).toLocaleString(),
-		text: '<pre class="moz-quote-pre" wrap="" style="margin: 0;">' + text + '</pre>'
-	}
-};
-
 var qapp = class extends ExtensionCommon.ExtensionAPI {
 	uninstallCSS() {
 		try {
@@ -309,7 +286,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						domNodes[0].remove();
 					}
 
-					let formatted = formatQNoteData(data);
+					let formatted = this.formatQNote(data);
 
 					let htmlFormatter = (title, text) => {
 						let html = ['<div class="qnote-insidenote" style="margin: 0; padding: 0; border: 1px solid black;">'];
@@ -510,7 +487,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						domNodes[0].remove();
 					}
 
-					let formatted = formatQNoteData(data);
+					let formatted = this.formatQNote(data);
 
 					let htmlFormatter = (title, text) => {
 						let html = [];
@@ -538,6 +515,28 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 							prefs.bottomText ? formatted.text : false,
 						);
 						body.insertAdjacentHTML('beforeend', '<div class="qnote-insidenote qnote-insidenote-bottom">' + html + '</div>');
+					}
+				},
+				formatQNote(data) {
+					// https://searchfox.org/mozilla-central/source/dom/base/nsIDocumentEncoder.idl
+					let flags =
+						Ci.nsIDocumentEncoder.OutputPreformatted
+						| Ci.nsIDocumentEncoder.OutputForPlainTextClipboardCopy
+						// Ci.nsIDocumentEncoder.OutputDropInvisibleBreak
+						// | Ci.nsIDocumentEncoder.OutputFormatFlowed
+						// | Ci.nsIDocumentEncoder.OutputFormatted
+						// | Ci.nsIDocumentEncoder.OutputLFLineBreak
+						;
+
+					// Strip tags, etc
+					let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
+					let text = parserUtils.convertToPlainText(data.text, flags, 0);
+					// text = text.replace(/\r\n/g, "<br>");
+					// text = text.replace(/\n/g, "<br>");
+
+					return {
+						title: 'QNote: ' + (new Date(data.ts)).toLocaleString(),
+						text: '<pre class="moz-quote-pre" wrap="" style="margin: 0;">' + text + '</pre>'
 					}
 				},
 				async saveNoteCache(note){
