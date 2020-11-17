@@ -324,4 +324,12 @@ class NotePopup extends BasePopup {
 			console.error(e);
 		}
 	}
+
+	getFirstElementByTagName(tagName){
+		try {
+			return this.contentDocument.getElementsByTagName(tagName).item(0);
+		} catch (e) {
+			console.error(e);
+		}
+	}
 }
