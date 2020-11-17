@@ -31,33 +31,33 @@ var formatQNoteData = data => {
 	}
 };
 
-function uninstallQNoteCSS() {
-	try {
-		let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
-		let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
-		if(cssService.sheetRegistered(uri, cssService.USER_SHEET)){
-			QDEB&&console.debug("Unregistering html/background.css");
-			cssService.unregisterSheet(uri, cssService.USER_SHEET);
-		}
-	} catch(e) {
-		console.error(e);
-	}
-}
-
-function installQNoteCSS() {
-	try {
-		let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
-		let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
-		if(!cssService.sheetRegistered(uri, cssService.USER_SHEET)){
-			QDEB&&console.debug("Registering html/background.css");
-			cssService.loadAndRegisterSheet(uri, cssService.USER_SHEET);
-		}
-	} catch(e) {
-		console.error(e);
-	}
-}
-
 var qapp = class extends ExtensionCommon.ExtensionAPI {
+	uninstallCSS() {
+		try {
+			let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
+			let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
+			if(cssService.sheetRegistered(uri, cssService.USER_SHEET)){
+				QDEB&&console.debug("Unregistering html/background.css");
+				cssService.unregisterSheet(uri, cssService.USER_SHEET);
+			}
+		} catch(e) {
+			console.error(e);
+		}
+	}
+
+	installCSS() {
+		try {
+			let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
+			let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
+			if(!cssService.sheetRegistered(uri, cssService.USER_SHEET)){
+				QDEB&&console.debug("Registering html/background.css");
+				cssService.loadAndRegisterSheet(uri, cssService.USER_SHEET);
+			}
+		} catch(e) {
+			console.error(e);
+		}
+	}
+
 	uninstallKeyboardHandler(w){
 		this.KeyboardHandler.removeFrom(w);
 	}
@@ -158,7 +158,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown() {
 		QDEB&&console.debug("QNote.shutdown()");
 
-		uninstallQNoteCSS();
+		this.uninstallCSS();
 
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 
@@ -253,8 +253,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					QDEB&&console.debug("qapp.init()");
 
 					// Remove old style sheet in case it still lay around, for example, after update
-					uninstallQNoteCSS();
-					installQNoteCSS();
+					API.uninstallCSS();
+					API.installCSS();
 
 					this.popups = new Map();
 
