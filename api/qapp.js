@@ -111,6 +111,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			}
 		}
 
+		function realWindowWrap(realWindow){
+			try {
+				return extension.windowManager.getWrapper(realWindow);
+			} catch {
+			}
+		}
+
 		var colHandler = {
 			limit: wex.Prefs.showFirstChars,
 			noteRowListener(view, row) {
@@ -199,7 +206,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					Services.ww.registerNotification(QAppWindowObserver);
 
-					QAppEventDispatcher.addListener('domwindowopened', this.printerQNoteAttacher);
+					QAppEventDispatcher.addListener('domwindowopened', (aSubject, aTopic, aData) => {
+						this.printerAttacher(aSubject, aTopic, aData);
+					});
 
 					// if(wex.Prefs.enableSearch){
 					// 	this.installQuickFilter();
@@ -207,87 +216,118 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					this.installColumnHandler();
 				},
-				printerQNoteAttacher(aSubject) {
+				async attachNoteToPrinter(windowId, data, prefsT){
+					let fName = "qapp.attachNoteToPrinter()";
+
+					if(!(data && data.exists)){
+						QDEB&&console.debug(`${fName} - no note`);
+						return;
+					}
+
+					// if(!prefs){
+					// 	QDEB&&console.debug(`${fName} - no prefs`);
+					// 	return;
+					// }
+
+					let w = Number.isInteger(windowId) ? id2RealWindow(windowId) : windowId;
+					if(!w || !w.document){
+						QDEB&&console.debug(`${fName} - no window`);
+						return;
+					}
+
+					let body = w.document.getElementsByTagName('body');
+					if(body.length){
+						body = body[0];
+					} else {
+						QDEB&&console.debug(`${fName} - no BODY`);
+						return;
+					}
+
+					QDEB&&console.debug(`${fName}`, data);
+
+					// Cleanup attached notes
+					let domNodes = document.getElementsByClassName('qnote-insidenote');
+					while(domNodes.length){
+						domNodes[0].remove();
+					}
+
+					let formatted = formatQNoteData(data);
+
+					let htmlFormatter = (title, text) => {
+						let html = ['<div class="qnote-insidenote" style="margin: 0; padding: 0; border: 1px solid black;">'];
+						if(title){
+							html.push(`<div style="border-bottom: 1px solid black;">${title}</div>`);
+						}
+						if(text){
+							html.push(`<div>${text}</div>`);
+						}
+						html.push('</div>');
+
+						return html.join("");
+					};
+
+					let prefs = {
+						topTitle: wex.Prefs.printAttachTopTitle,
+						topText: wex.Prefs.printAttachTopText,
+						bottomTitle: wex.Prefs.printAttachBottomTitle,
+						bottomText: wex.Prefs.printAttachBottomText
+					};
+
+					if(prefs.topTitle || prefs.topText){
+						let html = htmlFormatter(
+							prefs.topTitle ? formatted.title : false,
+							prefs.topText ? formatted.text : false,
+						);
+						body.insertAdjacentHTML('afterbegin', html + "<br>");
+					}
+
+					if(prefs.bottomTitle || prefs.bottomText){
+						let html = htmlFormatter(
+							prefs.bottomTitle ? formatted.title : false,
+							prefs.bottomText ? formatted.text : false,
+						);
+						body.insertAdjacentHTML('beforeend', "<br>" + html);
+					}
+				},
+				printerAttacher(aSubject) {
+					// Save list of printing urls
 					var messageUrisToPrint;
+					var self = this;
+
 					let printerWindowDOMListener = e => {
 						let document = e.target;
 
-						let body = document.getElementsByTagName('body');
-						if(body.length){
-							body = body[0];
-						} else {
-							QDEB&&console.debug("print - body not found");
+						// Not interested
+						if(!(document.URL === 'about:blank' && aSubject.opener && aSubject.opener.messenger)){
 							return;
 						}
 
-						let domNodes = document.getElementsByClassName('qnote-insidenote');
-						while(domNodes.length){
-							domNodes[0].remove();
-						}
-
-						if(
-							document.URL === 'about:blank' ||
-							!aSubject.opener ||
-							!aSubject.opener.messenger ||
-							!messageUrisToPrint ||
-							!messageUrisToPrint.shift
-						){
+						// If not uris to print
+						if(!(messageUrisToPrint && messageUrisToPrint.shift)){
 							return;
 						}
 
 						let messenger = aSubject.opener.messenger;
 
 						let msg = messenger.msgHdrFromURI(messageUrisToPrint.shift());
-						let note = noteGrabber.get(msg.messageId);
-						if(!note || !note.exists){
-							return;
-						}
 
-						let formatted = formatQNoteData(note);
-
-						let htmlFormatter = (title, text) => {
-							let html = ['<div class="qnote-insidenote" style="margin: 0; padding: 0; border: 1px solid black;">'];
-							if(title){
-								html.push(`<div style="border-bottom: 1px solid black;">${title}</div>`);
-							}
-							if(text){
-								html.push(`<div>${text}</div>`);
-							}
-							html.push('</div>');
-
-							return html.join("");
-						};
-
-						if(wex.Prefs.printAttachTop){
-							let html = htmlFormatter(
-								wex.Prefs.printAttachTopTitle ? formatted.title : false,
-								wex.Prefs.printAttachTopText ? formatted.text : false,
-							);
-							body.insertAdjacentHTML('afterbegin', html + "<br>");
-						}
-
-						if(wex.Prefs.printAttachBottom){
-							let html = htmlFormatter(
-								wex.Prefs.printAttachBottomTitle ? formatted.title : false,
-								wex.Prefs.printAttachBottomText ? formatted.text : false,
-							);
-							body.insertAdjacentHTML('beforeend', "<br>" + html);
-						}
+						self.attachNoteToPrinter(document.defaultView, noteGrabber.get(msg.messageId));
 					};
 
 					let domLoadedListener = e => {
 						let document = e.target;
-						if(!document.URL.includes('chrome://messenger/content/msgPrintEngine')){
+
+						// Level 1 filter - check if this print or print-preview window
+						if(!(document && document.URL.includes('chrome://messenger/content/msgPrintEngine'))){
+							return;
+						}
+
+						let pDocument = document.getElementById('content');
+						if(!pDocument){
 							return;
 						}
 
 						messageUrisToPrint = document.defaultView.arguments[1];
-
-						let pDocument = document.getElementById('content');
-						if(!pDocument){
-							QDEB&&console.debug("print - content not found");
-							return;
-						}
 
 						pDocument.addEventListener("DOMContentLoaded", printerWindowDOMListener);
 					};
@@ -381,6 +421,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				async attachNoteToMessage(windowId, data, prefs){
 					let fName = "qapp.attachNoteToMessage()";
 
+					if(!(data && data.exists)){
+						QDEB&&console.debug(`${fName} - no note`);
+						return;
+					}
+
 					if(!prefs){
 						QDEB&&console.debug(`${fName} - no prefs`);
 						return;
@@ -404,11 +449,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						body = body[0];
 					} else {
 						QDEB&&console.debug(`${fName} - no BODY`);
-						return;
-					}
-
-					if(!(data && data.exists)){
-						QDEB&&console.debug(`${fName} - no note`);
 						return;
 					}
 
