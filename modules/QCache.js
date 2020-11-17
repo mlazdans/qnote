@@ -44,4 +44,8 @@ class QCache {
 
 		return {};
 	}
+
+	setProvider(provider){
+		this.provider = provider;
+	}
 }
