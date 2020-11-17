@@ -62,6 +62,12 @@ async function initExtension(){
 
 	// Return notes to qapp on request
 	browser.qapp.onNoteRequest.addListener(getQAppNoteData);
+	browser.qapp.enablePrintAttacher({
+		topTitle: Prefs.printAttachTopTitle,
+		topText: Prefs.printAttachTopText,
+		bottomTitle: Prefs.printAttachBottomTitle,
+		bottomText: Prefs.printAttachBottomText
+	});
 
 	QDEB = !!Prefs.enableDebug;
 

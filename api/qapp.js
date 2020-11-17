@@ -206,17 +206,19 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					Services.ww.registerNotification(QAppWindowObserver);
 
-					QAppEventDispatcher.addListener('domwindowopened', (aSubject, aTopic, aData) => {
-						this.printerAttacher(aSubject, aTopic, aData);
-					});
-
 					// if(wex.Prefs.enableSearch){
 					// 	this.installQuickFilter();
 					// }
 
 					this.installColumnHandler();
 				},
-				async attachNoteToPrinter(windowId, data, prefsT){
+				async enablePrintAttacher(prefs){
+					QDEB&&console.debug("qapp.enablePrintAttacher()", prefs);
+					QAppEventDispatcher.addListener('domwindowopened', aSubject => {
+						this.printerAttacher(aSubject, prefs);
+					});
+				},
+				async attachNoteToPrinter(windowId, data, prefs){
 					let fName = "qapp.attachNoteToPrinter()";
 
 					if(!(data && data.exists)){
@@ -224,10 +226,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return;
 					}
 
-					// if(!prefs){
-					// 	QDEB&&console.debug(`${fName} - no prefs`);
-					// 	return;
-					// }
+					if(!prefs){
+						QDEB&&console.debug(`${fName} - no prefs`);
+						return;
+					}
 
 					let w = Number.isInteger(windowId) ? id2RealWindow(windowId) : windowId;
 					if(!w || !w.document){
@@ -246,7 +248,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					QDEB&&console.debug(`${fName}`, data);
 
 					// Cleanup attached notes
-					let domNodes = document.getElementsByClassName('qnote-insidenote');
+					let domNodes = w.document.getElementsByClassName('qnote-insidenote');
 					while(domNodes.length){
 						domNodes[0].remove();
 					}
@@ -266,13 +268,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return html.join("");
 					};
 
-					let prefs = {
-						topTitle: wex.Prefs.printAttachTopTitle,
-						topText: wex.Prefs.printAttachTopText,
-						bottomTitle: wex.Prefs.printAttachBottomTitle,
-						bottomText: wex.Prefs.printAttachBottomText
-					};
-
 					if(prefs.topTitle || prefs.topText){
 						let html = htmlFormatter(
 							prefs.topTitle ? formatted.title : false,
@@ -289,7 +284,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						body.insertAdjacentHTML('beforeend', "<br>" + html);
 					}
 				},
-				printerAttacher(aSubject) {
+				printerAttacher(aSubject, prefs) {
 					// Save list of printing urls
 					var messageUrisToPrint;
 					var self = this;
@@ -298,7 +293,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						let document = e.target;
 
 						// Not interested
-						if(!(document.URL === 'about:blank' && aSubject.opener && aSubject.opener.messenger)){
+						if(
+							document.URL === 'about:blank' ||
+							!aSubject.opener ||
+							!aSubject.opener.messenger
+						){
 							return;
 						}
 
@@ -309,9 +308,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 						let messenger = aSubject.opener.messenger;
 
-						let msg = messenger.msgHdrFromURI(messageUrisToPrint.shift());
+						// let msg = messenger.msgHdrFromURI(messageUrisToPrint.shift());
+						let msg = messenger.msgHdrFromURI(messageUrisToPrint[0]);
 
-						self.attachNoteToPrinter(document.defaultView, noteGrabber.get(msg.messageId));
+						self.attachNoteToPrinter(document.defaultView, noteGrabber.get(msg.messageId), prefs);
 					};
 
 					let domLoadedListener = e => {

@@ -27,6 +27,37 @@
 				"description": ""
 			}
 		}
+	},{
+		"id": "AttacherPrefs",
+		"name": "data",
+		"type": "object",
+		"description": "Preferences for window and printer attacher",
+		"properties": {
+			"topTitle": {
+				"type": "boolean",
+				"optional": true,
+				"default": false,
+				"description": ""
+			},
+			"topText": {
+				"type": "boolean",
+				"optional": true,
+				"default": false,
+				"description": ""
+			},
+			"bottomTitle": {
+				"type": "boolean",
+				"optional": true,
+				"default": false,
+				"description": ""
+			},
+			"bottomText": {
+				"type": "boolean",
+				"optional": true,
+				"default": false,
+				"description": ""
+			}
+		}
 	}],
 	"functions": [{
 		"name": "getProfilePath",
@@ -61,35 +92,17 @@
 		},{
 			"$ref": "NoteData"
 		},{
-			"name": "prefs",
-			"type": "object",
-			"optional": true,
-			"properties": {
-				"topTitle": {
-					"type": "boolean",
-					"optional": true,
-					"default": false,
-					"description": ""
-				},
-				"topText": {
-					"type": "boolean",
-					"optional": true,
-					"default": false,
-					"description": ""
-				},
-				"bottomTitle": {
-					"type": "boolean",
-					"optional": true,
-					"default": false,
-					"description": ""
-				},
-				"bottomText": {
-					"type": "boolean",
-					"optional": true,
-					"default": false,
-					"description": ""
-				}
-			}
+			"$ref": "AttacherPrefs",
+			"optional": true
+		}]
+	},{
+		"name": "enablePrintAttacher",
+		"type": "function",
+		"description": "",
+		"async": true,
+		"parameters": [{
+			"$ref": "AttacherPrefs",
+			"optional": true
 		}]
 	},{
 		"name": "clearNoteCache",
