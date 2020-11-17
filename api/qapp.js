@@ -24,7 +24,6 @@ var QAppWindowObserver = {
 	}
 };
 
-// TODO: make consistent with popups
 var formatQNoteData = data => {
 	// https://searchfox.org/mozilla-central/source/dom/base/nsIDocumentEncoder.idl
 	let flags =
@@ -360,7 +359,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// 	});
 					// });
 				},
-				// TODO: keep track of windows
 				async updateView(windowId, keyId){
 					let fName = "qapp.updateView()";
 
@@ -408,7 +406,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// void NoteChange(in nsMsgViewIndex aFirstLineChanged, in long aNumRows,
 					// 	in nsMsgViewNotificationCodeValue aChangeType);
 
-					// TODO: probably a good idea to change all rows in a view or at least add func parameter
+					// MAYBE: probably a good idea to change all rows in a view or at least add func parameter
 					// https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsITreeBoxObject#invalidateCell
 					view.NoteChange(row, 1, 2);
 				},

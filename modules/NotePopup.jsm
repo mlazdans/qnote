@@ -149,7 +149,7 @@ class NotePopup extends BasePopup {
 		let { left, top, width, height, title } = this.options;
 
 		var initNote = () => {
-			// TODO: maybe insall default .close();
+			// MAYBE: install default .close();
 			// closeButton.addEventListener("click", e => {
 			// 	console.log("close", e);
 			// });

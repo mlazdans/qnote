@@ -110,7 +110,6 @@ async function savePrefs(handler){
 	}
 
 	let defaultHandler = async saved => {
-		// TODO: update settings w/o reload
 		if(!saved){
 			return;
 		}
@@ -118,6 +117,7 @@ async function savePrefs(handler){
 		// Update extension prefs
 		ext.Prefs = await ext.loadPrefsWithDefaults();
 
+		// TODO: update settings w/o reload
 		ext.reloadExtension();
 		// if(Prefs.storageOption != oldPrefs.storageOption){
 		// 	//await browser.qapp.clearNoteCache();

@@ -1,12 +1,9 @@
 // TODO: note optionally next to message
 // TODO: check xnote version setting
-// TODO: rename xnote, qnote API
 // TODO: menu delete all notes from selected messages?
-// TODO: note on new window
-// TODO: note on new tab after dblClick
 // TODO: suggest: nsIMsgFilterService->removeCustomAction, nsIMsgFilterService->removeCustomTerm
 // TODO: suggest: QuickFilterManager.jsm > appendTerms() > term.customId = tfDef.customId;
-// TODO: multiple notes simultaneously
+// MAYBE: multiple notes simultaneously
 // TODO: save note pos and dims locally, outside note
 // TODO: create a solid blocker for pop/close
 // TODO: esc
