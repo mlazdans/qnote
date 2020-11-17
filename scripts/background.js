@@ -161,14 +161,15 @@ async function initExtension(){
 			flags |= POP_FOCUS;
 		}
 
-		QNotePopForMessage(Message.id, flags).then(isPopped =>{
-			mpUpdateForMessage(Message.id);
-			//mpUpdateCurrent();
-			// Focus message pane in case popped
-			if(isPopped && !Prefs.focusOnDisplay){
-				focusMessagePane(CurrentNote.windowId);
-			}
-		});
+		if(Prefs.showOnSelect){
+			QNotePopForMessage(Message.id, flags).then(isPopped =>{
+				// Focus message pane in case popped
+				if(isPopped && !Prefs.focusOnDisplay){
+					focusMessagePane(CurrentNote.windowId);
+				}
+			});
+		}
+		mpUpdateForMessage(Message.id);
 	});
 
 	// Click on main toolbar
