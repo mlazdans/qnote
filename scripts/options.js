@@ -152,7 +152,7 @@ async function initXNoteImportButton(){
 					alert(_("xnote.import.fail"));
 				}
 
-				// TODO: We need to get possible new data down to qapp cache. Quick hack is just to reload.
+				// TODO: We need to get possible new data down to qapp cache. Quick hack is just to reload. Or just clear cache. Hmm...
 				saveOptions(async saved => {
 					ext.reloadExtension();
 				});

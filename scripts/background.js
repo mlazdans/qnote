@@ -1,6 +1,4 @@
 // TODO: note optionally next to message
-// TODO: suggest: nsIMsgFilterService->removeCustomAction, nsIMsgFilterService->removeCustomTerm
-// TODO: suggest: QuickFilterManager.jsm > appendTerms() > term.customId = tfDef.customId;
 // MAYBE: multiple notes simultaneously
 // TODO: save note pos and dims locally, outside note
 // TODO: structure app code separately
