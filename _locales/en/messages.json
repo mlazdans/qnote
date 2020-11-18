@@ -1,5 +1,5 @@
 {
-	"description": { "message": "Attempt to migrate XNote++ to Thunderbird 78+" },
+	"description": { "message": "Add notes to your e-mails. Drop-in replacement for XNote++ with more features." },
 	"are.you.sure": { "message": "Are you sure?" },
 	"browse": { "message": "Browse" },
 	"folder.unaccesible": { "message": "Folder not found or is not readable: $1" },

@@ -1,5 +1,5 @@
 {
-	"description": { "message": "Mēģinājums migrēt XNote++ uz Thunderbird 78+" },
+	"description": { "message": "Pievieno piezīmes saviem e-pastiem. XNote++ aizstājējs un ar vairāk iespējām." },
 	"are.you.sure": { "message": "Vai esat pārliecināts?" },
 	"browse": { "message": "Izvēlēties" },
 	"folder.unaccesible": { "message": "Mape nav atrasta vai nav piekļuves: $1" },
