@@ -241,7 +241,7 @@ async function initOptionsPage(){
 	initTags(tags);
 
 	i18n.setTexts(document);
-	i18n.setData(document);
+	i18n.setData(document, Prefs);
 
 	initXNoteImportButton();
 	initExportStorageButton();

@@ -28,15 +28,14 @@ class DOMLocalizator {
 		}
 	}
 
-	setData(document){
+	setData(document, data){
 		for (const node of document.querySelectorAll('[data-preference]')) {
-			this.setNode(node);
+			this.setNode(node, data);
 		}
 	}
 
-	setNode(node){
-		let pref = node.dataset.preference;
-		let value = Prefs[pref]; // TODO: param
+	setNode(node, data){
+		let value = data[node.dataset.preference];
 
 		switch(node.nodeName) {
 			case "SELECT":
