@@ -327,9 +327,6 @@ async function QNotePopToggle(Tab) {
 		QDEB&&console.debug("QNotePopToggle(), popupId = -not set-");
 		QNotePopForTab(Tab, POP_FOCUS).then(isPopped => {
 			QDEB&&console.debug("QNotePopToggle(), isPopped =", isPopped);
-			if(isPopped){
-				CurrentNote.focus();
-			}
 		}).catch(silentCatcher());
 	}
 }
