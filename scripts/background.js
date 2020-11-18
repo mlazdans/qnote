@@ -196,7 +196,7 @@ async function initExtension(){
 	// Click on main toolbar
 	browser.browserAction.onClicked.addListener(Tab => {
 		QDEB&&console.debug("browserAction.onClicked()");
-		QNotePopToggle(Tab);
+		QNotePopToggle(Tab || CurrentTabId);
 		// QNotePopToggle().then(()=>{
 		// 	QNoteTabPop(tab);
 		// });
@@ -206,7 +206,7 @@ async function initExtension(){
 	// // Click on QNote button
 	browser.messageDisplayAction.onClicked.addListener(Tab => {
 		QDEB&&console.debug("messageDisplayAction.onClicked()", Tab, CurrentTabId);
-		QNotePopToggle(Tab);
+		QNotePopToggle(Tab || CurrentTabId);
 		// QNotePopToggle().then(()=>{
 		// 	QNoteTabPop(tab);
 		// });
