@@ -23,7 +23,6 @@ async function loadNote(keyId) {
 async function loadAllNotes() {
 	let p;
 	if(Prefs.storageOption === 'ext'){
-		// TODO: move notes and prefs in separete namespace
 		p = browser.storage.local.get(null).then(storage => {
 			let keys = [];
 			for(let keyId in storage){
