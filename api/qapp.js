@@ -258,8 +258,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 								e.preventDefault();
 							}
 
-							// console.log("res", e, e1, e2);
-
 							return e2;
 						};
 

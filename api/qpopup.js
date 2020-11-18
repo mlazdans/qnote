@@ -223,7 +223,6 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 
 					// TODO: implement
 					// popup.onFocus = e => {
-					// 	console.log("popup.onFocus");
 					// 	popup.popupInfo.focused = true;
 					// 	PopupEventDispatcher.fireListeners("onfocus", popup.popupInfo);
 					// };
