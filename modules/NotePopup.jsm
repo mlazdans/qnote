@@ -131,7 +131,7 @@ class NotePopup extends BasePopup {
 	}
 
 	focus(){
-		this.iframeWindow.focus();
+		this.iframeEl.focus();
 	}
 
 	close() {
