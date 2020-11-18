@@ -21,13 +21,13 @@ function getDefaultPrefs() {
 
 		printAttachTopTitle: true,
 		printAttachTopText: true,
-		printAttachBottomTitle: true,
-		printAttachBottomText: true,
+		printAttachBottomTitle: false,
+		printAttachBottomText: false,
 
 		messageAttachTopTitle: true,
 		messageAttachTopText: true,
-		messageAttachBottomTitle: true,
-		messageAttachBottomText: true,
+		messageAttachBottomTitle: false,
+		messageAttachBottomText: false,
 
 		enableDebug: false
 	};
