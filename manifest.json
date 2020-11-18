@@ -27,6 +27,7 @@
 	"background": {
 		"scripts": [
 			"modules/QEventDispatcher.js",
+			"modules/DOMLocalizator.js",
 			"scripts/utils-note.js",
 			"scripts/utils-message.js",
 			"scripts/utils.js",

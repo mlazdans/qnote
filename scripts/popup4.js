@@ -1,7 +1,10 @@
 var ext = chrome.extension.getBackgroundPage();
-var _ = browser.i18n.getMessage;
 var note = ext.CurrentNote.note;
 var YTextE = document.getElementById('note-text');
+
+let i18n = ext.i18n;
+i18n.setTexts(document);
+i18n.setData(document);
 
 // Redirect focus
 document.addEventListener("focus", e => {
@@ -21,7 +24,4 @@ if(note){
 	YTextE.addEventListener("keyup", e => {
 		note.text = YTextE.value;
 	});
-
-} else {
-	// alert("Note not found!");
 }

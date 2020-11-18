@@ -1,5 +1,4 @@
 // TODO: note optionally next to message
-// TODO: menu delete all notes from selected messages?
 // TODO: suggest: nsIMsgFilterService->removeCustomAction, nsIMsgFilterService->removeCustomTerm
 // TODO: suggest: QuickFilterManager.jsm > appendTerms() > term.customId = tfDef.customId;
 // MAYBE: multiple notes simultaneously
@@ -10,12 +9,14 @@ var CurrentNote;
 var CurrentTabId;
 var CurrentWindowId;
 var QDEB = true;
+var i18n = new DOMLocalizator(browser.i18n.getMessage);
 
 async function focusMessagePane(windowId){
 	browser.qapp.messagePaneFocus(windowId);
 }
 
 function initCurrentNote(){
+	updateIcons(false);
 	if(CurrentNote){
 		CurrentNote.needSaveOnClose = true;
 		CurrentNote.windowId = CurrentWindowId;
@@ -224,6 +225,7 @@ async function initExtension(){
 	// Context menu on message
 	browser.menus.onShown.addListener(info => {
 		// Avoid context menu other than from messageList
+		// TODO: menu delete all notes from selected messages?
 		if(info.selectedMessages === undefined){
 			return;
 		}

@@ -2,6 +2,7 @@ var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionPa
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
 var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
+var { DOMLocalizator } = ChromeUtils.import(extension.rootURI.resolve("modules/DOMLocalizator.js"));
 
 var PopupEventDispatcher = new QEventDispatcher(["oncreated", "onremoved", "onmove", "onresize", "oncontrols"]);
 
@@ -10,6 +11,11 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 	}
 
 	getAPI(context) {
+		var API = this;
+
+		this.i18n = new DOMLocalizator(id => {
+			return extension.localizeMessage(id);
+		});
 
 		function id2RealWindow(windowId){
 			try {
@@ -232,23 +238,32 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					PopupEventDispatcher.fireListeners("oncreated", popup.popupInfo);
 
 					return popup.pop().then(status => {
+						API.i18n.setTexts(popup.contentDocument);
+						if(controlsCSS){
+							let head = popup.getFirstElementByTagName('head');
+							let css = `<link rel="stylesheet" href="${controlsCSS}" type="text/css">`
+							head.insertAdjacentHTML('beforeend', css);
+						}
+
 						if(url){
 							popup.iframeEl.src = extension.getURL(url);
 						}
 
 						popup.iframeEl.addEventListener("load", e => {
-							if(controlsCSS){
-								let head = popup.getFirstElementByTagName('head');
-								let html = `<link rel="stylesheet" href="${controlsCSS}" type="text/css">`
-								head.insertAdjacentHTML('beforeend', html);
-							}
-
+							API.i18n.setTexts(popup.iframeDocument);
 							let uControls = popup.iframeDocument.querySelector('.qpopup-user-controls');
 							for(let el of uControls.children){
-								popup.addControl(el);
-								el.addEventListener('click', e => {
-									PopupEventDispatcher.fireListeners("oncontrols", "click", el.id, popup.popupInfo);
-								});
+								// let elCl = popup.contentDocument.importNode(el, true);
+								// let elCl = popup.iframeDocument.importNode(el, true);
+								try {
+									let elCl = el.cloneNode(true);
+									popup.addControl(elCl);
+									elCl.addEventListener('click', e => {
+										PopupEventDispatcher.fireListeners("oncontrols", "click", el.id, popup.popupInfo);
+									});
+								} catch (e){
+									console.warn(e);
+								}
 							}
 
 							let MutationObserver = popup.iframeWindow.MutationObserver;

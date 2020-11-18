@@ -1,5 +1,8 @@
 var ext = chrome.extension.getBackgroundPage();
+var i18n = ext.i18n;
 var _ = browser.i18n.getMessage;
+
+//var i18n = new DOMLocalizator(browser.i18n.getMessage);
 
 var Prefs;
 var DefaultPrefs;
@@ -15,69 +18,13 @@ var storageFolderBrowseButton = document.getElementById("storageFolderBrowseButt
 var input_storageFolder = document.getElementById("input_storageFolder");
 var input_overwriteExistingNotes = document.getElementById("input_overwriteExistingNotes");
 
-function isButton(node){
-	return node.nodeName == "INPUT" && node.type.toLocaleUpperCase() === "BUTTON"
-}
-function isCheckbox(node){
-	return node.nodeName == "INPUT" && node.type.toLocaleUpperCase() === "CHECKBOX"
-}
-function isRadio(node){
-	return node.nodeName == "INPUT" && node.type.toLocaleUpperCase() === "RADIO"
-}
-
 function setLabelColor(forE, color){
 	let label = document.querySelectorAll('label[for=' + forE + ']')[0];
 	label.style.color = color;
 	return label;
 }
 
-function setTexts(){
-	for (const node of document.querySelectorAll('[data-i18n]')) {
-		let id = node.dataset.i18n;
-		var text = _(id);
-		if(isButton(node)){
-			node.value = text;
-		} else {
-			node.appendChild(document.createTextNode(text));
-		}
-	}
-}
-
-function setData(){
-	for (const node of document.querySelectorAll('[data-preference]')) {
-		setNode(node);
-	}
-}
-
-async function setNode(node){
-	let pref = node.dataset.preference;
-	let value = Prefs[pref];
-
-	switch(node.nodeName) {
-		case "SELECT":
-			for(let option of node.querySelectorAll("option")){
-				if(option.value == value){
-					option.selected = true;
-					break;
-				}
-			}
-			break;
-		case "INPUT":
-			if(isCheckbox(node)){
-				node.checked = value;
-			} else if(isRadio(node)){
-				node.checked = (value === node.value);
-			} else {
-				node.value = value;
-			}
-			break;
-		default:
-			console.error("Unknown node type " + node.nodeName);
-			console.error(node);
-	}
-}
-
-async function savePrefs(handler){
+async function saveOptions(handler){
 	var oldPrefs = Object.assign({}, Prefs);
 
 	if(storageOptionValue() === 'folder'){
@@ -96,11 +43,11 @@ async function savePrefs(handler){
 		var key = item.dataset.preference;
 		var value = item.value;
 
-		if (!key || isButton(item) || (isRadio(item) && !item.checked) || (DefaultPrefs[key] === undefined)) {
+		if (!key || i18n.isButton(item) || (i18n.isRadio(item) && !item.checked) || (DefaultPrefs[key] === undefined)) {
 			continue;
 		}
 
-		if (isCheckbox(item)){
+		if (i18n.isCheckbox(item)){
 			value = item.checked;
 		}
 
@@ -206,7 +153,7 @@ async function initXNoteImportButton(){
 				}
 
 				// TODO: We need to get possible new data down to qapp cache. Quick hack is just to reload.
-				savePrefs(async saved => {
+				saveOptions(async saved => {
 					ext.reloadExtension();
 				});
 			}).finally(()=>{
@@ -292,14 +239,15 @@ async function initOptionsPage(){
 	DefaultPrefs = ext.getDefaultPrefs();
 
 	initTags(tags);
-	setTexts();
-	setData();
+
+	i18n.setTexts(document);
+	i18n.setData(document);
 
 	initXNoteImportButton();
 	initExportStorageButton();
 
 	saveButton.addEventListener('click', () => {
-		savePrefs();
+		saveOptions();
 	});
 	clearStorageButton.addEventListener('click', clearStorage);
 	exportStorageButton.addEventListener('click', ext.exportStorage);

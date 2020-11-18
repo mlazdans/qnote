@@ -1,3 +1,5 @@
+var _ = browser.i18n.getMessage;
+
 const POP_NONE = 0;
 const POP_FOCUS = (1<<0);
 const POP_EXISTING = (1<<1);
