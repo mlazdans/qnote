@@ -9,12 +9,12 @@ var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js
 
 var QDEB = true;
 var qapp = class extends ExtensionCommon.ExtensionAPI {
-	uninstallCSS() {
+	uninstallCSS(cssUri) {
 		try {
 			let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
-			let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
+			let uri = Services.io.newURI(extension.getURL(cssUri), null, null);
 			if(cssService.sheetRegistered(uri, cssService.USER_SHEET)){
-				QDEB&&console.debug("Unregistering html/background.css");
+				QDEB&&console.debug(`Unregistering ${cssUri}`);
 				cssService.unregisterSheet(uri, cssService.USER_SHEET);
 			}
 		} catch(e) {
@@ -22,12 +22,12 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		}
 	}
 
-	installCSS() {
+	installCSS(cssUri) {
 		try {
 			let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
-			let uri = Services.io.newURI(extension.getURL("html/background.css"), null, null);
+			let uri = Services.io.newURI(extension.getURL(cssUri), null, null);
 			if(!cssService.sheetRegistered(uri, cssService.USER_SHEET)){
-				QDEB&&console.debug("Registering html/background.css");
+				QDEB&&console.debug(`Registering ${cssUri}`);
 				cssService.loadAndRegisterSheet(uri, cssService.USER_SHEET);
 			}
 		} catch(e) {
@@ -148,7 +148,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown() {
 		QDEB&&console.debug("QNote.shutdown()");
 
-		this.uninstallCSS();
+		this.uninstallCSS("html/background.css");
 
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 
@@ -272,8 +272,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					QDEB&&console.debug("qapp.init()");
 
 					// Remove old style sheet in case it still lay around, for example, after update
-					API.uninstallCSS();
-					API.installCSS();
+					API.uninstallCSS("html/background.css");
+					API.installCSS("html/background.css");
 
 					this.popups = new Map();
 
