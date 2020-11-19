@@ -64,8 +64,15 @@ class WebExtensionNoteWindow extends NoteWindow {
 				top: note.top || 0
 			};
 
-			return browser.windows.create(opt).then(windowInfo => {
+			return browser.windows.create(opt).then(async windowInfo => {
 				this.popupId = windowInfo.id;
+
+				if(opt.left && opt.top){
+					await browser.windows.update(windowInfo.id, {
+						left: opt.left,
+						top: opt.top
+					});
+				}
 
 				return true;
 			});
