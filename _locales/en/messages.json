@@ -57,5 +57,8 @@
 	"attach.title": { "message": "title" },
 	"attach.text": { "message": "text" },
 	"enable.message_attach": { "message": "Attach to message" },
-	"enable.debug.messages": { "message": "Enable debug messages" }
+	"enable.debug.messages": { "message": "Enable debug messages" },
+
+	"date.format": { "message": "Date format" },
+	"formatting.rules": { "message": "Formatting rules" }
 }

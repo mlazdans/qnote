@@ -8,7 +8,7 @@ function getDefaultPrefs() {
 	return {
 		useTag: false,
 		tagName: "xnote",
-		dateFormat: "yyyy-mm-dd - HH:MM", // TODO: implement
+		dateFormat: "Y-m-d H:i", // See https://www.php.net/manual/en/datetime.format.php
 		width: 320,
 		height: 200,
 		showFirstChars: 0,
@@ -231,6 +231,11 @@ async function loadPrefsWithDefaults() {
 			p.storageOption = 'folder';
 			p.storageFolder = path;
 		}
+	}
+
+	// Override old default "yyyy-mm-dd - HH:MM"
+	if(p.dateFormat === "yyyy-mm-dd - HH:MM"){
+		p.dateFormat = 'Y-m-d H:i';
 	}
 
 	return p;

@@ -28,6 +28,7 @@
 		"scripts": [
 			"modules/QEventDispatcher.js",
 			"modules/DOMLocalizator.js",
+			"modules/dateFormat.js",
 			"scripts/utils-note.js",
 			"scripts/utils-message.js",
 			"scripts/utils.js",
