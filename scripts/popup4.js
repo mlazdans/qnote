@@ -10,9 +10,9 @@ document.addEventListener("focus", e => {
 if(note){
 	YTextE.value = note.text;
 
-	let title = 'QNote: ';
+	let title = 'QNote';
 	if(note.ts){
-		title += (new Date(note.ts)).toLocaleString();
+		title += ': ' + ext.getNoteFormattedTitle(note.ts);
 	}
 
 	document.title = title;

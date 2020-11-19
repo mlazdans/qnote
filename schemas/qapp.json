@@ -56,6 +56,12 @@
 				"optional": true,
 				"default": false,
 				"description": ""
+			},
+			"dateFormat": {
+				"type": "string",
+				"optional": true,
+				"default": "",
+				"description": ""
 			}
 		}
 	}],

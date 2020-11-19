@@ -1,3 +1,5 @@
+var EXPORTED_SYMBOLS = ["dateFormat"];
+
 var dateFormat = (format, timestamp) => {
   //  discuss at: https://locutus.io/php/date/
   // original by: Carlos R. L. Rodrigues (https://www.jsfromhell.com)

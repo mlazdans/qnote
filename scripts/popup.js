@@ -12,7 +12,7 @@ YTextE.value = note.text;
 
 document.title = 'QNote';
 if(note.ts){
-	document.title += ': ' + (new Date(note.ts)).toLocaleString();
+	document.title += ': ' + ext.getNoteFormattedTitle(note.ts);
 }
 
 const popupClose = () => {

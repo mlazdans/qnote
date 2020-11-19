@@ -6,6 +6,7 @@ var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePo
 var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js"));
+var { dateFormat } = ChromeUtils.import(extension.rootURI.resolve("modules/dateFormat.js"));
 
 var QDEB = true;
 var qapp = class extends ExtensionCommon.ExtensionAPI {
@@ -328,7 +329,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						domNodes[0].remove();
 					}
 
-					let formatted = this.formatQNote(data);
+					let formatted = this.formatQNote(data, prefs.dateFormat);
 
 					let htmlFormatter = (title, text) => {
 						let html = ['<div class="qnote-insidenote" style="margin: 0; padding: 0; border: 1px solid black;">'];
@@ -529,7 +530,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						domNodes[0].remove();
 					}
 
-					let formatted = this.formatQNote(data);
+					let formatted = this.formatQNote(data, prefs.dateFormat);
 
 					let htmlFormatter = (title, text) => {
 						let html = [];
@@ -559,7 +560,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						body.insertAdjacentHTML('beforeend', '<div class="qnote-insidenote qnote-insidenote-bottom">' + html + '</div>');
 					}
 				},
-				formatQNote(data) {
+				formatQNote(data, df) {
 					// https://searchfox.org/mozilla-central/source/dom/base/nsIDocumentEncoder.idl
 					let flags =
 						Ci.nsIDocumentEncoder.OutputPreformatted
@@ -577,7 +578,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// text = text.replace(/\n/g, "<br>");
 
 					return {
-						title: 'QNote: ' + (new Date(data.ts)).toLocaleString(),
+						title: 'QNote: ' + df ? dateFormat(df, data.ts / 1000) : (new Date(data.ts)).toLocaleString(),
 						text: '<pre class="moz-quote-pre" wrap="" style="margin: 0;">' + text + '</pre>'
 					}
 				},

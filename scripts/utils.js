@@ -366,7 +366,8 @@ async function mpUpdateForMessage(messageId){
 			topTitle: Prefs.messageAttachTopTitle,
 			topText: Prefs.messageAttachTopText,
 			bottomTitle: Prefs.messageAttachBottomTitle,
-			bottomText: Prefs.messageAttachBottomText
+			bottomText: Prefs.messageAttachBottomText,
+			dateFormat: Prefs.dateFormat
 		};
 		browser.qapp.attachNoteToMessage(CurrentWindowId, note2QAppNote(note), prefs);
 	});

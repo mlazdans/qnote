@@ -77,7 +77,8 @@ async function initExtension(){
 		topTitle: Prefs.printAttachTopTitle,
 		topText: Prefs.printAttachTopText,
 		bottomTitle: Prefs.printAttachBottomTitle,
-		bottomText: Prefs.printAttachBottomText
+		bottomText: Prefs.printAttachBottomText,
+		dateFormat: Prefs.dateFormat
 	});
 
 	// window.addEventListener("unhandledrejection", event => {

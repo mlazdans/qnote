@@ -78,3 +78,7 @@ async function loadAllQAppNotes(){
 function sendNoteToQApp(note){
 	return browser.qapp.saveNoteCache(note2QAppNote(note));
 }
+
+function getNoteFormattedTitle(ts){
+	return Prefs.dateFormat ? dateFormat(Prefs.dateFormat, ts / 1000) : (new Date(ts)).toLocaleString();
+}
