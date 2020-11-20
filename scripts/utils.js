@@ -377,13 +377,6 @@ async function mpUpdateForMessage(messageId){
 }
 
 async function mpUpdateCurrent(){
-	// if(CurrentNote.popupId){
-	// 	console.log("updateCurrentMessage", CurrentNote.popupId);
-	// 	await CurrentNote.close();
-	// }
-
-	// return getCurrentTabId().then(tabId => {
-	// 	console.log("mpUpdateCurrent", tabId);
 	return getDisplayedMessageForTab(CurrentTabId).then(message => {
 		return mpUpdateForMessage(message.id);
 	}).catch(silentCatcher());
