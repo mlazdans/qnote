@@ -71,5 +71,3 @@ var Menu = {
 		});
 	}
 }
-
-console.log("Menu", Menu);
