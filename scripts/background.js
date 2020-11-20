@@ -1,6 +1,5 @@
 // MAYBE: multiple notes simultaneously
 // TODO: save note pos and dims locally, outside note
-// TODO: structure app code separately
 var Prefs;
 var CurrentNote;
 var CurrentTabId;
@@ -241,7 +240,6 @@ async function initExtension(){
 			browser.menus.refresh();
 		});
 	});
-
 }
 
 async function waitForLoad() {
