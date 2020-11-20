@@ -8,6 +8,25 @@ button {
 	white-space: nowrap;
 }
 
+legend {
+	padding: 0 1rem;
+	border:1px solid #96c9ef;
+	background-color: #ffda44;
+}
+
+fieldset {
+	border: 1px solid #96c9ef;
+	margin-bottom: 1rem;
+}
+
+select, input[type=text], input[type=number] {
+	border: 1px solid #96c9ef;
+}
+
+a {
+	color: #41a5ef;
+}
+
 .anchorPlacement {
 	border-collapse: collapse;
 }

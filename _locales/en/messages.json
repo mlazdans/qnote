@@ -11,9 +11,9 @@
 	"toggle.qnote": { "message": "Toggle note" },
 
 	"width.label": { "message": "Width:" },
-	"height.label": { "message": "Height:" },
-	"use.tag.label": { "message": "Use Tag:" },
-	"show.on.select.label": { "message": "Show note popup on message selection" },
+	"height.label": { "message": "Height" },
+	"use.tag.label": { "message": "Use Tag" },
+	"show.on.select.label": { "message": "Show popup on message selection" },
 	"save.preferences.button": { "message": "Save" },
 	"import.legacy.xnotes.button": { "message": "Import legacy XNotes" },
 	"extension.reload.button": { "message": "Reload" },
@@ -23,8 +23,8 @@
 	"can.use.xnote.folder": { "message": "You can use legacy XNotes folder"},
 	"no.message_id.header": { "message": "Can't create note. Message without 'message-id:' header"},
 
-	"maintenance.fieldset": { "message": " Maintenance " },
-	"use.tag.manager": { "message": "Please use tag manager to manage tags" },
+	"maintenance.fieldset": { "message": "Maintenance" },
+	"use.tag.manager": { "message": "(please use tag manager to manage tags)" },
 
 	"xnote.import.finished.stats": { "message": "Import finished:\nimported notes - $1\nerrored notes - $2\nexisting notes - $3\noverwritten notes - $4" },
 	"xnote.import.fail": { "message": "Could not import legacy notes" },
@@ -32,7 +32,7 @@
 	"xnote.folder.found": { "message": "XNote folder found: $1" },
 
 	"storage.export.limitation": { "message": "'Export storage' available only on TB>=78" },
-	"storage.fieldset": { "message": " Storage " },
+	"storage.fieldset": { "message": "Storage" },
 	"storage.option.ext": { "message": "Inside extension" },
 	"storage.option.folder": { "message": "Local folder" },
 	"storage.cleared": { "message": "Storage cleared" },
@@ -60,7 +60,11 @@
 	"enable.debug.messages": { "message": "Enable debug messages" },
 
 	"date.format": { "message": "Date format" },
-	"formatting.rules": { "message": "Formatting rules" },
+	"formatting.rules": { "message": "(formatting rules)" },
 	"anchor.to": { "message": "Anchor to" },
-	"confirm.delete": { "message": "Confirm delete" }
+	"confirm.delete": { "message": "Confirm delete" },
+	"default.dimensions.fieldset": { "message": "Default dimensions and placement" },
+	"behaviour.fieldset": { "message": "Behaviour" },
+	"search.disabled.msg": { "message": "(search has been temporarily disabled until we found a better solution)" },
+	"additional.attach": { "message": "Additionally attach" }
 }
