@@ -21,7 +21,7 @@ var Menu = {
 			id: "delete",
 			title: _("delete.note"),
 			contexts: ["message_list"],
-			onclick(info) {
+			async onclick(info) {
 				if(await confirmDelete()) {
 					let messageId = Menu.getId(info);
 					if(CurrentNote.messageId === messageId){
@@ -71,3 +71,5 @@ var Menu = {
 		});
 	}
 }
+
+console.log("Menu", Menu);
