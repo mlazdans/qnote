@@ -40,6 +40,22 @@
 				"type": "integer",
 				"optional": true
 			},
+			"minWidth": {
+				"type": "integer",
+				"optional": true
+			},
+			"minHeight": {
+				"type": "integer",
+				"optional": true
+			},
+			"maxWidth": {
+				"type": "integer",
+				"optional": true
+			},
+			"maxHeight": {
+				"type": "integer",
+				"optional": true
+			},
 			"title": {
 				"type": "string",
 				"optional": true

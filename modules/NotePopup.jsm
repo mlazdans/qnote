@@ -287,6 +287,8 @@ class NotePopup extends BasePopup {
 		let titleEl = this.titleEl;
 		let resizeEl = this.resizeEl;
 
+		let { minWidth, minHeight, maxWidth, maxHeight } = this.options;
+
 		let tDrag = e => {
 			let popup = self.popupEl;
 			let el = e.target;
@@ -330,12 +332,11 @@ class NotePopup extends BasePopup {
 			let startW = popup.offsetWidth;
 			let startH = popup.offsetHeight;
 
-			// TODO: move to separate function
 			let rectLimit = {
-				maxWidth: 800,
-				maxHeight: 500,
-				minWidth: 200,
-				minHeight: 125
+				minWidth: minWidth || 200,
+				minHeight: minHeight || 125,
+				maxWidth: maxWidth || 800,
+				maxHeight: maxHeight || 500
 			};
 
 			let resizer = (e) => {
