@@ -60,5 +60,6 @@
 	"enable.debug.messages": { "message": "Enable debug messages" },
 
 	"date.format": { "message": "Date format" },
-	"formatting.rules": { "message": "Formatting rules" }
+	"formatting.rules": { "message": "Formatting rules" },
+	"anchor.to": { "message": "Anchor to" }
 }

@@ -47,6 +47,14 @@
 			"controlsCSS": {
 				"type": "string",
 				"optional": true
+			},
+			"anchor": {
+				"type": "string",
+				"optional": true
+			},
+			"anchorPlacement": {
+				"type": "string",
+				"optional": true
 			}
 		}
 	}],

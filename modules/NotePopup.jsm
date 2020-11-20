@@ -149,9 +149,29 @@ class NotePopup extends BasePopup {
 		return true;
 	}
 
+	// box = { top, left, width, height }
+	_center(innerBox, outerBox, absolute = true){
+		let retBox = {};
+
+		let iWidth = innerBox.width||0;
+		let iHeight = innerBox.height||0;
+		let oWidth = outerBox.width||0;
+		let oHeight = outerBox.height||0;
+
+		retBox.left = Math.round((oWidth - iWidth) / 2);
+		retBox.top = Math.round((oHeight - iHeight) / 2);
+
+		if(absolute) {
+			retBox.left += outerBox.left||0;
+			retBox.top += outerBox.top||0;
+		}
+
+		return retBox;
+	}
+
 	pop(){
 		let self = this;
-		let { left, top, width, height, title } = this.options;
+		let { left, top, width, height, title, anchor, anchorPlacement } = this.options;
 
 		var initNote = () => {
 			// MAYBE: install default .close();
@@ -160,12 +180,12 @@ class NotePopup extends BasePopup {
 
 			this.attachEvents();
 
-			this.moveTo(left, top);
+			// this.moveTo(left, top);
 			this.sizeTo(width, height);
 			this.shown = true;
 		};
 
-		return new Promise(function(resolve) {
+		return new Promise(resolve => {
 			let loadListener = (e0) => {
 				//self.browser.style.display = "none";
 
@@ -201,13 +221,58 @@ class NotePopup extends BasePopup {
 
 			self.browser.addEventListener("DOMContentLoaded", loadListener);
 
-			let anchor = null;
+			let aEl = null;
+			let aPlacement = "topleft";
+			let window = self.window;
 
-			// TODO: handle relative coords
-			if(left && top) {
-				self.panel.openPopup(anchor, "topleft", left, top);
+			let elements = {
+				window: "tabmail",
+				threadpane: "threadContentArea",
+				message: "messagepane",
+			};
+
+			let placements = {
+				center: "topleft",
+				topleft: "topleft topleft",
+				topcenter: "topcenter topleft",
+				topright: "topright topright",
+				rightcenter: "rightcenter topright",
+				bottomright: "bottomright bottomright",
+				bottomcenter: "bottomcenter bottomleft",
+				bottomleft: "bottomleft bottomleft",
+				leftcenter: "leftcenter topleft"
+			};
+
+			if(anchor && elements[anchor]){
+				aEl = window.document.getElementById(elements[anchor]);
+			}
+
+			if(anchorPlacement && placements[anchorPlacement]){
+				aPlacement = placements[anchorPlacement];
+			}
+
+			if(aEl && (left === null) && (top === null)){
+				let wBox = {
+					top: aEl.screenY,
+					left: aEl.screenX,
+					width: aEl.clientWidth,
+					height: aEl.clientHeight
+				};
+
+				let adjX = 0;
+				let adjY = 0;
+				if(anchorPlacement === 'center'){
+					let adjBox = this._center(self.options, wBox, false);
+					adjX = adjBox.left;
+					adjY = adjBox.top;
+				} else if(anchorPlacement === "topcenter" || anchorPlacement === "bottomcenter"){
+					adjX = (width / 2) * (- 1);
+				} else if(anchorPlacement === "rightcenter" || anchorPlacement === "leftcenter"){
+					adjY = (height / 2) * (- 1);
+				}
+				self.panel.openPopup(aEl, aPlacement, adjX, adjY);
 			} else {
-				self.panel.openPopup(anchor, "topleft");
+				self.panel.openPopup(null, "topleft", left, top);
 			}
 		});
 	}

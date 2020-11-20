@@ -2,7 +2,8 @@
 <html>
 <head>
 	<meta charset="utf-8"/>
-	<link rel="stylesheet" href="../html/options.css" type="text/css"></style>
+	<link rel="stylesheet" href="../html/options.css" type="text/css">
+	<title>QNote options</title>
 </head>
 
 <body>
@@ -13,10 +14,63 @@
 	<legend> QNote </legend>
 	<table>
 		<tr>
-			<td><label for="input_width" data-i18n="width.label"></label></td>
-			<td><input type="number" data-preference="width" id="input_width" maxlength="7" size="7" min="100" max="99999" /></td>
-			<td><label for="input_height" data-i18n="height.label"></label></td>
-			<td><input type="number" data-preference="height" id="input_height" maxlength="7" size="7" min="100" max="99999" /></td>
+			<td>
+				<table>
+					<tr>
+						<td><label for="select_anchor" data-i18n="anchor.to"></label></td>
+						<td>
+							<select data-preference="anchor" id="select_anchor" name="anchor">
+								<option value="window">Window</option>
+								<option value="threadpane">Message list</option>
+								<option value="message">Message</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td><label for="input_width" data-i18n="width.label"></label></td>
+						<td><input type="number" data-preference="width" id="input_width" min="100" max="99999" size="5" /></td>
+					</tr>
+					<tr>
+						<td><label for="input_height" data-i18n="height.label"></label></td>
+						<td><input type="number" data-preference="height" id="input_height" min="100" max="99999" size="5" /></td>
+					</tr>
+				</table>
+			</td>
+			<td>
+				<table class="anchorPlacement">
+					<tr>
+						<td><input type="radio" name="anchorPlacement" value="topleft" data-preference="anchorPlacement"></td>
+						<td class="lineX">&nbsp;</td>
+						<td><input type="radio" name="anchorPlacement" value="topcenter" data-preference="anchorPlacement"></td>
+						<td class="lineX">&nbsp;</td>
+						<td><input type="radio" name="anchorPlacement" value="topright" data-preference="anchorPlacement"></td>
+					</tr>
+					<tr>
+						<td class="lineY">&nbsp;</td>
+						<td colspan="3">&nbsp;</td>
+						<td class="lineY">&nbsp;</td>
+					</tr>
+					<tr>
+						<td><input type="radio" name="anchorPlacement" value="leftcenter" data-preference="anchorPlacement"></td>
+						<td>&nbsp;</td>
+						<td><input type="radio" name="anchorPlacement" value="center" data-preference="anchorPlacement"></td>
+						<td>&nbsp;</td>
+						<td><input type="radio" name="anchorPlacement" value="rightcenter" data-preference="anchorPlacement"></td>
+					</tr>
+					<tr>
+						<td class="lineY">&nbsp;</td>
+						<td colspan="3">&nbsp;</td>
+						<td class="lineY">&nbsp;</td>
+					</tr>
+					<tr>
+						<td><input type="radio" name="anchorPlacement" value="bottomleft" data-preference="anchorPlacement"></td>
+						<td class="lineX">&nbsp;</td>
+						<td><input type="radio" name="anchorPlacement" value="bottomcenter" data-preference="anchorPlacement"></td>
+						<td class="lineX">&nbsp;</td>
+						<td><input type="radio" name="anchorPlacement" value="bottomright" data-preference="anchorPlacement"></td>
+					</tr>
+				</table>
+			</td>
 		</tr>
 	</table>
 	<table>
@@ -38,7 +92,7 @@
 	<table>
 		<tr>
 			<td><label for="input_showFirstChars" data-i18n="show.first.chars.label"></label></td>
-			<td><input type="number" data-preference="showFirstChars" id="input_showFirstChars" maxlength="5" size="5" min="0" max="999" /></td>
+			<td><input type="number" data-preference="showFirstChars" id="input_showFirstChars" min="0" max="999" size="5" /></td>
 		</tr>
 	</table>
 	<table>
@@ -122,7 +176,7 @@
 			<tr>
 				<td><button type="button" id="importXNotesButton" data-i18n="import.legacy.xnotes.button"></button></td>
 				<td id="xnoteFolderInfo"></td>
-				<td><div id="importXNotesLoader" style="display: none;"><img src="../images/loader.gif"></div></td>
+				<td><div id="importXNotesLoader" style="display: none;"><img src="../images/loader.gif" alt="Loading..."></div></td>
 			</tr>
 			<tr>
 				<td colspan="3">

@@ -193,7 +193,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					return true;
 				},
 				async create(options){
-					let { windowId, top, left, width, height, url, title, controlsCSS } = options;
+					let { windowId, top, left, width, height, url, title, controlsCSS, anchor, anchorPlacement } = options;
 					let window = id2RealWindow(windowId);
 
 					var popup = new NotePopup({
@@ -202,7 +202,9 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						top: top,
 						left: left,
 						width: width,
-						height: height
+						height: height,
+						anchor: anchor,
+						anchorPlacement: anchorPlacement
 					});
 
 					popup.onResize = p => {

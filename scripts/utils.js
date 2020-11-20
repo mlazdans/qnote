@@ -29,7 +29,10 @@ function getDefaultPrefs() {
 		messageAttachBottomTitle: false,
 		messageAttachBottomText: false,
 
-		enableDebug: false
+		enableDebug: false,
+
+		anchor: "window", // window, threadpane, message
+		anchorPlacement: "center", // center, topleft, topcenter, topright, rightcenter, bottomright, bottomcenter, bottomleft, leftcenter
 	};
 }
 

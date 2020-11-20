@@ -1,7 +1,7 @@
-// TODO: note optionally next to message
 // MAYBE: multiple notes simultaneously
 // TODO: save note pos and dims locally, outside note
 // TODO: structure app code separately
+// TODO: confirm delete
 var Prefs;
 var CurrentNote;
 var CurrentTabId;

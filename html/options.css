@@ -7,3 +7,34 @@ html, body {
 button {
 	white-space: nowrap;
 }
+
+.anchorPlacement {
+	border-collapse: collapse;
+}
+
+.anchorPlacement input[type=radio] {
+	margin: auto;
+	padding: 0;
+	display: block;
+}
+
+.anchorPlacement td {
+	text-align: center;
+	vertical-align: middle;
+	margin: 0;
+	padding: 0;
+}
+
+.lineX {
+	min-width: 32px;
+	background-image: url(../images/1x1border.gif);
+	background-repeat: repeat-x;
+	background-position: center;
+}
+
+.lineY {
+	min-height: 20px;
+	background-image: url(../images/1x1border.gif);
+	background-repeat: repeat-y;
+	background-position: center;
+}

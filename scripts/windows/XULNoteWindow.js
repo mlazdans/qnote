@@ -64,20 +64,11 @@ class XULNoteWindow extends NoteWindow {
 				title: "QNote",
 				width: note.width || Prefs.width,
 				height: note.height || Prefs.height,
-				left: note.left || 0,
-				top: note.top || 0
+				left: note.left,
+				top: note.top,
+				anchor: Prefs.anchor,
+				anchorPlacement: Prefs.anchorPlacement
 			};
-
-			// MAYBE: preconfigured positions?
-			let centeredBox = this._center(opt, await this._getWindowRect());
-
-			if(!opt.left){
-				opt.left = centeredBox.left;
-			}
-
-			if(!opt.top){
-				opt.top = centeredBox.top;
-			}
 
 			return browser.qpopup.create(opt).then(popupInfo => {
 				this.popupId = popupInfo.id;
