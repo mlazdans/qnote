@@ -479,8 +479,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				async attachNoteToMessage(windowId, data, prefs){
 					let fName = "qapp.attachNoteToMessage()";
 
-					if(!(data && data.exists)){
-						QDEB&&console.debug(`${fName} - no note`);
+					if(!data){
+						QDEB&&console.debug(`${fName} - no note data`);
 						return;
 					}
 
@@ -529,6 +529,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					while(domNodes.length){
 						domNodes[0].remove();
 					}
+
+					// Return after cleanup, if note deleted
+					if(!data.exists){
+						QDEB&&console.debug(`${fName} - note doest no exist`);
+						return;
+					}
+
 
 					let formatted = this.formatQNote(data, prefs.dateFormat);
 
