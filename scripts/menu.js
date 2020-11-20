@@ -22,12 +22,14 @@ var Menu = {
 			title: _("delete.note"),
 			contexts: ["message_list"],
 			onclick(info) {
-				let messageId = Menu.getId(info);
-				if(CurrentNote.messageId === messageId){
-					// Ensure note close and additional handling there
-					CurrentNote.deleteNote();
-				} else {
-					deleteNoteForMessage(Menu.getId(info)).then(updateNoteView);
+				if(await confirmDelete()) {
+					let messageId = Menu.getId(info);
+					if(CurrentNote.messageId === messageId){
+						// Ensure note close and additional handling there
+						CurrentNote.deleteNote();
+					} else {
+						deleteNoteForMessage(Menu.getId(info)).then(updateNoteView);
+					}
 				}
 			},
 		});

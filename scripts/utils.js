@@ -33,6 +33,7 @@ function getDefaultPrefs() {
 
 		anchor: "window", // window, threadpane, message
 		anchorPlacement: "center", // center, topleft, topcenter, topright, rightcenter, bottomright, bottomcenter, bottomleft, leftcenter
+		confirmDelete: false
 	};
 }
 
@@ -410,4 +411,8 @@ function updateNoteView(note){
 	} else {
 		return browser.qapp.updateView(CurrentWindowId);
 	}
+}
+
+async function confirmDelete(){
+	return Prefs.confirmDelete ? await browser.legacy.confirm(_("are.you.sure")) : true;
 }

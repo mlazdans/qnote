@@ -1,7 +1,6 @@
 // MAYBE: multiple notes simultaneously
 // TODO: save note pos and dims locally, outside note
 // TODO: structure app code separately
-// TODO: confirm delete
 var Prefs;
 var CurrentNote;
 var CurrentTabId;
@@ -29,17 +28,19 @@ function initCurrentNote(){
 		throw new TypeError("Prefs.windowOption");
 	}
 
-	browser.qpopup.onControls.addListener((action, id, pi) => {
+	browser.qpopup.onControls.addListener(async (action, id, pi) => {
 		if(id !== 'note-delete' || action !== 'click' || pi.id != CurrentNote.popupId){
 			return;
 		}
 
-		CurrentNote.needSaveOnClose = false;
-		CurrentNote.close().then(() => {
-			return CurrentNote.deleteNote();
-		}).then(()=>{
-			initCurrentNote();
-		});
+		if(await confirmDelete()) {
+			CurrentNote.needSaveOnClose = false;
+			CurrentNote.close().then(() => {
+				return CurrentNote.deleteNote();
+			}).then(()=>{
+				initCurrentNote();
+			});
+		}
 	});
 
 	CurrentNote.addListener("afterupdate", (NoteWindow, action, isOk) => {

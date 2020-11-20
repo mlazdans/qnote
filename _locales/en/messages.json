@@ -61,5 +61,6 @@
 
 	"date.format": { "message": "Date format" },
 	"formatting.rules": { "message": "Formatting rules" },
-	"anchor.to": { "message": "Anchor to" }
+	"anchor.to": { "message": "Anchor to" },
+	"confirm.delete": { "message": "Confirm delete" }
 }
