@@ -14,7 +14,7 @@ class Note {
 
 	load(loader) {
 		return loader().then(data => {
-			// NOTE: convert x -> left and y -> top
+			// Convert legacy x -> left, y -> top
 			if(data.left === undefined && data.x !== undefined){
 				data.left = data.x;
 				delete data.x;
