@@ -585,7 +585,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// text = text.replace(/\n/g, "<br>");
 
 					return {
-						title: 'QNote: ' + df ? dateFormat(df, data.ts / 1000) : (new Date(data.ts)).toLocaleString(),
+						title: 'QNote: ' + (df ? dateFormat(df, data.ts / 1000) : (new Date(data.ts)).toLocaleString()),
 						text: '<pre class="moz-quote-pre" wrap="" style="margin: 0;">' + text + '</pre>'
 					}
 				},
