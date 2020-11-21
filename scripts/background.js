@@ -1,4 +1,5 @@
 // MAYBE: multiple notes simultaneously
+// MAYBE: note popup on mouse over
 // TODO: save note pos and dims locally, outside note
 var Prefs;
 var CurrentNote;
