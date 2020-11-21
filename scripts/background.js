@@ -1,11 +1,12 @@
 // MAYBE: multiple notes simultaneously
 // MAYBE: note popup on mouse over
 // TODO: save note pos and dims locally, outside note
+var QDEB = true;
 var Prefs;
 var CurrentNote;
 var CurrentTabId;
 var CurrentWindowId;
-var QDEB = true;
+var CurrentLang;
 var i18n = new DOMLocalizator(browser.i18n.getMessage);
 
 async function focusMessagePane(windowId){
@@ -62,6 +63,7 @@ function initCurrentNote(){
 
 async function setUpExtension(){
 	CurrentNote = null;
+	CurrentLang = browser.i18n.getUILanguage();
 
 	Prefs = await loadPrefsWithDefaults();
 
@@ -76,16 +78,14 @@ async function setUpExtension(){
 		topTitle: Prefs.printAttachTopTitle,
 		topText: Prefs.printAttachTopText,
 		bottomTitle: Prefs.printAttachBottomTitle,
-		bottomText: Prefs.printAttachBottomText,
-		dateFormat: Prefs.dateFormat
+		bottomText: Prefs.printAttachBottomText
 	});
 
 	browser.qapp.setMessageAttacherPrefs({
 		topTitle: Prefs.messageAttachTopTitle,
 		topText: Prefs.messageAttachTopText,
 		bottomTitle: Prefs.messageAttachBottomTitle,
-		bottomText: Prefs.messageAttachBottomText,
-		dateFormat: Prefs.dateFormat
+		bottomText: Prefs.messageAttachBottomText
 	});
 }
 
@@ -258,6 +258,12 @@ async function initExtension(){
 	// TODO: attach at least note icon to multi message display (since TB78.4)
 	// browser.messageDisplay.onMessagesDisplayed.addListener(async (Tab, Messages) => {
 	// });
+	// let date = new Date(Date.UTC(2015, 5, 27, 12, 0, 0))
+	// , options = {weekday: 'long', month: 'long', day: '2-digit' };
+	// console.log(date.toLocaleString('en', options)); //sáb. 27 de jun
+	//console.log(dateFormat('de', 'd/D/j/l/N/S/w/z/W/F/m/M/n/t/L/o/Y/y/a/A/B/g/G/h/H/i/s/u/v'));
+	//console.log(dateFormat('de'));
+	// console.log(dateFormatPredefined(CurrentLang, 'DATE_MED_WITH_WEEKDAY'));
 }
 
 async function waitForLoad() {

@@ -60,7 +60,12 @@
 	"enable.debug.messages": { "message": "Enable debug messages" },
 
 	"date.format": { "message": "Date format" },
+	"date.format.custom": { "message": "-custom-" },
 	"formatting.rules": { "message": "(formatting rules)" },
+	"datetime_group": { "message": "Date and time" },
+	"date_group": { "message": "Date" },
+	"time_group": { "message": "Time" },
+
 	"anchor.to": { "message": "Anchor to" },
 	"confirm.delete": { "message": "Confirm delete" },
 	"default.dimensions.fieldset": { "message": "Default dimensions and placement" },

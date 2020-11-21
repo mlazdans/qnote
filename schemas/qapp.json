@@ -21,6 +21,11 @@
 				"default": 0,
 				"description": ""
 			},
+			"tsFormatted": {
+				"type": "string",
+				"default": "",
+				"description": ""
+			},
 			"text": {
 				"type": "string",
 				"default": "",
@@ -55,12 +60,6 @@
 				"type": "boolean",
 				"optional": true,
 				"default": false,
-				"description": ""
-			},
-			"dateFormat": {
-				"type": "string",
-				"optional": true,
-				"default": "",
 				"description": ""
 			}
 		}
