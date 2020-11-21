@@ -120,11 +120,19 @@
 	</table>
 	<table>
 		<tr>
-			<td><label for="dateFormat" data-i18n="date.format"></label></td>
-			<td><input type="text" id="dateFormat" name="dateFormat" data-preference="dateFormat"></td>
-			<td><a href="https://www.php.net/manual/en/datetime.format.php" data-i18n="formatting.rules"></a></td>
+			<td><label for="dateFormatPredefined" data-i18n="date.format"></label></td>
+			<td><select data-preference="dateFormatPredefined" id="dateFormatPredefined"></select></td>
 		</tr>
 	</table>
+	<div id="block_dateFormat" style="display: none;">
+		<table>
+			<tr>
+				<td><label for="dateFormat" data-i18n="date.format"></label></td>
+				<td><input type="text" id="dateFormat" name="dateFormat" data-preference="dateFormat"></td>
+				<td><a href="https://www.php.net/manual/en/datetime.format.php" data-i18n="formatting.rules"></a></td>
+			</tr>
+		</table>
+	</div>
 </fieldset>
 <fieldset>
 	<legend data-i18n="additional.attach"></legend>

@@ -63,7 +63,8 @@ function note2QAppNote(note){
 		keyId: note.keyId,
 		exists: note.exists || false,
 		text: note.text || "",
-		ts: note.ts || 0
+		ts: note.ts || 0,
+		tsFormatted: getNoteFormattedTitle(note.ts)
 	} : null;
 }
 
@@ -80,5 +81,13 @@ function sendNoteToQApp(note){
 }
 
 function getNoteFormattedTitle(ts){
-	return Prefs.dateFormat ? dateFormat(Prefs.dateFormat, ts / 1000) : (new Date(ts)).toLocaleString();
+	if(Prefs.dateFormatPredefined){
+		return dateFormatPredefined(CurrentLang, Prefs.dateFormatPredefined, ts);
+	} else {
+		if(Prefs.dateFormat){
+			return dateFormat(CurrentLang, Prefs.dateFormat, ts);
+		} else {
+			return dateFormatPredefined(CurrentLang, 'DATETIME_FULL_WITH_SECONDS', ts);
+		}
+	}
 }

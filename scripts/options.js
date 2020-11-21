@@ -18,6 +18,37 @@ var storageFolderBrowseButton = document.getElementById("storageFolderBrowseButt
 var input_storageFolder = document.getElementById("input_storageFolder");
 var input_overwriteExistingNotes = document.getElementById("input_overwriteExistingNotes");
 
+var dateFormats = {
+	datetime_group: [
+		'DATETIME_FULL',
+		'DATETIME_FULL_WITH_SECONDS',
+		// 'DATETIME_HUGE',
+		// 'DATETIME_HUGE_WITH_SECONDS',
+		'DATETIME_MED',
+		'DATETIME_MED_WITH_SECONDS',
+		'DATETIME_MED_WITH_WEEKDAY',
+		'DATETIME_SHORT',
+		'DATETIME_SHORT_WITH_SECONDS',
+	],
+	date_group: [
+		'DATE_FULL',
+		'DATE_HUGE',
+		'DATE_MED',
+		'DATE_MED_WITH_WEEKDAY',
+		'DATE_SHORT',
+	],
+	time_group: [
+		'TIME_24_SIMPLE',
+		// 'TIME_24_WITH_LONG_OFFSET',
+		'TIME_24_WITH_SECONDS',
+		'TIME_24_WITH_SHORT_OFFSET',
+		'TIME_SIMPLE',
+		// 'TIME_WITH_LONG_OFFSET',
+		'TIME_WITH_SECONDS',
+		'TIME_WITH_SHORT_OFFSET'
+	]
+};
+
 function setLabelColor(forE, color){
 	let label = document.querySelectorAll('label[for=' + forE + ']')[0];
 	label.style.color = color;
@@ -111,6 +142,48 @@ function initTags(tags){
 		opt.text = tag.tag;
 		opt.value = tag.key;
 		select.add(opt);
+	}
+}
+
+function initDateFormats(){
+	let select = window.document.getElementById('dateFormatPredefined');
+	select.addEventListener("change", dateFormatChange);
+
+	if(!select){
+		return false;
+	}
+
+	while(select.length > 0 ){
+		select.remove(0);
+	}
+
+	let opt = document.createElement('option');
+	opt.text = _("date.format.custom");
+	opt.value = "";
+	select.add(opt);
+
+	for (const group in dateFormats) {
+		let gr = document.createElement('optgroup');
+		gr.label = _(group);
+		for (const df of dateFormats[group]) {
+			let opt = document.createElement('option');
+			opt.text = ext.dateFormatPredefined(ext.CurrentLang, df);
+			opt.value = df;
+			gr.appendChild(opt);
+		}
+
+		select.add(gr);
+	}
+}
+
+function dateFormatChange(){
+	let select = window.document.getElementById('dateFormatPredefined');
+	let customBlock = window.document.getElementById('block_dateFormat');
+
+	if(select.value){
+		customBlock.style.display = 'none';
+	} else {
+		customBlock.style.display = '';
 	}
 }
 
@@ -241,6 +314,7 @@ async function initOptionsPage(){
 	DefaultPrefs = ext.getDefaultPrefs();
 
 	initTags(tags);
+	initDateFormats();
 
 	i18n.setTexts(document);
 	i18n.setData(document, Prefs);
@@ -265,6 +339,7 @@ async function initOptionsPage(){
 	}
 
 	storageOptionChange();
+	dateFormatChange();
 }
 
 window.addEventListener("load", ()=>{

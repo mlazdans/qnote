@@ -9,6 +9,7 @@ function getDefaultPrefs() {
 		useTag: false,
 		tagName: "xnote",
 		dateFormat: "Y-m-d H:i", // See https://www.php.net/manual/en/datetime.format.php
+		dateFormatPredefined: "",
 		width: 320,
 		height: 200,
 		showFirstChars: 0,
