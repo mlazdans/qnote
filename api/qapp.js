@@ -79,6 +79,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				try {
 					return col.element.ownerGlobal.gDBView;
 				} catch {
+					return w.gDBView;
 				}
 			},
 			isEditable(row, col) {
@@ -212,9 +213,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			}
 		};
 
-		function id2RealWindow(windowId){
+		function id2RealWindow(w){
 			try {
-				return extension.windowManager.get(windowId).window;
+				return Number.isInteger(w) ? extension.windowManager.get(w).window : w;
 			} catch {
 			}
 		}
@@ -307,7 +308,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return;
 					}
 
-					let w = Number.isInteger(windowId) ? id2RealWindow(windowId) : windowId;
+					let w = id2RealWindow(windowId);
 					if(!w || !w.document){
 						QDEB&&console.debug(`${fName} - no window`);
 						return;
