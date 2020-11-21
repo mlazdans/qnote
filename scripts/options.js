@@ -89,8 +89,7 @@ async function saveOptions(handler){
 		// }
 
 		await ext.CurrentNote.close();
-
-		ext.setUpExtension();
+		await ext.setUpExtension();
 	};
 
 	await ext.savePrefs(Prefs).then(handler || defaultHandler);
