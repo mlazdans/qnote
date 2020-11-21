@@ -65,6 +65,8 @@ async function setUpExtension(){
 
 	Prefs = await loadPrefsWithDefaults();
 
+	initCurrentNote();
+
 	QDEB = !!Prefs.enableDebug;
 	browser.qapp.setDebug(QDEB);
 
@@ -85,14 +87,12 @@ async function setUpExtension(){
 		bottomText: Prefs.messageAttachBottomText,
 		dateFormat: Prefs.dateFormat
 	});
-
-	initCurrentNote();
 }
 
 async function initExtension(){
 	QDEB&&console.debug("initExtension()");
 
-	setUpExtension();
+	await setUpExtension();
 
 	CurrentWindowId = await getCurrentWindowId();
 
@@ -204,7 +204,7 @@ async function initExtension(){
 				}
 			});
 		}
-		mpUpdateForMessage(Message.id);
+		// mpUpdateForMessage(Message.id);
 	});
 
 	// Click on main toolbar
