@@ -29,21 +29,6 @@ function initCurrentNote(){
 		throw new TypeError("Prefs.windowOption");
 	}
 
-	browser.qpopup.onControls.addListener(async (action, id, pi) => {
-		if(id !== 'note-delete' || action !== 'click' || pi.id != CurrentNote.popupId){
-			return;
-		}
-
-		if(await confirmDelete()) {
-			CurrentNote.needSaveOnClose = false;
-			CurrentNote.close().then(() => {
-				return CurrentNote.deleteNote();
-			}).then(()=>{
-				initCurrentNote();
-			});
-		}
-	});
-
 	CurrentNote.addListener("afterupdate", (NoteWindow, action, isOk) => {
 		QDEB&&console.debug("afterupdate", action, isOk);
 		if(isOk && CurrentNote.messageId){
@@ -61,6 +46,7 @@ function initCurrentNote(){
 	});
 }
 
+// We call this after options has been changed
 async function setUpExtension(){
 	CurrentNote = null;
 	CurrentLang = browser.i18n.getUILanguage();
@@ -102,6 +88,21 @@ async function initExtension(){
 	// window.addEventListener("unhandledrejection", event => {
 	// 	console.warn(`Unhandle: ${event.reason}`, event);
 	// });
+
+	browser.qpopup.onControls.addListener(async (action, id, pi) => {
+		if(id !== 'note-delete' || action !== 'click' || pi.id != CurrentNote.popupId){
+			return;
+		}
+
+		if(await confirmDelete()) {
+			CurrentNote.needSaveOnClose = false;
+			CurrentNote.close().then(() => {
+				return CurrentNote.deleteNote();
+			}).then(()=>{
+				initCurrentNote();
+			});
+		}
+	});
 
 	await browser.qapp.init();
 
@@ -171,7 +172,6 @@ async function initExtension(){
 			return;
 		}
 
-		QDEB&&console.debug("windows.onFocusChanged()", windowId, CurrentNote.windowId);
 		await CurrentNote.close();
 
 		CurrentWindowId = windowId;
