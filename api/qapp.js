@@ -146,11 +146,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					this.noteRowListener(this.getView(col), row);
 				});
 
-				if(note.exists && !note.shortText && this.limit && (typeof note.text === 'string')){
-					note.shortText = note.text.substring(0, this.limit);
+				if(note.exists && (typeof note.text === 'string')){
+					return note.text.substring(0, this.limit);
+				} else {
+					return null;
 				}
-
-				return note.exists ? note.shortText : null;
 			},
 			getSortStringForRow(hdr) {
 				let note = API.noteGrabber.get(hdr.messageId);
