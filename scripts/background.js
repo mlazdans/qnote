@@ -258,12 +258,6 @@ async function initExtension(){
 	// TODO: attach at least note icon to multi message display (since TB78.4)
 	// browser.messageDisplay.onMessagesDisplayed.addListener(async (Tab, Messages) => {
 	// });
-	// let date = new Date(Date.UTC(2015, 5, 27, 12, 0, 0))
-	// , options = {weekday: 'long', month: 'long', day: '2-digit' };
-	// console.log(date.toLocaleString('en', options)); //sáb. 27 de jun
-	//console.log(dateFormat('de', 'd/D/j/l/N/S/w/z/W/F/m/M/n/t/L/o/Y/y/a/A/B/g/G/h/H/i/s/u/v'));
-	//console.log(dateFormat('de'));
-	// console.log(dateFormatPredefined(CurrentLang, 'DATE_MED_WITH_WEEKDAY'));
 }
 
 async function waitForLoad() {
