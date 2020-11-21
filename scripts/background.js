@@ -240,6 +240,10 @@ async function initExtension(){
 			browser.menus.refresh();
 		});
 	});
+
+	// TODO: attach at least note icon to multi message display (since TB78.4)
+	// browser.messageDisplay.onMessagesDisplayed.addListener(async (Tab, Messages) => {
+	// });
 }
 
 async function waitForLoad() {
