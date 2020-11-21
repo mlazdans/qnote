@@ -64,22 +64,21 @@ async function saveOptions(handler){
 		// Update extension prefs
 		ext.Prefs = await ext.loadPrefsWithDefaults();
 
-		// TODO: update settings w/o reload
-		ext.reloadExtension();
-		// if(Prefs.storageOption != oldPrefs.storageOption){
-		// 	//await browser.qapp.clearNoteCache();
-		// 	ext.reloadExtension();
+		// if(Prefs.showFirstChars !== oldPrefs.showFirstChars){
+		// 	// await browser.qapp.clearNoteCache();
+		// 	// await browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
 		// }
 
-		// // if(Prefs.showFirstChars !== oldPrefs.showFirstChars){
-		// // 	await browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
-		// // }
+		// Storage option changed
+		if(Prefs.storageOption !== oldPrefs.storageOption){
+			await browser.qapp.clearNoteCache();
+		}
 
-		// // Invalidate column cache
-		// if(Prefs.storageFolder !== oldPrefs.storageFolder){
-		// 	//await browser.qapp.clearNoteCache();
-		// 	ext.reloadExtension();
-		// }
+		// Folder changed
+		if(Prefs.storageFolder !== oldPrefs.storageFolder){
+			await browser.qapp.clearNoteCache();
+			// ext.reloadExtension();
+		}
 
 		// if(Prefs.windowOption !== oldPrefs.windowOption){
 		// 	ext.reloadExtension();
@@ -88,6 +87,10 @@ async function saveOptions(handler){
 		// if(Prefs.enableSearch !== oldPrefs.enableSearch){
 		// 	ext.reloadExtension();
 		// }
+
+		await ext.CurrentNote.close();
+
+		ext.setUpExtension();
 	};
 
 	await ext.savePrefs(Prefs).then(handler || defaultHandler);

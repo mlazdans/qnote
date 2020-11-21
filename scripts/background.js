@@ -60,19 +60,15 @@ function initCurrentNote(){
 	});
 }
 
-async function initExtension(){
-	QDEB&&console.debug("initExtension()");
+async function setUpExtension(){
+	CurrentNote = null;
 
 	Prefs = await loadPrefsWithDefaults();
 
 	QDEB = !!Prefs.enableDebug;
-
 	browser.qapp.setDebug(QDEB);
 
-	CurrentWindowId = await getCurrentWindowId();
-
-	// Return notes to qapp on request
-	browser.qapp.onNoteRequest.addListener(getQAppNoteData);
+	browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
 
 	browser.qapp.setPrinterAttacherPrefs({
 		topTitle: Prefs.printAttachTopTitle,
@@ -90,15 +86,24 @@ async function initExtension(){
 		dateFormat: Prefs.dateFormat
 	});
 
+	initCurrentNote();
+}
+
+async function initExtension(){
+	QDEB&&console.debug("initExtension()");
+
+	setUpExtension();
+
+	CurrentWindowId = await getCurrentWindowId();
+
+	// Return notes to qapp on request
+	browser.qapp.onNoteRequest.addListener(getQAppNoteData);
+
 	// window.addEventListener("unhandledrejection", event => {
 	// 	console.warn(`Unhandle: ${event.reason}`, event);
 	// });
 
-	initCurrentNote();
-
 	await browser.qapp.init();
-
-	browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
 
 	// KeyDown from qapp
 	browser.qapp.onKeyDown.addListener(e => {
