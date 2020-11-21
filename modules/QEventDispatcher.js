@@ -22,7 +22,7 @@ class QEventDispatcher {
 		this.listeners[name].delete(listener);
 	}
 
-	listenerExists(name, listener){
+	hasListener(name, listener){
 		return this.listeners[name].has(listener);
 	}
 
