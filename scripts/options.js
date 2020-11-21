@@ -2,8 +2,6 @@ var ext = chrome.extension.getBackgroundPage();
 var i18n = ext.i18n;
 var _ = browser.i18n.getMessage;
 
-//var i18n = new DOMLocalizator(browser.i18n.getMessage);
-
 var Prefs;
 var DefaultPrefs;
 
