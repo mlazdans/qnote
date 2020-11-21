@@ -60,61 +60,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			}
 		};
 
-		this.printerAttacherPrefs = {};
-		this.messageAttacherPrefs = {};
-	}
-
-	uninstallCSS(cssUri) {
-		try {
-			let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
-			let uri = Services.io.newURI(extension.getURL(cssUri), null, null);
-			if(cssService.sheetRegistered(uri, cssService.USER_SHEET)){
-				QDEB&&console.debug(`Unregistering ${cssUri}`);
-				cssService.unregisterSheet(uri, cssService.USER_SHEET);
-			}
-		} catch(e) {
-			console.error(e);
-		}
-	}
-
-	installCSS(cssUri) {
-		try {
-			let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
-			let uri = Services.io.newURI(extension.getURL(cssUri), null, null);
-			if(!cssService.sheetRegistered(uri, cssService.USER_SHEET)){
-				QDEB&&console.debug(`Registering ${cssUri}`);
-				cssService.loadAndRegisterSheet(uri, cssService.USER_SHEET);
-			}
-		} catch(e) {
-			console.error(e);
-		}
-	}
-
-	installKeyboardHandler(w){
-		var API = this;
-
-		// Keyboard attach and later remove on shutdown
-		this.KeyboardHandler.addTo(w);
-		this.EventDispatcher.addListener('onShutdown', () => {
-			API.KeyboardHandler.removeFrom(w);
-		});
-
-		this.EventDispatcher.addListener('DOMContentLoaded', aWindow => {
-			API.KeyboardHandler.addTo(aWindow);
-		});
-
-		this.EventDispatcher.addListener('domwindowclosed', aWindow => {
-			API.KeyboardHandler.removeFrom(aWindow);
-		});
-
-	}
-
-	uninstallKeyboardHandler(w){
-		this.KeyboardHandler.removeFrom(w);
-	}
-
-	installColumnHandler(w){
-		var API = this;
 		var colHandler = {
 			limit: 0,
 			noteRowListener(view, row) {
@@ -179,7 +124,61 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			columnHandler: colHandler
 		});
 
-		this.ColumnHandler.setDebug(QDEB);
+		this.printerAttacherPrefs = {};
+		this.messageAttacherPrefs = {};
+	}
+
+	uninstallCSS(cssUri) {
+		try {
+			let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
+			let uri = Services.io.newURI(extension.getURL(cssUri), null, null);
+			if(cssService.sheetRegistered(uri, cssService.USER_SHEET)){
+				QDEB&&console.debug(`Unregistering ${cssUri}`);
+				cssService.unregisterSheet(uri, cssService.USER_SHEET);
+			}
+		} catch(e) {
+			console.error(e);
+		}
+	}
+
+	installCSS(cssUri) {
+		try {
+			let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
+			let uri = Services.io.newURI(extension.getURL(cssUri), null, null);
+			if(!cssService.sheetRegistered(uri, cssService.USER_SHEET)){
+				QDEB&&console.debug(`Registering ${cssUri}`);
+				cssService.loadAndRegisterSheet(uri, cssService.USER_SHEET);
+			}
+		} catch(e) {
+			console.error(e);
+		}
+	}
+
+	installKeyboardHandler(w){
+		var API = this;
+
+		// Keyboard attach and later remove on shutdown
+		this.KeyboardHandler.addTo(w);
+		this.EventDispatcher.addListener('onShutdown', () => {
+			API.KeyboardHandler.removeFrom(w);
+		});
+
+		this.EventDispatcher.addListener('DOMContentLoaded', aWindow => {
+			API.KeyboardHandler.addTo(aWindow);
+		});
+
+		this.EventDispatcher.addListener('domwindowclosed', aWindow => {
+			API.KeyboardHandler.removeFrom(aWindow);
+		});
+
+	}
+
+	uninstallKeyboardHandler(w){
+		this.KeyboardHandler.removeFrom(w);
+	}
+
+	installColumnHandler(w){
+		var API = this;
 
 		// Column attach and later remove on shutdown
 		this.ColumnHandler.attachToWindow(w);
@@ -324,6 +323,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				},
 				async setDebug(on){
 					QDEB = on;
+					API.ColumnHandler.setDebug(QDEB);
 				},
 				async setPrinterAttacherPrefs(prefs){
 					API.printerAttacherPrefs = prefs;
