@@ -290,6 +290,9 @@ async function QNotePopForMessage(messageId, flags = POP_NONE) {
 				if(setFocus && isPopped){
 					CurrentNote.focus();
 				}
+
+				mpUpdateForMessage(messageId);
+
 				return isPopped;
 			}).finally(() => {
 				CurrentNote.popping = false;
