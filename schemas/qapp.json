@@ -97,12 +97,18 @@
 			"description": "windowId from windows API"
 		},{
 			"$ref": "NoteData"
-		},{
+		}]
+	},{
+		"name": "setPrinterAttacherPrefs",
+		"type": "function",
+		"description": "",
+		"async": true,
+		"parameters": [{
 			"$ref": "AttacherPrefs",
 			"optional": true
 		}]
 	},{
-		"name": "enablePrintAttacher",
+		"name": "setMessageAttacherPrefs",
 		"type": "function",
 		"description": "",
 		"async": true,

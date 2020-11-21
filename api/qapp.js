@@ -10,6 +10,60 @@ var { dateFormat } = ChromeUtils.import(extension.rootURI.resolve("modules/dateF
 
 var QDEB = true;
 var qapp = class extends ExtensionCommon.ExtensionAPI {
+	constructor(...args){
+		super(...args);
+
+		var API = this;
+
+		// We'll update cache and call listener once item arrives
+		// init() caller must install onNoteRequest listener
+		this.noteGrabber = new QCache();
+		this.EventDispatcher = new QEventDispatcher(["domwindowopened", "domwindowclosed", "DOMContentLoaded", "keydown", "onShutdown"]);
+		this.KeyboardHandler = {
+			elements: new WeakSet(),
+			addTo: elem => {
+				let self = API.KeyboardHandler;
+				if(self.elements.has(elem)){
+					QDEB&&console.debug("adding key handler - already exists");
+				} else {
+					QDEB&&console.debug("adding key handler...");
+					elem.addEventListener("keydown", self.handler);
+					self.elements.add(elem);
+				}
+			},
+			removeFrom: elem => {
+				let self = API.KeyboardHandler;
+				if(self.elements.has(elem)){
+					QDEB&&console.debug("removing key handler - does not exist");
+				} else {
+					QDEB&&console.debug("removing key handler...", elem);
+					elem.removeEventListener("keydown", self.handler)
+					self.elements.delete(elem);
+				}
+			},
+			handler: e => {
+				API.EventDispatcher.fireListeners("keydown", e);
+			}
+		}
+
+		this.WindowObserver = {
+			observe: function(aSubject, aTopic, aData) {
+				if(aTopic === 'domwindowopened' || aTopic === 'domwindowclosed'){
+					API.EventDispatcher.fireListeners(aTopic, aSubject, aTopic, aData);
+				}
+
+				if(aTopic === 'domwindowopened'){
+					aSubject.addEventListener("DOMContentLoaded", e => {
+						API.EventDispatcher.fireListeners("DOMContentLoaded", aSubject, aTopic, aData, e);
+					});
+				}
+			}
+		};
+
+		this.printerAttacherPrefs = {};
+		this.messageAttacherPrefs = {};
+	}
+
 	uninstallCSS(cssUri) {
 		try {
 			let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
@@ -166,66 +220,46 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		Components.utils.unload(extension.rootURI.resolve("modules/DOMLocalizator.js"));
 	}
 
+	id2RealWindow(w){
+		try {
+			return Number.isInteger(w) ? extension.windowManager.get(w).window : w;
+		} catch {
+		}
+	}
+
+	// Not used currently
+	// realWindowWrap(realWindow){
+	// 	try {
+	// 		return extension.windowManager.getWrapper(realWindow);
+	// 	} catch {
+	// 	}
+	// }
+
+	formatQNote(data, df) {
+		// https://searchfox.org/mozilla-central/source/dom/base/nsIDocumentEncoder.idl
+		let flags =
+			Ci.nsIDocumentEncoder.OutputPreformatted
+			| Ci.nsIDocumentEncoder.OutputForPlainTextClipboardCopy
+			// Ci.nsIDocumentEncoder.OutputDropInvisibleBreak
+			// | Ci.nsIDocumentEncoder.OutputFormatFlowed
+			// | Ci.nsIDocumentEncoder.OutputFormatted
+			// | Ci.nsIDocumentEncoder.OutputLFLineBreak
+			;
+
+		// Strip tags, etc
+		let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
+		let text = parserUtils.convertToPlainText(data.text, flags, 0);
+		// text = text.replace(/\r\n/g, "<br>");
+		// text = text.replace(/\n/g, "<br>");
+
+		return {
+			title: 'QNote: ' + (df ? dateFormat(df, data.ts / 1000) : (new Date(data.ts)).toLocaleString()),
+			text: '<pre class="moz-quote-pre" wrap="" style="margin: 0;">' + text + '</pre>'
+		}
+	}
+
 	getAPI(context) {
 		var API = this;
-		// We'll update cache and call listener once item arrives
-		// init() caller must install onNoteRequest listener
-		this.noteGrabber = new QCache();
-		this.EventDispatcher = new QEventDispatcher(["domwindowopened", "domwindowclosed", "DOMContentLoaded", "keydown", "onShutdown"]);
-		this.KeyboardHandler = {
-			elements: new WeakSet(),
-			addTo: elem => {
-				let self = API.KeyboardHandler;
-				if(self.elements.has(elem)){
-					QDEB&&console.debug("adding key handler - already exists");
-				} else {
-					QDEB&&console.debug("adding key handler...");
-					elem.addEventListener("keydown", self.handler);
-					self.elements.add(elem);
-				}
-			},
-			removeFrom: elem => {
-				let self = API.KeyboardHandler;
-				if(self.elements.has(elem)){
-					QDEB&&console.debug("removing key handler - does not exist");
-				} else {
-					QDEB&&console.debug("removing key handler...", elem);
-					elem.removeEventListener("keydown", self.handler)
-					self.elements.delete(elem);
-				}
-			},
-			handler: e => {
-				API.EventDispatcher.fireListeners("keydown", e);
-			}
-		}
-
-		this.WindowObserver = {
-			observe: function(aSubject, aTopic, aData) {
-				if(aTopic === 'domwindowopened' || aTopic === 'domwindowclosed'){
-					API.EventDispatcher.fireListeners(aTopic, aSubject, aTopic, aData);
-				}
-
-				if(aTopic === 'domwindowopened'){
-					aSubject.addEventListener("DOMContentLoaded", e => {
-						API.EventDispatcher.fireListeners("DOMContentLoaded", aSubject, aTopic, aData, e);
-					});
-				}
-			}
-		};
-
-		function id2RealWindow(w){
-			try {
-				return Number.isInteger(w) ? extension.windowManager.get(w).window : w;
-			} catch {
-			}
-		}
-
-		function realWindowWrap(realWindow){
-			try {
-				return extension.windowManager.getWrapper(realWindow);
-			} catch {
-			}
-		}
 
 		return {
 			qapp: {
@@ -277,25 +311,24 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					API.uninstallCSS("html/background.css");
 					API.installCSS("html/background.css");
 
-					this.popups = new Map();
-
 					Services.ww.registerNotification(API.WindowObserver);
 
 					let w = Services.wm.getMostRecentWindow("mail:3pane");
-
 					API.installColumnHandler(w);
 					API.installKeyboardHandler(w);
+
+					// QDEB&&console.debug("qapp.enablePrintAttacher()", prefs);
+					API.EventDispatcher.addListener('domwindowopened', aSubject => {
+						this.printerAttacher(aSubject);
+					});
 				},
 				async setDebug(on){
 					QDEB = on;
 				},
-				async enablePrintAttacher(prefs){
-					QDEB&&console.debug("qapp.enablePrintAttacher()", prefs);
-					API.EventDispatcher.addListener('domwindowopened', aSubject => {
-						this.printerAttacher(aSubject, prefs);
-					});
+				async setPrinterAttacherPrefs(prefs){
+					API.printerAttacherPrefs = prefs;
 				},
-				async attachNoteToPrinter(windowId, data, prefs){
+				async attachNoteToPrinter(windowId, data){
 					let fName = "qapp.attachNoteToPrinter()";
 
 					if(!(data && data.exists)){
@@ -303,12 +336,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return;
 					}
 
+					let prefs = API.printerAttacherPrefs;
 					if(!prefs){
 						QDEB&&console.debug(`${fName} - no prefs`);
 						return;
 					}
 
-					let w = id2RealWindow(windowId);
+					let w = API.id2RealWindow(windowId);
 					if(!w || !w.document){
 						QDEB&&console.debug(`${fName} - no window`);
 						return;
@@ -330,7 +364,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						domNodes[0].remove();
 					}
 
-					let formatted = this.formatQNote(data, prefs.dateFormat);
+					let formatted = API.formatQNote(data, prefs.dateFormat);
 
 					let htmlFormatter = (title, text) => {
 						let html = ['<div class="qnote-insidenote" style="margin: 0; padding: 0; border: 1px solid black;">'];
@@ -361,7 +395,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						body.insertAdjacentHTML('beforeend', "<br>" + html);
 					}
 				},
-				printerAttacher(aSubject, prefs) {
+				// We need this step to grab messageUrisToPrint list
+				printerAttacher(aSubject) {
 					// Save list of printing urls
 					var messageUrisToPrint;
 					var self = this;
@@ -388,7 +423,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						// let msg = messenger.msgHdrFromURI(messageUrisToPrint.shift());
 						let msg = messenger.msgHdrFromURI(messageUrisToPrint[0]);
 
-						self.attachNoteToPrinter(document.defaultView, API.noteGrabber.get(msg.messageId), prefs);
+						self.attachNoteToPrinter(document.defaultView, API.noteGrabber.get(msg.messageId));
 					};
 
 					let domLoadedListener = e => {
@@ -412,7 +447,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					aSubject.addEventListener("DOMContentLoaded", domLoadedListener);
 				},
 				async messagePaneFocus(windowId){
-					let w = id2RealWindow(windowId);
+					let w = API.id2RealWindow(windowId);
 					if(w && w.gFolderDisplay && w.gFolderDisplay.tree){
 						w.gFolderDisplay.tree.focus();
 					}
@@ -429,7 +464,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				async updateView(windowId, keyId){
 					let fName = "qapp.updateView()";
 
-					let w = id2RealWindow(windowId);
+					let w = API.id2RealWindow(windowId);
 					if(!w || !w.document){
 						QDEB&&console.debug(`${fName} - no window`);
 						return;
@@ -477,7 +512,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsITreeBoxObject#invalidateCell
 					view.NoteChange(row, 1, 2);
 				},
-				async attachNoteToMessage(windowId, data, prefs){
+				async setMessageAttacherPrefs(prefs){
+					API.messageAttacherPrefs = prefs;
+				},
+				async attachNoteToMessage(windowId, data){
 					let fName = "qapp.attachNoteToMessage()";
 
 					if(!data){
@@ -485,12 +523,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return;
 					}
 
+					let prefs = API.messageAttacherPrefs;
 					if(!prefs){
 						QDEB&&console.debug(`${fName} - no prefs`);
 						return;
 					}
 
-					let w = id2RealWindow(windowId);
+					let w = API.id2RealWindow(windowId);
 					if(!w || !w.document){
 						QDEB&&console.debug(`${fName} - no window`);
 						return;
@@ -538,7 +577,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 
 
-					let formatted = this.formatQNote(data, prefs.dateFormat);
+					let formatted = API.formatQNote(data, prefs.dateFormat);
 
 					let htmlFormatter = (title, text) => {
 						let html = [];
@@ -566,28 +605,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 							prefs.bottomText ? formatted.text : false,
 						);
 						body.insertAdjacentHTML('beforeend', '<div class="qnote-insidenote qnote-insidenote-bottom">' + html + '</div>');
-					}
-				},
-				formatQNote(data, df) {
-					// https://searchfox.org/mozilla-central/source/dom/base/nsIDocumentEncoder.idl
-					let flags =
-						Ci.nsIDocumentEncoder.OutputPreformatted
-						| Ci.nsIDocumentEncoder.OutputForPlainTextClipboardCopy
-						// Ci.nsIDocumentEncoder.OutputDropInvisibleBreak
-						// | Ci.nsIDocumentEncoder.OutputFormatFlowed
-						// | Ci.nsIDocumentEncoder.OutputFormatted
-						// | Ci.nsIDocumentEncoder.OutputLFLineBreak
-						;
-
-					// Strip tags, etc
-					let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
-					let text = parserUtils.convertToPlainText(data.text, flags, 0);
-					// text = text.replace(/\r\n/g, "<br>");
-					// text = text.replace(/\n/g, "<br>");
-
-					return {
-						title: 'QNote: ' + (df ? dateFormat(df, data.ts / 1000) : (new Date(data.ts)).toLocaleString()),
-						text: '<pre class="moz-quote-pre" wrap="" style="margin: 0;">' + text + '</pre>'
 					}
 				},
 				async saveNoteCache(note){

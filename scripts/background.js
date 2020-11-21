@@ -74,11 +74,19 @@ async function initExtension(){
 	// Return notes to qapp on request
 	browser.qapp.onNoteRequest.addListener(getQAppNoteData);
 
-	browser.qapp.enablePrintAttacher({
+	browser.qapp.setPrinterAttacherPrefs({
 		topTitle: Prefs.printAttachTopTitle,
 		topText: Prefs.printAttachTopText,
 		bottomTitle: Prefs.printAttachBottomTitle,
 		bottomText: Prefs.printAttachBottomText,
+		dateFormat: Prefs.dateFormat
+	});
+
+	browser.qapp.setMessageAttacherPrefs({
+		topTitle: Prefs.messageAttachTopTitle,
+		topText: Prefs.messageAttachTopText,
+		bottomTitle: Prefs.messageAttachBottomTitle,
+		bottomText: Prefs.messageAttachBottomText,
 		dateFormat: Prefs.dateFormat
 	});
 
