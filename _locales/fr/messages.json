@@ -48,5 +48,23 @@
 	"window.option.webext": { "message": "une fenêtre contextuelle" },
 
 	"close.and.save": { "message": "Fermer et enregistrer" },
-	"delete": { "message": "Supprimer" }
+	"delete": { "message": "Supprimer" },
+
+	"enable.search": { "message": "Activer la recherche" },
+	"enable.print_attach": { "message": "Intégrer à l’impression" },
+	"attach.bottom": { "message": "en bas" },
+	"attach.top": { "message": "en haut" },
+	"attach.title": { "message": "le titre" },
+	"attach.text": { "message": "le texte" },
+	"enable.message_attach": { "message": "Attacher au message" },
+	"enable.debug.messages": { "message": "Activer les messages de débogage" },
+
+	"date.format": { "message": "Format de la date : " },
+	"formatting.rules": { "message": "(règles de formatage)" },
+	"anchor.to": { "message": "Ancrer à : " },
+	"confirm.delete": { "message": "Confirmer la suppression" },
+	"default.dimensions.fieldset": { "message": "Position et dimensions par défaut" },
+	"behaviour.fieldset": { "message": "Comportement" },
+	"search.disabled.msg": { "message": "(désactivée en attendant une meilleure solution)" },
+	"additional.attach": { "message": "Intégration supplémentaire" }
 }
