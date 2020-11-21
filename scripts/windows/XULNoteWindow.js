@@ -72,7 +72,7 @@ class XULNoteWindow extends NoteWindow {
 				minHeight: 125,
 				maxWidth: 800,
 				maxHeight: 500,
-	};
+			};
 
 			return browser.qpopup.create(opt).then(popupInfo => {
 				this.popupId = popupInfo.id;
