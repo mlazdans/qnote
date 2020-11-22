@@ -1,6 +1,6 @@
 {
 	"description": {
-		"message": "Essai de migration de XNote++ sur Thunderbird 78+"
+		"message": "Ajoutez des notes à vos messages avec ce remplaçant amélioré de XNote++."
 	},
 	"are.you.sure": {
 		"message": "Êtes-vous certain ?"
@@ -72,7 +72,7 @@
 		"message": "Importation terminée :\n$1 notes importées\n$2 notes erronées\n$3 notes existantes\n$4 notes remplacées"
 	},
 	"import.fail": {
-		"message": "Impossible d’importer les anciennes notes"
+		"message": "Impossible d’importer les notes"
 	},
 	"xnote.folder.inaccessible": {
 		"message": "Dossier XNote++ inaccessible : $1"
@@ -111,10 +111,10 @@
 		"message": "Exporter le stockage"
 	},
 	"storage.import": {
-		"message": "Importer le stockage de l’extension : "
+		"message": "Importer le stockage de l’extension"
 	},
 	"window.fieldset": {
-		"message": "Présenter les notes dans "
+		"message": "Présenter les notes dans"
 	},
 	"window.option.xul": {
 		"message": "un panneau flottant"
@@ -132,7 +132,7 @@
 		"message": "Activer la recherche"
 	},
 	"enable.print_attach": {
-		"message": "Incorporer ą l’impression"
+		"message": "Incorporer à l’impression"
 	},
 	"attach.bottom": {
 		"message": "en bas"
@@ -159,7 +159,7 @@
 		"message": "personnalisé"
 	},
 	"formatting.rules": {
-		"message": "Rčgles de formatage"
+		"message": "Règles de formatage"
 	},
 	"datetime_group": {
 		"message": "Date et heure"
@@ -171,7 +171,7 @@
 		"message": "Heure"
 	},
 	"relative.to": {
-		"message": "Ancrer ą : "
+		"message": "Ancrer"
 	},
 	"confirm.delete": {
 		"message": "Confirmer la suppression"
@@ -192,12 +192,15 @@
 		"message": "Importer les notes du dossier"
 	},
 	"anchor.window" : {
-		"message": "Fenźtre"
+		"message": "à la fenêtre"
 	},
 	"anchor.threadpane" : {
-		"message": "Liste des messages"
+		"message": "à la liste des messages"
 	},
 	"anchor.message" : {
-		"message": "Message"
+		"message": "au message"
+	},
+	"options" : {
+		"message": "Options"
 	}
 }
