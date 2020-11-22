@@ -16,8 +16,9 @@ async function focusMessagePane(windowId){
 	browser.qapp.messagePaneFocus(windowId);
 }
 
-function initCurrentNote(){
-	updateIcons(false);
+async function initCurrentNote(){
+	await browser.menus.removeAll();
+	await updateIcons(false);
 	if(CurrentNote){
 		CurrentNote.needSaveOnClose = true;
 		CurrentNote.windowId = CurrentWindowId;
@@ -245,14 +246,14 @@ async function initExtension(){
 	});
 
 	// Context menu on message
-	browser.menus.onShown.addListener(info => {
+	// TODO: menu delete all notes from selected messages?
+	browser.menus.onShown.addListener(async info => {
+		await browser.menus.removeAll();
+
 		// Avoid context menu other than from messageList
-		// TODO: menu delete all notes from selected messages?
 		if(info.selectedMessages === undefined){
 			return;
 		}
-
-		browser.menus.removeAll();
 
 		if(info.selectedMessages.messages.length != 1){
 			return;
