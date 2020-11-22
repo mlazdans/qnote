@@ -124,49 +124,27 @@ async function saveSinglePref(k, v) {
 // 	return string;
 // }
 
-async function importXNotes(root){
-	var legacyXNotes = await browser.xnote.getAllNotes(root);
-	if(!legacyXNotes){
-		return;
-	}
-
-	var stats = {
+async function importQNotes(notes, overwrite = false){
+	let stats = {
 		err: 0,
 		exist: 0,
 		imported: 0,
 		overwritten: 0
 	};
 
-	for (const note of legacyXNotes) {
-		let xn = new XNote(note.keyId, root);
-		if(!(await xn.load())){
-			console.error("Error loading xnote " + xn.keyId);
-			stats.err++;
-			continue;
-		}
-
+	for (const note of notes) {
 		let yn = new QNote(note.keyId);
 
 		await yn.load();
 
 		let exists = yn.exists;
 
-		if(exists && !Prefs.overwriteExistingNotes){
+		if(exists && !overwrite){
 			stats.exist++;
 		} else {
-			yn.left = xn.left;
-			yn.top = xn.top;
-			yn.width = xn.width;
-			yn.height = xn.height;
-			yn.text = xn.text;
-			yn.ts = xn.ts;
-
+			yn.set(note.get());
 			if(await yn.save()){
-				if(exists){
-					stats.overwritten++;
-				} else {
-					stats.imported++;
-				}
+				stats[exists ? "overwritten" : "imported"]++;
 			} else {
 				console.error("Error saving qnote " + yn.keyId);
 				stats.err++;
@@ -175,6 +153,10 @@ async function importXNotes(root){
 	}
 
 	return stats;
+}
+
+async function importFolderNotes(root, overwrite = false){
+	return loadAllFolderNotes(root).then(notes => importQNotes(notes, overwrite));
 }
 
 async function isReadable(path){

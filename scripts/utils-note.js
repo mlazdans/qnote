@@ -26,46 +26,68 @@ async function loadAllExtKeys() {
 		let keys = [];
 		for(let keyId in storage){
 			if(keyId.substr(0, 5) !== 'pref.') {
-				keys.push({
-					keyId: keyId
-				});
+				keys.push(keyId);
 			}
 		}
 		return keys;
 	});
 }
 
+async function loadAllExtNotes() {
+	return loadAllExtKeys().then(async keys => {
+		let Notes = [];
+		for(let keyId of keys){
+			let note = new QNote(keyId);
+			await note.load();
+			Notes.push(note);
+		}
+		return Notes;
+	});
+}
+
 // Load all note keys from folder, prioritizing qnote if both qnote and xnote exists
-async function loadAllFolderKeys() {
+async function loadAllFolderKeys(folder) {
 	return Promise.all([
-		browser.xnote.getAllKeys(Prefs.storageFolder),
-		browser.qnote.getAllKeys(Prefs.storageFolder)
+		browser.xnote.getAllKeys(folder),
+		browser.qnote.getAllKeys(folder)
 	]).then(values => {
 		return Object.assign(values[0], values[1]);
 	});
 }
 
-async function loadAllNotes() {
-	let p;
-	if(Prefs.storageOption === 'ext'){
-		p = loadAllExtKeys();
-	} else if(Prefs.storageOption === 'folder'){
-		p = loadAllFolderKeys();
-	} else {
-		throw new TypeError("Ivalid Prefs.storageOption");
-	}
-
-	return p.then(async keys => {
+async function loadAllFolderNotes(folder) {
+	return loadAllFolderKeys(folder).then(async keys => {
 		let Notes = [];
-		for(let k of keys){
-			loadNote(k.keyId).then(note => {
-				Notes.push(note);
-			});
+		for(let keyId of keys){
+			let note = new QNoteFolder(keyId, folder);
+			await note.load();
+			Notes.push(note);
 		}
-
 		return Notes;
 	});
 }
+
+// async function loadAllNotes() {
+// 	let p;
+// 	if(Prefs.storageOption === 'ext'){
+// 		p = loadAllExtKeys();
+// 	} else if(Prefs.storageOption === 'folder'){
+// 		p = loadAllFolderKeys(Prefs.storageFolder);
+// 	} else {
+// 		throw new TypeError("Ivalid Prefs.storageOption");
+// 	}
+
+// 	return p.then(async keys => {
+// 		let Notes = [];
+// 		for(let k of keys){
+// 			loadNote(k.keyId).then(note => {
+// 				Notes.push(note);
+// 			});
+// 		}
+
+// 		return Notes;
+// 	});
+// }
 
 // Prepare note for sending to qapp
 function note2QAppNote(note){
@@ -78,13 +100,13 @@ function note2QAppNote(note){
 	} : null;
 }
 
-async function loadAllQAppNotes(){
-	return loadAllNotes().then(notes => {
-		for(let note of notes){
-			sendNoteToQApp(note);
-		}
-	});
-}
+// async function loadAllQAppNotes(){
+// 	return loadAllNotes().then(notes => {
+// 		for(let note of notes){
+// 			sendNoteToQApp(note);
+// 		}
+// 	});
+// }
 
 function sendNoteToQApp(note){
 	return browser.qapp.saveNoteCache(note2QAppNote(note));

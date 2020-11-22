@@ -2,11 +2,10 @@ var ext = chrome.extension.getBackgroundPage();
 var i18n = ext.i18n;
 var _ = browser.i18n.getMessage;
 
-var Prefs;
 var DefaultPrefs;
 
-var importXNotesButton = document.getElementById('importXNotesButton');
-var importXNotesLoader = document.getElementById("importXNotesLoader");
+var importFolderButton = document.getElementById('importFolderButton');
+var importFolderLoader = document.getElementById("importFolderLoader");
 var saveButton = document.getElementById('saveButton');
 var clearStorageButton = document.getElementById('clearStorageButton');
 var exportStorageButton = document.getElementById('exportStorageButton');
@@ -14,7 +13,7 @@ var importFile = document.getElementById("importFile");
 var reloadExtensionButton = document.getElementById("reloadExtensionButton");
 var storageFolderBrowseButton = document.getElementById("storageFolderBrowseButton");
 var input_storageFolder = document.getElementById("input_storageFolder");
-var input_overwriteExistingNotes = document.getElementById("input_overwriteExistingNotes");
+var overwriteExistingNotes = document.getElementById("overwriteExistingNotes");
 
 var dateFormats = {
 	datetime_group: [
@@ -49,12 +48,15 @@ var dateFormats = {
 
 function setLabelColor(forE, color){
 	let label = document.querySelectorAll('label[for=' + forE + ']')[0];
+
 	label.style.color = color;
+
 	return label;
 }
 
 async function saveOptions(handler){
-	var oldPrefs = Object.assign({}, Prefs);
+	let oldPrefs = Object.assign({}, ext.Prefs);
+	let prefs = await ext.loadPrefsWithDefaults();
 
 	if(storageOptionValue() === 'folder'){
 		if(!await ext.isReadable(input_storageFolder.value)){
@@ -82,46 +84,50 @@ async function saveOptions(handler){
 
 		value = DefaultPrefs[key].constructor(value); // Type cast
 
-		Prefs[key] = value;
+		prefs[key] = value;
 	}
 
-	let defaultHandler = async saved => {
-		if(!saved){
-			return;
-		}
-
-		// Update extension prefs
+	let defaultHandler = async () => {
+		// Update extension Prefs
 		ext.Prefs = await ext.loadPrefsWithDefaults();
 
-		// if(Prefs.showFirstChars !== oldPrefs.showFirstChars){
+		// if(prefs.showFirstChars !== oldPrefs.showFirstChars){
 		// 	// await browser.qapp.clearNoteCache();
-		// 	// await browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
+		// 	// await browser.qapp.setColumnTextLimit(prefs.showFirstChars);
 		// }
 
 		// Storage option changed
-		if(Prefs.storageOption !== oldPrefs.storageOption){
+		if(prefs.storageOption !== oldPrefs.storageOption){
 			await browser.qapp.clearNoteCache();
 		}
 
 		// Folder changed
-		if(Prefs.storageFolder !== oldPrefs.storageFolder){
+		if(prefs.storageFolder !== oldPrefs.storageFolder){
 			await browser.qapp.clearNoteCache();
 			// ext.reloadExtension();
 		}
 
-		// if(Prefs.windowOption !== oldPrefs.windowOption){
+		// if(prefs.windowOption !== oldPrefs.windowOption){
 		// 	ext.reloadExtension();
 		// }
 
-		// if(Prefs.enableSearch !== oldPrefs.enableSearch){
+		// if(prefs.enableSearch !== oldPrefs.enableSearch){
 		// 	ext.reloadExtension();
 		// }
 
 		await ext.CurrentNote.close();
 		await ext.setUpExtension();
+
+		return true;
 	};
 
-	await ext.savePrefs(Prefs).then(handler || defaultHandler);
+	return ext.savePrefs(prefs).then(saved => {
+		if(saved){
+			return (handler || defaultHandler)();
+		} else {
+			return false;
+		}
+	});
 }
 
 function initTags(tags){
@@ -196,7 +202,7 @@ async function initExportStorageButton() {
 	}
 }
 
-async function initXNoteImportButton(){
+async function initFolderImportButton(){
 	var path = await ext.getXNoteStoragePath();
 
 	if(path){
@@ -208,30 +214,27 @@ async function initXNoteImportButton(){
 		}
 	}
 
-	importXNotesButton.addEventListener('click', ()=>{
+	importFolderButton.addEventListener('click', ()=>{
 		let opt = {};
 		if(path){
 			opt.displayDirectory = path;
 		}
 
-		browser.legacy.folderPicker(opt).then((selectedPath)=>{
-			importXNotesButton.disabled = true;
-			importXNotesLoader.style.display = '';
+		browser.legacy.folderPicker(opt).then(selectedPath => {
+			importFolderButton.disabled = true;
+			importFolderLoader.style.display = '';
 
-			return ext.importXNotes(selectedPath).then(stats => {
+			return ext.importFolderNotes(selectedPath, !!overwriteExistingNotes.checked).then(stats => {
 				if(stats){
-					alert(_("xnote.import.finished.stats", [stats.imported, stats.err, stats.exist, stats.overwritten]));
+					alert(_("import.finished.stats", [stats.imported, stats.err, stats.exist, stats.overwritten]));
 				} else {
-					alert(_("xnote.import.fail"));
+					alert(_("import.fail"));
 				}
-
-				// TODO: We need to get possible new data down to qapp cache. Quick hack is just to reload. Or just clear cache. Hmm...
-				saveOptions(async saved => {
-					ext.reloadExtension();
-				});
-			}).finally(()=>{
-				importXNotesButton.disabled = false;
-				importXNotesLoader.style.display = 'none';
+			}).finally(async () => {
+				// Reset cache since we might import some new data
+				await browser.qapp.clearNoteCache();
+				importFolderButton.disabled = false;
+				importFolderLoader.style.display = 'none';
 			});
 		});
 	});
@@ -284,10 +287,10 @@ function importInternalStorage() {
 			return false;
 		}
 
-		browser.storage.local.set(storage).then(()=>{
+		browser.storage.local.set(storage).then(() => {
 			alert(_("storage.imported"));
 			ext.reloadExtension();
-		}, (e)=>{
+		}).catch(e => {
 			alert(_("storage.import.failed", e.message));
 		});
 	};
@@ -297,10 +300,10 @@ function importInternalStorage() {
 
 async function clearStorage(){
 	if(await browser.legacy.confirm(_("are.you.sure"))){
-		ext.clearStorage().then(() => {
+		ext.clearStorage().then(async () => {
 			alert(_("storage.cleared"));
-			ext.reloadExtension();
-		}, (e) => {
+			await browser.qapp.clearNoteCache();
+		}).catch(e => {
 			alert(_("storage.clear.failed", e.message));
 		});
 	}
@@ -308,29 +311,23 @@ async function clearStorage(){
 
 async function initOptionsPage(){
 	let tags = await ext.browser.messages.listTags();
-	Prefs = await ext.loadPrefsWithDefaults();
 	DefaultPrefs = ext.getDefaultPrefs();
 
 	initTags(tags);
 	initDateFormats();
 
 	i18n.setTexts(document);
-	i18n.setData(document, Prefs);
+	i18n.setData(document, await ext.loadPrefsWithDefaults());
 
-	initXNoteImportButton();
+	initFolderImportButton();
 	initExportStorageButton();
 
-	saveButton.addEventListener('click', () => {
-		saveOptions();
-	});
+	saveButton.addEventListener('click', () => saveOptions());
 	clearStorageButton.addEventListener('click', clearStorage);
 	exportStorageButton.addEventListener('click', ext.exportStorage);
 	importFile.addEventListener("change", importInternalStorage);
 	reloadExtensionButton.addEventListener("click", ext.reloadExtension);
 	storageFolderBrowseButton.addEventListener("click", storageFolderBrowse);
-	input_overwriteExistingNotes.addEventListener("click", ()=>{
-		ext.Prefs.overwriteExistingNotes = input_overwriteExistingNotes.checked;
-	});
 
 	for (const node of document.querySelectorAll('input[name="storageOption"]')) {
 		node.addEventListener("click", storageOptionChange);
