@@ -191,13 +191,13 @@
 	"import.folder.button": {
 		"message": "Importēt zīmītes no mapes"
 	},
-	"anchor.window" : {
+	"anchor.window": {
 		"message": "Logs"
 	},
-	"anchor.threadpane" : {
+	"anchor.threadpane": {
 		"message": "Vēstuļu saraksts"
 	},
-	"anchor.message" : {
+	"anchor.message": {
 		"message": "Vēstule"
 	}
 }

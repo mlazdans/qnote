@@ -191,16 +191,16 @@
 	"import.folder.button": {
 		"message": "Importer les notes du dossier"
 	},
-	"anchor.window" : {
+	"anchor.window": {
 		"message": "à la fenêtre"
 	},
-	"anchor.threadpane" : {
+	"anchor.threadpane": {
 		"message": "à la liste des messages"
 	},
-	"anchor.message" : {
+	"anchor.message": {
 		"message": "au message"
 	},
-	"options" : {
+	"options": {
 		"message": "Options"
 	}
 }

@@ -191,13 +191,13 @@
 	"import.folder.button": {
 		"message": "QNotes aus Ordner importieren"
 	},
-	"anchor.window" : {
+	"anchor.window": {
 		"message": "Programmfenster"
 	},
-	"anchor.threadpane" : {
+	"anchor.threadpane": {
 		"message": "Nachrichten-Übersicht"
 	},
-	"anchor.message" : {
+	"anchor.message": {
 		"message": "Nachricht"
 	}
 }

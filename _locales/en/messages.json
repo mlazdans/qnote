@@ -191,16 +191,16 @@
 	"import.folder.button": {
 		"message": "Import Notes from folder"
 	},
-	"anchor.window" : {
+	"anchor.window": {
 		"message": "Window"
 	},
-	"anchor.threadpane" : {
+	"anchor.threadpane": {
 		"message": "Message list"
 	},
-	"anchor.message" : {
+	"anchor.message": {
 		"message": "Message"
 	},
-	"options" : {
+	"options": {
 		"message": "Options"
 	}
 }
