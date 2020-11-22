@@ -26,7 +26,7 @@
 	"create.new.note": {
 		"message": "Crea una nuova nota"
 	},
-	"toggle.qnote": {
+	"toggleqnote": {
 		"message": "Attiva/disattiva nota"
 	},
 	"width.label": {

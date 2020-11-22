@@ -60,7 +60,7 @@
 			"suggested_key": {
 				"default": "Alt+Q"
 			},
-			"description": "__MSG_toggle.qnote__"
+			"description": "__MSG_toggleqnote__"
 		}
 	},
 	"experiment_apis": {

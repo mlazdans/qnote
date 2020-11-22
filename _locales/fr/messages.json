@@ -26,7 +26,7 @@
 	"create.new.note": {
 		"message": "Créer une note"
 	},
-	"toggle.qnote": {
+	"toggleqnote": {
 		"message": "Ouvrir ou fermer la note"
 	},
 	"width.label": {

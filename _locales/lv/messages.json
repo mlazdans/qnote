@@ -26,7 +26,7 @@
 	"create.new.note": {
 		"message": "Izveidot zīmīti"
 	},
-	"toggle.qnote": {
+	"toggleqnote": {
 		"message": "Pārslēgt zīmīti"
 	},
 	"width.label": {
