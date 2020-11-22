@@ -16,9 +16,9 @@ async function focusMessagePane(windowId){
 	browser.qapp.messagePaneFocus(windowId);
 }
 
-async function initCurrentNote(){
-	await browser.menus.removeAll();
-	await updateIcons(false);
+function initCurrentNote(){
+	browser.menus.removeAll();
+	updateIcons(false);
 	if(CurrentNote){
 		CurrentNote.needSaveOnClose = true;
 		CurrentNote.windowId = CurrentWindowId;
