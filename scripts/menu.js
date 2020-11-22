@@ -13,7 +13,7 @@ var Menu = {
 			title: _("modify.note"),
 			contexts: ["message_list"],
 			onclick(info) {
-				QNotePopForMessage(Menu.getMessage(info));
+				QNotePopForMessage(Menu.getId(info), POP_FOCUS);
 			},
 		});
 
@@ -31,6 +31,15 @@ var Menu = {
 						deleteNoteForMessage(Menu.getId(info)).then(updateNoteView);
 					}
 				}
+			},
+		});
+
+		browser.menus.create({
+			id: "options",
+			title: _("options"),
+			contexts: ["message_list"],
+			onclick(info) {
+				browser.runtime.openOptionsPage();
 			},
 		});
 
