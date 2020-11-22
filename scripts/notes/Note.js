@@ -44,7 +44,7 @@ class Note {
 	}
 
 	set(data){
-		for(let k of Object.keys(data)){
+		for(let k in data){
 			this[k] = data[k];
 		}
 
