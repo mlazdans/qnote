@@ -1,6 +1,6 @@
 {
 	"description": {
-		"message": "Provo a migrare XNote++ in Thunderbird 78+"
+		"message": "Aggiungi note alle tue e-mail. Sostituisci XNote++ con più funzionalità."
 	},
 	"are.you.sure": {
 		"message": "Sei sicuro?"
@@ -72,7 +72,7 @@
 		"message": "Importazione finita:\nnote importate - $1\nnote con errori - $2\nnote esistenti - $3\nnote sovrascritte - $4"
 	},
 	"import.fail": {
-		"message": "Impossibile importare note precedenti"
+		"message": "Impossibile importare le note"
 	},
 	"xnote.folder.inaccessible": {
 		"message": "Cartella XNote++ non trovata o non leggibile: $1"
@@ -127,5 +127,80 @@
 	},
 	"delete": {
 		"message": "Cancella"
+	},
+	"enable.search": {
+		"message": "Abilita ricerca"
+	},
+	"enable.print_attach": {
+		"message": "Allega alla stampa"
+	},
+	"attach.bottom": {
+		"message": "inferiore"
+	},
+	"attach.top": {
+		"message": "superiore"
+	},
+	"attach.title": {
+		"message": "titolo"
+	},
+	"attach.text": {
+		"message": "testo"
+	},
+	"enable.message_attach": {
+		"message": "Allega al messaggio"
+	},
+	"enable.debug.messages": {
+		"message": "Abilita debug messaggi"
+	},
+	"date.format": {
+		"message": "Formato data"
+	},
+	"date.format.custom": {
+		"message": "-personalizzato-"
+	},
+	"formatting.rules": {
+		"message": "Regole di formattazione"
+	},
+	"datetime_group": {
+		"message": "Data e ora"
+	},
+	"date_group": {
+		"message": "Data"
+	},
+	"time_group": {
+		"message": "Ora"
+	},
+	"relative.to": {
+		"message": "Ancora a"
+	},
+	"confirm.delete": {
+		"message": "Conferma cancellazione"
+	},
+	"default.dimensions.fieldset": {
+		"message": "Dimensioni e posizionamento di default"
+	},
+	"behaviour.fieldset": {
+		"message": "Comportamento"
+	},
+	"search.disabled.msg": {
+		"message": "(la ricerca è stata temporaneamente disabilitata finché non troviamo una soluzione migliore)"
+	},
+	"additional.attach": {
+		"message": "Allegati aggiuntivi"
+	},
+	"import.folder.button": {
+		"message": "Importa Note dalla cartella"
+	},
+	"anchor.window": {
+		"message": "Finestra"
+	},
+	"anchor.threadpane": {
+		"message": "Lista messaggi"
+	},
+	"anchor.message": {
+		"message": "Messaggi"
+	},
+	"options": {
+		"message": "Opzioni"
 	}
 }
