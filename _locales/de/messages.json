@@ -30,13 +30,13 @@
 		"message": "Notiz umschalten"
 	},
 	"width.label": {
-		"message": "Breite:"
+		"message": "Breite"
 	},
 	"height.label": {
-		"message": "Höhe:"
+		"message": "Höhe"
 	},
 	"use.tag.label": {
-		"message": "Schlagwort:"
+		"message": "Schlagwort"
 	},
 	"show.on.select.label": {
 		"message": "Bei Email-Anwahl direkt QNote anzeigen"
@@ -57,7 +57,7 @@
 		"message": "Vorhandene Notizen überschreiben"
 	},
 	"can.use.xnote.folder": {
-		"message": "Sie können den bestehenden XNote-Ordner verwenden"
+		"message": "Sie können den bestehenden XNote++ Ordner verwenden"
 	},
 	"no.message_id.header": {
 		"message": "QNote kann nicht erstellt werden: Email besitzt keine 'Nachrichten-ID'"
@@ -66,7 +66,7 @@
 		"message": "Verwaltung"
 	},
 	"use.tag.manager": {
-		"message": "Mit Einstellungen / Allgemein / Schlagwörter bearbeiten"
+		"message": "(mit Einstellungen / Allgemein / Schlagwörter bearbeiten)"
 	},
 	"import.finished.stats": {
 		"message": "Notizen importiert:\ninsgesamt - $1\nfehlerhaft - $2\nvorhanden - $3\nüberschrieben - $4"
@@ -75,10 +75,10 @@
 		"message": "Kann bestehende Notizen nicht importieren"
 	},
 	"xnote.folder.inaccessible": {
-		"message": "XNote-Ordner nicht gefunden oder nicht lesbar: $1"
+		"message": "XNote++ Ordner nicht gefunden oder nicht lesbar: $1"
 	},
 	"xnote.folder.found": {
-		"message": "XNote-Ordner gefunden: $1"
+		"message": "XNote++ Ordner gefunden: $1"
 	},
 	"storage.export.limitation": {
 		"message": "'Archiv exportieren' klappt nur mit Thunderbird 78 und höher"

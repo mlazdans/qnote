@@ -30,13 +30,13 @@
 		"message": "Attiva/disattiva nota"
 	},
 	"width.label": {
-		"message": "Larghezza:"
+		"message": "Larghezza"
 	},
 	"height.label": {
-		"message": "Altezza:"
+		"message": "Altezza"
 	},
 	"use.tag.label": {
-		"message": "Usa categoria:"
+		"message": "Usa categoria"
 	},
 	"show.on.select.label": {
 		"message": "Visualizza nota quando selezioni il messaggio"
@@ -57,16 +57,16 @@
 		"message": "Sovrascrivo le note esistenti?"
 	},
 	"can.use.xnote.folder": {
-		"message": "Puoi usare la cartella esistente di XNotes folder"
+		"message": "Puoi usare la cartella esistente di XNote++ folder"
 	},
 	"no.message_id.header": {
 		"message": "Non posso creare la nota. Messaggio senza 'message-id:' intestazione"
 	},
 	"maintenance.fieldset": {
-		"message": " Manutenzione "
+		"message": "Manutenzione"
 	},
 	"use.tag.manager": {
-		"message": "Per favore vai in impostazioni/Calendario/Categorie per gestire le categorie"
+		"message": "(per favore vai in impostazioni/Calendario/Categorie per gestire le categorie)"
 	},
 	"import.finished.stats": {
 		"message": "Importazione finita:\nnote importate - $1\nnote con errori - $2\nnote esistenti - $3\nnote sovrascritte - $4"
@@ -75,16 +75,16 @@
 		"message": "Impossibile importare note precedenti"
 	},
 	"xnote.folder.inaccessible": {
-		"message": "Cartella XNote non trovata o non leggibile: $1"
+		"message": "Cartella XNote++ non trovata o non leggibile: $1"
 	},
 	"xnote.folder.found": {
-		"message": "Cartella XNote non trovata: $1"
+		"message": "Cartella XNote++ non trovata: $1"
 	},
 	"storage.export.limitation": {
 		"message": "'Esporta archivio' disponibile solo in TB>=78"
 	},
 	"storage.fieldset": {
-		"message": " Archivio "
+		"message": "Archivio"
 	},
 	"storage.option.ext": {
 		"message": "Estensione interna"

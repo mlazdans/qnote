@@ -27,16 +27,16 @@
 		"message": "Izveidot zīmīti"
 	},
 	"toggleqnote": {
-		"message": "Pārslēgt zīmīti"
+		"message": "Pārslēgties uz zīmīti"
 	},
 	"width.label": {
-		"message": "Platums:"
+		"message": "Platums"
 	},
 	"height.label": {
-		"message": "Agustums:"
+		"message": "Agustums"
 	},
 	"use.tag.label": {
-		"message": "Lietot tagu:"
+		"message": "Lietot tagu"
 	},
 	"show.on.select.label": {
 		"message": "Automātiski parādīt zīmīti izvēloties vēstuli"
@@ -48,7 +48,7 @@
 		"message": "Pārlādēt"
 	},
 	"show.first.chars.label": {
-		"message": "Radīt pirmos X zīmītes simbolus vēstuļu sarakstā"
+		"message": "Radīt pirmos X simbolus vēstuļu sarakstā"
 	},
 	"focus.on.display": {
 		"message": "Fokusēt zīmīti pēc atvēršanas (tikai peldošam panelim)"
@@ -57,34 +57,34 @@
 		"message": "Pārrakstīt esošās zīmītes"
 	},
 	"can.use.xnote.folder": {
-		"message": "Varat lietot arī XNotes mapi"
+		"message": "Varat lietot arī XNote++ mapi"
 	},
 	"no.message_id.header": {
 		"message": "Nevar izveidot zīmīti. Vēstule bez 'message-id:' hedera"
 	},
 	"maintenance.fieldset": {
-		"message": " Apkope "
+		"message": "Apkope"
 	},
 	"use.tag.manager": {
-		"message": "Ldzu izmantojiet tagu pārvaldnieku"
+		"message": "(lūdzu izmantojiet tagu pārvaldnieku)"
 	},
 	"import.finished.stats": {
 		"message": "Imports pabeigts:\nimportētās zīmītes - $1\nkļūdainās zīmītes - $2\njau esošās zīmītes - $3\npārrakstītās zīmītes - $4"
 	},
 	"import.fail": {
-		"message": "Nevarēja importēt vecās XNote zīmītes"
+		"message": "Nevarēja importēt zīmītes"
 	},
 	"xnote.folder.inaccessible": {
-		"message": "XNote mape nav atrasta vai nav piekļuves: $1"
+		"message": "XNote++ mape nav atrasta vai nav piekļuves: $1"
 	},
 	"xnote.folder.found": {
-		"message": "XNote mape atrasta: $1"
+		"message": "XNote++ mape atrasta: $1"
 	},
 	"storage.export.limitation": {
 		"message": "'Glabātuves eksports' pieejams tikai TB>=78"
 	},
 	"storage.fieldset": {
-		"message": " Glabātuve "
+		"message": "Glabātuve"
 	},
 	"storage.option.ext": {
 		"message": "Paplašinājuma glabātuvē"
