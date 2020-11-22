@@ -44,9 +44,6 @@
 	"save.preferences.button": {
 		"message": "Enregistrer"
 	},
-	"import.legacy.xnotes.button": {
-		"message": "Importer les anciennes XNotes"
-	},
 	"extension.reload.button": {
 		"message": "Recharger"
 	},
@@ -71,10 +68,10 @@
 	"use.tag.manager": {
 		"message": "(utiliser le gestionnaire d’étiquettes)"
 	},
-	"xnote.import.finished.stats": {
+	"import.finished.stats": {
 		"message": "Importation terminée :\n$1 notes importées\n$2 notes erronées\n$3 notes existantes\n$4 notes remplacées"
 	},
-	"xnote.import.fail": {
+	"import.fail": {
 		"message": "Impossible d’importer les anciennes notes"
 	},
 	"xnote.folder.inaccessible": {

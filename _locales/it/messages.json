@@ -44,9 +44,6 @@
 	"save.preferences.button": {
 		"message": "Salva"
 	},
-	"import.legacy.xnotes.button": {
-		"message": "Importa XNotes esistenti"
-	},
 	"extension.reload.button": {
 		"message": "Ricarica"
 	},
@@ -71,10 +68,10 @@
 	"use.tag.manager": {
 		"message": "Per favore vai in impostazioni/Calendario/Categorie per gestire le categorie"
 	},
-	"xnote.import.finished.stats": {
+	"import.finished.stats": {
 		"message": "Importazione finita:\nnote importate - $1\nnote con errori - $2\nnote esistenti - $3\nnote sovrascritte - $4"
 	},
-	"xnote.import.fail": {
+	"import.fail": {
 		"message": "Impossibile importare note precedenti"
 	},
 	"xnote.folder.inaccessible": {

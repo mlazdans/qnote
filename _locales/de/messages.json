@@ -44,9 +44,6 @@
 	"save.preferences.button": {
 		"message": "Speichern"
 	},
-	"import.legacy.xnotes.button": {
-		"message": "Bestehende XNotes importieren"
-	},
 	"extension.reload.button": {
 		"message": "Add-on neu laden"
 	},
@@ -71,10 +68,10 @@
 	"use.tag.manager": {
 		"message": "Mit Einstellungen / Allgemein / Schlagwörter bearbeiten"
 	},
-	"xnote.import.finished.stats": {
+	"import.finished.stats": {
 		"message": "Notizen importiert:\ninsgesamt - $1\nfehlerhaft - $2\nvorhanden - $3\nüberschrieben - $4"
 	},
-	"xnote.import.fail": {
+	"import.fail": {
 		"message": "Kann bestehende Notizen nicht importieren"
 	},
 	"xnote.folder.inaccessible": {

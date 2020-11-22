@@ -44,9 +44,6 @@
 	"save.preferences.button": {
 		"message": "Saglabāt"
 	},
-	"import.legacy.xnotes.button": {
-		"message": "Importēt XNotes zīmītes"
-	},
 	"extension.reload.button": {
 		"message": "Pārlādēt"
 	},
@@ -71,10 +68,10 @@
 	"use.tag.manager": {
 		"message": "Ldzu izmantojiet tagu pārvaldnieku"
 	},
-	"xnote.import.finished.stats": {
+	"import.finished.stats": {
 		"message": "Imports pabeigts:\nimportētās zīmītes - $1\nkļūdainās zīmītes - $2\njau esošās zīmītes - $3\npārrakstītās zīmītes - $4"
 	},
-	"xnote.import.fail": {
+	"import.fail": {
 		"message": "Nevarēja importēt vecās XNote zīmītes"
 	},
 	"xnote.folder.inaccessible": {
