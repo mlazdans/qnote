@@ -13,7 +13,7 @@
 		"async": true,
 		"parameters": []
 	},{
-		"name": "getAllNotes",
+		"name": "getAllKeys",
 		"type": "function",
 		"description": "Returns list of xnote files in a folder",
 		"async": true,

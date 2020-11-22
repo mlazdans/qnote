@@ -20,27 +20,37 @@ async function loadNote(keyId) {
 	return note.load().then(() => note);
 }
 
+// Load all note keys from local storage
+async function loadAllExtKeys() {
+	return browser.storage.local.get(null).then(storage => {
+		let keys = [];
+		for(let keyId in storage){
+			if(keyId.substr(0, 5) !== 'pref.') {
+				keys.push({
+					keyId: keyId
+				});
+			}
+		}
+		return keys;
+	});
+}
+
+// Load all note keys from folder, prioritizing qnote if both qnote and xnote exists
+async function loadAllFolderKeys() {
+	return Promise.all([
+		browser.xnote.getAllKeys(Prefs.storageFolder),
+		browser.qnote.getAllKeys(Prefs.storageFolder)
+	]).then(values => {
+		return Object.assign(values[0], values[1]);
+	});
+}
+
 async function loadAllNotes() {
 	let p;
 	if(Prefs.storageOption === 'ext'){
-		p = browser.storage.local.get(null).then(storage => {
-			let keys = [];
-			for(let keyId in storage){
-				if(keyId.substr(0, 5) !== 'pref.') {
-					keys.push({
-						keyId: keyId
-					});
-				}
-			}
-			return keys;
-		});
+		p = loadAllExtKeys();
 	} else if(Prefs.storageOption === 'folder'){
-		p = Promise.all([
-			browser.xnote.getAllNotes(Prefs.storageFolder),
-			browser.qnote.getAllNotes(Prefs.storageFolder)
-		]).then(values => {
-			return Object.assign(values[0], values[1]);
-		});
+		p = loadAllFolderKeys();
 	} else {
 		throw new TypeError("Ivalid Prefs.storageOption");
 	}

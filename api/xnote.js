@@ -274,7 +274,7 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 
 					return note;
 				},
-				async getAllNotes(root) {
+				async getAllKeys(root) {
 					try {
 						var file = new FileUtils.File(root);
 					} catch {

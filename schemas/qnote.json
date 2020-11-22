@@ -1,7 +1,7 @@
 [{
 	"namespace": "qnote",
 	"functions": [{
-		"name": "getAllNotes",
+		"name": "getAllKeys",
 		"type": "function",
 		"description": "Returns list of QNote files in a folder",
 		"async": true,
