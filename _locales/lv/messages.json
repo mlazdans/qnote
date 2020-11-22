@@ -170,8 +170,8 @@
 	"time_group": {
 		"message": "Laiks"
 	},
-	"anchor.to": {
-		"message": "Noenkurot"
+	"relative.to": {
+		"message": "Relatīvi pret"
 	},
 	"confirm.delete": {
 		"message": "Apstiprināt dzēšanu"

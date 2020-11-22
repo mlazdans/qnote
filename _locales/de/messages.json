@@ -170,7 +170,7 @@
 	"time_group": {
 		"message": "Uhrzeit"
 	},
-	"anchor.to": {
+	"relative.to": {
 		"message": "Bezug zu"
 	},
 	"confirm.delete": {

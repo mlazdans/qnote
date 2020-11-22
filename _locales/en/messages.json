@@ -170,8 +170,8 @@
 	"time_group": {
 		"message": "Time"
 	},
-	"anchor.to": {
-		"message": "Anchor to"
+	"relative.to": {
+		"message": "Relative to"
 	},
 	"confirm.delete": {
 		"message": "Confirm delete"
