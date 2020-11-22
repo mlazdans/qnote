@@ -26,7 +26,7 @@
 	"create.new.note": {
 		"message": "Neue Notiz"
 	},
-	"toggle.qnote": {
+	"toggleqnote": {
 		"message": "Notiz umschalten"
 	},
 	"width.label": {
@@ -127,5 +127,77 @@
 	},
 	"delete": {
 		"message": "Löschen"
+	},
+	"enable.search": {
+		"message": "Suche aktivieren"
+	},
+	"enable.print_attach": {
+		"message": "In der Druckausgabe"
+	},
+	"attach.bottom": {
+		"message": "unten"
+	},
+	"attach.top": {
+		"message": "oben"
+	},
+	"attach.title": {
+		"message": "Titelzeile"
+	},
+	"attach.text": {
+		"message": "Notiz"
+	},
+	"enable.message_attach": {
+		"message": "Im Nachrichtenbereich"
+	},
+	"enable.debug.messages": {
+		"message": "Protokoll einschalten"
+	},
+	"date.format": {
+		"message": "Datumsformat"
+	},
+	"date.format.custom": {
+		"message": "-benutzerdefiniert-"
+	},
+	"formatting.rules": {
+		"message": "Regeln zur Formatierung"
+	},
+	"datetime_group": {
+		"message": "Datum und Uhrzeit"
+	},
+	"date_group": {
+		"message": "Datum"
+	},
+	"time_group": {
+		"message": "Uhrzeit"
+	},
+	"anchor.to": {
+		"message": "Bezug zu"
+	},
+	"confirm.delete": {
+		"message": "Wirklich löschen"
+	},
+	"default.dimensions.fieldset": {
+		"message": "Standard-Position und -Größe"
+	},
+	"behaviour.fieldset": {
+		"message": "Regeln und Erscheinungsbild"
+	},
+	"search.disabled.msg": {
+		"message": "(Die Suche ist noch ausgeschaltet, bis eine gute Lösung gefunden ist)"
+	},
+	"additional.attach": {
+		"message": "Zusätzliche Anzeige der QNote"
+	},
+	"import.folder.button": {
+		"message": "QNotes aus Ordner importieren"
+	},
+	"anchor.window" : {
+		"message": "Programmfenster"
+	},
+	"anchor.threadpane" : {
+		"message": "Nachrichten-Übersicht"
+	},
+	"anchor.message" : {
+		"message": "Nachricht"
 	}
 }
