@@ -1,6 +1,6 @@
 {
 	"description": {
-		"message": "Versuch XNote++ auf Thunderbird 78 und höher zu migrieren"
+		"message": "Fügen Sie Notizen zu Ihren E-Mails hinzu. Kompatibel zu XNote++ - aber besser."
 	},
 	"are.you.sure": {
 		"message": "Sind Sie sicher?"
@@ -72,7 +72,7 @@
 		"message": "Notizen importiert:\ninsgesamt - $1\nfehlerhaft - $2\nvorhanden - $3\nüberschrieben - $4"
 	},
 	"import.fail": {
-		"message": "Kann bestehende Notizen nicht importieren"
+		"message": "Notizen konnten nicht importiert werden."
 	},
 	"xnote.folder.inaccessible": {
 		"message": "XNote++ Ordner nicht gefunden oder nicht lesbar: $1"
@@ -174,7 +174,7 @@
 		"message": "Bezug zu"
 	},
 	"confirm.delete": {
-		"message": "Wirklich löschen"
+		"message": "Löschen bestätigen"
 	},
 	"default.dimensions.fieldset": {
 		"message": "Standard-Position und -Größe"
@@ -183,7 +183,7 @@
 		"message": "Regeln und Erscheinungsbild"
 	},
 	"search.disabled.msg": {
-		"message": "(Die Suche ist noch ausgeschaltet, bis eine gute Lösung gefunden ist)"
+		"message": "(die Suche ist noch ausgeschaltet, bis eine gute Lösung gefunden ist)"
 	},
 	"additional.attach": {
 		"message": "Zusätzliche Anzeige der QNote"
@@ -199,5 +199,8 @@
 	},
 	"anchor.message": {
 		"message": "Nachricht"
+	},
+	"options": {
+		"message": "Optionen"
 	}
 }
