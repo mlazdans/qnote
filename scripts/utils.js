@@ -38,8 +38,10 @@ function getDefaultPrefs() {
 	};
 }
 
-function getTabId(tab){
-	return Number.isInteger(tab) ? tab : tab.id;
+function getTabId(Tab){
+	if(Tab){
+		return Number.isInteger(Tab) ? Tab : Tab.id;
+	}
 }
 
 function xnotePrefsMapper(prefs){
@@ -381,6 +383,23 @@ async function getCurrentTab(){
 
 async function getCurrentTabId(){
 	return getCurrentTab().then(Tab => {
+		return getTabId(Tab);
+	});
+}
+
+async function getWindowMailTab(windowId){
+	return browser.windows.get(windowId, { populate: true }).then(Window => {
+		if(Window.tabs){
+			for(let t of Window.tabs){
+				if(t.mailTab){
+					return t;
+				}
+			}
+		}
+	});
+}
+async function getWindowMailTabId(windowId){
+	return getWindowMailTab(windowId).then(Tab => {
 		return getTabId(Tab);
 	});
 }

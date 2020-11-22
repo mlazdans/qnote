@@ -83,6 +83,11 @@ async function initExtension(){
 	await setUpExtension();
 
 	CurrentWindowId = await getCurrentWindowId();
+	CurrentTabId = await getCurrentTabId();
+
+	if(!CurrentTabId){
+		CurrentTabId = await getWindowMailTabId(CurrentWindowId);
+	}
 
 	// Return notes to qapp on request
 	browser.qapp.onNoteRequest.addListener(getQAppNoteData);
