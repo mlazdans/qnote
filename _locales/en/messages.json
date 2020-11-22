@@ -190,5 +190,14 @@
 	},
 	"import.folder.button": {
 		"message": "Import Notes from folder"
+	},
+	"anchor.window" : {
+		"message": "Window"
+	},
+	"anchor.threadpane" : {
+		"message": "Message list"
+	},
+	"anchor.message" : {
+		"message": "Message"
 	}
 }
