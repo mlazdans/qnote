@@ -15,7 +15,7 @@
 	},{
 		"name": "getAllKeys",
 		"type": "function",
-		"description": "Returns list of xnote files in a folder",
+		"description": "Returns list of xnote keys in a folder",
 		"async": true,
 		"parameters": [{
 			"name": "path",
@@ -32,9 +32,9 @@
 			"type": "string",
 			"description": "Root folder for XNotes"
 		},{
-			"name": "fileName",
+			"name": "keyId",
 			"type": "string",
-			"description": "XNote filename"
+			"description": "XNote key"
 		}]
 	},{
 		"name": "deleteNote",
@@ -46,9 +46,9 @@
 			"type": "string",
 			"description": "Root folder for XNotes"
 		},{
-			"name": "fileName",
+			"name": "keyId",
 			"type": "string",
-			"description": "XNote filename"
+			"description": "XNote key"
 		}]
 	},{
 		"name": "saveNote",
@@ -60,9 +60,9 @@
 			"type": "string",
 			"description": "Root folder for XNotes"
 		},{
-			"name": "fileName",
+			"name": "keyId",
 			"type": "string",
-			"description": "XNote filename"
+			"description": "XNote key"
 		},{
 			"name": "data",
 			"type": "object",

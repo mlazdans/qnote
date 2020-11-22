@@ -3,7 +3,7 @@
 	"functions": [{
 		"name": "getAllKeys",
 		"type": "function",
-		"description": "Returns list of QNote files in a folder",
+		"description": "Returns list of QNote keys in a folder",
 		"async": true,
 		"parameters": [{
 			"name": "path",

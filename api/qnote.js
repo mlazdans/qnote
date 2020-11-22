@@ -10,11 +10,11 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 	}
 	getAPI(context) {
-		function noteFile(root, fileName){
+		function noteFile(root, keyId){
 			try {
 				var file = new FileUtils.File(root);
 
-				file.appendRelativePath(encodeFileName(fileName + '.qnote'));
+				file.appendRelativePath(encodeFileName(keyId + '.qnote'));
 
 				return file;
 			} catch {
@@ -26,8 +26,8 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 			return file && file.exists() && file.isFile() && file.isReadable();
 		}
 
-		function getExistingNoteFile(root, fileName) {
-			var file = noteFile(root, fileName);
+		function getExistingNoteFile(root, keyId) {
+			var file = noteFile(root, keyId);
 
 			if(fileExists(file)){
 				return file;
@@ -52,10 +52,10 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 
 		return {
 			qnote: {
-				async saveNote(root, fileName, note){
-					var file = noteFile(root, fileName);
+				async saveNote(root, keyId, note){
+					var file = noteFile(root, keyId);
 					if(!file){
-						console.error(`Can not open qnote: ${fileName}`);
+						console.error(`Can not open qnote: ${keyId}`);
 						return false;
 					}
 
@@ -84,8 +84,8 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 						return false;
 					}
 				},
-				async deleteNote(root, fileName){
-					var file = getExistingNoteFile(root, fileName);
+				async deleteNote(root, keyId){
+					var file = getExistingNoteFile(root, keyId);
 					try {
 						file.remove(false);
 						return true;
@@ -93,8 +93,8 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 						return false;
 					}
 				},
-				async loadNote(root, fileName){
-					var file = getExistingNoteFile(root, fileName);
+				async loadNote(root, keyId){
+					var file = getExistingNoteFile(root, keyId);
 					if(!file){
 						return false;
 					}
@@ -141,10 +141,7 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 
 						var fileName = decodeFileName(o.leafName);
 						if(fileName.substring(fileName.length - 6) === '.qnote'){
-							notes.push({
-								keyId: fileName.substring(0, fileName.length - 6),
-								fileName: fileName
-							});
+							notes.push(fileName.substring(0, fileName.length - 6));
 						}
 					}
 

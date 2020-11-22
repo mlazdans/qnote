@@ -290,10 +290,7 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 
 						var fileName = decodeFileName(o.leafName);
 						if(fileName.substring(fileName.length - 6) === '.xnote'){
-							notes.push({
-								keyId: fileName.substring(0, fileName.length - 6),
-								fileName: fileName
-							});
+							notes.push(fileName.substring(0, fileName.length - 6));
 						}
 					}
 
