@@ -279,7 +279,7 @@ function importInternalStorage() {
 	const reader = new FileReader();
 	const file = this.files[0];
 
-	reader.onload = (e) => {
+	reader.onload = e => {
 		try {
 			var storage = JSON.parse(e.target.result);
 		} catch(e){
@@ -287,9 +287,11 @@ function importInternalStorage() {
 			return false;
 		}
 
-		browser.storage.local.set(storage).then(() => {
+		browser.storage.local.set(storage).then(async () => {
 			alert(_("storage.imported"));
-			ext.reloadExtension();
+			await browser.qapp.clearNoteCache();
+			ext.setUpExtension();
+			initOptionsPageValues();
 		}).catch(e => {
 			alert(_("storage.import.failed", e.message));
 		});
@@ -303,10 +305,18 @@ async function clearStorage(){
 		ext.clearStorage().then(async () => {
 			alert(_("storage.cleared"));
 			await browser.qapp.clearNoteCache();
+			ext.setUpExtension();
+			initOptionsPageValues();
 		}).catch(e => {
 			alert(_("storage.clear.failed", e.message));
 		});
 	}
+}
+
+async function initOptionsPageValues(){
+	i18n.setData(document, await ext.loadPrefsWithDefaults());
+	storageOptionChange();
+	dateFormatChange();
 }
 
 async function initOptionsPage(){
@@ -317,7 +327,6 @@ async function initOptionsPage(){
 	initDateFormats();
 
 	i18n.setTexts(document);
-	i18n.setData(document, await ext.loadPrefsWithDefaults());
 
 	initFolderImportButton();
 	initExportStorageButton();
@@ -333,8 +342,7 @@ async function initOptionsPage(){
 		node.addEventListener("click", storageOptionChange);
 	}
 
-	storageOptionChange();
-	dateFormatChange();
+	initOptionsPageValues();
 }
 
 window.addEventListener("load", ()=>{
