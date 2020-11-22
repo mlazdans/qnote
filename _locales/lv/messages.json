@@ -127,5 +127,77 @@
 	},
 	"delete": {
 		"message": "Dzēst"
+	},
+	"enable.search": {
+		"message": "Ieslēgt meklētāju"
+	},
+	"enable.print_attach": {
+		"message": "Pievienot printēšanai"
+	},
+	"attach.bottom": {
+		"message": "apakšā"
+	},
+	"attach.top": {
+		"message": "augšā"
+	},
+	"attach.title": {
+		"message": "virsraksts"
+	},
+	"attach.text": {
+		"message": "teksts"
+	},
+	"enable.message_attach": {
+		"message": "Pievienot vēstulei"
+	},
+	"enable.debug.messages": {
+		"message": "Ieslēgt atkļūdošana paziņojumus"
+	},
+	"date.format": {
+		"message": "Datuma formāts"
+	},
+	"date.format.custom": {
+		"message": "-savs-"
+	},
+	"formatting.rules": {
+		"message": "Formatēšanas noteikumi"
+	},
+	"datetime_group": {
+		"message": "Laiks un datums"
+	},
+	"date_group": {
+		"message": "Datums"
+	},
+	"time_group": {
+		"message": "Laiks"
+	},
+	"anchor.to": {
+		"message": "Noenkurot"
+	},
+	"confirm.delete": {
+		"message": "Apstiprināt dzēšanu"
+	},
+	"default.dimensions.fieldset": {
+		"message": "Noklusējuma izmēri un izvietošana"
+	},
+	"behaviour.fieldset": {
+		"message": "Uzvedība"
+	},
+	"search.disabled.msg": {
+		"message": "(meklētājs patlaban ir atslēgts kamēr tiek meklēts labāks risinājums)"
+	},
+	"additional.attach": {
+		"message": "Papildus pievienot"
+	},
+	"import.folder.button": {
+		"message": "Importēt zīmītes no mapes"
+	},
+	"anchor.window" : {
+		"message": "Logs"
+	},
+	"anchor.threadpane" : {
+		"message": "Vēstuļu saraksts"
+	},
+	"anchor.message" : {
+		"message": "Vēstule"
 	}
 }
