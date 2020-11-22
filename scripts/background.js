@@ -2,6 +2,7 @@
 // MAYBE: note popup on mouse over
 // TODO: save note pos and dims locally, outside note
 // TODO: save note pos relative to window
+// TODO: reset options to defaults
 var QDEB = true;
 var Prefs;
 var CurrentNote;
