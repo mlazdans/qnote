@@ -1,75 +1,194 @@
 {
-	"description": { "message": "Add notes to your e-mails. Drop-in replacement for XNote++ with more features." },
-	"are.you.sure": { "message": "Are you sure?" },
-	"browse": { "message": "Browse" },
-	"folder.unaccesible": { "message": "Folder not found or is not readable: $1" },
-	"json.parse.error": { "message": "JSON parse error: $1" },
-	"modify.note": { "message": "Modify note" },
-	"delete.note": { "message": "Delete note" },
-	"reset.note.window": { "message": "Reset note window" },
-	"create.new.note": { "message": "Create new note" },
-	"toggle.qnote": { "message": "Toggle note" },
-
-	"width.label": { "message": "Width:" },
-	"height.label": { "message": "Height" },
-	"use.tag.label": { "message": "Use Tag" },
-	"show.on.select.label": { "message": "Show popup on message selection" },
-	"save.preferences.button": { "message": "Save" },
-	"import.legacy.xnotes.button": { "message": "Import legacy XNotes" },
-	"extension.reload.button": { "message": "Reload" },
-	"show.first.chars.label": { "message": "Show first X characters in QNote column"},
-	"focus.on.display": { "message": "Focus QNote after display (only floating panel)"},
-	"overwrite.existing.notes": { "message": "Overwrite existing notes"},
-	"can.use.xnote.folder": { "message": "You can use legacy XNotes folder"},
-	"no.message_id.header": { "message": "Can't create note. Message without 'message-id:' header"},
-
-	"maintenance.fieldset": { "message": "Maintenance" },
-	"use.tag.manager": { "message": "(please use tag manager to manage tags)" },
-
-	"xnote.import.finished.stats": { "message": "Import finished:\nimported notes - $1\nerrored notes - $2\nexisting notes - $3\noverwritten notes - $4" },
-	"xnote.import.fail": { "message": "Could not import legacy notes" },
-	"xnote.folder.inaccessible": { "message": "XNote folder not found or is not readable: $1" },
-	"xnote.folder.found": { "message": "XNote folder found: $1" },
-
-	"storage.export.limitation": { "message": "'Export storage' available only on TB>=78" },
-	"storage.fieldset": { "message": "Storage" },
-	"storage.option.ext": { "message": "Inside extension" },
-	"storage.option.folder": { "message": "Local folder" },
-	"storage.cleared": { "message": "Storage cleared" },
-	"storage.clear.failed": { "message": "Failed to clear storage: $1" },
-	"storage.imported": { "message": "Storage imported" },
-	"storage.import.failed": { "message": "Failed to import storage: $1" },
-	"storage.clear.button": { "message": "Clear storage" },
-	"storage.export.button": { "message": "Export storage" },
-	"storage.import": { "message": "Import extension storage" },
-
-	"window.fieldset": { "message": "Window" },
-	"window.option.xul": { "message": "Floating panel" },
-	"window.option.webext": { "message": "Popup window" },
-
-	"close.and.save": { "message": "Close and save" },
-	"delete": { "message": "Delete" },
-
-	"enable.search": { "message": "Enable search" },
-	"enable.print_attach": { "message": "Attach to print" },
-	"attach.bottom": { "message": "bottom" },
-	"attach.top": { "message": "top" },
-	"attach.title": { "message": "title" },
-	"attach.text": { "message": "text" },
-	"enable.message_attach": { "message": "Attach to message" },
-	"enable.debug.messages": { "message": "Enable debug messages" },
-
-	"date.format": { "message": "Date format" },
-	"date.format.custom": { "message": "-custom-" },
-	"formatting.rules": { "message": "(formatting rules)" },
-	"datetime_group": { "message": "Date and time" },
-	"date_group": { "message": "Date" },
-	"time_group": { "message": "Time" },
-
-	"anchor.to": { "message": "Anchor to" },
-	"confirm.delete": { "message": "Confirm delete" },
-	"default.dimensions.fieldset": { "message": "Default dimensions and placement" },
-	"behaviour.fieldset": { "message": "Behaviour" },
-	"search.disabled.msg": { "message": "(search has been temporarily disabled until we found a better solution)" },
-	"additional.attach": { "message": "Additionally attach" }
+	"description": {
+		"message": "Add notes to your e-mails. Drop-in replacement for XNote++ with more features."
+	},
+	"are.you.sure": {
+		"message": "Are you sure?"
+	},
+	"browse": {
+		"message": "Browse"
+	},
+	"folder.unaccesible": {
+		"message": "Folder not found or is not readable: $1"
+	},
+	"json.parse.error": {
+		"message": "JSON parse error: $1"
+	},
+	"modify.note": {
+		"message": "Modify note"
+	},
+	"delete.note": {
+		"message": "Delete note"
+	},
+	"reset.note.window": {
+		"message": "Reset note window"
+	},
+	"create.new.note": {
+		"message": "Create new note"
+	},
+	"toggle.qnote": {
+		"message": "Toggle note"
+	},
+	"width.label": {
+		"message": "Width:"
+	},
+	"height.label": {
+		"message": "Height"
+	},
+	"use.tag.label": {
+		"message": "Use Tag"
+	},
+	"show.on.select.label": {
+		"message": "Show popup on message selection"
+	},
+	"save.preferences.button": {
+		"message": "Save"
+	},
+	"extension.reload.button": {
+		"message": "Reload"
+	},
+	"show.first.chars.label": {
+		"message": "Show first X characters in column"
+	},
+	"focus.on.display": {
+		"message": "Focus QNote after display (only floating panel)"
+	},
+	"overwrite.existing.notes": {
+		"message": "Overwrite existing notes"
+	},
+	"can.use.xnote.folder": {
+		"message": "You can use legacy XNote++ folder"
+	},
+	"no.message_id.header": {
+		"message": "Can't create note. Message without 'message-id:' header"
+	},
+	"maintenance.fieldset": {
+		"message": "Maintenance"
+	},
+	"use.tag.manager": {
+		"message": "(please use tag manager to manage tags)"
+	},
+	"import.finished.stats": {
+		"message": "Import finished:\nimported notes - $1\nerrored notes - $2\nexisting notes - $3\noverwritten notes - $4"
+	},
+	"import.fail": {
+		"message": "Could not import legacy notes"
+	},
+	"xnote.folder.inaccessible": {
+		"message": "XNote++ folder not found or is not readable: $1"
+	},
+	"xnote.folder.found": {
+		"message": "XNote++ folder found: $1"
+	},
+	"storage.export.limitation": {
+		"message": "'Export storage' available only on TB>=78"
+	},
+	"storage.fieldset": {
+		"message": "Storage"
+	},
+	"storage.option.ext": {
+		"message": "Inside extension"
+	},
+	"storage.option.folder": {
+		"message": "Local folder"
+	},
+	"storage.cleared": {
+		"message": "Storage cleared"
+	},
+	"storage.clear.failed": {
+		"message": "Failed to clear storage: $1"
+	},
+	"storage.imported": {
+		"message": "Storage imported"
+	},
+	"storage.import.failed": {
+		"message": "Failed to import storage: $1"
+	},
+	"storage.clear.button": {
+		"message": "Clear storage"
+	},
+	"storage.export.button": {
+		"message": "Export storage"
+	},
+	"storage.import": {
+		"message": "Import extension storage"
+	},
+	"window.fieldset": {
+		"message": "Window"
+	},
+	"window.option.xul": {
+		"message": "Floating panel"
+	},
+	"window.option.webext": {
+		"message": "Popup window"
+	},
+	"close.and.save": {
+		"message": "Close and save"
+	},
+	"delete": {
+		"message": "Delete"
+	},
+	"enable.search": {
+		"message": "Enable search"
+	},
+	"enable.print_attach": {
+		"message": "Attach to print"
+	},
+	"attach.bottom": {
+		"message": "bottom"
+	},
+	"attach.top": {
+		"message": "top"
+	},
+	"attach.title": {
+		"message": "title"
+	},
+	"attach.text": {
+		"message": "text"
+	},
+	"enable.message_attach": {
+		"message": "Attach to message"
+	},
+	"enable.debug.messages": {
+		"message": "Enable debug messages"
+	},
+	"date.format": {
+		"message": "Date format"
+	},
+	"date.format.custom": {
+		"message": "-custom-"
+	},
+	"formatting.rules": {
+		"message": "(formatting rules)"
+	},
+	"datetime_group": {
+		"message": "Date and time"
+	},
+	"date_group": {
+		"message": "Date"
+	},
+	"time_group": {
+		"message": "Time"
+	},
+	"anchor.to": {
+		"message": "Anchor to"
+	},
+	"confirm.delete": {
+		"message": "Confirm delete"
+	},
+	"default.dimensions.fieldset": {
+		"message": "Default dimensions and placement"
+	},
+	"behaviour.fieldset": {
+		"message": "Behaviour"
+	},
+	"search.disabled.msg": {
+		"message": "(search has been temporarily disabled until we found a better solution)"
+	},
+	"additional.attach": {
+		"message": "Additionally attach"
+	},
+	"import.folder.button": {
+		"message": "Import Notes from folder"
+	}
 }
