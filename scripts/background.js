@@ -1,6 +1,7 @@
 // MAYBE: multiple notes simultaneously
 // MAYBE: note popup on mouse over
 // TODO: save note pos and dims locally, outside note
+// TODO: save note pos relative to window
 var QDEB = true;
 var Prefs;
 var CurrentNote;
