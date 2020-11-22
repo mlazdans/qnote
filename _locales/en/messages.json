@@ -72,7 +72,7 @@
 		"message": "Import finished:\nimported notes - $1\nerrored notes - $2\nexisting notes - $3\noverwritten notes - $4"
 	},
 	"import.fail": {
-		"message": "Could not import legacy notes"
+		"message": "Could not import notes"
 	},
 	"xnote.folder.inaccessible": {
 		"message": "XNote++ folder not found or is not readable: $1"
