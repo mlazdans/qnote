@@ -1,52 +1,134 @@
 {
-	"description": { "message": "Essai de migration de XNote++ sur Thunderbird 78+" },
-	"are.you.sure": { "message": "Êtes-vous certain ?" },
-	"browse": { "message": "Parcourir…" },
-	"folder.unaccesible": { "message": "Dossier inaccessible : $1" },
-	"json.parse.error": { "message": "Erreur d’analyse JSON : $1" },
-	"modify.note": { "message": "Modifier la note" },
-	"delete.note": { "message": "Supprimer la note" },
-	"reset.note.window": { "message": "Réinitialiser la fenêtre" },
-	"create.new.note": { "message": "Créer une note" },
-	"toggle.qnote": { "message": "Ouvrir ou fermer la note" },
-
-	"width.label": { "message": "Largeur :" },
-	"height.label": { "message": "Hauteur :" },
-	"use.tag.label": { "message": "Attribuer l’étiquette : " },
-	"show.on.select.label": { "message": "Afficher la note à la sélection du message" },
-	"save.preferences.button": { "message": "Enregistrer" },
-	"import.legacy.xnotes.button": { "message": "Importer les anciennes XNotes" },
-	"extension.reload.button": { "message": "Recharger" },
-	"show.first.chars.label": { "message": "Afficher les n premiers caractères dans la colonne QNote : n ="},
-	"focus.on.display": { "message": "Cibler QNote à l’affichage (panneau flottant uniquement)"},
-	"overwrite.existing.notes": { "message": "Remplacer les notes existantes"},
-	"can.use.xnote.folder": { "message": "Il est possible d’utiliser l’ancien dossier XNote."},
-	"no.message_id.header": { "message": "Impossible de créer la note : message sans en-tête d’identification (message-id:)"},
-
-	"maintenance.fieldset": { "message": " Maintenance " },
-	"use.tag.manager": { "message": "(utiliser le gestionnaire d’étiquettes)" },
-
-	"xnote.import.finished.stats": { "message": "Importation terminée :\n$1 notes importées\n$2 notes erronées\n$3 notes existantes\n$4 notes remplacées" },
-	"xnote.import.fail": { "message": "Impossible d’importer les anciennes notes" },
-	"xnote.folder.inaccessible": { "message": "Dossier XNote inaccessible : $1" },
-	"xnote.folder.found": { "message": "Dossier XNote trouvé : $1" },
-
-	"storage.export.limitation": { "message": "L’exportation du stockage n’est possible que sur Thunderbird 78 ou supérieur." },
-	"storage.fieldset": { "message": " Stockage " },
-	"storage.option.ext": { "message": "Interne à l’extension" },
-	"storage.option.folder": { "message": "Dossier local" },
-	"storage.cleared": { "message": "Stockage supprimé" },
-	"storage.clear.failed": { "message": "Échec de la suppression du stockage : $1" },
-	"storage.imported": { "message": "Stockage importé" },
-	"storage.import.failed": { "message": "Échec de l’importation du stockage : $1" },
-	"storage.clear.button": { "message": "Supprimer le stockage" },
-	"storage.export.button": { "message": "Exporter le stockage" },
-	"storage.import": { "message": "Importer le stockage de l’extension : " },
-
-	"window.fieldset": { "message": "Présenter les notes dans " },
-	"window.option.xul": { "message": "un panneau flottant" },
-	"window.option.webext": { "message": "une fenêtre contextuelle" },
-
-	"close.and.save": { "message": "Fermer et enregistrer" },
-	"delete": { "message": "Supprimer" }
+	"description": {
+		"message": "Essai de migration de XNote++ sur Thunderbird 78+"
+	},
+	"are.you.sure": {
+		"message": "Êtes-vous certain ?"
+	},
+	"browse": {
+		"message": "Parcourir…"
+	},
+	"folder.unaccesible": {
+		"message": "Dossier inaccessible : $1"
+	},
+	"json.parse.error": {
+		"message": "Erreur d’analyse JSON : $1"
+	},
+	"modify.note": {
+		"message": "Modifier la note"
+	},
+	"delete.note": {
+		"message": "Supprimer la note"
+	},
+	"reset.note.window": {
+		"message": "Réinitialiser la fenêtre"
+	},
+	"create.new.note": {
+		"message": "Créer une note"
+	},
+	"toggle.qnote": {
+		"message": "Ouvrir ou fermer la note"
+	},
+	"width.label": {
+		"message": "Largeur :"
+	},
+	"height.label": {
+		"message": "Hauteur :"
+	},
+	"use.tag.label": {
+		"message": "Attribuer l’étiquette : "
+	},
+	"show.on.select.label": {
+		"message": "Afficher la note à la sélection du message"
+	},
+	"save.preferences.button": {
+		"message": "Enregistrer"
+	},
+	"import.legacy.xnotes.button": {
+		"message": "Importer les anciennes XNotes"
+	},
+	"extension.reload.button": {
+		"message": "Recharger"
+	},
+	"show.first.chars.label": {
+		"message": "Afficher les n premiers caractères dans la colonne QNote : n ="
+	},
+	"focus.on.display": {
+		"message": "Cibler QNote à l’affichage (panneau flottant uniquement)"
+	},
+	"overwrite.existing.notes": {
+		"message": "Remplacer les notes existantes"
+	},
+	"can.use.xnote.folder": {
+		"message": "Il est possible d’utiliser l’ancien dossier XNote."
+	},
+	"no.message_id.header": {
+		"message": "Impossible de créer la note : message sans en-tête d’identification (message-id:)"
+	},
+	"maintenance.fieldset": {
+		"message": " Maintenance "
+	},
+	"use.tag.manager": {
+		"message": "(utiliser le gestionnaire d’étiquettes)"
+	},
+	"xnote.import.finished.stats": {
+		"message": "Importation terminée :\n$1 notes importées\n$2 notes erronées\n$3 notes existantes\n$4 notes remplacées"
+	},
+	"xnote.import.fail": {
+		"message": "Impossible d’importer les anciennes notes"
+	},
+	"xnote.folder.inaccessible": {
+		"message": "Dossier XNote inaccessible : $1"
+	},
+	"xnote.folder.found": {
+		"message": "Dossier XNote trouvé : $1"
+	},
+	"storage.export.limitation": {
+		"message": "L’exportation du stockage n’est possible que sur Thunderbird 78 ou supérieur."
+	},
+	"storage.fieldset": {
+		"message": " Stockage "
+	},
+	"storage.option.ext": {
+		"message": "Interne à l’extension"
+	},
+	"storage.option.folder": {
+		"message": "Dossier local"
+	},
+	"storage.cleared": {
+		"message": "Stockage supprimé"
+	},
+	"storage.clear.failed": {
+		"message": "Échec de la suppression du stockage : $1"
+	},
+	"storage.imported": {
+		"message": "Stockage importé"
+	},
+	"storage.import.failed": {
+		"message": "Échec de l’importation du stockage : $1"
+	},
+	"storage.clear.button": {
+		"message": "Supprimer le stockage"
+	},
+	"storage.export.button": {
+		"message": "Exporter le stockage"
+	},
+	"storage.import": {
+		"message": "Importer le stockage de l’extension : "
+	},
+	"window.fieldset": {
+		"message": "Présenter les notes dans "
+	},
+	"window.option.xul": {
+		"message": "un panneau flottant"
+	},
+	"window.option.webext": {
+		"message": "une fenêtre contextuelle"
+	},
+	"close.and.save": {
+		"message": "Fermer et enregistrer"
+	},
+	"delete": {
+		"message": "Supprimer"
+	}
 }
