@@ -28,15 +28,15 @@
 					</tr>
 					<tr>
 						<td><label for="input_width" data-i18n="width.label"></label></td>
-						<td><input type="number" data-preference="width" id="input_width" min="100" max="99999" size="5" /></td>
+						<td><input type="number" data-preference="width" id="input_width" min="100" max="99999" class="size3" /></td>
 					</tr>
 					<tr>
 						<td><label for="input_height" data-i18n="height.label"></label></td>
-						<td><input type="number" data-preference="height" id="input_height" min="100" max="99999" size="5" /></td>
+						<td><input type="number" data-preference="height" id="input_height" min="100" max="99999" class="size3" /></td>
 					</tr>
 				</table>
 			</td>
-			<td>
+			<td style="vertical-align: top;">
 				<table class="anchorPlacement">
 					<tr>
 						<td><input type="radio" name="anchorPlacement" value="topleft" data-preference="anchorPlacement"></td>
@@ -102,7 +102,7 @@
 			<td><select data-preference="tagName" id="select_tagName"></select></td>
 			<td data-i18n="use.tag.manager"></td>
 		</tr>
-	<table>
+	</table>
 	<table>
 		<tr>
 			<td data-i18n="window.fieldset"></td>
@@ -115,7 +115,7 @@
 	<table>
 		<tr>
 			<td><label for="input_showFirstChars" data-i18n="show.first.chars.label"></label></td>
-			<td><input type="number" data-preference="showFirstChars" id="input_showFirstChars" min="0" max="999" size="5" /></td>
+			<td><input type="number" data-preference="showFirstChars" id="input_showFirstChars" min="0" max="999" class="size2" /></td>
 		</tr>
 	</table>
 	<table>
@@ -129,7 +129,7 @@
 			<tr>
 				<td><label for="dateFormat" data-i18n="date.format"></label></td>
 				<td><input type="text" id="dateFormat" name="dateFormat" data-preference="dateFormat"></td>
-				<td><a href="https://www.php.net/manual/en/datetime.format.php" data-i18n="formatting.rules"></a> (dDjlNwzWFmMntLYyGHisv)</td>
+				<td><a href="https://www.php.net/manual/en/datetime.format.php" class="text-link" data-i18n="formatting.rules"></a> (dDjlNwzWFmMntLYyGHisv)</td>
 			</tr>
 		</table>
 	</div>
@@ -193,14 +193,14 @@
 		<table>
 			<tr>
 				<td><button type="button" id="importFolderButton" data-i18n="import.folder.button"></button></td>
-				<td id="xnoteFolderInfo"></td>
-				<td><div id="importFolderLoader" style="display: none;"><img src="../images/loader.gif" alt="Loading..."></div></td>
-			</tr>
-			<tr>
-				<td colspan="3">
+				<td>
 					<input type="checkbox" id="overwriteExistingNotes">
 					<label for="overwriteExistingNotes" data-i18n="overwrite.existing.notes"></label>
 				</td>
+				<td><div id="importFolderLoader" style="display: none;"><img src="../images/loader.gif" alt="Loading..."></div></td>
+			</tr>
+			<tr>
+				<td colspan="3" id="xnoteFolderInfo"></td>
 			</tr>
 		</table>
 	</div>
