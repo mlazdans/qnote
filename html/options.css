@@ -36,7 +36,15 @@ fieldset {
 
 select, input[type=text], input[type=number] {
 	/* border: 1px solid #96c9ef; */
-	border: 1px solid var(--in-content-categories-background);
+	border: 1px solid var(--in-content-box-border-color);
+}
+
+select {
+	min-height: auto;
+}
+
+option, optgroup {
+	padding: 0.25em;
 }
 
 /* a {
