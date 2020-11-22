@@ -203,8 +203,9 @@ async function initExtension(){
 					focusMessagePane(CurrentNote.windowId);
 				}
 			});
+		} else {
+			mpUpdateForMessage(Message.id);
 		}
-		// mpUpdateForMessage(Message.id);
 	});
 
 	// Click on main toolbar
