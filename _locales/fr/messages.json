@@ -127,5 +127,77 @@
 	},
 	"delete": {
 		"message": "Supprimer"
+	},
+	"enable.search": {
+		"message": "Activer la recherche"
+	},
+	"enable.print_attach": {
+		"message": "Incorporer ą l’impression"
+	},
+	"attach.bottom": {
+		"message": "en bas"
+	},
+	"attach.top": {
+		"message": "en haut"
+	},
+	"attach.title": {
+		"message": "le titre"
+	},
+	"attach.text": {
+		"message": "le texte"
+	},
+	"enable.message_attach": {
+		"message": "Attacher au message"
+	},
+	"enable.debug.messages": {
+		"message": "Activer les messages de débogage"
+	},
+	"date.format": {
+		"message": "Format de la date : "
+	},
+	"date.format.custom": {
+		"message": "personnalisé"
+	},
+	"formatting.rules": {
+		"message": "Rčgles de formatage"
+	},
+	"datetime_group": {
+		"message": "Date et heure"
+	},
+	"date_group": {
+		"message": "Date"
+	},
+	"time_group": {
+		"message": "Heure"
+	},
+	"anchor.to": {
+		"message": "Ancrer ą : "
+	},
+	"confirm.delete": {
+		"message": "Confirmer la suppression"
+	},
+	"default.dimensions.fieldset": {
+		"message": "Position et dimensions par défaut"
+	},
+	"behaviour.fieldset": {
+		"message": "Comportement"
+	},
+	"search.disabled.msg": {
+		"message": "(désactivée en attendant une meilleure solution)"
+	},
+	"additional.attach": {
+		"message": "Intégration supplémentaire"
+	},
+	"import.folder.button": {
+		"message": "Importer les notes du dossier"
+	},
+	"anchor.window" : {
+		"message": "Fenźtre"
+	},
+	"anchor.threadpane" : {
+		"message": "Liste des messages"
+	},
+	"anchor.message" : {
+		"message": "Message"
 	}
 }
