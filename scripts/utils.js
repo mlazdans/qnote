@@ -287,18 +287,17 @@ async function QNotePopForMessage(messageId, flags = POP_NONE) {
 			}
 
 			CurrentNote.popping = true;
-			return CurrentNote.pop().then(isPopped => {
+			CurrentNote.pop().then(isPopped => {
 				if(setFocus && isPopped){
 					CurrentNote.focus();
 				}
-
-				mpUpdateForMessage(messageId);
 
 				return isPopped;
 			}).finally(() => {
 				CurrentNote.popping = false;
 			});
 		}
+		mpUpdateForNote(note);
 	}).catch(e => {
 		if(e instanceof NoKeyIdError){
 			if(createNew){
@@ -361,16 +360,20 @@ function silentCatcher(){
 }
 
 // mp = message pane
+async function mpUpdateForNote(note){
+	// Marks icons active
+	updateIcons(note && note.exists);
+
+	// Send updated note down to qapp
+	updateNoteView(note);
+
+	// Attach note to message
+	browser.qapp.attachNoteToMessage(CurrentWindowId, note2QAppNote(note));
+}
+
 async function mpUpdateForMessage(messageId){
 	return loadNoteForMessage(messageId).then(note => {
-		// Marks icons active
-		updateIcons(note && note.exists);
-
-		// Send updated note down to qapp
-		updateNoteView(note);
-
-		// Attach note to message
-		browser.qapp.attachNoteToMessage(CurrentWindowId, note2QAppNote(note));
+		mpUpdateForNote(note);
 	});
 }
 
