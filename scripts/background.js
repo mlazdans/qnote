@@ -3,6 +3,7 @@
 // TODO: save note pos and dims locally, outside note
 // TODO: save note pos relative to window
 // TODO: reset options to defaults
+// TODO: save create and update time
 var QDEB = true;
 var Prefs;
 var CurrentNote;
