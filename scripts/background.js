@@ -268,6 +268,10 @@ async function initExtension(){
 	// TODO: attach at least note icon to multi message display (since TB78.4)
 	// browser.messageDisplay.onMessagesDisplayed.addListener(async (Tab, Messages) => {
 	// });
+
+	// TODO: add "install", "update" handling if neccessary
+	// if temporary - add reload button to the main toolbar to speed up developement
+	// messenger.runtime.onInstalled.addListener(async ({ reason, temporary })
 }
 
 async function waitForLoad() {
