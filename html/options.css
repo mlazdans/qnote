@@ -39,6 +39,10 @@ select, input[type=text], input[type=number] {
 	border: 1px solid var(--in-content-box-border-color);
 }
 
+input[type=number] {
+	border-right: none;
+}
+
 select {
 	min-height: auto;
 }
