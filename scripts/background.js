@@ -5,6 +5,8 @@
 // TODO: reset options to defaults
 // TODO: save create and update time
 // TODO: optional different locale for date format
+// TODO: do not bring column back if opted out
+// MAYBE: anchor outside reference frame
 var QDEB = true;
 var Prefs;
 var CurrentNote;
