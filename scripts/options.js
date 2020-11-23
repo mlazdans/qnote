@@ -1,12 +1,14 @@
 var ext = chrome.extension.getBackgroundPage();
 var i18n = ext.i18n;
 var _ = browser.i18n.getMessage;
+var QDEB = ext.QDEB;
 
 var DefaultPrefs;
 
 var importFolderButton = document.getElementById('importFolderButton');
 var importFolderLoader = document.getElementById("importFolderLoader");
-var saveButton = document.getElementById('saveButton');
+// var saveButton = document.getElementById('saveButton');
+var resetDefaultsButton = document.getElementById('resetDefaultsButton');
 var clearStorageButton = document.getElementById('clearStorageButton');
 var exportStorageButton = document.getElementById('exportStorageButton');
 var importFile = document.getElementById("importFile");
@@ -54,14 +56,50 @@ function setLabelColor(forE, color){
 	return label;
 }
 
-async function saveOptions(handler){
+async function saveOptionsDefaultHandler(prefs) {
+	await ext.CurrentNote.close();
+
 	let oldPrefs = Object.assign({}, ext.Prefs);
+
+	ext.Prefs = await ext.loadPrefsWithDefaults();
+
+	// if(prefs.showFirstChars !== oldPrefs.showFirstChars){
+	// 	// await browser.qapp.clearNoteCache();
+	// 	// await browser.qapp.setColumnTextLimit(prefs.showFirstChars);
+	// }
+
+	// Storage option changed
+	if(prefs.storageOption !== oldPrefs.storageOption){
+		await browser.qapp.clearNoteCache();
+	}
+
+	// Folder changed
+	if(prefs.storageFolder !== oldPrefs.storageFolder){
+		await browser.qapp.clearNoteCache();
+		// ext.reloadExtension();
+	}
+
+	// if(prefs.windowOption !== oldPrefs.windowOption){
+	// 	ext.reloadExtension();
+	// }
+
+	// if(prefs.enableSearch !== oldPrefs.enableSearch){
+	// 	ext.reloadExtension();
+	// }
+
+	await ext.setUpExtension();
+
+	return true;
+};
+
+async function saveOptions(handler){
+	QDEB&&console.debug("Saving options...");
 	let prefs = await ext.loadPrefsWithDefaults();
 
 	if(storageOptionValue() === 'folder'){
 		if(!await ext.isReadable(input_storageFolder.value)){
 			setLabelColor('storageOptionFolder', 'red');
-			alert(_("folder.unaccesible", input_storageFolder.value));
+			// alert(_("folder.unaccesible", input_storageFolder.value));
 			return false;
 		}
 	}
@@ -87,47 +125,7 @@ async function saveOptions(handler){
 		prefs[key] = value;
 	}
 
-	let defaultHandler = async () => {
-		// Update extension Prefs
-		ext.Prefs = await ext.loadPrefsWithDefaults();
-
-		// if(prefs.showFirstChars !== oldPrefs.showFirstChars){
-		// 	// await browser.qapp.clearNoteCache();
-		// 	// await browser.qapp.setColumnTextLimit(prefs.showFirstChars);
-		// }
-
-		// Storage option changed
-		if(prefs.storageOption !== oldPrefs.storageOption){
-			await browser.qapp.clearNoteCache();
-		}
-
-		// Folder changed
-		if(prefs.storageFolder !== oldPrefs.storageFolder){
-			await browser.qapp.clearNoteCache();
-			// ext.reloadExtension();
-		}
-
-		// if(prefs.windowOption !== oldPrefs.windowOption){
-		// 	ext.reloadExtension();
-		// }
-
-		// if(prefs.enableSearch !== oldPrefs.enableSearch){
-		// 	ext.reloadExtension();
-		// }
-
-		await ext.CurrentNote.close();
-		await ext.setUpExtension();
-
-		return true;
-	};
-
-	return ext.savePrefs(prefs).then(saved => {
-		if(saved){
-			return (handler || defaultHandler)();
-		} else {
-			return false;
-		}
-	});
+	return ext.savePrefs(prefs).then(saved => saved && (handler || saveOptionsDefaultHandler)(prefs));
 }
 
 function initTags(tags){
@@ -246,8 +244,12 @@ function storageOptionValue(){
 	return e ? e.value : DefaultPrefs.storageFolder;
 }
 
-function storageOptionChange(){
+async function storageOptionChange(){
 	let option = storageOptionValue();
+
+	if(!input_storageFolder.value){
+		input_storageFolder.value = await ext.getXNoteStoragePath();
+	}
 
 	for (const node of document.querySelectorAll('[class="storageFieldset"]')) {
 		if(node.id === 'storageFieldset_' + option){
@@ -270,8 +272,9 @@ async function storageFolderBrowse(){
 		opt.displayDirectory = path;
 	}
 
-	browser.legacy.folderPicker(opt).then((selectedPath)=>{
+	browser.legacy.folderPicker(opt).then(selectedPath => {
 		input_storageFolder.value = selectedPath;
+		saveOptions();
 	});
 }
 
@@ -291,7 +294,7 @@ function importInternalStorage() {
 			alert(_("storage.imported"));
 			await browser.qapp.clearNoteCache();
 			ext.setUpExtension();
-			initOptionsPageValues();
+			initOptionsPageValues(await ext.loadPrefsWithDefaults());
 		}).catch(e => {
 			alert(_("storage.import.failed", e.message));
 		});
@@ -306,17 +309,23 @@ async function clearStorage(){
 			alert(_("storage.cleared"));
 			await browser.qapp.clearNoteCache();
 			ext.setUpExtension();
-			initOptionsPageValues();
+			initOptionsPageValues(await ext.loadPrefsWithDefaults());
 		}).catch(e => {
 			alert(_("storage.clear.failed", e.message));
 		});
 	}
 }
 
-async function initOptionsPageValues(){
-	i18n.setData(document, await ext.loadPrefsWithDefaults());
+async function initOptionsPageValues(prefs){
+	i18n.setData(document, prefs);
 	storageOptionChange();
 	dateFormatChange();
+	return true;
+}
+
+async function resetDefaults(){
+	QDEB&&console.debug("Resetting to defaults...");
+	return ext.savePrefs(DefaultPrefs).then(saved => saved && saveOptionsDefaultHandler(DefaultPrefs) && initOptionsPageValues(DefaultPrefs));
 }
 
 async function initOptionsPage(){
@@ -328,21 +337,24 @@ async function initOptionsPage(){
 
 	i18n.setTexts(document);
 
+	initOptionsPageValues(await ext.loadPrefsWithDefaults());
+
 	initFolderImportButton();
 	initExportStorageButton();
 
-	saveButton.addEventListener('click', () => saveOptions());
+	// saveButton.addEventListener('click', () => saveOptions());
 	clearStorageButton.addEventListener('click', clearStorage);
 	exportStorageButton.addEventListener('click', ext.exportStorage);
 	importFile.addEventListener("change", importInternalStorage);
 	reloadExtensionButton.addEventListener("click", ext.reloadExtension);
 	storageFolderBrowseButton.addEventListener("click", storageFolderBrowse);
+	resetDefaultsButton.addEventListener("click", resetDefaults);
 
 	for (const node of document.querySelectorAll('input[name="storageOption"]')) {
 		node.addEventListener("click", storageOptionChange);
 	}
 
-	initOptionsPageValues();
+	document.querySelectorAll("input,select,textarea").forEach(el => el.addEventListener("input", () => saveOptions()));
 }
 
 window.addEventListener("load", ()=>{

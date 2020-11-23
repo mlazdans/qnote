@@ -202,5 +202,8 @@
 	},
 	"options": {
 		"message": "Options"
+	},
+	"reset.defaults.button": {
+		"message": "Reset to defaults"
 	}
 }
