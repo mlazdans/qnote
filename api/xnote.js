@@ -296,16 +296,23 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 
 					return notes;
 				},
-				async getStoragePath() {
-					var _storageDir =
-						Components.classes['@mozilla.org/file/directory_service;1']
-						.getService(Components.interfaces.nsIProperties)
-						.get('ProfD', Components.interfaces.nsIFile)
-					;
+				getProfilePath() {
+					return Cc['@mozilla.org/file/directory_service;1'].getService(Ci.nsIProperties).get('ProfD', Ci.nsIFile);
+				},
+				async getStoragePath(path) {
+					let prof = this.getProfilePath();
 
-					_storageDir.append('XNote');
+					if(path){
+						if(path.startsWith("[ProfD]")) {
+							prof.appendRelativePath(path.substring(7));
+						} else {
+							return path;
+						}
+					} else {
+						prof.append('XNote');
+					}
 
-					return _storageDir.path;
+					return prof.path;
 				}
 			}
 		}

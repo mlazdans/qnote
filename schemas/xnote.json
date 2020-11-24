@@ -11,7 +11,12 @@
 		"type": "function",
 		"description": "Get storage path",
 		"async": true,
-		"parameters": []
+		"parameters": [{
+			"name": "path",
+			"optional": true,
+			"type": "string",
+			"description": "Path from prefs (may contain [ProfD]) or null if XNote under profile dir"
+		}]
 	},{
 		"name": "getAllKeys",
 		"type": "function",
