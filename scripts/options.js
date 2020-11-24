@@ -16,6 +16,7 @@ var reloadExtensionButton = document.getElementById("reloadExtensionButton");
 var storageFolderBrowseButton = document.getElementById("storageFolderBrowseButton");
 var input_storageFolder = document.getElementById("input_storageFolder");
 var overwriteExistingNotes = document.getElementById("overwriteExistingNotes");
+var errorBox = document.getElementById("errorBox");
 
 var dateFormats = {
 	datetime_group: [
@@ -92,13 +93,19 @@ async function saveOptionsDefaultHandler(prefs) {
 	return true;
 };
 
+function displayErrorBox(shown){
+	errorBox.style.display = shown ? "block" : "none";
+}
+
 async function saveOptions(handler){
 	QDEB&&console.debug("Saving options...");
 	let prefs = await ext.loadPrefsWithDefaults();
 
+	displayErrorBox(false);
 	if(storageOptionValue() === 'folder'){
 		if(!await ext.isFolderReadable(input_storageFolder.value)){
 			setLabelColor('storageOptionFolder', 'red');
+			displayErrorBox(true);
 			// alert(_("folder.unaccesible", input_storageFolder.value));
 			return false;
 		}

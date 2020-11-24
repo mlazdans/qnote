@@ -11,7 +11,8 @@ html, body {
 }
 
 form {
-	margin: 0;
+	margin: 0 !important;
+	padding: 0 !important;
 }
 
 button {
@@ -20,7 +21,7 @@ button {
 }
 
 legend {
-	padding: 0.5em;
+	padding: 0.25em 0.5em;
 	background-color: var(--in-content-categories-background);
 	border: 1px solid var(--in-content-box-border-color);
 	/* border:1px solid #96c9ef; */
@@ -30,7 +31,8 @@ legend {
 fieldset {
 	/* border: 1px solid #96c9ef; */
 	border: 1px solid var(--in-content-box-border-color);
-	margin: 0 0 0 1em;
+	/* margin: 0 0 0 1em; */
+	margin: 0;
 	padding: 0 1em;
 }
 
@@ -43,6 +45,12 @@ input[type=number] {
 	border-right: none;
 }
 
+input[type=checkbox] {
+	margin: 0;
+	margin-top: 3px;
+	margin-inline-end: unset;
+}
+
 select {
 	min-height: auto;
 }
@@ -51,6 +59,23 @@ option, optgroup {
 	padding: 0.25em;
 }
 
+td {
+	vertical-align: middle;
+}
+
+#errorBox {
+	background-image: url("chrome://global/skin/icons/error-16.png");
+	background-repeat: no-repeat;
+	background-position: 1em center;
+	/* border: 1px solid var(--in-content-warning-container); */
+	border: 1px solid var(--in-content-box-border-color);
+	font-weight: bold;
+	padding: 1em;
+	padding-left: 3em;
+	margin: 0;
+	display: none;
+	/* margin-top: 1em; */
+}
 /* a {
 	color: #41a5ef;
 } */

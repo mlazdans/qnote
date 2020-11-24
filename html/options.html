@@ -8,6 +8,8 @@
 
 <body>
 
+<div id="errorBox" class="updateSettingCrossUserWarningContainer" data-i18n="error"></div>
+
 <form>
 
 <fieldset>
@@ -186,6 +188,7 @@
 			<td><label for="storageOptionExt" data-i18n="storage.option.ext"></label></td>
 			<td><input type="radio" id="storageOptionFolder" name="storageOption" value="folder" data-preference="storageOption"></td>
 			<td><label for="storageOptionFolder" data-i18n="storage.option.folder"></label></td>
+			<td data-i18n="can.use.xnote.folder"></td>
 		</tr>
 	</table>
 
@@ -193,14 +196,9 @@
 		<table>
 			<tr>
 				<td><button type="button" id="importFolderButton" data-i18n="import.folder.button"></button></td>
-				<td>
-					<input type="checkbox" id="overwriteExistingNotes">
-					<label for="overwriteExistingNotes" data-i18n="overwrite.existing.notes"></label>
-				</td>
+				<td><input type="checkbox" id="overwriteExistingNotes"></td>
+				<td><label for="overwriteExistingNotes" data-i18n="overwrite.existing.notes"></label></td>
 				<td><div id="importFolderLoader" style="display: none;"><img src="../images/loader.gif" alt="Loading..."></div></td>
-			</tr>
-			<tr>
-				<td colspan="3" id="xnoteFolderInfo"></td>
 			</tr>
 		</table>
 	</div>
@@ -212,7 +210,7 @@
 				<td><button type="button" id="storageFolderBrowseButton" data-i18n="browse"></button></td>
 			</tr>
 			<tr>
-				<td colspan="2" data-i18n="can.use.xnote.folder"></td>
+				<td colspan="2" id="xnoteFolderInfo"></td>
 			</tr>
 		</table>
 	</div>
@@ -228,7 +226,7 @@
 	</table>
 	<table>
 		<tr>
-			<td colspan="3" data-i18n="storage.export.limitation"></td>
+			<td colspan="4" data-i18n="storage.export.limitation"></td>
 		</tr>
 		<tr>
 			<td><button type="button" id="resetDefaultsButton" data-i18n="reset.defaults.button"></button></td>
