@@ -57,7 +57,7 @@
 		"message": "Pārrakstīt esošās zīmītes"
 	},
 	"can.use.xnote.folder": {
-		"message": "Varat lietot arī XNote++ mapi"
+		"message": "(varat lietot arī XNote++ mapi)"
 	},
 	"no.message_id.header": {
 		"message": "Nevar izveidot zīmīti. Vēstule bez 'message-id:' hedera"
@@ -75,7 +75,7 @@
 		"message": "Nevarēja importēt zīmītes"
 	},
 	"xnote.folder.inaccessible": {
-		"message": "XNote++ mape nav atrasta vai nav piekļuves: $1"
+		"message": "XNote++ mape nav atrasta vai nav piekļuves"
 	},
 	"xnote.folder.found": {
 		"message": "XNote++ mape atrasta: $1"

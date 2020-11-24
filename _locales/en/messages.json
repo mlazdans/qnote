@@ -57,7 +57,7 @@
 		"message": "Overwrite existing notes"
 	},
 	"can.use.xnote.folder": {
-		"message": "You can use legacy XNote++ folder"
+		"message": "(you can use legacy XNote++ folder)"
 	},
 	"no.message_id.header": {
 		"message": "Can't create note. Message without 'message-id:' header"
@@ -75,7 +75,7 @@
 		"message": "Could not import notes"
 	},
 	"xnote.folder.inaccessible": {
-		"message": "XNote++ folder not found or is not readable: $1"
+		"message": "XNote++ folder not found or is not readable"
 	},
 	"xnote.folder.found": {
 		"message": "XNote++ folder found: $1"
@@ -205,5 +205,8 @@
 	},
 	"reset.defaults.button": {
 		"message": "Reset to defaults"
+	},
+	"error": {
+		"message": "Error"
 	}
 }

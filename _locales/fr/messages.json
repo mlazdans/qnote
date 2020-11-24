@@ -75,7 +75,7 @@
 		"message": "Impossible d’importer les notes"
 	},
 	"xnote.folder.inaccessible": {
-		"message": "Dossier XNote++ inaccessible : $1"
+		"message": "Dossier XNote++ inaccessible"
 	},
 	"xnote.folder.found": {
 		"message": "Dossier XNote++ trouvé : $1"

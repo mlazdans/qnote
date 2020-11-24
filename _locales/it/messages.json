@@ -57,7 +57,7 @@
 		"message": "Sovrascrivo le note esistenti?"
 	},
 	"can.use.xnote.folder": {
-		"message": "Puoi usare la cartella esistente di XNote++ folder"
+		"message": "(puoi usare la cartella esistente di XNote++ folder)"
 	},
 	"no.message_id.header": {
 		"message": "Non posso creare la nota. Messaggio senza 'message-id:' intestazione"
@@ -75,7 +75,7 @@
 		"message": "Impossibile importare le note"
 	},
 	"xnote.folder.inaccessible": {
-		"message": "Cartella XNote++ non trovata o non leggibile: $1"
+		"message": "Cartella XNote++ non trovata o non leggibile"
 	},
 	"xnote.folder.found": {
 		"message": "Cartella XNote++ non trovata: $1"
