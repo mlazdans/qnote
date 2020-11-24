@@ -134,42 +134,48 @@ class NoteColumnHandler {
 	}
 
 	setUpDOM(w) {
-		let qnoteCol = this.getElementById(w, "qnoteCol");
-
 		// Don't bother if already added to DOM
-		if(qnoteCol){
+		if(this.getElementById(w, "qnoteCol")){
+			QDEB&&console.debug("qnoteCol DOM entry already present");
 			return true;
 		}
 
-		let threadCols = this.getElementById(w, "threadCols");
-
 		// If threadCols not found, assume it is not right window
+		let threadCols = this.getElementById(w, "threadCols");
 		if(!threadCols){
 			return false;
 		}
 
 		// Not sure what and where gets saved. I'm guessing `ordinal/visible` are stored within folder column states and `width` using xulstore?
+		// Probably even don't have to worry
 		let width, ordinal, visible;
 		let newState, colStates;
 
 		let aFolderDisplay = w.gFolderDisplay;
 		if(aFolderDisplay){
 			colStates = aFolderDisplay.getColumnStates();
-			newState = Object.assign({}, colStates.qnoteCol);
+			if(colStates.hasOwnProperty("qnoteCol")){
+				newState = Object.assign({}, colStates.qnoteCol);
+				QDEB&&console.debug("qnoteCol found sate:", newState);
+				ordinal = newState.ordinal;
+				visible = newState.visible;
+			}
 
-			ordinal = newState.ordinal;
-			visible = newState.visible;
 		}
+
+		QDEB&&console.debug("qnoteCol xulStoreGet sate: hidden:", this.xulStoreGet("hidden"), ", ordinal:", this.xulStoreGet("ordinal"), ", width:", this.xulStoreGet("width"));
 
 		// Can't use ?? here because of TB68
 		ordinal = ordinal === undefined || ordinal === null ? this.xulStoreGet("ordinal") : ordinal;
 		width = (width === undefined || width === null ? this.xulStoreGet("width") : width) || 24;
-		visible = visible === undefined || visible ===null ? (this.xulStoreGet("hidden") !== true) : visible;
+		visible = visible === undefined || visible === null ? (this.xulStoreGet("hidden") !== "true") : visible; // xulStore returned values appear to be strings
 
 		// Some casts
 		visible = !!visible;
 		ordinal = ordinal + "";
 		width = width + "";
+
+		QDEB&&console.debug("qnoteCol new sate: visible:", visible, ", ordinal:", ordinal, ", width:", width);
 
 		newState = { visible, ordinal };
 
@@ -198,6 +204,7 @@ class NoteColumnHandler {
 		// '<label class="treecol-text" crop="right" value="QNote" />' +
 		// '<image class="treecol-sortdirection" />' +
 		let treecols = threadCols.querySelectorAll("treecol");
+		// Assume treecols probably will not be empty, but it could - beware
 		if(treecols.length){
 			let last = treecols[treecols.length - 1];
 			if(last){
