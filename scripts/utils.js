@@ -187,7 +187,7 @@ async function getXNoteStoragePath(){
 		if(await isFolderReadable(path)){
 			return path;
 		} else {
-			QDEB&&console.debug("Does not exists of not readable: ", path);
+			QDEB&&console.debug("Does not exists or not readable: ", path);
 		}
 	}
 
