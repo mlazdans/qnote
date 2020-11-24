@@ -75,5 +75,15 @@
 			"type": "string",
 			"description": "Path to check"
 		}]
+	},{
+		"name": "isFolderReadable",
+		"type": "function",
+		"description": "Returns true if folder is readable",
+		"async": true,
+		"parameters": [{
+			"name": "path",
+			"type": "string",
+			"description": "Path to check"
+		}]
 	}]
 }]
