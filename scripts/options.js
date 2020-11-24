@@ -97,7 +97,7 @@ async function saveOptions(handler){
 	let prefs = await ext.loadPrefsWithDefaults();
 
 	if(storageOptionValue() === 'folder'){
-		if(!await ext.isReadable(input_storageFolder.value)){
+		if(!await ext.isFolderReadable(input_storageFolder.value)){
 			setLabelColor('storageOptionFolder', 'red');
 			// alert(_("folder.unaccesible", input_storageFolder.value));
 			return false;
@@ -204,7 +204,7 @@ async function initFolderImportButton(){
 	var path = await ext.getXNoteStoragePath();
 
 	if(path){
-		if(await ext.isReadable(path)){
+		if(await ext.isFolderReadable(path)){
 			document.getElementById('xnoteFolderInfo').textContent = _("xnote.folder.found", path);
 		} else {
 			document.getElementById('xnoteFolderInfo').textContent = _("xnote.folder.inaccessible", path);
@@ -263,12 +263,16 @@ async function storageOptionChange(){
 async function storageFolderBrowse(){
 	var path = await ext.getXNoteStoragePath();
 
-	if(!await ext.isReadable(path)){
+	if(!await ext.isFolderReadable(path)){
+		path = ext.Prefs.storageFolder;
+	}
+
+	if(!await ext.isFolderReadable(path)){
 		path = await browser.qapp.getProfilePath();
 	}
 
 	let opt = {};
-	if(await ext.isReadable(path)){
+	if(await ext.isFolderReadable(path)){
 		opt.displayDirectory = path;
 	}
 
@@ -294,7 +298,7 @@ function importInternalStorage() {
 			alert(_("storage.imported"));
 			await browser.qapp.clearNoteCache();
 			ext.setUpExtension();
-			initOptionsPageValues(await ext.loadPrefsWithDefaults());
+			initOptionsPageValues();
 		}).catch(e => {
 			alert(_("storage.import.failed", e.message));
 		});
@@ -309,36 +313,36 @@ async function clearStorage(){
 			alert(_("storage.cleared"));
 			await browser.qapp.clearNoteCache();
 			ext.setUpExtension();
-			initOptionsPageValues(await ext.loadPrefsWithDefaults());
+			initOptionsPageValues();
 		}).catch(e => {
 			alert(_("storage.clear.failed", e.message));
 		});
 	}
 }
 
-async function initOptionsPageValues(prefs){
-	i18n.setData(document, prefs);
+async function initOptionsPageValues(){
+	i18n.setData(document, await ext.loadPrefsWithDefaults());
 	storageOptionChange();
 	dateFormatChange();
-	return true;
 }
 
 async function resetDefaults(){
 	QDEB&&console.debug("Resetting to defaults...");
-	return ext.savePrefs(DefaultPrefs).then(saved => saved && saveOptionsDefaultHandler(DefaultPrefs) && initOptionsPageValues(DefaultPrefs));
+	return ext.clearPrefs().then(() => {
+		ext.setUpExtension();
+		initOptionsPageValues();
+	});
 }
 
 async function initOptionsPage(){
 	let tags = await ext.browser.messages.listTags();
 	DefaultPrefs = ext.getDefaultPrefs();
 
-	initTags(tags);
-	initDateFormats();
-
 	i18n.setTexts(document);
 
-	initOptionsPageValues(await ext.loadPrefsWithDefaults());
-
+	initTags(tags);
+	initDateFormats();
+	initOptionsPageValues();
 	initFolderImportButton();
 	initExportStorageButton();
 

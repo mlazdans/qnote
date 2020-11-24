@@ -4,6 +4,7 @@ const POP_NONE = 0;
 const POP_FOCUS = (1<<0);
 const POP_EXISTING = (1<<1);
 
+// No undefined values please
 function getDefaultPrefs() {
 	return {
 		useTag: false,
@@ -55,7 +56,7 @@ function xnotePrefsMapper(prefs){
 		storage_path: 'storageFolder'
 	}
 
-	for(let k of Object.keys(map)){
+	for(let k in map){
 		if(prefs[k] !== undefined){
 			ret[map[k]] = prefs[k];
 		}
@@ -68,7 +69,7 @@ async function getPrefs(){
 	let p = {};
 	let defaultPrefs = getDefaultPrefs();
 
-	for(let k of Object.keys(defaultPrefs)){
+	for(let k in defaultPrefs){
 		let v = await browser.storage.local.get('pref.' + k);
 		if(v['pref.' + k] !== undefined){
 			p[k] = defaultPrefs[k].constructor(v['pref.' + k]); // Type cast
@@ -78,9 +79,9 @@ async function getPrefs(){
 	return p;
 }
 
+// TODO: we don't need return, let reject in case of problems
 async function savePrefs(p) {
-	var defaultPrefs = getDefaultPrefs();
-	for(let k of Object.keys(defaultPrefs)){
+	for(let k in getDefaultPrefs()){
 		if(p[k] !== undefined){
 			await browser.storage.local.set({
 				['pref.' + k]: p[k]
@@ -89,6 +90,12 @@ async function savePrefs(p) {
 	}
 
 	return true;
+}
+
+async function clearPrefs() {
+	for(let k in getDefaultPrefs()){
+		await browser.storage.local.remove('pref.' + k);
+	}
 }
 
 async function saveSinglePref(k, v) {
@@ -165,16 +172,23 @@ async function isReadable(path){
 	return path && await browser.legacy.isReadable(path);
 }
 
+async function isFolderReadable(path){
+	return path && await browser.legacy.isFolderReadable(path);
+}
+
 async function getXNoteStoragePath(){
-	let path;
 	let legacyPrefs = xnotePrefsMapper(await browser.xnote.getPrefs());
 
 	if(legacyPrefs.storageFolder){
-		path = legacyPrefs.storageFolder;
-	}
+		QDEB&&console.debug("XNote++ storage folder setting found:", legacyPrefs.storageFolder);
 
-	if(await isReadable(path)){
-		return path;
+		let path = await browser.xnote.getStoragePath(legacyPrefs.storageFolder);
+
+		if(await isFolderReadable(path)){
+			return path;
+		} else {
+			QDEB&&console.debug("Does not exists of not readable: ", path);
+		}
 	}
 
 	return await browser.xnote.getStoragePath();
@@ -188,7 +202,7 @@ async function loadPrefsWithDefaults() {
 	// Check for legacy settings if no settings at all
 	if(isEmptyPrefs){
 		let l = xnotePrefsMapper(await browser.xnote.getPrefs());
-		for(let k of Object.keys(defaultPrefs)){
+		for(let k in defaultPrefs){
 			if(l[k] === undefined){
 				p[k] = defaultPrefs[k];
 			} else {
@@ -198,7 +212,7 @@ async function loadPrefsWithDefaults() {
 	}
 
 	// Apply defaults
-	for(let k of Object.keys(defaultPrefs)){
+	for(let k in defaultPrefs){
 		if(p[k] === undefined){
 			p[k] = defaultPrefs[k];
 		}
@@ -212,13 +226,13 @@ async function loadPrefsWithDefaults() {
 		// By default we set internal storage
 		// If legacy XNote storage_path is set and readable, then use it
 		//  else check if XNote folder exists inside profile directory
-		p.storageOption = 'ext';
-
 		let path = await getXNoteStoragePath();
 
-		if(await isReadable(path)){
+		if(await isFolderReadable(path)){
 			p.storageOption = 'folder';
 			p.storageFolder = path;
+		} else {
+			p.storageOption = 'ext';
 		}
 	}
 
