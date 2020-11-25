@@ -222,8 +222,10 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					};
 
 					popup.onMove = p => {
-						popup.popupInfo.left = p.left - window.screenX;
-						popup.popupInfo.top = p.top - window.screenY;
+						// NOTE: This coordinate is reported in CSS pixels, not in hardware pixels. That means it can be affected by the zoom level; to compute the actual number of physical screen pixels, you should use the nsIDOMWindowUtils.screenPixelsPerCSSPixel property.
+						// window.windowUtils.screenPixelsPerCSSPixel
+						popup.popupInfo.left = p.left - window.mozInnerScreenX;
+						popup.popupInfo.top = p.top - window.mozInnerScreenY;
 						PopupEventDispatcher.fireListeners("onmove", popup.popupInfo);
 					};
 
