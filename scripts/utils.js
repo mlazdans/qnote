@@ -35,8 +35,7 @@ function getDefaultPrefs() {
 		enableDebug: false,
 
 		anchor: "window", // window, threadpane, message
-		anchorOutside: false,
-		anchorPlacement: "center", // center, topleft, topcenter, topright, rightcenter, bottomright, bottomcenter, bottomleft, leftcenter
+		anchorPlacement: "center", // see options.js generatePosGrid() for options
 		confirmDelete: false
 	};
 }

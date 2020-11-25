@@ -68,7 +68,6 @@ class XULNoteWindow extends NoteWindow {
 				top: note.top,
 				anchor: Prefs.anchor,
 				anchorPlacement: Prefs.anchorPlacement,
-				anchorIsOutside: Prefs.anchorOutside,
 				minWidth: 200,
 				minHeight: 125,
 				maxWidth: 800,
