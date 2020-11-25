@@ -11,6 +11,7 @@ function getDefaultPrefs() {
 		tagName: "xnote",
 		dateFormat: "Y-m-d H:i", // See https://www.php.net/manual/en/datetime.format.php
 		dateFormatPredefined: "",
+		dateLocale: "",
 		width: 320,
 		height: 200,
 		showFirstChars: 0,
@@ -430,4 +431,42 @@ function updateNoteView(note){
 
 async function confirmDelete(){
 	return Prefs.confirmDelete ? await browser.legacy.confirm(_("are.you.sure")) : true;
+}
+
+function _qDateFormat(locale, ts){
+	if(Prefs.dateFormatPredefined){
+		return dateFormatPredefined(locale, Prefs.dateFormatPredefined, ts);
+	} else {
+		if(Prefs.dateFormat){
+			return dateFormat(locale, Prefs.dateFormat, ts);
+		} else {
+			return dateFormatPredefined(locale, 'DATETIME_FULL_WITH_SECONDS', ts);
+		}
+	}
+}
+
+function qDateFormat(ts){
+	if(Prefs.dateLocale){
+		try {
+			return _qDateFormat(Prefs.dateLocale, ts);
+		} catch {
+		}
+	}
+
+	return _qDateFormat(CurrentLang, ts);
+}
+
+function qDateFormatPredefined(format, ts){
+	if(Prefs.dateLocale){
+		try {
+			return dateFormatPredefined(Prefs.dateLocale, format, ts);
+		} catch {
+		}
+	}
+
+	return dateFormatPredefined(CurrentLang, format, ts);
+}
+
+async function focusMessagePane(windowId){
+	browser.qapp.messagePaneFocus(windowId);
 }

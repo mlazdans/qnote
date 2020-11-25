@@ -208,5 +208,11 @@
 	},
 	"error": {
 		"message": "Error"
+	},
+	"custom.date.locale": {
+		"message": "Locale for date"
+	},
+	"locale.rules": {
+		"message": "Locale rules"
 	}
 }

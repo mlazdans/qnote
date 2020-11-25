@@ -12,7 +12,7 @@ YTextE.value = note.text;
 
 document.title = 'QNote';
 if(note.ts){
-	document.title += ': ' + ext.getNoteFormattedTitle(note.ts);
+	document.title += ': ' + ext.qDateFormat(note.ts);
 }
 
 const popupClose = () => {

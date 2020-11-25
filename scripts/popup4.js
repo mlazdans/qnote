@@ -12,7 +12,7 @@ if(note){
 
 	let title = 'QNote';
 	if(note.ts){
-		title += ': ' + ext.getNoteFormattedTitle(note.ts);
+		title += ': ' + ext.qDateFormat(note.ts);
 	}
 
 	document.title = title;

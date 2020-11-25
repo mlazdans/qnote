@@ -58,7 +58,7 @@ function setLabelColor(forE, color){
 }
 
 async function saveOptionsDefaultHandler(prefs) {
-	await ext.CurrentNote.close();
+	ext.CurrentNote && await ext.CurrentNote.close();
 
 	let oldPrefs = Object.assign({}, ext.Prefs);
 
@@ -89,6 +89,7 @@ async function saveOptionsDefaultHandler(prefs) {
 	// }
 
 	await ext.setUpExtension();
+	initOptionsPageValues();
 
 	return true;
 };
@@ -162,8 +163,8 @@ function initDateFormats(){
 		return false;
 	}
 
-	while(select.length > 0 ){
-		select.remove(0);
+	while(select.children.length){
+		select.children.item(0).remove();
 	}
 
 	let opt = document.createElement('option');
@@ -176,8 +177,9 @@ function initDateFormats(){
 		gr.label = _(group);
 		for (const df of dateFormats[group]) {
 			let opt = document.createElement('option');
-			opt.text = ext.dateFormatPredefined(ext.CurrentLang, df);
+			opt.text = ext.qDateFormatPredefined(df);
 			opt.value = df;
+			opt.selected = ext.Prefs.dateFormatPredefined == df;
 			gr.appendChild(opt);
 		}
 
@@ -329,6 +331,7 @@ async function clearStorage(){
 
 async function initOptionsPageValues(){
 	i18n.setData(document, await ext.loadPrefsWithDefaults());
+	initDateFormats();
 	storageOptionChange();
 	dateFormatChange();
 }
@@ -342,13 +345,16 @@ async function resetDefaults(){
 }
 
 async function initOptionsPage(){
+	// If background has not yet initialized, load our prefs
+	if(!ext.Prefs){
+		ext.Prefs = await ext.loadPrefsWithDefaults();
+	}
 	let tags = await ext.browser.messages.listTags();
 	DefaultPrefs = ext.getDefaultPrefs();
 
 	i18n.setTexts(document);
 
 	initTags(tags);
-	initDateFormats();
 	initOptionsPageValues();
 	initFolderImportButton();
 	initExportStorageButton();
