@@ -2,10 +2,7 @@
 // MAYBE: note popup on mouse over
 // TODO: save note pos and dims locally, outside note
 // TODO: save note pos relative to window
-// TODO: reset options to defaults
 // TODO: save create and update time
-// TODO: optional different locale for date format
-// TODO: do not bring column back if opted out
 // MAYBE: anchor outside reference frame
 var QDEB = true;
 var Prefs;
@@ -14,10 +11,6 @@ var CurrentTabId;
 var CurrentWindowId;
 var CurrentLang;
 var i18n = new DOMLocalizator(browser.i18n.getMessage);
-
-async function focusMessagePane(windowId){
-	browser.qapp.messagePaneFocus(windowId);
-}
 
 function initCurrentNote(){
 	browser.menus.removeAll();
