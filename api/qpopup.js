@@ -223,8 +223,8 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					};
 
 					popup.onMove = p => {
-						popup.popupInfo.left = p.left;
-						popup.popupInfo.top = p.top;
+						popup.popupInfo.left = p.left - window.screenX;
+						popup.popupInfo.top = p.top - window.screenY;
 						PopupEventDispatcher.fireListeners("onmove", popup.popupInfo);
 					};
 

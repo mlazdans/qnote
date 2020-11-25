@@ -1,9 +1,7 @@
 // MAYBE: multiple notes simultaneously
 // MAYBE: note popup on mouse over
 // TODO: save note pos and dims locally, outside note
-// TODO: save note pos relative to window
 // TODO: save create and update time
-// MAYBE: anchor outside reference frame
 var QDEB = true;
 var Prefs;
 var CurrentNote;

@@ -172,6 +172,7 @@ class NotePopup extends BasePopup {
 	pop(){
 		let self = this;
 		let { left, top, width, height, title, anchor, anchorPlacement, anchorIsOutside } = this.options;
+		let window = self.window;
 
 		var initNote = () => {
 			// MAYBE: install default .close();
@@ -223,7 +224,6 @@ class NotePopup extends BasePopup {
 
 			let aEl = null;
 			let aPlacement = "topleft";
-			let window = self.window;
 
 			let elements = {
 				window: "messengerWindow",
@@ -266,16 +266,17 @@ class NotePopup extends BasePopup {
 				aPlacement = placements[anchorPlacement];
 			}
 
-			if(aEl && (left === null) && (top === null)){
-				let wBox = {
-					top: aEl.screenY,
-					left: aEl.screenX,
-					width: aEl.clientWidth,
-					height: aEl.clientHeight
-				};
+			let wBox = {
+				top: aEl.screenY,
+				left: aEl.screenX,
+				width: aEl.clientWidth,
+				height: aEl.clientHeight
+			};
 
-				let adjX = 0;
-				let adjY = 0;
+			let adjX = 0;
+			let adjY = 0;
+
+			if(aEl && (left === null) && (top === null)){
 				if(anchorPlacement === 'center'){
 					let adjBox = this._center(self.options, wBox, false);
 					adjX = adjBox.left;
@@ -308,17 +309,21 @@ class NotePopup extends BasePopup {
 			let popup = self.popupEl;
 			let el = e.target;
 			let startX = e.screenX;
-			let startY = e.screenY	;
+			let startY = e.screenY;
 			let startLeft = panel.screenX;
 			let startTop = panel.screenY;
 
 			el.style.cursor = 'move';
 
 			let mover = e => {
-				panel.moveTo(e.screenX - startX + startLeft, e.screenY - startY + startTop);
+				let x = e.screenX - startX + startLeft;
+				let y = e.screenY - startY + startTop;
+				panel.moveTo(x, y);
 				return {
-					left: e.screenX - startX + startLeft,
-					top: e.screenY - startY + startTop
+					// left: e.screenX - window.screenX,
+					// top: e.screenY - window.screenY
+					left: x,
+					top: y
 					// x: e.screenX - startX + startLeft - window.screenX,
 					// y: e.screenY - startY + startTop - window.screenY
 				}
