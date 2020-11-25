@@ -76,42 +76,41 @@ td {
 	display: none;
 	/* margin-top: 1em; */
 }
-/* a {
-	color: #41a5ef;
-} */
 
-/* #storageFieldset_ext {
-	border: 1px solid #96c9ef;
-} */
+.anchorPlacementContainer {
+	background-image: url(../images/empty-win.gif);
+	background-size: contain;
+	background-repeat: no-repeat;
+	width: 192px;
+	height: 108px;
+}
 
 .anchorPlacement {
-	display: block;
+	margin-top: 6px;
+	margin-left: 6px;
+	width: calc(100% - 12px);
+	height: calc(100% - 12px);
 	border-collapse: collapse;
 }
 
-/* .anchorPlacement input[type=radio] {
-	margin: auto;
-	padding: 0;
-	display: block;
-} */
-
 .anchorPlacement td {
+	border: 1px solid ghostwhite;
 	text-align: center;
 	vertical-align: middle;
 	margin: 0;
 	padding: 0;
 }
 
-.lineX {
-	min-width: 32px;
-	background-image: url(../images/1x1border.gif);
-	background-repeat: repeat-x;
-	background-position: center;
+/* Align radio buttons */
+.anchorPlacement tr:first-child td {
+	vertical-align: top;
 }
-
-.lineY {
-	min-height: 20px;
-	background-image: url(../images/1x1border.gif);
-	background-repeat: repeat-y;
-	background-position: center;
+.anchorPlacement tr:last-child td {
+	vertical-align: bottom;
+}
+.anchorPlacement td:last-child {
+	text-align: right;
+}
+.anchorPlacement td:first-child {
+	text-align: left;
 }

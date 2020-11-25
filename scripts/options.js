@@ -367,6 +367,10 @@ async function initOptionsPage(){
 	storageFolderBrowseButton.addEventListener("click", storageFolderBrowse);
 	resetDefaultsButton.addEventListener("click", resetDefaults);
 
+	// Handle click on placement radio parent cell
+	let anchorPlacement = document.querySelectorAll('input[name="anchorPlacement"]');
+	anchorPlacement.forEach(e => e.parentNode.addEventListener("click", () => e.click()));
+
 	for (const node of document.querySelectorAll('input[name="storageOption"]')) {
 		node.addEventListener("click", storageOptionChange);
 	}
