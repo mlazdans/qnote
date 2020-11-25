@@ -17,7 +17,8 @@ var storageFolderBrowseButton = document.getElementById("storageFolderBrowseButt
 var input_storageFolder = document.getElementById("input_storageFolder");
 var overwriteExistingNotes = document.getElementById("overwriteExistingNotes");
 var errorBox = document.getElementById("errorBox");
-var anchorOutside = document.getElementById("anchorOutside");
+var posGrid = document.getElementById("posGrid");
+var anchorPlacement = document.querySelector("[name=anchorPlacement]");
 
 var dateFormats = {
 	datetime_group: [
@@ -330,18 +331,14 @@ async function clearStorage(){
 	}
 }
 
-function anchorOutsideChange(){
-	let outClass = "anchorPlacementContainerOutside";
-	let cl = document.querySelector(".anchorPlacementContainer").classList;
-	if(cl.contains(outClass)){
-		if(!anchorOutside.checked){
-			cl.remove(outClass);
+function gridPosChange(){
+	document.querySelectorAll("#posGrid .cell").forEach(cell => {
+		if(cell.dataset["value"] == anchorPlacement.value){
+			cell.classList.add("active");
+		} else {
+			cell.classList.remove("active");
 		}
-	} else {
-		if(anchorOutside.checked){
-			cl.add(outClass);
-		}
-	}
+	});
 }
 
 async function initOptionsPageValues(){
@@ -349,7 +346,7 @@ async function initOptionsPageValues(){
 	initDateFormats();
 	storageOptionChange();
 	dateFormatChange();
-	anchorOutsideChange();
+	gridPosChange();
 	QDEB = ext.QDEB;
 }
 
@@ -359,6 +356,88 @@ async function resetDefaults(){
 		ext.setUpExtension();
 		initOptionsPageValues();
 	});
+}
+
+// Anchor
+// ----------------
+// topleft
+// topright
+// bottomleft
+// bottomright
+// leftcenter
+// rightcenter
+// topcenter
+// bottomcenter
+
+// Popup
+// ----------------
+// topleft
+// topright
+// bottomleft
+// bottomright
+
+// The first word specifies the anchor corner/edge and
+// the second species the popup corner
+
+function generatePosGrid(){
+	let values = {
+		0: {
+			0: "topleft bottomright",
+			1: "topleft topright",
+			2: "leftcenter topright",
+			3: "bottomleft bottomright",
+			4: "bottomleft topright"
+		},
+		1: {
+			0: "topleft bottomleft",
+			1: "topleft topleft",
+			2: "leftcenter topleft",
+			3: "bottomleft bottomleft",
+			4: "bottomleft topleft"
+		},
+		2: {
+			0: "topcenter bottomleft",
+			1: "topcenter topleft",
+			2: "center",
+			3: "bottomcenter bottomleft",
+			4: "bottomcenter topleft"
+		},
+		3: {
+			0: "topright bottomright",
+			1: "topright topright",
+			2: "rightcenter topright",
+			3: "bottomright bottomright",
+			4: "bottomright topright"
+		},
+		4: {
+			0: "topright bottomleft",
+			1: "topright topleft",
+			2: "rightcenter topleft",
+			3: "bottomright bottomleft",
+			4: "bottomright topleft"
+		}
+	};
+
+	let col;
+	let cell;
+
+	for(let i = 0; i < 5; i++){
+		col = document.createElement('div');
+		col.className = "col";
+		for(let j = 0; j < 5; j++){
+			cell = document.createElement('div');
+			cell.className = "cell";
+			// cell.textContent = i + "," + j + "," + values[i][j];
+			cell.dataset["value"] = values[i][j];
+			col.appendChild(cell);
+		}
+		posGrid.appendChild(col);
+	}
+
+	document.querySelectorAll("#posGrid .cell").forEach(e => e.addEventListener("click", () => {
+		anchorPlacement.value = e.dataset["value"];
+		saveOptions();
+	}));
 }
 
 async function initOptionsPage(){
@@ -372,6 +451,7 @@ async function initOptionsPage(){
 	i18n.setTexts(document);
 
 	initTags(tags);
+	generatePosGrid();
 	initOptionsPageValues();
 	initFolderImportButton();
 	initExportStorageButton();
@@ -383,10 +463,9 @@ async function initOptionsPage(){
 	reloadExtensionButton.addEventListener("click", ext.reloadExtension);
 	storageFolderBrowseButton.addEventListener("click", storageFolderBrowse);
 	resetDefaultsButton.addEventListener("click", resetDefaults);
-	anchorOutside.addEventListener("click", anchorOutsideChange);
 
 	// Handle click on placement radio parent cell
-	document.querySelectorAll("input[name=anchorPlacement]").forEach(e => e.parentNode.addEventListener("click", () => e.click()));
+	// document.querySelectorAll("input[name=anchorPlacement]").forEach(e => e.parentNode.addEventListener("click", () => e.click()));
 
 	// Handle storage option click
 	document.querySelectorAll("input[name=storageOption]").forEach(e => e.addEventListener("click", storageOptionChange));

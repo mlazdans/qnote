@@ -12,43 +12,27 @@
 
 <form>
 
+<input type="hidden" name="anchorPlacement" data-preference="anchorPlacement">
+
 <fieldset>
 	<legend data-i18n="default.dimensions.fieldset"></legend>
 	<table>
 		<tr>
-			<td><label for="select_anchor" data-i18n="relative.to"></label></td>
-			<td>
-				<select data-preference="anchor" id="select_anchor" name="anchor">
-					<option value="window" data-i18n="anchor.window"></option>
-					<option value="threadpane" data-i18n="anchor.threadpane"></option>
-					<option value="message" data-i18n="anchor.message"></option>
-				</select>
-			</td>
-			<td><input type="checkbox" data-preference="anchorOutside" id="anchorOutside"></td>
-			<td><label for="anchorOutside" data-i18n="outside"></label></td>
-		</tr>
-	</table>
-	<table>
-		<tr>
-			<td style="vertical-align: top;" class="anchorPlacementContainer">
-				<table class="anchorPlacement">
+			<td class="anchorSelector">
+				<table>
 					<tr>
-						<td><input type="radio" name="anchorPlacement" value="topleft" data-preference="anchorPlacement"></td>
-						<td><input type="radio" name="anchorPlacement" value="topcenter" data-preference="anchorPlacement"></td>
-						<td><input type="radio" name="anchorPlacement" value="topright" data-preference="anchorPlacement"></td>
-					</tr>
-					<tr>
-						<td><input type="radio" name="anchorPlacement" value="leftcenter" data-preference="anchorPlacement"></td>
-						<td><input type="radio" name="anchorPlacement" value="center" data-preference="anchorPlacement"></td>
-						<td><input type="radio" name="anchorPlacement" value="rightcenter" data-preference="anchorPlacement"></td>
-					</tr>
-					<tr>
-						<td><input type="radio" name="anchorPlacement" value="bottomleft" data-preference="anchorPlacement"></td>
-						<td><input type="radio" name="anchorPlacement" value="bottomcenter" data-preference="anchorPlacement"></td>
-						<td><input type="radio" name="anchorPlacement" value="bottomright" data-preference="anchorPlacement"></td>
+						<td><label for="select_anchor" data-i18n="relative.to"></label></td>
+						<td>
+							<select data-preference="anchor" id="select_anchor" name="anchor">
+								<option value="window" data-i18n="anchor.window"></option>
+								<option value="threadpane" data-i18n="anchor.threadpane"></option>
+								<option value="message" data-i18n="anchor.message"></option>
+							</select>
+						</td>
 					</tr>
 				</table>
 			</td>
+			<td><div id="posGrid"></div></td>
 		</tr>
 	</table>
 	<table>

@@ -77,53 +77,85 @@ td {
 	/* margin-top: 1em; */
 }
 
-.anchorPlacementContainer {
-	background-image: url(../images/empty-win.gif);
-	background-size: cover;
-	background-repeat: no-repeat;
-	width: 320px;
-	height: 180px;
+:root {
+	--aspect-ratio: 1.6;
+	--cell-w: 64px;
+	--cell-h: calc(var(--cell-w) / var(--aspect-ratio));
 }
 
-.anchorPlacementContainerOutside {
-	background-size: 90%;
-	background-position: 16px 9px;
-}
-
-.anchorPlacement {
-	/* margin-top: 5px;
-	margin-left: 4px;
-	width: calc(100% - 10px);
-	height: calc(100% - 8px); */
-	width: calc(100%);
-	height: calc(100%);
-	border-collapse: collapse;
-}
-
-.anchorPlacement td {
-	/* border: 1px solid ghostwhite; */
-	text-align: center;
-	vertical-align: middle;
-	margin: 0;
-	padding: 0;
-}
-
-.anchorPlacement td:hover {
-	background-color: var(--in-content-page-background);
-	border-radius: 5px;
-	opacity: 0.2;
-}
-
-/* Align radio buttons */
-.anchorPlacement tr:first-child td {
+.anchorSelector {
 	vertical-align: top;
+	padding-top: calc(var(--cell-h) / 2);
 }
-.anchorPlacement tr:last-child td {
-	vertical-align: bottom;
+
+#posGrid {
+	margin: 0 auto;
+	width: calc(5 * var(--cell-w));
+	height: calc(5 * var(--cell-h));
+	display: grid;
+	grid-template-columns: repeat(5, 1fr);
+
+	background-repeat: no-repeat;
+	background-image: url(../images/empty-win.gif);
+	background-size: calc(100% - 2 * var(--cell-w)) calc(100% - 2 * var(--cell-h));
+	background-position: var(--cell-w) var(--cell-h);
 }
-.anchorPlacement td:last-child {
-	text-align: right;
+
+#posGrid .cell {
+	width: var(--cell-w);
+	height: var(--cell-h);
+	cursor: pointer;
+	background-repeat: no-repeat;
+	background-image: url(../images/mini-note-disabled.gif);
+	background-position: center;
+	background-size: 50%;
+	opacity: 0.5;
+	/* border:1px solid #96c9ef; */
 }
-.anchorPlacement td:first-child {
-	text-align: left;
+
+#posGrid .cell:hover,
+#posGrid .active {
+	background-image: url(../images/mini-note.gif);
+	opacity: 1;
+}
+
+/* Align mini-note backgrounds */
+/* Row 1 */
+#posGrid .col .cell:nth-child(1) {
+	background-position-y: bottom;
+}
+
+/* Row 2 */
+#posGrid .col .cell:nth-child(2) {
+	background-position-y: top;
+}
+
+/* Row 4 */
+#posGrid .col .cell:nth-child(4) {
+	background-position-y: bottom;
+}
+
+/* Row 5 */
+#posGrid .col .cell:nth-child(5) {
+	background-position-y: top;
+}
+
+/* Col 1 */
+#posGrid .col:nth-child(1) .cell {
+	background-position-x: right;
+}
+
+/* Col 2 */
+#posGrid .col:nth-child(2) .cell {
+	background-position-x: left;
+}
+
+/* Col 4 */
+#posGrid .col:nth-child(4) .cell {
+	background-position-x: right;
+}
+
+/* Col 5 */
+#posGrid .col:nth-child(5) .cell {
+	background-position-x: left;
 }

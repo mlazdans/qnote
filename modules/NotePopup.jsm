@@ -171,7 +171,7 @@ class NotePopup extends BasePopup {
 
 	pop(){
 		let self = this;
-		let { left, top, width, height, title, anchor, anchorPlacement, anchorIsOutside } = this.options;
+		let { left, top, width, height, title, anchor, anchorPlacement } = this.options;
 		let window = self.window;
 
 		var initNote = () => {
@@ -222,71 +222,42 @@ class NotePopup extends BasePopup {
 
 			self.browser.addEventListener("DOMContentLoaded", loadListener);
 
-			let aEl = null;
-			let aPlacement = "topleft";
-
 			let elements = {
 				window: "messengerWindow",
 				threadpane: "threadContentArea",
 				message: "messagepane",
 			};
 
-			let placements;
-			if(anchorIsOutside){
-				placements = {
-					center: "topleft",
-					topleft: "topleft topright",
-					topcenter: "topcenter bottomleft",
-					topright: "topright topleft",
-					rightcenter: "rightcenter topleft",
-					bottomright: "bottomright bottomleft",
-					bottomcenter: "bottomcenter topleft",
-					bottomleft: "bottomleft bottomright",
-					leftcenter: "leftcenter topright"
+			if((left === null) && (top === null)){
+				let aEl;
+				let adjX = 0;
+				let adjY = 0;
+
+				if(anchor && elements[anchor]){
+					aEl = window.document.getElementById(elements[anchor]);
+				} else {
+					aEl = window.document.getElementById(elements.window);
+				}
+
+				let wBox = {
+					top: aEl.screenY,
+					left: aEl.screenX,
+					width: aEl.clientWidth,
+					height: aEl.clientHeight
 				};
-			} else {
-				placements = {
-					center: "topleft",
-					topleft: "topleft topleft",
-					topcenter: "topcenter topleft",
-					topright: "topright topright",
-					rightcenter: "rightcenter topright",
-					bottomright: "bottomright bottomright",
-					bottomcenter: "bottomcenter bottomleft",
-					bottomleft: "bottomleft bottomleft",
-					leftcenter: "leftcenter topleft"
-				};
-			}
 
-			if(anchor && elements[anchor]){
-				aEl = window.document.getElementById(elements[anchor]);
-			}
+				// console.log("anchoring to:", anchor, ", anchorPlacement:", anchorPlacement);
 
-			if(anchorPlacement && placements[anchorPlacement]){
-				aPlacement = placements[anchorPlacement];
-			}
-
-			let wBox = {
-				top: aEl.screenY,
-				left: aEl.screenX,
-				width: aEl.clientWidth,
-				height: aEl.clientHeight
-			};
-
-			let adjX = 0;
-			let adjY = 0;
-
-			if(aEl && (left === null) && (top === null)){
 				if(anchorPlacement === 'center'){
 					let adjBox = this._center(self.options, wBox, false);
 					adjX = adjBox.left;
 					adjY = adjBox.top;
-				} else if(anchorPlacement === "topcenter" || anchorPlacement === "bottomcenter"){
+				} else if(anchorPlacement.startsWith("topcenter") || anchorPlacement.startsWith("bottomcenter")){
 					adjX = (width / 2) * (- 1);
-				} else if(anchorPlacement === "rightcenter" || anchorPlacement === "leftcenter"){
+				} else if(anchorPlacement.startsWith("rightcenter") || anchorPlacement.startsWith("leftcenter")){
 					adjY = (height / 2) * (- 1);
 				}
-				self.panel.openPopup(aEl, aPlacement, adjX, adjY);
+				self.panel.openPopup(aEl, anchorPlacement, adjX, adjY);
 			} else {
 				self.panel.openPopup(null, "topleft", left, top);
 			}
