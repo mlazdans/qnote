@@ -246,8 +246,6 @@ class NotePopup extends BasePopup {
 					height: aEl.clientHeight
 				};
 
-				// console.log("anchoring to:", anchor, ", anchorPlacement:", anchorPlacement);
-
 				if(anchorPlacement === 'center'){
 					let adjBox = this._center(self.options, wBox, false);
 					adjX = adjBox.left;
@@ -276,11 +274,11 @@ class NotePopup extends BasePopup {
 
 		let { minWidth, minHeight, maxWidth, maxHeight } = this.options;
 
-		let tDrag = e => {
+		let tDrag = mouse => {
 			let popup = self.popupEl;
-			let el = e.target;
-			let startX = e.screenX;
-			let startY = e.screenY;
+			let el = mouse.target;
+			let startX = mouse.screenX;
+			let startY = mouse.screenY;
 			let startLeft = panel.screenX;
 			let startTop = panel.screenY;
 
