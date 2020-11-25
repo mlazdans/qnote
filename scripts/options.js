@@ -17,6 +17,7 @@ var storageFolderBrowseButton = document.getElementById("storageFolderBrowseButt
 var input_storageFolder = document.getElementById("input_storageFolder");
 var overwriteExistingNotes = document.getElementById("overwriteExistingNotes");
 var errorBox = document.getElementById("errorBox");
+var anchorOutside = document.getElementById("anchorOutside");
 
 var dateFormats = {
 	datetime_group: [
@@ -329,11 +330,26 @@ async function clearStorage(){
 	}
 }
 
+function anchorOutsideChange(){
+	let outClass = "anchorPlacementContainerOutside";
+	let cl = document.querySelector(".anchorPlacementContainer").classList;
+	if(cl.contains(outClass)){
+		if(!anchorOutside.checked){
+			cl.remove(outClass);
+		}
+	} else {
+		if(anchorOutside.checked){
+			cl.add(outClass);
+		}
+	}
+}
+
 async function initOptionsPageValues(){
 	i18n.setData(document, await ext.loadPrefsWithDefaults());
 	initDateFormats();
 	storageOptionChange();
 	dateFormatChange();
+	anchorOutsideChange();
 }
 
 async function resetDefaults(){
@@ -345,7 +361,7 @@ async function resetDefaults(){
 }
 
 async function initOptionsPage(){
-	// If background has not yet initialized, load our prefs
+	// Force load our prefs if background has not yet initialized (for example options page already open and has been loaded first)
 	if(!ext.Prefs){
 		ext.Prefs = await ext.loadPrefsWithDefaults();
 	}
@@ -366,16 +382,19 @@ async function initOptionsPage(){
 	reloadExtensionButton.addEventListener("click", ext.reloadExtension);
 	storageFolderBrowseButton.addEventListener("click", storageFolderBrowse);
 	resetDefaultsButton.addEventListener("click", resetDefaults);
+	anchorOutside.addEventListener("click", anchorOutsideChange);
 
 	// Handle click on placement radio parent cell
-	let anchorPlacement = document.querySelectorAll('input[name="anchorPlacement"]');
-	anchorPlacement.forEach(e => e.parentNode.addEventListener("click", () => e.click()));
+	document.querySelectorAll("input[name=anchorPlacement]").forEach(e => e.parentNode.addEventListener("click", () => e.click()));
 
-	for (const node of document.querySelectorAll('input[name="storageOption"]')) {
-		node.addEventListener("click", storageOptionChange);
-	}
+	// Handle storage option click
+	document.querySelectorAll("input[name=storageOption]").forEach(e => e.addEventListener("click", storageOptionChange));
 
-	document.querySelectorAll("input,select,textarea").forEach(el => el.addEventListener("input", () => saveOptions()));
+	// Add auto-save to the controls
+	let saveListener = (el, method) => el.addEventListener(method, () => saveOptions());
+	document.querySelectorAll("input[type=text],input[type=number]").forEach(el => saveListener(el, "input"));
+	document.querySelectorAll("select").forEach(el => saveListener(el, "change"));
+	document.querySelectorAll("input[type=checkbox],input[type=radio]").forEach(el => saveListener(el, "click"));
 }
 
 window.addEventListener("load", ()=>{

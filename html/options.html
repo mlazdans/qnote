@@ -16,29 +16,19 @@
 	<legend data-i18n="default.dimensions.fieldset"></legend>
 	<table>
 		<tr>
+			<td><label for="select_anchor" data-i18n="relative.to"></label></td>
 			<td>
-				<table>
-					<tr>
-						<td><label for="select_anchor" data-i18n="relative.to"></label></td>
-						<td>
-							<select data-preference="anchor" id="select_anchor" name="anchor">
-								<option value="window" data-i18n="anchor.window"></option>
-								<option value="threadpane" data-i18n="anchor.threadpane"></option>
-								<option value="message" data-i18n="anchor.message"></option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td><label for="input_width" data-i18n="width.label"></label></td>
-						<td><input type="number" data-preference="width" id="input_width" min="100" max="99999" class="size3" /></td>
-					</tr>
-					<tr>
-						<td><label for="input_height" data-i18n="height.label"></label></td>
-						<td><input type="number" data-preference="height" id="input_height" min="100" max="99999" class="size3" /></td>
-					</tr>
-				</table>
+				<select data-preference="anchor" id="select_anchor" name="anchor">
+					<option value="window" data-i18n="anchor.window"></option>
+					<option value="threadpane" data-i18n="anchor.threadpane"></option>
+					<option value="message" data-i18n="anchor.message"></option>
+				</select>
 			</td>
-			<td style="vertical-align: top;" class="anchorPlacementContainer">
+			<td><input type="checkbox" data-preference="anchorOutside" id="anchorOutside"></td>
+			<td><label for="anchorOutside" data-i18n="outside"></label></td>
+		</tr>
+		<tr>
+			<td colspan="4" style="vertical-align: top;" class="anchorPlacementContainer">
 				<table class="anchorPlacement">
 					<tr>
 						<td><input type="radio" name="anchorPlacement" value="topleft" data-preference="anchorPlacement"></td>
@@ -57,6 +47,14 @@
 					</tr>
 				</table>
 			</td>
+		</tr>
+	</table>
+	<table>
+		<tr>
+			<td><label for="input_width" data-i18n="width.label"></label></td>
+			<td><input type="number" data-preference="width" id="input_width" min="100" max="99999" class="size3" /></td>
+			<td><label for="input_height" data-i18n="height.label"></label></td>
+			<td><input type="number" data-preference="height" id="input_height" min="100" max="99999" class="size3" /></td>
 		</tr>
 	</table>
 </fieldset>

@@ -79,26 +79,39 @@ td {
 
 .anchorPlacementContainer {
 	background-image: url(../images/empty-win.gif);
-	background-size: contain;
+	background-size: cover;
 	background-repeat: no-repeat;
-	width: 192px;
-	height: 108px;
+	width: 320px;
+	height: 180px;
+}
+
+.anchorPlacementContainerOutside {
+	background-size: 90%;
+	background-position: 16px 9px;
 }
 
 .anchorPlacement {
-	margin-top: 6px;
-	margin-left: 6px;
-	width: calc(100% - 12px);
-	height: calc(100% - 12px);
+	/* margin-top: 5px;
+	margin-left: 4px;
+	width: calc(100% - 10px);
+	height: calc(100% - 8px); */
+	width: calc(100%);
+	height: calc(100%);
 	border-collapse: collapse;
 }
 
 .anchorPlacement td {
-	border: 1px solid ghostwhite;
+	/* border: 1px solid ghostwhite; */
 	text-align: center;
 	vertical-align: middle;
 	margin: 0;
 	padding: 0;
+}
+
+.anchorPlacement td:hover {
+	background-color: var(--in-content-page-background);
+	border-radius: 5px;
+	opacity: 0.2;
 }
 
 /* Align radio buttons */

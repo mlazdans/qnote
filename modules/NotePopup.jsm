@@ -171,7 +171,7 @@ class NotePopup extends BasePopup {
 
 	pop(){
 		let self = this;
-		let { left, top, width, height, title, anchor, anchorPlacement } = this.options;
+		let { left, top, width, height, title, anchor, anchorPlacement, anchorIsOutside } = this.options;
 
 		var initNote = () => {
 			// MAYBE: install default .close();
@@ -226,22 +226,37 @@ class NotePopup extends BasePopup {
 			let window = self.window;
 
 			let elements = {
-				window: "tabmail",
+				window: "messengerWindow",
 				threadpane: "threadContentArea",
 				message: "messagepane",
 			};
 
-			let placements = {
-				center: "topleft",
-				topleft: "topleft topleft",
-				topcenter: "topcenter topleft",
-				topright: "topright topright",
-				rightcenter: "rightcenter topright",
-				bottomright: "bottomright bottomright",
-				bottomcenter: "bottomcenter bottomleft",
-				bottomleft: "bottomleft bottomleft",
-				leftcenter: "leftcenter topleft"
-			};
+			let placements;
+			if(anchorIsOutside){
+				placements = {
+					center: "topleft",
+					topleft: "topleft topright",
+					topcenter: "topcenter bottomleft",
+					topright: "topright topleft",
+					rightcenter: "rightcenter topleft",
+					bottomright: "bottomright bottomleft",
+					bottomcenter: "bottomcenter topleft",
+					bottomleft: "bottomleft bottomright",
+					leftcenter: "leftcenter topright"
+				};
+			} else {
+				placements = {
+					center: "topleft",
+					topleft: "topleft topleft",
+					topcenter: "topcenter topleft",
+					topright: "topright topright",
+					rightcenter: "rightcenter topright",
+					bottomright: "bottomright bottomright",
+					bottomcenter: "bottomcenter bottomleft",
+					bottomleft: "bottomleft bottomleft",
+					leftcenter: "leftcenter topleft"
+				};
+			}
 
 			if(anchor && elements[anchor]){
 				aEl = window.document.getElementById(elements[anchor]);

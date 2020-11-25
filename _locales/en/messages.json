@@ -214,5 +214,8 @@
 	},
 	"locale.rules": {
 		"message": "Locale rules"
+	},
+	"outside": {
+		"message": "Outside"
 	}
 }

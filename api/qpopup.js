@@ -195,7 +195,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				async create(options){
 					let {
 						windowId, top, left, width, height, url, title, controlsCSS, anchor, anchorPlacement,
-						minWidth, minHeight, maxWidth, maxHeight
+						minWidth, minHeight, maxWidth, maxHeight, anchorIsOutside
 					} = options;
 
 					let window = id2RealWindow(windowId);
@@ -212,7 +212,8 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						maxWidth: maxWidth,
 						maxHeight: maxHeight,
 						anchor: anchor,
-						anchorPlacement: anchorPlacement
+						anchorPlacement: anchorPlacement,
+						anchorIsOutside: anchorIsOutside
 					});
 
 					popup.onResize = p => {

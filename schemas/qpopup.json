@@ -71,6 +71,10 @@
 			"anchorPlacement": {
 				"type": "string",
 				"optional": true
+			},
+			"anchorIsOutside": {
+				"type": "boolean",
+				"optional": true
 			}
 		}
 	}],
