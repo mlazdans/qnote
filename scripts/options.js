@@ -1,7 +1,7 @@
 var ext = chrome.extension.getBackgroundPage();
 var i18n = ext.i18n;
 var _ = browser.i18n.getMessage;
-var QDEB = ext.QDEB;
+var QDEB = true;
 
 var DefaultPrefs;
 
@@ -350,6 +350,7 @@ async function initOptionsPageValues(){
 	storageOptionChange();
 	dateFormatChange();
 	anchorOutsideChange();
+	QDEB = ext.QDEB;
 }
 
 async function resetDefaults(){
