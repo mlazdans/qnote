@@ -1,5 +1,6 @@
 var EXPORTED_SYMBOLS = ["dateFormat", "dateFormatPredefined"];
 
+// Inside parentheses are implemented date "characters"
 // Day
 // ========================================================================================================================
 // (d)	Day of the month, 2 digits with leading zeros	01 to 31
@@ -51,10 +52,7 @@ function ts2jsdate(ts){
 }
 
 function dateFormat(locale, format, ts) {
-	// const obj = Object.fromEntries(entries);
-	if(!format){
-	}
-
+	let conStr = '';
 	let dt = luxon.DateTime.fromJSDate(ts2jsdate(ts)).setLocale(locale);
 
 	function pad(o, l, c){
@@ -85,7 +83,6 @@ function dateFormat(locale, format, ts) {
 		v: dt.millisecond,
 	};
 
-	let conStr = '';
 	format.replace(/\\?(.?)/gi, (c, s) => {
 		let con = c;
 		if(Con[c] !== undefined){
