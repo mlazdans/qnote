@@ -9,33 +9,33 @@
 	},{
 		"name": "getStoragePath",
 		"type": "function",
-		"description": "Get storage path",
+		"description": "Get XNote storage folder",
 		"async": true,
 		"parameters": [{
 			"name": "path",
 			"optional": true,
 			"type": "string",
-			"description": "Path from prefs (may contain [ProfD]) or null if XNote under profile dir"
+			"description": "Path from prefs (may contain [ProfD]) or null if XNote folder exists under profile dir"
 		}]
 	},{
 		"name": "getAllKeys",
 		"type": "function",
-		"description": "Returns list of xnote keys in a folder",
-		"async": true,
-		"parameters": [{
-			"name": "path",
-			"type": "string",
-			"description": "Path to xnote legacy storage root"
-		}]
-	},{
-		"name": "loadNote",
-		"type": "function",
-		"description": "Loads xnote from file",
+		"description": "Returns list of XNote keys in a folder",
 		"async": true,
 		"parameters": [{
 			"name": "root",
 			"type": "string",
-			"description": "Root folder for XNotes"
+			"description": "Path to XNote folder"
+		}]
+	},{
+		"name": "loadNote",
+		"type": "function",
+		"description": "Loads XNote from file",
+		"async": true,
+		"parameters": [{
+			"name": "root",
+			"type": "string",
+			"description": "Path to XNote folder"
 		},{
 			"name": "keyId",
 			"type": "string",
@@ -44,12 +44,12 @@
 	},{
 		"name": "deleteNote",
 		"type": "function",
-		"description": "Delete xnote",
+		"description": "Delete XNote",
 		"async": true,
 		"parameters": [{
 			"name": "root",
 			"type": "string",
-			"description": "Root folder for XNotes"
+			"description": "Path to XNote folder"
 		},{
 			"name": "keyId",
 			"type": "string",
@@ -63,7 +63,7 @@
 		"parameters": [{
 			"name": "root",
 			"type": "string",
-			"description": "Root folder for XNotes"
+			"description": "Path to XNote folder"
 		},{
 			"name": "keyId",
 			"type": "string",
