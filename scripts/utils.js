@@ -149,12 +149,18 @@ async function importQNotes(notes, overwrite = false){
 			stats.exist++;
 		} else {
 			yn.set(note.get());
-			if(await yn.save()){
+			await yn.save().then(() => {
 				stats[exists ? "overwritten" : "imported"]++;
-			} else {
-				console.error("Error saving qnote " + yn.keyId);
+			}).catch(e => {
+				console.error(_("error.saving.note"), e.message, yn.keyId);
 				stats.err++;
-			}
+			});
+			// if(await yn.save()){
+			// 	stats[exists ? "overwritten" : "imported"]++;
+			// } else {
+			// 	console.error("Error saving qnote " + yn.keyId);
+			// 	stats.err++;
+			// }
 		}
 	}
 
@@ -174,12 +180,12 @@ async function isFolderReadable(path){
 }
 
 async function getXNoteStoragePath(){
-	let legacyPrefs = xnotePrefsMapper(await browser.xnote.getPrefs());
+	let xnotePrefs = xnotePrefsMapper(await browser.xnote.getPrefs());
 
-	if(legacyPrefs.storageFolder){
-		QDEB&&console.debug("XNote++ storage folder setting found:", legacyPrefs.storageFolder);
+	if(xnotePrefs.storageFolder){
+		QDEB&&console.debug("XNote++ storage folder setting found:", xnotePrefs.storageFolder);
 
-		let path = await browser.xnote.getStoragePath(legacyPrefs.storageFolder);
+		let path = await browser.xnote.getStoragePath(xnotePrefs.storageFolder);
 
 		if(await isFolderReadable(path)){
 			return path;
@@ -196,7 +202,7 @@ async function loadPrefsWithDefaults() {
 	let defaultPrefs = getDefaultPrefs();
 	let isEmptyPrefs = Object.keys(p).length === 0;
 
-	// Check for legacy settings if no settings at all
+	// Check for xnote settings if no settings at all
 	if(isEmptyPrefs){
 		let l = xnotePrefsMapper(await browser.xnote.getPrefs());
 		for(let k in defaultPrefs){
@@ -221,8 +227,8 @@ async function loadPrefsWithDefaults() {
 
 	if(isEmptyPrefs){
 		// By default we set internal storage
-		// If legacy XNote storage_path is set and readable, then use it
-		//  else check if XNote folder exists inside profile directory
+		// If XNote++ storage_path is set and readable, then use it
+		// else check if XNote folder exists inside profile directory
 		let path = await getXNoteStoragePath();
 
 		if(await isFolderReadable(path)){

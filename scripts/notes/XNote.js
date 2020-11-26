@@ -5,9 +5,7 @@ class XNote extends Note {
 	}
 
 	load(){
-		return super.load(() => {
-			return browser.xnote.loadNote(this.root, this.keyId);
-		});
+		return super.load(() => browser.xnote.loadNote(this.root, this.keyId));
 	}
 
 	save(){
@@ -15,10 +13,6 @@ class XNote extends Note {
 	}
 
 	delete() {
-		return super.delete(() => {
-			return browser.xnote.deleteNote(this.root, this.keyId).then(()=>{
-				return true;
-			});
-		});
+		return super.delete(() => browser.xnote.deleteNote(this.root, this.keyId));
 	}
 }

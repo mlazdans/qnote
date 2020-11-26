@@ -14,7 +14,7 @@ class Note {
 
 	load(loader) {
 		return loader().then(data => {
-			// Convert legacy x -> left, y -> top
+			// Convert x -> left, y -> top
 			if(data.left === undefined && data.x !== undefined){
 				data.left = data.x;
 				delete data.x;
@@ -52,26 +52,31 @@ class Note {
 	}
 
 	save(saver){
+		let fName = `${this.constructor.name}.save()`;
+		QDEB&&console.debug(`${fName} - saving...`);
+
 		// Prepare data to save. We do not want all note properties saved
 		let data = this.get();
 
-		return saver(data).then(isSaved => {
-			this.exists = isSaved;
-			if(isSaved){
-				QDEB&&console.debug("note.save() - saved");
-			} else {
-				QDEB&&console.debug("note.save() - failure");
-			}
-			return isSaved;
+		return saver(data).then(() => {
+			this.exists = true;
+			QDEB&&console.debug(`${fName} - saved!`);
+		}).catch(e => {
+			QDEB&&console.debug(`${fName} - failure: ${e.message}`);
+			return Promise.reject(e);
 		});
 	}
 
 	delete(deleter) {
-		return deleter().then(isDeleted => {
-			if(isDeleted) {
-				this.exists = false;
-			}
-			return isDeleted;
+		let fName = `${this.constructor.name}.delete()`;
+		QDEB&&console.debug(`${fName} - deleting...`);
+
+		return deleter().then(() => {
+			this.exists = false;
+			QDEB&&console.debug(`${fName} - deleted!`);
+		}).catch(e => {
+			QDEB&&console.debug(`${fName} - failure: ${e.message}`);
+			return Promise.reject(e);
 		});
 	}
 }

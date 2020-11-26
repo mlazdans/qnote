@@ -27,18 +27,22 @@ class WebExtensionNoteWindow extends NoteWindow {
 	}
 
 	async close(closeWindow = true) {
-		return super.close(async () => {
-			if(closeWindow && this.popupId){
-				return browser.windows.remove(this.popupId).then(() => { // API will reject, in case of problem
-					return true;
-				},() => {
-					return false;
-				});
-			} else {
-				return false;
-			}
-		});
+		return super.close(async () => closeWindow && browser.windows.remove(this.popupId));
 	}
+
+	// async close(closeWindow = true) {
+	// 	return super.close(async () => {
+	// 		if(closeWindow && this.popupId){
+	// 			return browser.windows.remove(this.popupId).then(() => { // API will reject, in case of problem
+	// 				return true;
+	// 			},() => {
+	// 				return false;
+	// 			});
+	// 		} else {
+	// 			return false;
+	// 		}
+	// 	});
+	// }
 
 	async pop() {
 		return super.pop(async () => {

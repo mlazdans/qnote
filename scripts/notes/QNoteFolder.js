@@ -8,9 +8,9 @@ class QNoteFolder extends Note {
 		return super.load(async () => {
 			let data;
 
-			// Check for legacy XNote
-			if(data = await browser.qnote.loadNote(this.root, this.keyId)){
-			} else if(data = await browser.xnote.loadNote(this.root, this.keyId)){
+			// Check for XNote
+			if(!(data = await browser.qnote.loadNote(this.root, this.keyId))){
+				data = await browser.xnote.loadNote(this.root, this.keyId);
 			}
 
 			return data;
@@ -18,9 +18,7 @@ class QNoteFolder extends Note {
 	}
 
 	save(){
-		return super.save(data => {
-			return browser.qnote.saveNote(this.root, this.keyId, data);
-		});
+		return super.save(data => browser.qnote.saveNote(this.root, this.keyId, data));
 	}
 
 	delete() {
@@ -28,9 +26,7 @@ class QNoteFolder extends Note {
 			// Remove XNote, if exists
 			await browser.xnote.deleteNote(this.root, this.keyId);
 
-			return browser.qnote.deleteNote(this.root, this.keyId).then(()=>{
-				return true;
-			});
+			return browser.qnote.deleteNote(this.root, this.keyId);
 		});
 	}
 }

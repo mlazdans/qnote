@@ -4,32 +4,22 @@ class QNote extends Note {
 	}
 
 	load(){
-		return super.load(() => {
-			return browser.storage.local.get(this.keyId).then(store => {
-				if(!store || !store[this.keyId]){
-					return false;
-				}
+		return super.load(() => browser.storage.local.get(this.keyId).then(store => {
+			if(!store || !store[this.keyId]){
+				return false;
+			}
 
-				return store[this.keyId];
-			})
-		});
+			return store[this.keyId];
+		}));
 	}
 
 	save(){
-		return super.save(data => {
-			return browser.storage.local.set({
-				[this.keyId]: data
-			}).then(() => {
-				return true;
-			});
-		});
+		return super.save(data => browser.storage.local.set({
+			[this.keyId]: data
+		}));
 	}
 
 	delete() {
-		return super.delete(() => {
-			return browser.storage.local.remove(this.keyId).then(()=>{
-				return true;
-			});
-		});
+		return super.delete(() => browser.storage.local.remove(this.keyId));
 	}
 }
