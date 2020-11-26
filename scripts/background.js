@@ -27,9 +27,9 @@ function initCurrentNote(){
 		throw new TypeError("Prefs.windowOption");
 	}
 
-	CurrentNote.addListener("afterupdate", (NoteWindow, action, isOk) => {
-		QDEB&&console.debug("afterupdate", action, isOk);
-		if(isOk && CurrentNote.messageId){
+	CurrentNote.addListener("afterupdate", (NoteWindow, action) => {
+		QDEB&&console.debug("afterupdate", action);
+		if(CurrentNote.messageId){
 			mpUpdateForMessage(CurrentNote.messageId);
 			if(Prefs.useTag){
 				tagMessage(CurrentNote.messageId, Prefs.tagName, action === "save");
