@@ -214,5 +214,11 @@
 	},
 	"locale.rules": {
 		"message": "Locale rules"
+	},
+	"error.saving.note": {
+		"message": "Error saving note"
+	},
+	"error.deleting.note": {
+		"message": "Error deleting note"
 	}
 }
