@@ -80,7 +80,6 @@ async function getPrefs(){
 	return p;
 }
 
-// TODO: we don't need return, let reject in case of problems
 async function savePrefs(p) {
 	for(let k in getDefaultPrefs()){
 		if(p[k] !== undefined){
