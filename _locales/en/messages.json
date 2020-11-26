@@ -57,7 +57,7 @@
 		"message": "Overwrite existing notes"
 	},
 	"can.use.xnote.folder": {
-		"message": "(you can use legacy XNote++ folder)"
+		"message": "(you can use XNote++ folder)"
 	},
 	"no.message_id.header": {
 		"message": "Can't create note. Message without 'message-id:' header"
