@@ -12,6 +12,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 
 	getAPI(context) {
 		var API = this;
+		var QDEB = true;
 
 		this.i18n = new DOMLocalizator(id => {
 			return extension.localizeMessage(id);
@@ -136,12 +137,15 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						};
 					}
 				}).api(),
+				async setDebug(on){
+					QDEB = on;
+				},
 				async remove(id){
 					// console.log("api.remove", id);
 					popupManager.get(id).close();
 					popupManager.remove(id);
 					PopupEventDispatcher.fireListeners("onremoved", id);
-			},
+				},
 				async get(id){
 					let popup = popupManager.get(id);
 
