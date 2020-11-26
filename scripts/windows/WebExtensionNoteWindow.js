@@ -3,7 +3,6 @@ class WebExtensionNoteWindow extends NoteWindow {
 		super(windowId);
 
 		browser.windows.onRemoved.addListener(windowId => {
-			// We are interested only on current popup
 			if(windowId === this.popupId){
 				this.close(false);
 			}
@@ -15,9 +14,7 @@ class WebExtensionNoteWindow extends NoteWindow {
 	}
 
 	async isFocused() {
-		return browser.windows.get(this.popupId).then(Window => {
-			return Window.focused;
-		});
+		return browser.windows.get(this.popupId).then(Window => Window.focused);
 	}
 
 	async focus() {
@@ -30,20 +27,7 @@ class WebExtensionNoteWindow extends NoteWindow {
 		return super.close(async () => closeWindow && browser.windows.remove(this.popupId));
 	}
 
-	// async close(closeWindow = true) {
-	// 	return super.close(async () => {
-	// 		if(closeWindow && this.popupId){
-	// 			return browser.windows.remove(this.popupId).then(() => { // API will reject, in case of problem
-	// 				return true;
-	// 			},() => {
-	// 				return false;
-	// 			});
-	// 		} else {
-	// 			return false;
-	// 		}
-	// 	});
-	// }
-
+	// TODO: adjust position to match relative positions XULWindow using
 	async pop() {
 		return super.pop(async () => {
 			let note = this.note;
