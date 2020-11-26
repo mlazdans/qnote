@@ -11,9 +11,7 @@ class XNote extends Note {
 	}
 
 	save(){
-		return super.save(data => {
-			return browser.xnote.saveNote(this.root, this.keyId, data);
-		});
+		return super.save(data => browser.xnote.saveNote(this.root, this.keyId, data));
 	}
 
 	delete() {
