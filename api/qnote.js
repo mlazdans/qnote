@@ -1,5 +1,6 @@
 var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+var { ExtensionError } = ExtensionUtils;
 
 var qnote = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown(isAppShutdown) {
@@ -23,7 +24,7 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 		}
 
 		function fileExists(file){
-			return file && file.exists() && file.isFile() && file.isReadable();
+			return file && file.exists() /*&& file.isFile() && file.isReadable()*/;
 		}
 
 		function getExistingNoteFile(root, keyId) {
@@ -54,11 +55,6 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 			qnote: {
 				async saveNote(root, keyId, note){
 					var file = noteFile(root, keyId);
-					if(!file){
-						console.error(`Can not open qnote: ${keyId}`);
-						return false;
-					}
-
 					let data = JSON.stringify(note);
 
 					let tempFile = file.parent.clone();
@@ -77,24 +73,20 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 					// fileOutStream.write(data, data.length);
 					fileOutStream.close();
 
-					try {
-						tempFile.moveTo(null, file.leafName);
-						return true;
-					} catch {
-						return false;
-					}
+					tempFile.moveTo(null, file.leafName);
+
+					return true;
 				},
 				async deleteNote(root, keyId){
 					var file = getExistingNoteFile(root, keyId);
-					try {
-						file.remove(false);
-						return true;
-					} catch {
-						return false;
-					}
+
+					file.remove(false);
+
+					return true;
 				},
 				async loadNote(root, keyId){
 					var file = getExistingNoteFile(root, keyId);
+
 					if(!file){
 						return false;
 					}
@@ -113,26 +105,18 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 						data += str.value;
 					}
 
-					try {
-						var note = JSON.parse(data);
-						//var note = JSON.parse(con.read(file.fileSize));
-					} catch {
-					}
-
 					//fileScriptableIO.close();
 					con.close();
 					fileInStream.close();
 
-					return note;
+					try {
+						return JSON.parse(data);
+					} catch {
+						return null;
+					}
 				},
 				async getAllKeys(root) {
-					try {
-						var file = new FileUtils.File(root);
-					} catch {
-						console.error(`Can not open qnotes folder: ${root}`);
-						return;
-					}
-
+					var file = new FileUtils.File(root);
 					var eFiles = file.directoryEntries;
 					var notes = [];
 
