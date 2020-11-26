@@ -89,8 +89,6 @@ async function savePrefs(p) {
 			});
 		}
 	}
-
-	return true;
 }
 
 async function clearPrefs() {
@@ -100,11 +98,9 @@ async function clearPrefs() {
 }
 
 async function saveSinglePref(k, v) {
-	await browser.storage.local.set({
+	return browser.storage.local.set({
 		['pref.' + k]: v
 	});
-
-	return true;
 }
 
 // utf8decode = function (utftext) {

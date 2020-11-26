@@ -135,7 +135,7 @@ async function saveOptions(handler){
 		prefs[key] = value;
 	}
 
-	return ext.savePrefs(prefs).then(saved => saved && (handler || saveOptionsDefaultHandler)(prefs));
+	return ext.savePrefs(prefs).then(() => (handler || saveOptionsDefaultHandler)(prefs));
 }
 
 function initTags(tags){
