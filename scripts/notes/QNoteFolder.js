@@ -24,7 +24,7 @@ class QNoteFolder extends Note {
 	delete() {
 		return super.delete(async () => {
 			// Remove XNote, if exists
-			await browser.xnote.deleteNote(this.root, this.keyId);
+			await browser.xnote.deleteNote(this.root, this.keyId).catch(e => QDEB&&console.debug(e));
 
 			return browser.qnote.deleteNote(this.root, this.keyId);
 		});
