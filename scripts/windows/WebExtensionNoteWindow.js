@@ -27,19 +27,7 @@ class WebExtensionNoteWindow extends NoteWindow {
 	}
 
 	async close(closeWindow = true) {
-		super.close(async () => {
-			// return new Promise(resolve => {
-			// 	if(closeWindow && this.popupId){
-			// 		browser.windows.remove(this.popupId).then(() => {
-			// 			resolve(true);
-			// 		}).catch(e => {
-			// 			console.error("Can't close", e);
-			// 			resolve(false);
-			// 		});
-			// 	} else {
-			// 		resolve(true);
-			// 	}
-			// });
+		return super.close(async () => {
 			if(closeWindow && this.popupId){
 				return browser.windows.remove(this.popupId).then(() => { // API will reject, in case of problem
 					return true;
