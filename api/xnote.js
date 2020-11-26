@@ -196,105 +196,102 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 					return getPrefs();
 				},
 				async saveNote(root, keyId, note){
-					var file = noteFile(root, keyId);
-					if(!file){
-						console.error(`Can not open xnote: ${keyId}`);
-						return false;
-					}
-
-					let tempFile = file.parent.clone();
-					tempFile.append("~" + file.leafName + ".tmp");
-					// Using 0660 instead of 0600 so that sharing notes accross users
-					// within the same group is possible on Linux.
-					tempFile.createUnique(tempFile.NORMAL_FILE_TYPE, parseInt("0660",8));
-
-					let fileOutStream = Components.classes['@mozilla.org/network/file-output-stream;1'].createInstance(Components.interfaces.nsIFileOutputStream);
-
-					fileOutStream.init(tempFile, 2, 0x200, false); // Opens for writing only
-					fileOutStream.write(String(note.left), 4);
-					fileOutStream.write(String(note.top), 4);
-					fileOutStream.write(String(note.width), 4);
-					fileOutStream.write(String(note.height), 4);
-
-					let d = dateToNoteDate(new Date(note.ts), getPrefs().dateformat || getDefaultPrefs().dateformat);
-					fileOutStream.write(d, 32);
-
-					let contentencode = encodeURIComponent(note.text.replace(/\n/g,'<BR>'));
-					fileOutStream.write(contentencode, contentencode.length);
-
-					fileOutStream.close();
-
 					try {
+						var file = noteFile(root, keyId);
+
+						let tempFile = file.parent.clone();
+						tempFile.append("~" + file.leafName + ".tmp");
+						// Using 0660 instead of 0600 so that sharing notes accross users
+						// within the same group is possible on Linux.
+						tempFile.createUnique(tempFile.NORMAL_FILE_TYPE, parseInt("0660",8));
+
+						let fileOutStream = Components.classes['@mozilla.org/network/file-output-stream;1'].createInstance(Components.interfaces.nsIFileOutputStream);
+
+						fileOutStream.init(tempFile, 2, 0x200, false); // Opens for writing only
+						fileOutStream.write(String(note.left), 4);
+						fileOutStream.write(String(note.top), 4);
+						fileOutStream.write(String(note.width), 4);
+						fileOutStream.write(String(note.height), 4);
+
+						let d = dateToNoteDate(new Date(note.ts), getPrefs().dateformat || getDefaultPrefs().dateformat);
+						fileOutStream.write(d, 32);
+
+						let contentencode = encodeURIComponent(note.text.replace(/\n/g,'<BR>'));
+						fileOutStream.write(contentencode, contentencode.length);
+
+						fileOutStream.close();
+
 						tempFile.moveTo(null, file.leafName);
-						return true;
-					} catch {
-						return false;
+					} catch(e) {
+						throw new ExtensionError(e.message);
 					}
 				},
 				async deleteNote(root, keyId){
-					var file = getExistingNoteFile(root, keyId);
 					try {
+						var file = getExistingNoteFile(root, keyId);
 						file.remove(false);
-						return true;
-					} catch {
-						return false;
+					} catch(e) {
+						throw new ExtensionError(e.message);
 					}
 				},
 				async loadNote(root, keyId){
-					var file = getExistingNoteFile(root, keyId);
-					if(!file){
-						return false;
+					try {
+						var file = getExistingNoteFile(root, keyId);
+
+						if(!file){
+							return false;
+						}
+
+						var note = {};
+
+						var fileInStream = Components.classes['@mozilla.org/network/file-input-stream;1'].createInstance(Components.interfaces.nsIFileInputStream);
+						var fileScriptableIO = Components.classes['@mozilla.org/scriptableinputstream;1'].createInstance(Components.interfaces.nsIScriptableInputStream);
+						fileInStream.init(file, 0x01, parseInt("0444", 8), null);
+						fileScriptableIO.init(fileInStream);
+
+						//note.keyId = file.leafName.substring(0, file.leafName.length - 6);
+						note.left = parseInt(fileScriptableIO.read(4));
+						note.top = parseInt(fileScriptableIO.read(4));
+						note.width = parseInt(fileScriptableIO.read(4));
+						note.height = parseInt(fileScriptableIO.read(4));
+						let tsPart = fileScriptableIO.read(32);
+						note.ts = noteDateToDate(tsPart);
+						if(note.ts){
+							note.ts = note.ts.getTime();
+						} else {
+							note.ts = 0;
+						}
+						note.text = decodeURIComponent(fileScriptableIO.read(file.fileSize-48));
+
+						fileScriptableIO.close();
+						fileInStream.close();
+
+						note.text = note.text.replace(/<BR>/g,'\n');
+
+						return note;
+					} catch(e) {
+						throw new ExtensionError(e.message);
 					}
-
-					var note = {};
-
-					var fileInStream = Components.classes['@mozilla.org/network/file-input-stream;1'].createInstance(Components.interfaces.nsIFileInputStream);
-					var fileScriptableIO = Components.classes['@mozilla.org/scriptableinputstream;1'].createInstance(Components.interfaces.nsIScriptableInputStream);
-					fileInStream.init(file, 0x01, parseInt("0444", 8), null);
-					fileScriptableIO.init(fileInStream);
-
-					//note.keyId = file.leafName.substring(0, file.leafName.length - 6);
-					note.left = parseInt(fileScriptableIO.read(4));
-					note.top = parseInt(fileScriptableIO.read(4));
-					note.width = parseInt(fileScriptableIO.read(4));
-					note.height = parseInt(fileScriptableIO.read(4));
-					let tsPart = fileScriptableIO.read(32);
-					note.ts = noteDateToDate(tsPart);
-					if(note.ts){
-						note.ts = note.ts.getTime();
-					} else {
-						note.ts = 0;
-					}
-					note.text = decodeURIComponent(fileScriptableIO.read(file.fileSize-48));
-
-					fileScriptableIO.close();
-					fileInStream.close();
-
-					note.text = note.text.replace(/<BR>/g,'\n');
-
-					return note;
 				},
 				async getAllKeys(root) {
 					try {
 						var file = new FileUtils.File(root);
-					} catch {
-						console.error(`Can not open xnotes folder: ${root}`);
-						return;
-					}
+						var eFiles = file.directoryEntries;
+						var notes = [];
 
-					var eFiles = file.directoryEntries;
-					var notes = [];
+						while (eFiles.hasMoreElements()) {
+							var o = eFiles.getNext().QueryInterface(Components.interfaces.nsIFile);
 
-					while (eFiles.hasMoreElements()) {
-						var o = eFiles.getNext().QueryInterface(Components.interfaces.nsIFile);
-
-						var fileName = decodeFileName(o.leafName);
-						if(fileName.substring(fileName.length - 6) === '.xnote'){
-							notes.push(fileName.substring(0, fileName.length - 6));
+							var fileName = decodeFileName(o.leafName);
+							if(fileName.substring(fileName.length - 6) === '.xnote'){
+								notes.push(fileName.substring(0, fileName.length - 6));
+							}
 						}
-					}
 
-					return notes;
+						return notes;
+					} catch(e) {
+						throw new ExtensionError(e.message);
+					}
 				},
 				getProfilePath() {
 					return Cc['@mozilla.org/file/directory_service;1'].getService(Ci.nsIProperties).get('ProfD', Ci.nsIFile);
