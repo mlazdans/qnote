@@ -6,8 +6,9 @@ class XULNoteWindow extends NoteWindow {
 
 		// Close
 		browser.qpopup.onRemoved.addListener(popupId => {
+			// console.log("browser.qpopup.onRemoved", popupId);
 			if(popupId === this.popupId){
-				super.close();
+				this.close(false);
 			}
 		});
 
@@ -35,9 +36,7 @@ class XULNoteWindow extends NoteWindow {
 	}
 
 	async isFocused() {
-		return browser.qpopup.get(this.popupId).then(popupInfo => {
-			return popupInfo ? popupInfo.focused : false;
-		});
+		return browser.qpopup.get(this.popupId).then(popupInfo => popupInfo ? popupInfo.focused : false);
 	}
 
 	async focus() {
@@ -46,12 +45,8 @@ class XULNoteWindow extends NoteWindow {
 		});
 	}
 
-	async close() {
-		super.close(async () => {
-			if(this.popupId){
-				return browser.qpopup.remove(this.popupId);
-			}
-		});
+	async close(closeWindow = true) {
+		return super.close(async () => closeWindow && browser.qpopup.remove(this.popupId));
 	}
 
 	async pop() {
