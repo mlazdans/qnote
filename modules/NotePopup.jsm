@@ -139,14 +139,13 @@ class NotePopup extends BasePopup {
 
 		if(this.panel){
 			this.panel.remove();
-			if(this.onClose){
-				this.onClose();
-			}
+		}
+
+		if(this.onClose){
+			this.onClose();
 		}
 
 		this.shown = false;
-
-		return true;
 	}
 
 	// box = { top, left, width, height }
