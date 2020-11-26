@@ -155,12 +155,6 @@ async function importQNotes(notes, overwrite = false){
 				console.error(_("error.saving.note"), e.message, yn.keyId);
 				stats.err++;
 			});
-			// if(await yn.save()){
-			// 	stats[exists ? "overwritten" : "imported"]++;
-			// } else {
-			// 	console.error("Error saving qnote " + yn.keyId);
-			// 	stats.err++;
-			// }
 		}
 	}
 
