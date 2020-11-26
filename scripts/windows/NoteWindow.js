@@ -62,7 +62,6 @@ class NoteWindow extends QEventDispatcher {
 		return this.note.delete().then(async () => {
 			await this.fireListeners("afterdelete", this);
 			await this.fireListeners("afterupdate", this, "delete");
-			return true;
 		}).catch(e => browser.legacy.alert(_("error.deleting.note"), e.message));
 	}
 
@@ -81,7 +80,6 @@ class NoteWindow extends QEventDispatcher {
 			return this.note.save().then(async () => {
 				await this.fireListeners("aftersave", this);
 				await this.fireListeners("afterupdate", this, "save");
-				return true;
 			}).catch(e => browser.legacy.alert(_("error.saving.note"), e.message));
 		} else {
 			QDEB&&console.debug(`${fName} - not modified`);
@@ -107,7 +105,7 @@ class NoteWindow extends QEventDispatcher {
 
 		if(!this.needSaveOnClose){
 			QDEB&&console.debug(`${fName}, needSaveOnClose = false, do nothing`);
-			return false;
+			return;
 		}
 
 		let action;
@@ -120,30 +118,13 @@ class NoteWindow extends QEventDispatcher {
 		}
 
 		if(action === 'save') {
-			return this.saveNote();
+			this.saveNote();
 		} else if(action === 'delete'){
-			return this.deleteNote();
+			this.deleteNote();
 		} else {
 			QDEB&&console.debug(`${fName}, do nothing`);
 		}
 	}
-
-	// async close(closer) {
-	// 	if(!this.shown){
-	// 		return false;
-	// 	}
-
-	// 	this.shown = false;
-
-	// 	if(!closer){
-	// 		return this._close();
-	// 	}
-
-	// 	return closer().then(async isClosed => {
-	// 		await this.fireListeners("afterclose", this, isClosed);
-	// 		return this._close();
-	// 	}).catch(silentCatcher());
-	// }
 
 	async loadNote(keyId) {
 		return loadNote(keyId).then(note => {
@@ -162,8 +143,6 @@ class NoteWindow extends QEventDispatcher {
 
 	// return true if popped
 	async pop(popper) {
-		return popper().then(isPopped => {
-			return this.shown = isPopped;
-		});
+		return popper().then(isPopped => this.shown = isPopped);
 	}
 }
