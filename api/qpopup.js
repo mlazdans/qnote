@@ -37,10 +37,15 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				return this.counter;
 			},
 			remove(id){
-				return this.popups.delete(id);
+				if(this.get(id)){
+					return this.popups.delete(id);
+				}
 			},
 			get(id){
-				return this.popups.get(id);
+				if(this.has(id)){
+					return this.popups.get(id);
+				}
+				throw new ExtensionError(`Invalid popup ID: ${id}`);
 			},
 			has(id){
 				return this.popups.has(id);
@@ -132,26 +137,13 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					}
 				}).api(),
 				async remove(id){
-					let popup = popupManager.get(id);
-
-					if(!popup){
-						return false;
-					}
-
+					// console.log("api.remove", id);
+					popupManager.get(id).close();
 					popupManager.remove(id);
-
-					popup.close();
-
 					PopupEventDispatcher.fireListeners("onremoved", id);
-
-					return true;
-				},
+			},
 				async get(id){
 					let popup = popupManager.get(id);
-
-					if(!popup){
-						return null;
-					}
 
 					popup.popupInfo.focused = popup.isFocused;
 
@@ -159,10 +151,6 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				},
 				async update(id, options){
 					let popup = popupManager.get(id);
-
-					if(!popup){
-						return false;
-					}
 
 					let pi = popup.popupInfo;
 
@@ -189,8 +177,6 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					if(title){
 						popup.title = title;
 					}
-
-					return true;
 				},
 				async create(options){
 					let {
@@ -229,9 +215,11 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						PopupEventDispatcher.fireListeners("onmove", popup.popupInfo);
 					};
 
-					popup.onClose = () => {
-						this.remove(popup.popupInfo.id);
-					};
+					// popup.onClose = () => {
+					// 	if(popupManager.has(popup.popupInfo.id)){
+					// 		this.remove(popup.popupInfo.id, false);
+					// 	}
+					// };
 
 					// TODO: implement
 					// popup.onFocus = e => {
@@ -300,7 +288,8 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						});
 
 						popup.closeEl.addEventListener("click", e => {
-							popup.close();
+							// popup.close();
+							this.remove(popup.popupInfo.id);
 						});
 
 						return popup.popupInfo;
