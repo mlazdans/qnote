@@ -101,8 +101,6 @@ async function initExtension(){
 			CurrentNote.needSaveOnClose = false;
 			CurrentNote.close().then(() => {
 				return CurrentNote.deleteNote();
-			}).then(()=>{
-				initCurrentNote();
 			});
 		}
 	});
