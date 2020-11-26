@@ -24,7 +24,7 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 		}
 
 		function fileExists(file){
-			return file && file.exists() /*&& file.isFile() && file.isReadable()*/;
+			return file && file.exists();
 		}
 
 		function getExistingNoteFile(root, keyId) {
@@ -82,7 +82,9 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 				async deleteNote(root, keyId){
 					try {
 						var file = getExistingNoteFile(root, keyId);
-						file.remove(false);
+						if(file){
+							file.remove(false);
+						}
 					} catch(e) {
 						throw new ExtensionError(e.message);
 					}
