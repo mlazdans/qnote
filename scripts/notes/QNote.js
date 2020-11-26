@@ -6,7 +6,7 @@ class QNote extends Note {
 	load(){
 		return super.load(() => browser.storage.local.get(this.keyId).then(store => {
 			if(!store || !store[this.keyId]){
-				return null;
+				return false;
 			}
 
 			return store[this.keyId];

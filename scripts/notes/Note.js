@@ -13,6 +13,7 @@ class Note {
 	}
 
 	load(loader) {
+		// TODO: some loaders might return null and it fails then
 		return loader().then(data => {
 			// Convert x -> left, y -> top
 			if(data.left === undefined && data.x !== undefined){
