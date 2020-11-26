@@ -163,6 +163,16 @@ async function initExtension(){
 		//updateCurrentMessage(CurrentTab);
 	});
 
+	browser.windows.onRemoved.addListener(async windowId => {
+		QDEB&&console.debug("windows.onRemoved()", windowId, CurrentNote.windowId);
+		mpUpdateCurrent();
+		// await CurrentNote.close();
+
+		// CurrentWindowId = Window.id;
+		// initCurrentNote();
+		//updateCurrentMessage(CurrentTab);
+	});
+
 	// Change focus
 	browser.windows.onFocusChanged.addListener(async windowId => {
 		QDEB&&console.debug("windows.onFocusChanged(), windowId:", windowId, ", current windowId:", CurrentNote.windowId);
