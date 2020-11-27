@@ -6,20 +6,22 @@ var QDEB = true;
 var Prefs;
 var CurrentNote;
 var CurrentTabId;
-var CurrentWindowId;
+var CurrentWindowId; // MAYBE: should get rid of and replace with CurrentNote.windowId
 var CurrentLang;
 var i18n = new DOMLocalizator(browser.i18n.getMessage);
 
-function initCurrentNote(){
+function initCurrentNote(from){
+	QDEB&&console.debug(`initCurrentNote(${from})`);
+
 	browser.menus.removeAll();
 	updateIcons(false);
 
 	// TODO: not sure if this is needed
-	if(CurrentNote){
-		CurrentNote.needSaveOnClose = true;
-		CurrentNote.windowId = CurrentWindowId;
-		return;
-	}
+	// if(CurrentNote){
+	// 	CurrentNote.needSaveOnClose = true;
+	// 	CurrentNote.windowId = CurrentWindowId;
+	// 	return;
+	// }
 
 	if(Prefs.windowOption === 'xul'){
 		CurrentNote = new XULNoteWindow(CurrentWindowId);
@@ -39,22 +41,27 @@ function initCurrentNote(){
 		}
 	});
 
-	CurrentNote.addListener("afterclose", (NoteWindow, isClosed) => {
+	CurrentNote.addListener("afterclose", () => {
 		QDEB&&console.debug("afterclose");
-		if(isClosed){
-			focusMessagePane(CurrentNote.windowId);
-		}
+		focusMessagePane(CurrentNote.windowId);
 	});
 }
 
 // We call this after options has been changed
 async function setUpExtension(){
-	CurrentNote = null;
+	CurrentWindowId = await getCurrentWindowId();
+	CurrentTabId = await getCurrentTabId();
+
+	if(!CurrentTabId){
+		CurrentTabId = await getWindowMailTabId(CurrentWindowId);
+	}
+
+	// CurrentNote = null;
 	CurrentLang = browser.i18n.getUILanguage();
 
 	Prefs = await loadPrefsWithDefaults();
 
-	initCurrentNote();
+	initCurrentNote("setUpExtension");
 
 	QDEB = !!Prefs.enableDebug;
 	browser.qapp.setDebug(QDEB);
@@ -81,13 +88,6 @@ async function initExtension(){
 	QDEB&&console.debug("initExtension()");
 
 	await setUpExtension();
-
-	CurrentWindowId = await getCurrentWindowId();
-	CurrentTabId = await getCurrentTabId();
-
-	if(!CurrentTabId){
-		CurrentTabId = await getWindowMailTabId(CurrentWindowId);
-	}
 
 	// Return notes to qapp on request
 	browser.qapp.onNoteRequest.addListener(getQAppNoteData);
@@ -133,7 +133,7 @@ async function initExtension(){
 
 		// CurrentTabId = getTabId(Tab);
 		// CurrentWindowId = Tab.windowId;
-		initCurrentNote();
+		// initCurrentNote("mailTabs.onDisplayedFolderChanged");
 		//updateCurrentMessage(CurrentTab);
 	});
 
@@ -144,7 +144,7 @@ async function initExtension(){
 
 		// CurrentTabId = activeInfo.tabId;
 		// CurrentWindowId = activeInfo.windowId;
-		initCurrentNote();
+		// initCurrentNote("tabs.onCreated");
 		//updateCurrentMessage(CurrentTab);
 	});
 
@@ -155,7 +155,7 @@ async function initExtension(){
 
 		CurrentTabId = activeInfo.tabId;
 		// CurrentWindowId = activeInfo.windowId;
-		initCurrentNote();
+		// initCurrentNote("tabs.onActivated");
 		//updateCurrentMessage(CurrentTab);
 	});
 
@@ -165,7 +165,7 @@ async function initExtension(){
 		await CurrentNote.persistAndClose();
 
 		CurrentWindowId = Window.id;
-		initCurrentNote();
+		// initCurrentNote("windows.onCreated");
 		//updateCurrentMessage(CurrentTab);
 	});
 
@@ -175,7 +175,7 @@ async function initExtension(){
 		// await CurrentNote.persistAndClose();
 
 		// CurrentWindowId = Window.id;
-		// initCurrentNote();
+		// // initCurrentNote();
 		//updateCurrentMessage(CurrentTab);
 	});
 
@@ -191,8 +191,8 @@ async function initExtension(){
 
 		await CurrentNote.persistAndClose();
 
-		CurrentWindowId = windowId;
-		initCurrentNote();
+		CurrentNote.windowId = CurrentWindowId = windowId;
+		// initCurrentNote("windows.onFocusChanged");
 		mpUpdateCurrent();
 	});
 
@@ -206,7 +206,7 @@ async function initExtension(){
 		CurrentTabId = getTabId(Tab);
 		// CurrentWindowId = Tab.windowId;
 		// CurrentWindowId = await getCurrentWindowId();
-		initCurrentNote();
+		// initCurrentNote("messageDisplay.onMessageDisplayed");
 
 		let flags = POP_EXISTING;
 		if(Prefs.focusOnDisplay){
