@@ -1,4 +1,4 @@
-// TODO: get rid of methods with caller param
+class DirtyStateError extends Error {};
 class NoteWindow extends QEventDispatcher {
 	constructor(windowId) {
 		super(["aftersave", "afterdelete", "afterupdate", "afterclose"]);
@@ -7,6 +7,7 @@ class NoteWindow extends QEventDispatcher {
 		this.popupId;
 		this.needSaveOnClose = true;
 		this.shown = false;
+		this.dirty = false;
 		this.windowId = windowId;
 	}
 
@@ -25,6 +26,22 @@ class NoteWindow extends QEventDispatcher {
 		}
 
 		return true;
+	}
+
+	async loadNote(keyId) {
+		return loadNote(keyId).then(note => {
+			console.log("loadNote", note);
+			this.note = note;
+			this.loadedNoteData = note.get();
+
+			return note;
+		});
+	}
+
+	async loadNoteForMessage(messageId) {
+		return getMessageKeyId(messageId).then(keyId => {
+			return this.loadNote(keyId);
+		});
 	}
 
 	async update(){
@@ -65,6 +82,7 @@ class NoteWindow extends QEventDispatcher {
 		let fName = `${this.constructor.name}.deleteNote()`;
 
 		QDEB&&console.debug(`${fName} - deleting...`);
+
 		if(await confirmDelete()) {
 			this.note.delete().then(async () => {
 				QDEB&&console.debug(`${fName} - deleted!`);
@@ -124,52 +142,55 @@ class NoteWindow extends QEventDispatcher {
 	}
 
 	async deleteAndClose(){
-		let fName = `${this.constructor.name}.deleteAndClose()`;
-		this.deleteNote().then(async () => {
-			QDEB&&console.debug(`${fName} resulted in: ${status}`);
-			this.close();
+		return this.wrapDirty(async () => {
+			let fName = `${this.constructor.name}.deleteAndClose()`;
+			return this.deleteNote().then(async () => {
+				QDEB&&console.debug(`${fName} resulted in: ${status}`);
+				this.close();
+			});
 		}).catch(silentCatcher());
 	}
 
 	async persistAndClose(){
-		let fName = `${this.constructor.name}.persistAndClose()`;
-		QDEB&&console.debug(`${fName} - closing...`);
+		return this.wrapDirty(async () => {
+			let fName = `${this.constructor.name}.persistAndClose()`;
+			QDEB&&console.debug(`${fName} - closing...`);
 
-		if(!this.shown){
-			QDEB&&console.debug(`${fName} - not shown!`);
-			return;
-		}
+			if(!this.shown){
+				QDEB&&console.debug(`${fName} - not shown!`);
+				return;
+			}
 
-		this.persist().then(async () => {
-			this.close();
+			return this.persist().then(() => this.close());
 		}).catch(silentCatcher());
-	}
-
-	async loadNote(keyId) {
-		return loadNote(keyId).then(note => {
-			this.note = note;
-			this.loadedNoteData = note.get();
-
-			return note;
-		});
-	}
-
-	async loadNoteForMessage(messageId) {
-		return getMessageKeyId(messageId).then(keyId => {
-			return this.loadNote(keyId);
-		});
 	}
 
 	// return true if popped
 	async pop(popper) {
-		let fName = `${this.constructor.name}.pop()`;
-		QDEB&&console.debug(`${fName} - popping...`);
+		return this.wrapDirty(async () => {
+			let fName = `${this.constructor.name}.pop()`;
+			QDEB&&console.debug(`${fName} - popping...`);
 
-		if(this.shown){
-			QDEB&&console.debug(`${fName} - already popped...`);
-			return false;
-		}
+			if(this.shown){
+				QDEB&&console.debug(`${fName} - already popped...`);
+				return false;
+			}
 
-		return popper().then(isPopped => this.shown = isPopped);
+			return popper().then(isPopped => this.shown = isPopped);
+		}).catch(silentCatcher());
 	}
+
+	async wrapDirty(action){
+		let self = this;
+		return new Promise(function(resolve, reject) {
+			if(self.dirty){
+				throw new DirtyStateError;
+			} else {
+				console.log(action);
+				self.dirty = true;
+				return resolve(action().finally(() => self.dirty = false));
+			}
+		});
+	}
+
 }
