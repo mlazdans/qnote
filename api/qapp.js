@@ -10,6 +10,8 @@ var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js
 var QDEB = true;
 var qapp = class extends ExtensionCommon.ExtensionAPI {
 	constructor(...args){
+		let fName = "new qapp()";
+		QDEB&&console.debug(`${fName}`);
 		super(...args);
 
 		var API = this;
@@ -17,50 +19,70 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		// We'll update cache and call listener once item arrives
 		// init() caller must install onNoteRequest listener
 		this.noteGrabber = new QCache();
-		this.EventDispatcher = new QEventDispatcher(["domwindowopened", "domwindowclosed", "DOMContentLoaded", "keydown", "onShutdown"]);
+
+		this.EventDispatcher = new QEventDispatcher(["domwindowopened", "domwindowclosed", "DOMContentLoaded", "keydown", "onShutdown", "domcomplete"]);
 		this.KeyboardHandler = {
-			elements: new WeakSet(),
-			addTo: elem => {
+			windows: new WeakSet(),
+			addTo: w => {
 				let fName = "KeyboardHandler.addTo()";
 				QDEB&&console.debug(`${fName} - attaching...`);
 
-				let self = API.KeyboardHandler;
-				if(self.elements.has(elem)){
+				let kh = API.KeyboardHandler;
+
+				if(kh.windows.has(w)){
 					QDEB&&console.debug(`${fName} - already exists`);
 				} else if(
-					elem &&
-					elem.document &&
-					elem.document.URL &&
-					elem.document.URL.includes('chrome://messenger/content/messenger') ||
-					elem.document.URL.includes('chrome://messenger/content/messageWindow')
+					w &&
+					w.document &&
+					w.document.URL &&
+					w.document.URL.includes('chrome://messenger/content/messenger') ||
+					w.document.URL.includes('chrome://messenger/content/messageWindow')
 				) {
-					elem.addEventListener("keydown", self.handler);
-					self.elements.add(elem);
+					w.addEventListener("keydown", kh.handler);
+					kh.windows.add(w);
+					API.EventDispatcher.addListener('onShutdown', () => {
+						kh.removeFrom(w);
+					});
+
 					QDEB&&console.debug(`${fName} - attached!`);
+
+					return true;
 				} else {
 					QDEB&&console.debug(`${fName} - not attachable`);
 				}
+
+				return false;
 			},
-			removeFrom: elem => {
+			removeFrom: w => {
 				let fName = "KeyboardHandler.removeFrom()";
 				QDEB&&console.debug(`${fName} - removing...`);
 
-				let self = API.KeyboardHandler;
-				if(self.elements.has(elem)){
-					elem.removeEventListener("keydown", self.handler)
-					self.elements.delete(elem);
+				let kh = API.KeyboardHandler;
+
+				if(kh.windows.has(w)){
+					w.removeEventListener("keydown", kh.handler)
+					kh.windows.delete(w);
+
 					QDEB&&console.debug(`${fName} - removed!`);
+
+					return true;
 				} else {
 					QDEB&&console.debug(`${fName} - does not exist`);
 				}
+
+				return false;
 			},
 			handler: e => {
+				QDEB&&console.debug("KeyboardHandler.handler()", e.code);
 				API.EventDispatcher.fireListeners("keydown", e);
 			}
 		}
 
 		this.WindowObserver = {
 			observe: function(aSubject, aTopic, aData) {
+				let fName = "qapp.WindowObserver.observe()";
+				QDEB&&console.debug(`${fName} ${aTopic}`, aSubject.URL);
+
 				if(aTopic === 'domwindowopened' || aTopic === 'domwindowclosed'){
 					API.EventDispatcher.fireListeners(aTopic, aSubject, aTopic, aData);
 				}
@@ -68,6 +90,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				if(aTopic === 'domwindowopened'){
 					aSubject.addEventListener("DOMContentLoaded", e => {
 						API.EventDispatcher.fireListeners("DOMContentLoaded", aSubject, aTopic, aData, e);
+						if(aSubject.document.readyState === "complete"){
+							API.EventDispatcher.fireListeners("domcomplete", aSubject, aTopic, aData, e);
+						}
 					});
 				}
 			}
@@ -168,22 +193,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 	}
 
 	installKeyboardHandler(w){
-		var API = this;
+		let kf = this.KeyboardHandler;
 
-		// Keyboard attach and later remove on shutdown
-		this.KeyboardHandler.addTo(w);
-		this.EventDispatcher.addListener('onShutdown', () => {
-			API.KeyboardHandler.removeFrom(w);
-		});
+		kf.addTo(w);
 
-		this.EventDispatcher.addListener('DOMContentLoaded', aWindow => {
-			API.KeyboardHandler.addTo(aWindow);
-		});
-
-		this.EventDispatcher.addListener('domwindowclosed', aWindow => {
-			API.KeyboardHandler.removeFrom(aWindow);
-		});
-
+		this.EventDispatcher.addListener('domcomplete', aWindow => kf.addTo(aWindow));
 	}
 
 	uninstallKeyboardHandler(w){
@@ -199,15 +213,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			API.ColumnHandler.detachFromWindow(w);
 		});
 
-		this.EventDispatcher.addListener('DOMContentLoaded', aWindow => {
+		this.EventDispatcher.addListener('domcomplete', aWindow => {
 			API.ColumnHandler.attachToWindow(aWindow);
 		});
 
-		// TODO: somethings are still left behind if extension reloaded when more than one window is opened
 		this.EventDispatcher.addListener('onShutdown', aWindow => {
 			API.ColumnHandler.detachFromWindow(aWindow);
 		});
-
 	}
 
 	uninstallColumnHandler(w){
@@ -297,7 +309,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						const l = e => {
 							let e1 = {};
 							for(let k of interested){
-								e1[k] = e[k] !== undefined ? e[k] : undefined;
+								// e1[k] = e[k] !== undefined ? e[k] : undefined;
+								e1[k] = e[k];
 							}
 
 							let e2 = fire.sync(e1);
