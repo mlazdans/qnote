@@ -134,7 +134,7 @@ class NoteWindow extends QEventDispatcher {
 				}
 			}
 		} else {
-			QDEB&&console.debug(`${fName} - not modified`, noteData, this.loadedNoteData);
+			QDEB&&console.debug(`${fName} - not modified`);
 		}
 
 		return this[action]();
