@@ -1,9 +1,11 @@
+// TODO: disable Reload, Import, etc buttons if CurrentNote.dirty
 var ext = chrome.extension.getBackgroundPage();
 var i18n = ext.i18n;
 var _ = browser.i18n.getMessage;
 var QDEB = true;
 
 var DefaultPrefs;
+var ErrMsg = [];
 
 var importFolderButton = document.getElementById('importFolderButton');
 var importFolderLoader = document.getElementById("importFolderLoader");
@@ -60,7 +62,7 @@ function setLabelColor(forE, color){
 }
 
 async function saveOptionsDefaultHandler(prefs) {
-	ext.CurrentNote && await ext.CurrentNote.persistAndClose();
+	ext.CurrentNote && await ext.CurrentNote.silentlyPersistAndClose();
 
 	let oldPrefs = Object.assign({}, ext.Prefs);
 
@@ -96,25 +98,34 @@ async function saveOptionsDefaultHandler(prefs) {
 	return true;
 };
 
-function displayErrorBox(shown){
-	errorBox.style.display = shown ? "block" : "none";
+function displayErrorBox(){
+	errorBox.innerHTML = ErrMsg.join("<br>");
+	errorBox.style.display = ErrMsg.length > 0 ? "block" : "none";
 }
 
 async function saveOptions(handler){
 	QDEB&&console.debug("Saving options...");
 	let prefs = await ext.loadPrefsWithDefaults();
 
-	displayErrorBox(false);
+	ErrMsg = [];
+	displayErrorBox();
+	setLabelColor('storageOptionFolder', '');
+
 	if(storageOptionValue() === 'folder'){
 		if(!await ext.isFolderReadable(input_storageFolder.value)){
 			setLabelColor('storageOptionFolder', 'red');
-			displayErrorBox(true);
-			// alert(_("folder.unaccesible", input_storageFolder.value));
-			return false;
+			ErrMsg.push(_("folder.unaccesible", input_storageFolder.value));
 		}
 	}
 
-	setLabelColor('storageOptionFolder', '');
+	if(ext.CurrentNote && ext.CurrentNote.dirty){
+		ErrMsg.push(_("close.current.note"));
+	}
+
+	if(ErrMsg.length){
+		displayErrorBox();
+		return false;
+	}
 
 	var elements = document.forms[0].elements;
 	for (i = 0; i < elements.length; i++) {
@@ -424,13 +435,15 @@ function generatePosGrid(){
 	for(let i = 0; i < 5; i++){
 		col = document.createElement('div');
 		col.className = "col";
+
 		for(let j = 0; j < 5; j++){
 			cell = document.createElement('div');
 			cell.className = "cell";
-			// cell.textContent = i + "," + j + "," + values[i][j];
 			cell.dataset["value"] = values[i][j];
+
 			col.appendChild(cell);
 		}
+
 		posGrid.appendChild(col);
 	}
 
@@ -471,8 +484,14 @@ async function initOptionsPage(){
 	document.querySelectorAll("input[name=storageOption]").forEach(e => e.addEventListener("click", storageOptionChange));
 
 	// Add auto-save to the controls
-	let saveListener = (el, method) => el.addEventListener(method, () => saveOptions());
-	document.querySelectorAll("input[type=text],input[type=number]").forEach(el => saveListener(el, "input"));
+	let saveListener = (el, method) => el.addEventListener(method, e => {
+		saveOptions();
+		if(ext.CurrentNote.dirty){
+			e.preventDefault();
+			return false;
+		}
+	});
+	document.querySelectorAll("input[type=text],input[type=number]").forEach(el => saveListener(el, "keydown"));
 	document.querySelectorAll("select").forEach(el => saveListener(el, "change"));
 	document.querySelectorAll("input[type=checkbox],input[type=radio]").forEach(el => saveListener(el, "click"));
 }
