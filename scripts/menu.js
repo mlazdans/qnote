@@ -24,10 +24,17 @@ var Menu = {
 			async onclick(info) {
 				let messageId = Menu.getId(info);
 				if(CurrentNote.messageId === messageId){
-					CurrentNote.deleteAndClose();
+					// TODO: code duplication QNotePopToggle()
+					CurrentNote.persistAndClose().catch(e => {
+						if(e instanceof DirtyStateError){
+							browser.legacy.alert(_("close.current.note"));
+						} else {
+							throw e;
+						}
+					});
 				} else {
 					if(await confirmDelete()) {
-						deleteNoteForMessage(Menu.getId(info)).then(updateNoteView);
+						deleteNoteForMessage(Menu.getId(info)).then(updateNoteView).catch(e => browser.legacy.alert(_("error.deleting.note"), e.message));
 					}
 				}
 			},
@@ -63,7 +70,7 @@ var Menu = {
 						top: undefined,
 						width: Prefs.width,
 						height: Prefs.height
-					});
+					}).catch(e => browser.legacy.alert(_("error.saving.note"), e.message));
 				}
 			},
 		});

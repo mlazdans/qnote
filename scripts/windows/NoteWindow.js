@@ -5,6 +5,7 @@ class NoteWindow extends QEventDispatcher {
 
 		this.note;
 		this.popupId;
+		this.messageId;
 		this.needSaveOnClose = true;
 		this.shown = false;
 		this.dirty = false;
@@ -57,6 +58,7 @@ class NoteWindow extends QEventDispatcher {
 
 	async close(){
 		this.shown = false;
+		this.messageId = undefined;
 		this.fireListeners("afterclose", this);
 	}
 
@@ -83,7 +85,7 @@ class NoteWindow extends QEventDispatcher {
 		QDEB&&console.debug(`${fName} - deleting...`);
 
 		if(await confirmDelete()) {
-			this.note.delete().then(async () => {
+			return this.note.delete().then(async () => {
 				QDEB&&console.debug(`${fName} - deleted!`);
 				await this.fireListeners("afterdelete", this);
 				await this.fireListeners("afterupdate", this, "delete");
@@ -97,7 +99,7 @@ class NoteWindow extends QEventDispatcher {
 		let fName = `${this.constructor.name}.saveNote()`;
 		if(this.needSaveOnClose){
 			QDEB&&console.debug(`${fName} - saving...`);
-			this.note.save().then(async () => {
+			return this.note.save().then(async () => {
 				QDEB&&console.debug(`${fName} - saved!`);
 				await this.fireListeners("aftersave", this);
 				await this.fireListeners("afterupdate", this, "save");
@@ -140,16 +142,6 @@ class NoteWindow extends QEventDispatcher {
 		return this[action]();
 	}
 
-	async deleteAndClose(){
-		return this.wrapDirty(async () => {
-			let fName = `${this.constructor.name}.deleteAndClose()`;
-			return this.deleteNote().then(async () => {
-				QDEB&&console.debug(`${fName} resulted in: ${status}`);
-				this.close();
-			});
-		}).catch(silentCatcher());
-	}
-
 	async persistAndClose(){
 		return this.wrapDirty(async () => {
 			let fName = `${this.constructor.name}.persistAndClose()`;
@@ -161,7 +153,25 @@ class NoteWindow extends QEventDispatcher {
 			}
 
 			return this.persist().then(() => this.close());
-		}).catch(silentCatcher());
+		});
+	}
+
+	async silentlyPersistAndClose(){
+		return this.persistAndClose().catch(silentCatcher());
+	}
+
+	async deleteAndClose(){
+		return this.wrapDirty(async () => {
+			let fName = `${this.constructor.name}.deleteAndClose()`;
+			return this.deleteNote().then(async () => {
+				QDEB&&console.debug(`${fName} resulted in: ${status}`);
+				this.close();
+			});
+		});
+	}
+
+	async silentlyDeleteAndClose(){
+		return this.deleteAndClose().catch(silentCatcher());
 	}
 
 	// return true if popped
@@ -176,7 +186,7 @@ class NoteWindow extends QEventDispatcher {
 			}
 
 			return popper().then(isPopped => this.shown = isPopped);
-		}).catch(silentCatcher());
+		});
 	}
 
 	async wrapDirty(action){

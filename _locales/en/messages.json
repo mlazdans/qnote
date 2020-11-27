@@ -220,5 +220,8 @@
 	},
 	"error.deleting.note": {
 		"message": "Error deleting note"
+	},
+	"close.current.note": {
+		"message": "Please close current note"
 	}
 }

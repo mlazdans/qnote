@@ -241,12 +241,12 @@ async function loadPrefsWithDefaults() {
 }
 
 async function reloadExtension(){
-	await CurrentNote.persistAndClose();
+	await CurrentNote.silentlyPersistAndClose();
 	return await browser.runtime.reload();
 }
 
 async function clearStorage(){
-	await CurrentNote.persistAndClose();
+	await CurrentNote.silentlyPersistAndClose();
 	return browser.storage.local.clear();
 }
 
@@ -300,6 +300,10 @@ async function QNotePopForMessage(messageId, flags = POP_NONE) {
 			if(createNew){
 				browser.legacy.alert(_("no.message_id.header"));
 			}
+		} else if(e instanceof DirtyStateError){
+			if(createNew){
+				browser.legacy.alert(_("close.current.note"));
+			}
 		} else {
 			console.error(e);
 		}
@@ -308,7 +312,7 @@ async function QNotePopForMessage(messageId, flags = POP_NONE) {
 
 async function QNotePopForTab(Tab, flags = POP_NONE) {
 	return getDisplayedMessageForTab(Tab).then(async Message => {
-		await CurrentNote.persistAndClose();
+		await CurrentNote.silentlyPersistAndClose();
 
 		// CurrentTabId = getTabId(Tab);
 		// CurrentWindowId = Tab.windowId;
@@ -329,7 +333,13 @@ async function QNotePopToggle(Tab) {
 		// Window will loose focus hence report no focus
 		if(await CurrentNote.isFocused()){
 			QDEB&&console.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - focused, waiting to close`);
-			await CurrentNote.persistAndClose();
+			await CurrentNote.persistAndClose().catch(e => {
+				if(e instanceof DirtyStateError){
+					browser.legacy.alert(_("close.current.note"));
+				} else {
+					throw e;
+				}
+			});
 		} else {
 			QDEB&&console.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - opened, waiting to gain focus`);
 			await CurrentNote.focus();
@@ -371,7 +381,7 @@ async function mpUpdateForNote(note){
 async function mpUpdateForMessage(messageId){
 	return loadNoteForMessage(messageId).then(note => {
 		mpUpdateForNote(note);
-	});
+	}).catch(silentCatcher());
 }
 
 async function mpUpdateCurrent(){

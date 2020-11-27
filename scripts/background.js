@@ -10,11 +10,15 @@ var CurrentWindowId; // MAYBE: should get rid of and replace with CurrentNote.wi
 var CurrentLang;
 var i18n = new DOMLocalizator(browser.i18n.getMessage);
 
+function resetTbState(){
+	browser.menus.removeAll();
+	updateIcons(false);
+}
+
 function initCurrentNote(from){
 	QDEB&&console.debug(`initCurrentNote(${from})`);
 
-	browser.menus.removeAll();
-	updateIcons(false);
+	resetTbState();
 
 	// TODO: not sure if this is needed
 	// if(CurrentNote){
@@ -103,11 +107,11 @@ async function initExtension(){
 		}
 
 		if(id === 'note-delete'){
-			CurrentNote.deleteAndClose();
+			await CurrentNote.silentlyDeleteAndClose();
 		}
 
 		if(id === 'qpopup-close'){
-			await CurrentNote.persistAndClose();
+			await CurrentNote.silentlyPersistAndClose();
 		}
 	});
 
@@ -119,7 +123,7 @@ async function initExtension(){
 		if(e.key === 'Escape'){
 			if(CurrentNote.shown){
 				CurrentNote.needSaveOnClose = false;
-				CurrentNote.persistAndClose();
+				CurrentNote.silentlyPersistAndClose();
 				ret.preventDefault = true;
 			}
 		}
@@ -129,7 +133,8 @@ async function initExtension(){
 	// Change folders
 	browser.mailTabs.onDisplayedFolderChanged.addListener(async (Tab, displayedFolder) => {
 		QDEB&&console.debug("mailTabs.onDisplayedFolderChanged()");
-		await CurrentNote.persistAndClose();
+		await CurrentNote.silentlyPersistAndClose();
+		resetTbState();
 
 		// CurrentTabId = getTabId(Tab);
 		// CurrentWindowId = Tab.windowId;
@@ -140,7 +145,7 @@ async function initExtension(){
 	// Create tabs
 	browser.tabs.onCreated.addListener(async Tab => {
 		QDEB&&console.debug("tabs.onCreated()", Tab);
-		await CurrentNote.persistAndClose();
+		await CurrentNote.silentlyPersistAndClose();
 
 		// CurrentTabId = activeInfo.tabId;
 		// CurrentWindowId = activeInfo.windowId;
@@ -151,7 +156,7 @@ async function initExtension(){
 	// Change tabs
 	browser.tabs.onActivated.addListener(async activeInfo => {
 		QDEB&&console.debug("tabs.onActivated()", activeInfo);
-		await CurrentNote.persistAndClose();
+		await CurrentNote.silentlyPersistAndClose();
 
 		CurrentTabId = activeInfo.tabId;
 		// CurrentWindowId = activeInfo.windowId;
@@ -162,7 +167,7 @@ async function initExtension(){
 	// Create window
 	browser.windows.onCreated.addListener(async Window => {
 		QDEB&&console.debug("windows.onCreated()");
-		await CurrentNote.persistAndClose();
+		await CurrentNote.silentlyPersistAndClose();
 
 		CurrentWindowId = Window.id;
 		// initCurrentNote("windows.onCreated");
@@ -172,7 +177,7 @@ async function initExtension(){
 	browser.windows.onRemoved.addListener(async windowId => {
 		QDEB&&console.debug("windows.onRemoved()", windowId, CurrentNote.windowId);
 		mpUpdateCurrent();
-		// await CurrentNote.persistAndClose();
+		// await CurrentNote.silentlyPersistAndClose();
 
 		// CurrentWindowId = Window.id;
 		// // initCurrentNote();
@@ -189,7 +194,7 @@ async function initExtension(){
 			return;
 		}
 
-		await CurrentNote.persistAndClose();
+		await CurrentNote.silentlyPersistAndClose();
 
 		CurrentNote.windowId = CurrentWindowId = windowId;
 		// initCurrentNote("windows.onFocusChanged");
@@ -201,7 +206,7 @@ async function initExtension(){
 		QDEB&&console.debug("messageDisplay.onMessageDisplayed(), messageId:", Message.id);
 		//updateCurrentMessage(CurrentTab);
 
-		await CurrentNote.persistAndClose();
+		await CurrentNote.silentlyPersistAndClose();
 
 		CurrentTabId = getTabId(Tab);
 		// CurrentWindowId = Tab.windowId;
@@ -270,7 +275,7 @@ async function initExtension(){
 		loadNoteForMessage(Menu.getId(info)).then(note => {
 			Menu[note.exists ? "modify" : "new"]();
 			browser.menus.refresh();
-		});
+		}).catch(silentCatcher());
 	});
 
 	// TODO: attach at least note icon to multi message display (since TB78.4)
