@@ -21,23 +21,37 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		this.KeyboardHandler = {
 			elements: new WeakSet(),
 			addTo: elem => {
+				let fName = "KeyboardHandler.addTo()";
+				QDEB&&console.debug(`${fName} - attaching...`);
+
 				let self = API.KeyboardHandler;
 				if(self.elements.has(elem)){
-					QDEB&&console.debug("adding key handler - already exists");
-				} else {
-					QDEB&&console.debug("adding key handler...");
+					QDEB&&console.debug(`${fName} - already exists`);
+				} else if(
+					elem &&
+					elem.document &&
+					elem.document.URL &&
+					elem.document.URL.includes('chrome://messenger/content/messenger') ||
+					elem.document.URL.includes('chrome://messenger/content/messageWindow')
+				) {
 					elem.addEventListener("keydown", self.handler);
 					self.elements.add(elem);
+					QDEB&&console.debug(`${fName} - attached!`);
+				} else {
+					QDEB&&console.debug(`${fName} - not attachable`);
 				}
 			},
 			removeFrom: elem => {
+				let fName = "KeyboardHandler.removeFrom()";
+				QDEB&&console.debug(`${fName} - removing...`);
+
 				let self = API.KeyboardHandler;
 				if(self.elements.has(elem)){
-					QDEB&&console.debug("removing key handler - does not exist");
-				} else {
-					QDEB&&console.debug("removing key handler...", elem);
 					elem.removeEventListener("keydown", self.handler)
 					self.elements.delete(elem);
+					QDEB&&console.debug(`${fName} - removed!`);
+				} else {
+					QDEB&&console.debug(`${fName} - does not exist`);
 				}
 			},
 			handler: e => {
