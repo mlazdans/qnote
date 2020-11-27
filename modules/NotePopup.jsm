@@ -131,7 +131,16 @@ class NotePopup extends BasePopup {
 	}
 
 	focus(){
-		this.iframeEl.focus();
+		if(this.contentDocument.readyState !== "complete"){
+			let self = this;
+			let stateListener = e => {
+				self.contentDocument.removeEventListener("readystatechange", stateListener)
+				self.focus();
+			};
+			this.contentDocument.addEventListener("readystatechange", stateListener);
+		} else {
+			this.iframeEl.focus();
+		}
 	}
 
 	close() {
