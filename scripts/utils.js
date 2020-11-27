@@ -281,17 +281,20 @@ async function QNotePopForMessage(messageId, flags = POP_NONE) {
 			// }
 
 			// CurrentNote.popping = true;
-			CurrentNote.pop().then(isPopped => {
+			return CurrentNote.pop().then(isPopped => {
 				if(setFocus && isPopped){
 					CurrentNote.focus();
 				}
+
+				mpUpdateForNote(note);
 
 				return isPopped;
 			// }).finally(() => {
 			// 	CurrentNote.popping = false;
 			});
+		} else {
+			mpUpdateForNote(note);
 		}
-		mpUpdateForNote(note);
 	}).catch(e => {
 		if(e instanceof NoKeyIdError){
 			if(createNew){
@@ -463,5 +466,6 @@ function qDateFormatPredefined(format, ts){
 }
 
 async function focusMessagePane(windowId){
-	browser.qapp.messagePaneFocus(windowId);
+	QDEB&&console.debug("focusMessagePane()");
+	await browser.qapp.messagePaneFocus(windowId);
 }
