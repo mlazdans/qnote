@@ -141,7 +141,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					QDEB = on;
 				},
 				async remove(id){
-					// console.log("api.remove", id);
+					QDEB&&console.log("qpopup.remove()", id);
 					popupManager.get(id).close();
 					popupManager.remove(id);
 					PopupEventDispatcher.fireListeners("onremoved", id);
@@ -183,6 +183,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					}
 				},
 				async create(options){
+					QDEB&&console.log("qpopup.create()");
 					let {
 						windowId, top, left, width, height, url, title, controlsCSS, anchor, anchorPlacement,
 						minWidth, minHeight, maxWidth, maxHeight
@@ -292,8 +293,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						});
 
 						popup.closeEl.addEventListener("click", e => {
-							// popup.close();
-							this.remove(popup.popupInfo.id);
+							PopupEventDispatcher.fireListeners("oncontrols", "click", "qpopup-close", popup.popupInfo);
 						});
 
 						return popup.popupInfo;
