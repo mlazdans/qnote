@@ -132,10 +132,7 @@ class NoteWindow extends QEventDispatcher {
 			QDEB&&console.debug(`${fName} - not modified`);
 		}
 
-		return this[action]().then(async status => {
-			QDEB&&console.debug(`${fName} resulted in ${action}: ${status}`);
-			return status;
-		}).catch(silentCatcher());
+		return this[action]();
 	}
 
 	async persistAndClose(){
@@ -148,10 +145,10 @@ class NoteWindow extends QEventDispatcher {
 		}
 
 		this.persist().then(async status => {
-			// if(status){
+			if(status){
 				this.close();
-			// }
-		});
+			}
+		}).catch(silentCatcher());
 	}
 
 	async loadNote(keyId) {
