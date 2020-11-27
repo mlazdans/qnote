@@ -30,7 +30,6 @@ class NoteWindow extends QEventDispatcher {
 
 	async loadNote(keyId) {
 		return loadNote(keyId).then(note => {
-			console.log("loadNote", note);
 			this.note = note;
 			this.loadedNoteData = note.get();
 
@@ -182,11 +181,10 @@ class NoteWindow extends QEventDispatcher {
 
 	async wrapDirty(action){
 		let self = this;
-		return new Promise(function(resolve, reject) {
+		return new Promise(resolve => {
 			if(self.dirty){
 				throw new DirtyStateError;
 			} else {
-				console.log(action);
 				self.dirty = true;
 				return resolve(action().finally(() => self.dirty = false));
 			}
