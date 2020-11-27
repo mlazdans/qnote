@@ -203,7 +203,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			API.ColumnHandler.attachToWindow(aWindow);
 		});
 
-		this.EventDispatcher.addListener('domwindowclosed', aWindow => {
+		// TODO: somethings are still left behind if extension reloaded when more than one window is opened
+		this.EventDispatcher.addListener('onShutdown', aWindow => {
 			API.ColumnHandler.detachFromWindow(aWindow);
 		});
 
