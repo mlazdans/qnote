@@ -2,6 +2,7 @@
 // MAYBE: note popup on mouse over
 // TODO: save note pos and dims locally, outside note
 // TODO: save create and update time
+// TODO: attach keyb/col handler to all windows at the start
 var QDEB = true;
 var Prefs;
 var CurrentNote;
