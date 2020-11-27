@@ -1,6 +1,6 @@
+// TODO: get rid of methods with caller param
 class NoteWindow extends QEventDispatcher {
 	constructor(windowId) {
-		// afterclose fires after closed but before save/delete/update
 		super(["aftersave", "afterdelete", "afterupdate", "afterclose"]);
 
 		this.note;
@@ -39,6 +39,11 @@ class NoteWindow extends QEventDispatcher {
 		console.error("Not implemented");
 	}
 
+	async close(){
+		this.shown = false;
+		this.fireListeners("afterclose", this);
+	}
+
 	get modified() {
 		return !this.isEqual(this.loadedNoteData, this.note.get());
 	}
@@ -58,38 +63,83 @@ class NoteWindow extends QEventDispatcher {
 
 	async deleteNote(){
 		let fName = `${this.constructor.name}.deleteNote()`;
+
 		QDEB&&console.debug(`${fName} - deleting...`);
-		return this.note.delete().then(async () => {
-			await this.fireListeners("afterdelete", this);
-			await this.fireListeners("afterupdate", this, "delete");
-		}).catch(e => browser.legacy.alert(_("error.deleting.note"), e.message));
+		if(await confirmDelete()) {
+			return this.note.delete().then(async () => {
+				await this.fireListeners("afterdelete", this);
+				await this.fireListeners("afterupdate", this, "delete");
+
+				return true;
+			}).catch(e => browser.legacy.alert(_("error.deleting.note"), e.message));
+		}
 	}
 
 	async saveNote(){
 		let fName = `${this.constructor.name}.saveNote()`;
-		let noteData = this.note.get();
+		if(!this.needSaveOnClose){
+			QDEB&&console.debug(`${fName}, needSaveOnClose = false, do nothing`);
+			return true;
+		}
 
+		QDEB&&console.debug(`${fName} - saving...`);
+
+		return this.note.save().then(async () => {
+			await this.fireListeners("aftersave", this);
+			await this.fireListeners("afterupdate", this, "save");
+
+			return true;
+		}).catch(e => browser.legacy.alert(_("error.saving.note"), e.message));
+	}
+
+	async deleteAndClose(){
+		let fName = `${this.constructor.name}.deleteAndClose()`;
+		this.deleteNote().then(async status => {
+			QDEB&&console.debug(`${fName} resulted in: ${status}`);
+			if(status){
+				this.close();
+			}
+		}).catch(silentCatcher());
+	}
+
+	async doNothing(){
+		let fName = `${this.constructor.name}.doNothing()`;
+		QDEB&&console.debug(`${fName}, doing nothing... Done!`);
+		return true;
+	}
+
+	async persist(){
+		let fName = `${this.constructor.name}.persist()`;
+		QDEB&&console.debug(`${fName} - persisting...`);
+
+		let noteData = this.note.get();
 		if(this.loadedNoteData){
 			if(this.loadedNoteData.text !== noteData.text){
 				this.note.ts = Date.now();
 			}
 		}
 
+		let action = 'doNothing';
 		if(this.modified) {
-			QDEB&&console.debug(`${fName} - saving...`);
-			return this.note.save().then(async () => {
-				await this.fireListeners("aftersave", this);
-				await this.fireListeners("afterupdate", this, "save");
-			}).catch(e => browser.legacy.alert(_("error.saving.note"), e.message));
+			if(this.note.exists){ // Update, delete
+				action = this.note.text ? "saveNote" : "deleteNote"; // delete if no text
+			} else {
+				if(this.note.text){ // Create new
+					action = "saveNote";
+				}
+			}
 		} else {
 			QDEB&&console.debug(`${fName} - not modified`);
 		}
 
-		return false;
+		return this[action]().then(async status => {
+			QDEB&&console.debug(`${fName} resulted in ${action}: ${status}`);
+			return status;
+		}).catch(silentCatcher());
 	}
 
-	async close(closer){
-		let fName = `${this.constructor.name}.close()`;
+	async persistAndClose(){
+		let fName = `${this.constructor.name}.persistAndClose()`;
 		QDEB&&console.debug(`${fName} - closing...`);
 
 		if(!this.shown){
@@ -97,33 +147,11 @@ class NoteWindow extends QEventDispatcher {
 			return;
 		}
 
-		this.shown = false;
-
-		closer && await closer();
-
-		await this.fireListeners("afterclose", this);
-
-		if(!this.needSaveOnClose){
-			QDEB&&console.debug(`${fName}, needSaveOnClose = false, do nothing`);
-			return;
-		}
-
-		let action;
-		if(this.note.exists){ // Update, delete
-			action = this.note.text ? "save" : "delete"; // delete if no text
-		} else {
-			if(this.note.text){ // Create new
-				action = "save";
-			}
-		}
-
-		if(action === 'save') {
-			this.saveNote();
-		} else if(action === 'delete'){
-			this.deleteNote();
-		} else {
-			QDEB&&console.debug(`${fName}, do nothing`);
-		}
+		this.persist().then(async status => {
+			// if(status){
+				this.close();
+			// }
+		});
 	}
 
 	async loadNote(keyId) {

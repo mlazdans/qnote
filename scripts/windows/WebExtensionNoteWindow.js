@@ -24,7 +24,10 @@ class WebExtensionNoteWindow extends NoteWindow {
 	}
 
 	async close(closeWindow = true) {
-		return super.close(async () => closeWindow && browser.windows.remove(this.popupId));
+		if(closeWindow){
+			browser.windows.remove(this.popupId);
+			super.close();
+		}
 	}
 
 	// TODO: adjust position to match relative positions XULWindow using

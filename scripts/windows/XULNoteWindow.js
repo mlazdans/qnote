@@ -46,7 +46,10 @@ class XULNoteWindow extends NoteWindow {
 	}
 
 	async close(closeWindow = true) {
-		return super.close(async () => closeWindow && browser.qpopup.remove(this.popupId));
+		if(closeWindow){
+			browser.qpopup.remove(this.popupId);
+			super.close();
+		}
 	}
 
 	async pop() {

@@ -27,7 +27,7 @@ const popupClose = () => {
 document.addEventListener('keydown', e => {
 	if(e.key == 'Escape'){
 		CurrentNote.needSaveOnClose = false;
-		CurrentNote.close();
+		CurrentNote.persistAndClose();
 	}
 });
 

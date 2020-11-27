@@ -13,6 +13,8 @@ var i18n = new DOMLocalizator(browser.i18n.getMessage);
 function initCurrentNote(){
 	browser.menus.removeAll();
 	updateIcons(false);
+
+	// TODO: not sure if this is needed
 	if(CurrentNote){
 		CurrentNote.needSaveOnClose = true;
 		CurrentNote.windowId = CurrentWindowId;
@@ -38,6 +40,7 @@ function initCurrentNote(){
 	});
 
 	CurrentNote.addListener("afterclose", (NoteWindow, isClosed) => {
+		QDEB&&console.debug("afterclose");
 		if(isClosed){
 			focusMessagePane(CurrentNote.windowId);
 		}
@@ -55,6 +58,7 @@ async function setUpExtension(){
 
 	QDEB = !!Prefs.enableDebug;
 	browser.qapp.setDebug(QDEB);
+	browser.qpopup.setDebug(QDEB);
 
 	browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
 
@@ -93,15 +97,17 @@ async function initExtension(){
 	// });
 
 	browser.qpopup.onControls.addListener(async (action, id, pi) => {
-		if(id !== 'note-delete' || action !== 'click' || pi.id != CurrentNote.popupId){
+		QDEB&&console.debug("browser.qpopup.onControls()", action, id);
+		if(action !== 'click' || pi.id != CurrentNote.popupId){
 			return;
 		}
 
-		if(await confirmDelete()) {
-			CurrentNote.needSaveOnClose = false;
-			CurrentNote.close().then(() => {
-				return CurrentNote.deleteNote();
-			});
+		if(id === 'note-delete'){
+			CurrentNote.deleteAndClose();
+		}
+
+		if(id === 'qpopup-close'){
+			await CurrentNote.persistAndClose();
 		}
 	});
 
@@ -113,7 +119,7 @@ async function initExtension(){
 		if(e.key === 'Escape'){
 			if(CurrentNote.shown){
 				CurrentNote.needSaveOnClose = false;
-				CurrentNote.close();
+				CurrentNote.persistAndClose();
 				ret.preventDefault = true;
 			}
 		}
@@ -123,7 +129,7 @@ async function initExtension(){
 	// Change folders
 	browser.mailTabs.onDisplayedFolderChanged.addListener(async (Tab, displayedFolder) => {
 		QDEB&&console.debug("mailTabs.onDisplayedFolderChanged()");
-		await CurrentNote.close();
+		await CurrentNote.persistAndClose();
 
 		// CurrentTabId = getTabId(Tab);
 		// CurrentWindowId = Tab.windowId;
@@ -134,7 +140,7 @@ async function initExtension(){
 	// Create tabs
 	browser.tabs.onCreated.addListener(async Tab => {
 		QDEB&&console.debug("tabs.onCreated()", Tab);
-		await CurrentNote.close();
+		await CurrentNote.persistAndClose();
 
 		// CurrentTabId = activeInfo.tabId;
 		// CurrentWindowId = activeInfo.windowId;
@@ -145,7 +151,7 @@ async function initExtension(){
 	// Change tabs
 	browser.tabs.onActivated.addListener(async activeInfo => {
 		QDEB&&console.debug("tabs.onActivated()", activeInfo);
-		await CurrentNote.close();
+		await CurrentNote.persistAndClose();
 
 		CurrentTabId = activeInfo.tabId;
 		// CurrentWindowId = activeInfo.windowId;
@@ -156,7 +162,7 @@ async function initExtension(){
 	// Create window
 	browser.windows.onCreated.addListener(async Window => {
 		QDEB&&console.debug("windows.onCreated()");
-		await CurrentNote.close();
+		await CurrentNote.persistAndClose();
 
 		CurrentWindowId = Window.id;
 		initCurrentNote();
@@ -166,7 +172,7 @@ async function initExtension(){
 	browser.windows.onRemoved.addListener(async windowId => {
 		QDEB&&console.debug("windows.onRemoved()", windowId, CurrentNote.windowId);
 		mpUpdateCurrent();
-		// await CurrentNote.close();
+		// await CurrentNote.persistAndClose();
 
 		// CurrentWindowId = Window.id;
 		// initCurrentNote();
@@ -183,7 +189,7 @@ async function initExtension(){
 			return;
 		}
 
-		await CurrentNote.close();
+		await CurrentNote.persistAndClose();
 
 		CurrentWindowId = windowId;
 		initCurrentNote();
@@ -195,7 +201,7 @@ async function initExtension(){
 		QDEB&&console.debug("messageDisplay.onMessageDisplayed(), messageId:", Message.id);
 		//updateCurrentMessage(CurrentTab);
 
-		await CurrentNote.close();
+		await CurrentNote.persistAndClose();
 
 		CurrentTabId = getTabId(Tab);
 		// CurrentWindowId = Tab.windowId;

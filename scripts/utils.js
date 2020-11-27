@@ -241,12 +241,12 @@ async function loadPrefsWithDefaults() {
 }
 
 async function reloadExtension(){
-	await CurrentNote.close();
+	await CurrentNote.persistAndClose();
 	return await browser.runtime.reload();
 }
 
 async function clearStorage(){
-	await CurrentNote.close();
+	await CurrentNote.persistAndClose();
 	return browser.storage.local.clear();
 }
 
@@ -305,7 +305,7 @@ async function QNotePopForMessage(messageId, flags = POP_NONE) {
 
 async function QNotePopForTab(Tab, flags = POP_NONE) {
 	return getDisplayedMessageForTab(Tab).then(async Message => {
-		await CurrentNote.close();
+		await CurrentNote.persistAndClose();
 
 		// CurrentTabId = getTabId(Tab);
 		// CurrentWindowId = Tab.windowId;
@@ -326,10 +326,10 @@ async function QNotePopToggle(Tab) {
 		// Window will loose focus hence report no focus
 		if(await CurrentNote.isFocused()){
 			QDEB&&console.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - focused, waiting to close`);
-			CurrentNote.close();
+			await CurrentNote.persistAndClose();
 		} else {
 			QDEB&&console.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - opened, waiting to gain focus`);
-			CurrentNote.focus();
+			await CurrentNote.focus();
 		}
 	} else {
 		QDEB&&console.debug("QNotePopToggle(), popupId = -not set-");
@@ -425,7 +425,7 @@ function updateNoteView(note){
 }
 
 async function confirmDelete(){
-	return Prefs.confirmDelete ? await browser.legacy.confirm(_("are.you.sure")) : true;
+	return Prefs.confirmDelete ? await browser.legacy.confirm(_("delete.note"), _("are.you.sure")) : true;
 }
 
 function _qDateFormat(locale, ts){

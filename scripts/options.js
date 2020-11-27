@@ -60,7 +60,7 @@ function setLabelColor(forE, color){
 }
 
 async function saveOptionsDefaultHandler(prefs) {
-	ext.CurrentNote && await ext.CurrentNote.close();
+	ext.CurrentNote && await ext.CurrentNote.persistAndClose();
 
 	let oldPrefs = Object.assign({}, ext.Prefs);
 

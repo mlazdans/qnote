@@ -22,12 +22,11 @@ var Menu = {
 			title: _("delete.note"),
 			contexts: ["message_list"],
 			async onclick(info) {
-				if(await confirmDelete()) {
-					let messageId = Menu.getId(info);
-					if(CurrentNote.messageId === messageId){
-						// Ensure note close and additional handling there
-						CurrentNote.deleteNote();
-					} else {
+				let messageId = Menu.getId(info);
+				if(CurrentNote.messageId === messageId){
+					CurrentNote.deleteAndClose();
+				} else {
+					if(await confirmDelete()) {
 						deleteNoteForMessage(Menu.getId(info)).then(updateNoteView);
 					}
 				}
