@@ -59,6 +59,7 @@ class NoteWindow extends QEventDispatcher {
 	async close(){
 		this.shown = false;
 		this.messageId = undefined;
+		this.needSaveOnClose = true;
 		this.fireListeners("afterclose", this);
 	}
 
