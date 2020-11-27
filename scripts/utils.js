@@ -275,20 +275,20 @@ async function QNotePopForMessage(messageId, flags = POP_NONE) {
 	return CurrentNote.loadNoteForMessage(messageId).then(note => {
 		CurrentNote.messageId = messageId;
 		if(note.exists || createNew){
-			if(CurrentNote.popping){
-				QDEB&&console.debug("already popping");
-				return false;
-			}
+			// if(CurrentNote.popping){
+			// 	QDEB&&console.debug("already popping");
+			// 	return false;
+			// }
 
-			CurrentNote.popping = true;
+			// CurrentNote.popping = true;
 			CurrentNote.pop().then(isPopped => {
 				if(setFocus && isPopped){
 					CurrentNote.focus();
 				}
 
 				return isPopped;
-			}).finally(() => {
-				CurrentNote.popping = false;
+			// }).finally(() => {
+			// 	CurrentNote.popping = false;
 			});
 		}
 		mpUpdateForNote(note);
@@ -309,17 +309,17 @@ async function QNotePopForTab(Tab, flags = POP_NONE) {
 
 		// CurrentTabId = getTabId(Tab);
 		// CurrentWindowId = Tab.windowId;
-		initCurrentNote();
+		// initCurrentNote();
 
 		return QNotePopForMessage(Message.id, flags);
 	});
 };
 
 async function QNotePopToggle(Tab) {
-	if(CurrentNote.popping){
-		QDEB&&console.debug("QNotePopToggle() - already popping");
-		return;
-	}
+	// if(CurrentNote.popping){
+	// 	QDEB&&console.debug("QNotePopToggle() - already popping");
+	// 	return;
+	// }
 
 	if(CurrentNote.shown){
 		// This logic won't work with WebExtensionNoteWindow when clicking on buttons
