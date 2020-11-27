@@ -6,7 +6,6 @@ class XULNoteWindow extends NoteWindow {
 
 		// Close
 		browser.qpopup.onRemoved.addListener(popupId => {
-			// console.log("browser.qpopup.onRemoved", popupId);
 			if(popupId === this.popupId){
 				this.close(false);
 			}

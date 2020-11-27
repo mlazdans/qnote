@@ -242,7 +242,7 @@ async function initExtension(){
 
 	// // Click on QNote button
 	browser.messageDisplayAction.onClicked.addListener(Tab => {
-		QDEB&&console.debug("messageDisplayAction.onClicked()", Tab, CurrentTabId);
+		QDEB&&console.debug("messageDisplayAction.onClicked()");
 		QNotePopToggle(Tab || CurrentTabId);
 		// QNotePopToggle().then(()=>{
 		// 	QNoteTabPop(tab);
