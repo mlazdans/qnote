@@ -226,5 +226,8 @@
 	},
 	"always.default.placement": {
 		"message": "Always use default size and position"
+	},
+	"options.reset": {
+		"message": "Options has been reset"
 	}
 }

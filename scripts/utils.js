@@ -91,12 +91,6 @@ async function savePrefs(p) {
 	}
 }
 
-async function clearPrefs() {
-	for(let k in getDefaultPrefs()){
-		await browser.storage.local.remove('pref.' + k);
-	}
-}
-
 async function saveSinglePref(k, v) {
 	return browser.storage.local.set({
 		['pref.' + k]: v
@@ -246,8 +240,16 @@ async function reloadExtension(){
 	return await browser.runtime.reload();
 }
 
+async function clearPrefs() {
+	let p = [];
+	for(let k in getDefaultPrefs()){
+		p.push(browser.storage.local.remove('pref.' + k));
+	}
+
+	return Promise.all(p);
+}
+
 async function clearStorage(){
-	await CurrentNote.silentlyPersistAndClose();
 	return browser.storage.local.clear();
 }
 

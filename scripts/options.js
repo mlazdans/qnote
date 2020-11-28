@@ -317,15 +317,24 @@ function importInternalStorage() {
 
 async function clearStorage(){
 	if(await browser.legacy.confirm(_("are.you.sure"))){
-		ext.clearStorage().then(async () => {
-			alert(_("storage.cleared"));
+		return ext.clearStorage().then(async () => {
 			await browser.qapp.clearNoteCache();
 			ext.setUpExtension();
 			initOptionsPageValues();
+			alert(_("storage.cleared"));
 		}).catch(e => {
 			alert(_("storage.clear.failed", e.message));
 		});
 	}
+}
+
+async function resetDefaults(){
+	return ext.clearPrefs().then(async () => {
+		await browser.qapp.clearNoteCache();
+		ext.setUpExtension();
+		initOptionsPageValues();
+		alert(_("options.reset"));
+	});
 }
 
 function gridPosChange(){
@@ -345,14 +354,6 @@ async function initOptionsPageValues(){
 	dateFormatChange();
 	gridPosChange();
 	QDEB = ext.QDEB;
-}
-
-async function resetDefaults(){
-	QDEB&&console.debug("Resetting to defaults...");
-	return ext.clearPrefs().then(() => {
-		ext.setUpExtension();
-		initOptionsPageValues();
-	});
 }
 
 // Anchor
@@ -450,19 +451,24 @@ async function initOptionsPage(){
 	i18n.setTexts(document);
 
 	// Add auto-save to the controls
-	let saveListener = (el, method) => el.addEventListener(method, e => {
-		saveOptions();
+	// Also prevent if note dirty
+	let saveListener = (el, method, doSave = true) => el.addEventListener(method, e => {
 		if(ext.CurrentNote.dirty){
+			ErrMsg = [_("close.current.note")];
+			displayErrorBox();
 			e.preventDefault();
 			e.stopImmediatePropagation();
-			return false;
+		} else if(doSave) {
+			saveOptions();
 		}
 	});
 	document.querySelectorAll("input[type=text],input[type=number]").forEach(el => saveListener(el, "keydown"));
-	document.querySelectorAll("select").forEach(el => saveListener(el, "change"));
+	document.querySelectorAll("select,input[type=number]").forEach(el => saveListener(el, "change"));
 	document.querySelectorAll("input[type=checkbox],input[type=radio]").forEach(el => saveListener(el, "click"));
-	document.querySelectorAll("button").forEach(el => saveListener(el, "click"));
-	document.querySelectorAll("input[type=file]").forEach(el => saveListener(el, "change"));
+
+	// Prevent buttons when note dirty
+	document.querySelectorAll("button").forEach(el => saveListener(el, "click", false));
+	document.querySelectorAll("input[type=file]").forEach(el => saveListener(el, "change", false));
 
 	initTags(tags);
 	generatePosGrid();
