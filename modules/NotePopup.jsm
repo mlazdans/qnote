@@ -231,7 +231,6 @@ class NotePopup extends BasePopup {
 			self.browser.addEventListener("DOMContentLoaded", loadListener);
 
 			let elements = {
-				// window: "messengerWindow",
 				window: "",
 				threadpane: "threadContentArea",
 				message: "messagepane",
@@ -246,8 +245,8 @@ class NotePopup extends BasePopup {
 					aEl = window.document.getElementById(elements[anchor]);
 				}
 
-				// Elements are referring to main window. Fall back to just window in case opened into non-main
-				if(!aEl){
+				// Fall back to window in case referring element is not visible
+				if(!aEl || !aEl.clientWidth || !aEl.clientHeight){
 					aEl = window.document.querySelector("window");
 				}
 
