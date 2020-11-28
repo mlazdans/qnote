@@ -25,7 +25,7 @@ var Menu = {
 				let messageId = Menu.getId(info);
 				if(CurrentNote.messageId === messageId){
 					// TODO: code duplication QNotePopToggle()
-					CurrentNote.persistAndClose().catch(e => {
+					CurrentNote.deleteAndClose().catch(e => {
 						if(e instanceof DirtyStateError){
 							browser.legacy.alert(_("close.current.note"));
 						} else {
