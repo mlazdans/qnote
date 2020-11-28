@@ -57,10 +57,6 @@ async function setUpExtension(){
 	CurrentWindowId = await getCurrentWindowId();
 	CurrentTabId = await getCurrentTabId();
 
-	if(!CurrentTabId){
-		CurrentTabId = await getWindowMailTabId(CurrentWindowId);
-	}
-
 	// CurrentNote = null;
 	CurrentLang = browser.i18n.getUILanguage();
 
@@ -176,7 +172,7 @@ async function initExtension(){
 	});
 
 	browser.windows.onRemoved.addListener(async windowId => {
-		QDEB&&console.debug("windows.onRemoved()", windowId, CurrentNote.windowId);
+		QDEB&&console.debug("windows.onRemoved(), windowId:", windowId, ", current windowId:", CurrentNote.windowId);
 		mpUpdateCurrent();
 		// await CurrentNote.silentlyPersistAndClose();
 
@@ -187,7 +183,6 @@ async function initExtension(){
 
 	// Change focus
 	browser.windows.onFocusChanged.addListener(async windowId => {
-		QDEB&&console.debug("windows.onFocusChanged(), windowId:", windowId, ", current windowId:", CurrentNote.windowId);
 		if(
 			windowId === browser.windows.WINDOW_ID_NONE ||
 			windowId === CurrentNote.windowId
@@ -195,9 +190,12 @@ async function initExtension(){
 			return;
 		}
 
+		QDEB&&console.debug("windows.onFocusChanged(), windowId:", windowId, ", current windowId:", CurrentNote.windowId);
+
 		await CurrentNote.silentlyPersistAndClose();
 
 		CurrentNote.windowId = CurrentWindowId = windowId;
+		CurrentTabId = await getCurrentTabId();
 		// initCurrentNote("windows.onFocusChanged");
 		mpUpdateCurrent();
 	});

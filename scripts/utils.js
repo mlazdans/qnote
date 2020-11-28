@@ -406,8 +406,18 @@ async function getCurrentTab(){
 }
 
 async function getCurrentTabId(){
-	return getCurrentTab().then(Tab => {
-		return getTabId(Tab);
+	return getCurrentTab().then(async Tab => getTabId(Tab ? Tab : await getWindowActiveTab(CurrentWindowId)));
+}
+
+async function getWindowActiveTab(windowId){
+	return browser.windows.get(windowId, { populate: true }).then(Window => {
+		if(Window.tabs){
+			for(let t of Window.tabs){
+				if(t.active){
+					return t;
+				}
+			}
+		}
 	});
 }
 
