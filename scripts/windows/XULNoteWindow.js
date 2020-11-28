@@ -3,11 +3,18 @@ class XULNoteWindow extends NoteWindow {
 		super(windowId);
 
 		// TODO: need to add some filters to the events
+		browser.qpopup.onControls.addListener(async (action, id, pi) => {
+			QDEB&&console.debug("browser.qpopup.onControls()", action, id);
+			if(action !== 'click' || pi.id != this.popupId){
+				return;
+			}
 
-		// Close
-		browser.qpopup.onRemoved.addListener(popupId => {
-			if(popupId === this.popupId){
-				this.close(false);
+			if(id === 'qpopup-close'){
+				await this.silentlyPersistAndClose();
+			}
+
+			if(id === 'note-delete'){
+				await this.silentlyDeleteAndClose();
 			}
 		});
 
@@ -44,11 +51,9 @@ class XULNoteWindow extends NoteWindow {
 		});
 	}
 
-	async close(closeWindow = true) {
-		if(closeWindow){
-			browser.qpopup.remove(this.popupId);
-			super.close();
-		}
+	async close() {
+		browser.qpopup.remove(this.popupId);
+		super.close();
 	}
 
 	async pop() {
