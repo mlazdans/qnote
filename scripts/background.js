@@ -21,13 +21,6 @@ function initCurrentNote(from){
 
 	resetTbState();
 
-	// TODO: not sure if this is needed
-	// if(CurrentNote){
-	// 	CurrentNote.needSaveOnClose = true;
-	// 	CurrentNote.windowId = CurrentWindowId;
-	// 	return;
-	// }
-
 	if(Prefs.windowOption === 'xul'){
 		CurrentNote = new XULNoteWindow(CurrentWindowId);
 	} else if(Prefs.windowOption == 'webext'){
@@ -117,11 +110,6 @@ async function initExtension(){
 		QDEB&&console.debug("mailTabs.onDisplayedFolderChanged()");
 		await CurrentNote.silentlyPersistAndClose();
 		resetTbState();
-
-		// CurrentTabId = getTabId(Tab);
-		// CurrentWindowId = Tab.windowId;
-		// initCurrentNote("mailTabs.onDisplayedFolderChanged");
-		//updateCurrentMessage(CurrentTab);
 	});
 
 	// Create tabs
@@ -135,22 +123,15 @@ async function initExtension(){
 		}
 
 		await CurrentNote.silentlyPersistAndClose();
-
-		// CurrentTabId = activeInfo.tabId;
-		// CurrentWindowId = activeInfo.windowId;
-		// initCurrentNote("tabs.onCreated");
-		//updateCurrentMessage(CurrentTab);
 	});
 
 	// Change tabs
 	browser.tabs.onActivated.addListener(async activeInfo => {
 		QDEB&&console.debug("tabs.onActivated()", activeInfo);
+
 		await CurrentNote.silentlyPersistAndClose();
 
 		CurrentTabId = activeInfo.tabId;
-		// CurrentWindowId = activeInfo.windowId;
-		// initCurrentNote("tabs.onActivated");
-		//updateCurrentMessage(CurrentTab);
 	});
 
 	// Create window
@@ -165,18 +146,12 @@ async function initExtension(){
 		await CurrentNote.silentlyPersistAndClose();
 
 		CurrentWindowId = Window.id;
-		// initCurrentNote("windows.onCreated");
-		//updateCurrentMessage(CurrentTab);
 	});
 
 	browser.windows.onRemoved.addListener(async windowId => {
 		QDEB&&console.debug("windows.onRemoved(), windowId:", windowId, ", current windowId:", CurrentNote.windowId);
-		mpUpdateCurrent();
-		// await CurrentNote.silentlyPersistAndClose();
 
-		// CurrentWindowId = Window.id;
-		// // initCurrentNote();
-		//updateCurrentMessage(CurrentTab);
+		mpUpdateCurrent();
 	});
 
 	// Change focus
@@ -199,7 +174,7 @@ async function initExtension(){
 
 		CurrentNote.windowId = CurrentWindowId = windowId;
 		CurrentTabId = await getCurrentTabId();
-		// initCurrentNote("windows.onFocusChanged");
+
 		mpUpdateCurrent();
 	});
 
@@ -211,9 +186,6 @@ async function initExtension(){
 		await CurrentNote.silentlyPersistAndClose();
 
 		CurrentTabId = getTabId(Tab);
-		// CurrentWindowId = Tab.windowId;
-		// CurrentWindowId = await getCurrentWindowId();
-		// initCurrentNote("messageDisplay.onMessageDisplayed");
 
 		let flags = POP_EXISTING;
 		if(Prefs.focusOnDisplay){
@@ -235,27 +207,22 @@ async function initExtension(){
 	// Click on main toolbar
 	browser.browserAction.onClicked.addListener(Tab => {
 		QDEB&&console.debug("browserAction.onClicked()");
+
 		QNotePopToggle(Tab || CurrentTabId);
-		// QNotePopToggle().then(()=>{
-		// 	QNoteTabPop(tab);
-		// });
-		// CurrentTab = tab;
 	});
 
 	// // Click on QNote button
 	browser.messageDisplayAction.onClicked.addListener(Tab => {
 		QDEB&&console.debug("messageDisplayAction.onClicked()");
+
 		QNotePopToggle(Tab || CurrentTabId);
-		// QNotePopToggle().then(()=>{
-		// 	QNoteTabPop(tab);
-		// });
-		// CurrentTab = tab;
 	});
 
 	// Handle keyboard shortcuts
 	browser.commands.onCommand.addListener(command => {
 		if(command === 'qnote') {
 			QDEB&&console.debug("commands.onCommand()", command);
+
 			QNotePopToggle(CurrentTabId);
 		}
 	});

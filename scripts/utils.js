@@ -315,23 +315,13 @@ async function QNotePopForTab(Tab, flags = POP_NONE) {
 	return getDisplayedMessageForTab(Tab).then(async Message => {
 		await CurrentNote.silentlyPersistAndClose();
 
-		// CurrentTabId = getTabId(Tab);
-		// CurrentWindowId = Tab.windowId;
-		// initCurrentNote();
-
 		return QNotePopForMessage(Message.id, flags);
 	});
 };
 
 async function QNotePopToggle(Tab) {
-	// if(CurrentNote.popping){
-	// 	QDEB&&console.debug("QNotePopToggle() - already popping");
-	// 	return;
-	// }
-
 	if(CurrentNote.shown){
-		// This logic won't work with WebExtensionNoteWindow when clicking on buttons
-		// Window will loose focus hence report no focus
+		// This logic won't work with WebExtensionNoteWindow when clicking on buttons because window will loose focus hence report no focus
 		if(await CurrentNote.isFocused()){
 			QDEB&&console.debug(`QNotePopToggle(), popupId = ${CurrentNote.popupId} - focused, waiting to close`);
 			await CurrentNote.persistAndClose().catch(e => {
