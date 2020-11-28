@@ -16,11 +16,11 @@ class NoteColumnHandler {
 			// onCreatedView: aFolderDisplay => {
 			// },
 			onActiveCreatedView: aFolderDisplay => {
-				QDEB&&console.debug("NoteColumnHandler: onActiveCreatedView()", aFolderDisplay);
+				QDEB&&console.debug("NoteColumnHandler: onActiveCreatedView()");
 				self.addColumnHandler(aFolderDisplay.view.dbView);
 			},
 			onDestroyingView: (aFolderDisplay, aFolderIsComingBack) => {
-				QDEB&&console.debug("NoteColumnHandler: onDestroyingView()", aFolderDisplay, aFolderIsComingBack);
+				QDEB&&console.debug("NoteColumnHandler: onDestroyingView()");
 				self.removeColumnHandler(aFolderDisplay.view.dbView);
 			}
 			// onMessagesLoaded: (aFolderDisplay, aAll) => {
