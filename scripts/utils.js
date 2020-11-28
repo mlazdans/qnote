@@ -36,6 +36,7 @@ function getDefaultPrefs() {
 
 		anchor: "window", // window, threadpane, message
 		anchorPlacement: "center", // see options.js generatePosGrid() for options
+		alwaysDefaultPlacement: false,
 		confirmDelete: false
 	};
 }

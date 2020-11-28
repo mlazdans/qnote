@@ -30,6 +30,14 @@
 							</select>
 						</td>
 					</tr>
+					<tr>
+						<td><label for="input_width" data-i18n="width.label"></label></td>
+						<td><input type="number" data-preference="width" id="input_width" min="100" max="99999" class="size3" /></td>
+					</tr>
+					<tr>
+						<td><label for="input_height" data-i18n="height.label"></label></td>
+						<td><input type="number" data-preference="height" id="input_height" min="100" max="99999" class="size3" /></td>
+					</tr>
 				</table>
 			</td>
 			<td><div id="posGrid"></div></td>
@@ -37,10 +45,8 @@
 	</table>
 	<table>
 		<tr>
-			<td><label for="input_width" data-i18n="width.label"></label></td>
-			<td><input type="number" data-preference="width" id="input_width" min="100" max="99999" class="size3" /></td>
-			<td><label for="input_height" data-i18n="height.label"></label></td>
-			<td><input type="number" data-preference="height" id="input_height" min="100" max="99999" class="size3" /></td>
+			<td><input type="checkbox" data-preference="alwaysDefaultPlacement" id="alwaysDefaultPlacement"></td>
+			<td><label for="alwaysDefaultPlacement" data-i18n="always.default.placement"></label></td>
 		</tr>
 	</table>
 </fieldset>

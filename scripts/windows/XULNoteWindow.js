@@ -73,8 +73,15 @@ class XULNoteWindow extends NoteWindow {
 				minWidth: 200,
 				minHeight: 125,
 				maxWidth: 800,
-				maxHeight: 500,
+				maxHeight: 500
 			};
+
+			if(Prefs.alwaysDefaultPlacement){
+				opt.width = Prefs.width;
+				opt.height = Prefs.height;
+				opt.left = undefined;
+				opt.top = undefined;
+			}
 
 			return browser.qpopup.create(opt).then(popupInfo => {
 				this.popupId = popupInfo.id;
