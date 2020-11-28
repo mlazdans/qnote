@@ -20,7 +20,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		// init() caller must install onNoteRequest listener
 		this.noteGrabber = new QCache();
 
-		this.EventDispatcher = new QEventDispatcher(["domwindowopened", "domwindowclosed", "DOMContentLoaded", "keydown", "onShutdown", "domcomplete"]);
+		this.EventDispatcher = new QEventDispatcher(["domwindowopened", "domwindowclosed", "keydown", "onShutdown", "domcomplete"]);
 		this.KeyboardHandler = {
 			windows: new WeakSet(),
 			addTo: w => {
@@ -81,19 +81,25 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		this.WindowObserver = {
 			observe: function(aSubject, aTopic, aData) {
 				let fName = "qapp.WindowObserver.observe()";
-				QDEB&&console.debug(`${fName} ${aTopic}`, aSubject.URL);
+				QDEB&&console.debug(`${fName} ${aTopic}`, aSubject.document.URL);
 
 				if(aTopic === 'domwindowopened' || aTopic === 'domwindowclosed'){
 					API.EventDispatcher.fireListeners(aTopic, aSubject, aTopic, aData);
 				}
 
 				if(aTopic === 'domwindowopened'){
-					aSubject.addEventListener("DOMContentLoaded", e => {
-						API.EventDispatcher.fireListeners("DOMContentLoaded", aSubject, aTopic, aData, e);
-						if(aSubject.document.readyState === "complete"){
-							API.EventDispatcher.fireListeners("domcomplete", aSubject, aTopic, aData, e);
-						}
+					aSubject.addEventListener("load", e => {
+						API.EventDispatcher.fireListeners("domcomplete", aSubject, aTopic, aData, e);
+					}, {
+						once: true
 					});
+					// aSubject.addEventListener("DOMContentLoaded", e => {
+					// 	API.EventDispatcher.fireListeners("DOMContentLoaded", aSubject, aTopic, aData, e);
+					// 	if(aSubject.document.readyState === "complete"){
+					// 		API.EventDispatcher.fireListeners("domcomplete", aSubject, aTopic, aData, e);
+					// 	}
+					// }, {
+					// });
 				}
 			}
 		};
@@ -205,20 +211,17 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 	}
 
 	installColumnHandler(w){
-		var API = this;
+		let API = this;
+		let ch = this.ColumnHandler;
 
-		// Column attach and later remove on shutdown
-		this.ColumnHandler.attachToWindow(w);
-		this.EventDispatcher.addListener('onShutdown', () => {
-			API.ColumnHandler.detachFromWindow(w);
-		});
+		if(ch.attachToWindow(w)){
+			API.EventDispatcher.addListener('onShutdown', () => ch.detachFromWindow(w));
+		}
 
 		this.EventDispatcher.addListener('domcomplete', aWindow => {
-			API.ColumnHandler.attachToWindow(aWindow);
-		});
-
-		this.EventDispatcher.addListener('onShutdown', aWindow => {
-			API.ColumnHandler.detachFromWindow(aWindow);
+			if(ch.attachToWindow(aWindow)){
+				API.EventDispatcher.addListener('onShutdown', () => ch.detachFromWindow(aWindow));
+			}
 		});
 	}
 
@@ -229,13 +232,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown() {
 		QDEB&&console.debug("QNote.shutdown()");
 
-		this.uninstallCSS("html/background.css");
-
-		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
+		Services.ww.unregisterNotification(this.WindowObserver);
 
 		this.EventDispatcher.fireListeners("onShutdown");
-
-		Services.ww.unregisterNotification(this.WindowObserver);
+		this.uninstallCSS("html/background.css");
 
 		Components.utils.unload(extension.rootURI.resolve("modules/NoteColumnHandler.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/NotePopup.jsm"));
@@ -243,6 +243,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		Components.utils.unload(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 		Components.utils.unload(extension.rootURI.resolve("modules/QCache.js"));
 		Components.utils.unload(extension.rootURI.resolve("modules/DOMLocalizator.js"));
+
+		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 	}
 
 	id2RealWindow(w){

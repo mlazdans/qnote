@@ -16,13 +16,11 @@ class NoteColumnHandler {
 			// onCreatedView: aFolderDisplay => {
 			// },
 			onActiveCreatedView: aFolderDisplay => {
-				try {
-					self.addColumnHandler(aFolderDisplay.view.dbView);
-				} catch(e) {
-					console.error(e);
-				}
+				QDEB&&console.debug("NoteColumnHandler: onActiveCreatedView()", aFolderDisplay);
+				self.addColumnHandler(aFolderDisplay.view.dbView);
 			},
 			onDestroyingView: (aFolderDisplay, aFolderIsComingBack) => {
+				QDEB&&console.debug("NoteColumnHandler: onDestroyingView()", aFolderDisplay, aFolderIsComingBack);
 				self.removeColumnHandler(aFolderDisplay.view.dbView);
 			}
 			// onMessagesLoaded: (aFolderDisplay, aAll) => {
@@ -36,72 +34,74 @@ class NoteColumnHandler {
 
 	addColumnHandler(view){
 		try {
-			if(view){
-				view.addColumnHandler("qnoteCol", this.columnHandler);
-			}
+			view.addColumnHandler("qnoteCol", this.columnHandler);
+			return true;
 		} catch(e){
-			console.error(e);
+			console.debug(e);
 		}
 	}
 
 	removeColumnHandler(view){
 		try {
-			if(view){
-				view.removeColumnHandler("qnoteCol");
-			}
+			view.removeColumnHandler("qnoteCol");
+			return true;
 		} catch(e){
-			console.error(e);
+			console.debug(e);
 		}
 	}
 
 	attachToWindow(w){
 		let fName = `${this.constructor.name}.attachToWindow()`;
+		QDEB&&console.debug(`${fName} - attaching...`);
 
 		if(this.windows.has(w)){
-			QDEB&&console.debug(`${fName} - already attached`);
+			QDEB&&console.debug(`${fName} - already attached!`);
 			return false;
 		}
 
 		if(!this.setUpDOM(w)){
-			QDEB&&console.debug(`${fName} - not attachable`);
+			QDEB&&console.debug(`${fName} - not attachable!`);
 			return false;
 		}
+
+		this.windows.add(w);
 
 		// Keep track when changing folders
 		if(w.FolderDisplayListenerManager) {
 			// MAYBE: suggest listenerExists or smth
 			let idx = w.FolderDisplayListenerManager._listeners.indexOf(this.dBViewListener);
 			if (idx >= 0) {
-				QDEB&&console.debug(`${fName} - FolderDisplayListenerManager.registerListener() - already installed`);
+				QDEB&&console.debug(`${fName} - FolderDisplayListenerManager: listener already installed`);
 			} else {
 				QDEB&&console.debug(`${fName} - FolderDisplayListenerManager.registerListener()`);
 				w.FolderDisplayListenerManager.registerListener(this.dBViewListener);
 			}
 		} else {
-			QDEB&&console.debug(`${fName} - FolderDisplayListenerManager -not found-`);
+			QDEB&&console.debug(`${fName} - FolderDisplayListenerManager: not found`);
 		}
 
 		this.addColumnHandler(w.gDBView);
 
-		return this.windows.add(w);
+		return true;
 	}
 
 	detachFromWindow(w){
 		let fName = `${this.constructor.name}.detachFromWindow()`;
+		QDEB&&console.debug(`${fName} - detaching...`);
 
 		if(!this.windows.has(w)){
-			QDEB&&console.debug(`${fName} - window not found`);
+			QDEB&&console.debug(`${fName} - window not found!`);
 			return false;
 		}
 
-		QDEB&&console.debug(`${fName}`);
+		this.windows.delete(w);
+
+		this.removeColumnHandler(w.gDBView)
 
 		if(w.FolderDisplayListenerManager) {
 			QDEB&&console.debug(`${fName} - FolderDisplayListenerManager.unregisterListener()`);
 			w.FolderDisplayListenerManager.unregisterListener(this.dBViewListener);
 		}
-
-		this.removeColumnHandler(w.gDBView);
 
 		// If we remove from DOM then column properties does not get saved
 		// if(qnoteCol = w.document.getElementById("qnoteCol")){
@@ -109,7 +109,7 @@ class NoteColumnHandler {
 		// 	qnoteCol.parentNode.removeChild(qnoteCol);
 		// }
 
-		return this.windows.delete(w);
+		return true;
 	}
 
 	// http://wbamberg.github.io/idl-reference/docs/nsIXULStore.html
