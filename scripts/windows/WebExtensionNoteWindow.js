@@ -2,9 +2,9 @@ class WebExtensionNoteWindow extends NoteWindow {
 	constructor(windowId) {
 		super(windowId);
 
-		browser.windows.onRemoved.addListener(windowId => {
+		browser.windows.onRemoved.addListener(async windowId => {
 			if(windowId === this.popupId){
-				this.close(false);
+				await this.silentlyPersistAndClose();
 			}
 		});
 	}
@@ -23,14 +23,11 @@ class WebExtensionNoteWindow extends NoteWindow {
 		});
 	}
 
-	async close(closeWindow = true) {
-		if(closeWindow){
-			browser.windows.remove(this.popupId);
-			super.close();
-		}
+	async close() {
+		browser.windows.remove(this.popupId);
+		super.close();
 	}
 
-	// TODO: adjust position to match relative positions XULWindow using
 	async pop() {
 		return super.pop(async () => {
 			let note = this.note;
@@ -46,10 +43,18 @@ class WebExtensionNoteWindow extends NoteWindow {
 			return browser.windows.create(opt).then(async windowInfo => {
 				this.popupId = windowInfo.id;
 
+				let adjX = 0;
+				let adjY = 0;
+
+				await browser.windows.get(this.windowId).then(Window => {
+					adjX = Window.left;
+					adjY = Window.top;
+				});
+
 				if(opt.left && opt.top){
 					await browser.windows.update(windowInfo.id, {
-						left: opt.left,
-						top: opt.top
+						left: opt.left + adjX,
+						top: opt.top + adjY
 					});
 				}
 
