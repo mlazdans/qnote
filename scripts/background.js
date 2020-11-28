@@ -97,21 +97,6 @@ async function initExtension(){
 	// 	console.warn(`Unhandle: ${event.reason}`, event);
 	// });
 
-	browser.qpopup.onControls.addListener(async (action, id, pi) => {
-		QDEB&&console.debug("browser.qpopup.onControls()", action, id);
-		if(action !== 'click' || pi.id != CurrentNote.popupId){
-			return;
-		}
-
-		if(id === 'note-delete'){
-			await CurrentNote.silentlyDeleteAndClose();
-		}
-
-		if(id === 'qpopup-close'){
-			await CurrentNote.silentlyPersistAndClose();
-		}
-	});
-
 	await browser.qapp.init();
 
 	// KeyDown from qapp
@@ -141,7 +126,14 @@ async function initExtension(){
 
 	// Create tabs
 	browser.tabs.onCreated.addListener(async Tab => {
-		QDEB&&console.debug("tabs.onCreated()", Tab);
+		QDEB&&console.debug("tabs.onCreated()", getTabId(Tab), CurrentNote.popupId);
+
+		// This check is needed for WebExtensionNoteWindow
+		// Not sure why this is triggered after WebExtensionNoteWindow is created
+		if(!CurrentNote.popupId || (getTabId(Tab) === CurrentNote.popupId)){
+			return;
+		}
+
 		await CurrentNote.silentlyPersistAndClose();
 
 		// CurrentTabId = activeInfo.tabId;
@@ -163,7 +155,13 @@ async function initExtension(){
 
 	// Create window
 	browser.windows.onCreated.addListener(async Window => {
-		QDEB&&console.debug("windows.onCreated()");
+		QDEB&&console.debug("windows.onCreated()", Window.id, CurrentNote.popupId);
+
+		// This check is needed for WebExtensionNoteWindow
+		if(!CurrentNote.popupId || (Window.id === CurrentNote.popupId)){
+			return;
+		}
+
 		await CurrentNote.silentlyPersistAndClose();
 
 		CurrentWindowId = Window.id;
@@ -190,7 +188,12 @@ async function initExtension(){
 			return;
 		}
 
-		QDEB&&console.debug("windows.onFocusChanged(), windowId:", windowId, ", current windowId:", CurrentNote.windowId);
+		QDEB&&console.debug("windows.onFocusChanged(), windowId:", windowId, ", current windowId:", CurrentNote.windowId, CurrentNote.popupId);
+
+		// This check is needed for WebExtensionNoteWindow
+		if(!CurrentNote.popupId || windowId === CurrentNote.popupId){
+			return;
+		}
 
 		await CurrentNote.silentlyPersistAndClose();
 
