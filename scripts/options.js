@@ -68,11 +68,6 @@ async function saveOptionsDefaultHandler(prefs) {
 
 	ext.Prefs = await ext.loadPrefsWithDefaults();
 
-	// if(prefs.showFirstChars !== oldPrefs.showFirstChars){
-	// 	// await browser.qapp.clearNoteCache();
-	// 	// await browser.qapp.setColumnTextLimit(prefs.showFirstChars);
-	// }
-
 	// Storage option changed
 	if(prefs.storageOption !== oldPrefs.storageOption){
 		await browser.qapp.clearNoteCache();
@@ -81,16 +76,7 @@ async function saveOptionsDefaultHandler(prefs) {
 	// Folder changed
 	if(prefs.storageFolder !== oldPrefs.storageFolder){
 		await browser.qapp.clearNoteCache();
-		// ext.reloadExtension();
 	}
-
-	// if(prefs.windowOption !== oldPrefs.windowOption){
-	// 	ext.reloadExtension();
-	// }
-
-	// if(prefs.enableSearch !== oldPrefs.enableSearch){
-	// 	ext.reloadExtension();
-	// }
 
 	await ext.setUpExtension();
 	initOptionsPageValues();
@@ -463,6 +449,21 @@ async function initOptionsPage(){
 
 	i18n.setTexts(document);
 
+	// Add auto-save to the controls
+	let saveListener = (el, method) => el.addEventListener(method, e => {
+		saveOptions();
+		if(ext.CurrentNote.dirty){
+			e.preventDefault();
+			e.stopImmediatePropagation();
+			return false;
+		}
+	});
+	document.querySelectorAll("input[type=text],input[type=number]").forEach(el => saveListener(el, "keydown"));
+	document.querySelectorAll("select").forEach(el => saveListener(el, "change"));
+	document.querySelectorAll("input[type=checkbox],input[type=radio]").forEach(el => saveListener(el, "click"));
+	document.querySelectorAll("button").forEach(el => saveListener(el, "click"));
+	document.querySelectorAll("input[type=file]").forEach(el => saveListener(el, "change"));
+
 	initTags(tags);
 	generatePosGrid();
 	initOptionsPageValues();
@@ -482,18 +483,6 @@ async function initOptionsPage(){
 
 	// Handle storage option click
 	document.querySelectorAll("input[name=storageOption]").forEach(e => e.addEventListener("click", storageOptionChange));
-
-	// Add auto-save to the controls
-	let saveListener = (el, method) => el.addEventListener(method, e => {
-		saveOptions();
-		if(ext.CurrentNote.dirty){
-			e.preventDefault();
-			return false;
-		}
-	});
-	document.querySelectorAll("input[type=text],input[type=number]").forEach(el => saveListener(el, "keydown"));
-	document.querySelectorAll("select").forEach(el => saveListener(el, "change"));
-	document.querySelectorAll("input[type=checkbox],input[type=radio]").forEach(el => saveListener(el, "click"));
 }
 
 window.addEventListener("load", ()=>{
