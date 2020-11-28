@@ -138,14 +138,14 @@ async function initExtension(){
 	browser.windows.onCreated.addListener(async Window => {
 		QDEB&&console.debug("windows.onCreated()", Window.id, CurrentNote.popupId);
 
+		CurrentWindowId = Window.id;
+
 		// This check is needed for WebExtensionNoteWindow
 		if(!CurrentNote.popupId || (Window.id === CurrentNote.popupId)){
 			return;
 		}
 
 		await CurrentNote.silentlyPersistAndClose();
-
-		CurrentWindowId = Window.id;
 	});
 
 	browser.windows.onRemoved.addListener(async windowId => {
@@ -163,7 +163,12 @@ async function initExtension(){
 			return;
 		}
 
-		QDEB&&console.debug("windows.onFocusChanged(), windowId:", windowId, ", current windowId:", CurrentNote.windowId, CurrentNote.popupId);
+		QDEB&&console.debug("windows.onFocusChanged(), windowId:", windowId, ", current windowId:", CurrentNote.windowId);
+
+		CurrentNote.windowId = CurrentWindowId = windowId;
+		CurrentTabId = await getCurrentTabId();
+
+		mpUpdateCurrent();
 
 		// This check is needed for WebExtensionNoteWindow
 		if(!CurrentNote.popupId || windowId === CurrentNote.popupId){
@@ -171,11 +176,6 @@ async function initExtension(){
 		}
 
 		await CurrentNote.silentlyPersistAndClose();
-
-		CurrentNote.windowId = CurrentWindowId = windowId;
-		CurrentTabId = await getCurrentTabId();
-
-		mpUpdateCurrent();
 	});
 
 	// Change message
