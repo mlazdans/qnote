@@ -3,6 +3,7 @@
 // TODO: save note pos and dims locally, outside note
 // TODO: save create and update time
 // TODO: attach keyb/col handler to all windows at the start
+// TODO: getting dead object: open msg in tab, drag out in new window, reload extension when tread view activated in new window
 var QDEB = true;
 var Prefs;
 var CurrentNote;

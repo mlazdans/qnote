@@ -332,6 +332,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						};
 					}
 				}).api(),
+				// TODO: pass windowId
 				async init(){
 					QDEB&&console.debug("qapp.init()");
 
@@ -351,8 +352,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					});
 				},
 				async setDebug(on){
-					QDEB = on;
-					API.ColumnHandler.setDebug(QDEB);
+					API.ColumnHandler.setDebug(QDEB = on);
 				},
 				async setPrinterAttacherPrefs(prefs){
 					API.printerAttacherPrefs = prefs;
