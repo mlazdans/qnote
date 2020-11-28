@@ -57,31 +57,19 @@ class XULNoteWindow extends NoteWindow {
 	}
 
 	async pop() {
-		return super.pop(async () => {
-			let note = this.note;
-			let opt = {
+		return super.pop(async opt => {
+			opt = Object.assign(opt, {
 				windowId: this.windowId,
+				title: "QNote",
 				url: "html/popup4.html",
 				controlsCSS: '../html/popup4-controls.css',
-				title: "QNote",
-				width: note.width || Prefs.width,
-				height: note.height || Prefs.height,
-				left: note.left,
-				top: note.top,
 				anchor: Prefs.anchor,
 				anchorPlacement: Prefs.anchorPlacement,
 				minWidth: 200,
 				minHeight: 125,
 				maxWidth: 800,
 				maxHeight: 500
-			};
-
-			if(Prefs.alwaysDefaultPlacement){
-				opt.width = Prefs.width;
-				opt.height = Prefs.height;
-				opt.left = undefined;
-				opt.top = undefined;
-			}
+			});
 
 			return browser.qpopup.create(opt).then(popupInfo => {
 				this.popupId = popupInfo.id;

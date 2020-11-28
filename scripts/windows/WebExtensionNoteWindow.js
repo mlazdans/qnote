@@ -29,16 +29,11 @@ class WebExtensionNoteWindow extends NoteWindow {
 	}
 
 	async pop() {
-		return super.pop(async () => {
-			let note = this.note;
-			let opt = {
+		return super.pop(async opt => {
+			opt = Object.assign(opt, {
 				url: "html/popup.html",
-				type: "popup",
-				width: note.width || Prefs.width,
-				height: note.height || Prefs.height,
-				left: note.left || 0,
-				top: note.top || 0
-			};
+				type: "popup"
+			});
 
 			return browser.windows.create(opt).then(async windowInfo => {
 				this.popupId = windowInfo.id;

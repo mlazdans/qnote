@@ -187,7 +187,23 @@ class NoteWindow extends QEventDispatcher {
 				return false;
 			}
 
-			return popper().then(isPopped => this.shown = isPopped);
+			let note = this.note;
+
+			let opt = {
+				width: note.width || Prefs.width,
+				height: note.height || Prefs.height,
+				left: note.left,
+				top: note.top
+			};
+
+			if(Prefs.alwaysDefaultPlacement){
+				opt.width = Prefs.width;
+				opt.height = Prefs.height;
+				opt.left = undefined;
+				opt.top = undefined;
+			}
+
+			return popper(opt).then(isPopped => this.shown = isPopped);
 		});
 	}
 
