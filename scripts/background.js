@@ -109,19 +109,15 @@ async function initExtension(){
 	// Change folders
 	browser.mailTabs.onDisplayedFolderChanged.addListener(async (Tab, displayedFolder) => {
 		QDEB&&console.debug("mailTabs.onDisplayedFolderChanged()");
+
 		await CurrentNote.silentlyPersistAndClose();
+
 		resetTbState();
 	});
 
 	// Create tabs
 	browser.tabs.onCreated.addListener(async Tab => {
-		QDEB&&console.debug("tabs.onCreated()", getTabId(Tab), CurrentNote.popupId);
-
-		// This check is needed for WebExtensionNoteWindow
-		// Not sure why this is triggered after WebExtensionNoteWindow is created
-		if(!CurrentNote.popupId || (getTabId(Tab) === CurrentNote.popupId)){
-			return;
-		}
+		QDEB&&console.debug("tabs.onCreated(), tabId:", getTabId(Tab));
 
 		await CurrentNote.silentlyPersistAndClose();
 	});
@@ -137,20 +133,18 @@ async function initExtension(){
 
 	// Create window
 	browser.windows.onCreated.addListener(async Window => {
-		QDEB&&console.debug("windows.onCreated()", Window.id, CurrentNote.popupId);
-
-		CurrentWindowId = Window.id;
+		QDEB&&console.debug("windows.onCreated(), windowId:", Window.id);
 
 		// This check is needed for WebExtensionNoteWindow
-		if(!CurrentNote.popupId || (Window.id === CurrentNote.popupId)){
-			return;
+		if(Window.type === "type"){
+			CurrentWindowId = Window.id;
 		}
 
 		await CurrentNote.silentlyPersistAndClose();
 	});
 
 	browser.windows.onRemoved.addListener(async windowId => {
-		QDEB&&console.debug("windows.onRemoved(), windowId:", windowId, ", current windowId:", CurrentNote.windowId);
+		QDEB&&console.debug("windows.onRemoved(), windowId:", windowId);
 
 		mpUpdateCurrent();
 	});
@@ -158,23 +152,20 @@ async function initExtension(){
 	// Change focus
 	browser.windows.onFocusChanged.addListener(async windowId => {
 		if(
-			windowId === browser.windows.WINDOW_ID_NONE ||
-			windowId === CurrentNote.windowId
+			false
+			|| windowId === browser.windows.WINDOW_ID_NONE
+			|| windowId === CurrentNote.windowId
+			|| windowId === CurrentNote.popupId // This check is needed for WebExtensionNoteWindow
 		){
 			return;
 		}
 
-		QDEB&&console.debug("windows.onFocusChanged(), windowId:", windowId, ", current windowId:", CurrentNote.windowId);
+		QDEB&&console.debug("windows.onFocusChanged(), windowId:", windowId);
 
 		CurrentNote.windowId = CurrentWindowId = windowId;
 		CurrentTabId = await getCurrentTabId();
 
 		mpUpdateCurrent();
-
-		// This check is needed for WebExtensionNoteWindow
-		if(!CurrentNote.popupId || windowId === CurrentNote.popupId){
-			return;
-		}
 
 		await CurrentNote.silentlyPersistAndClose();
 	});
