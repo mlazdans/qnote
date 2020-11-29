@@ -1,4 +1,3 @@
-// TODO: disable Reload, Import, etc buttons if CurrentNote.dirty
 var ext = chrome.extension.getBackgroundPage();
 var i18n = ext.i18n;
 var _ = browser.i18n.getMessage;
