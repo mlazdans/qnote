@@ -491,7 +491,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// });
 				},
 				async updateView(windowId, keyId){
-					let fName = "qapp.updateView()";
+					let fName = `qapp.updateView(${windowId}, ${keyId})`;
 
 					let w = API.id2RealWindow(windowId);
 					if(!w || !w.document){
@@ -545,7 +545,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					API.messageAttacherPrefs = prefs;
 				},
 				async attachNoteToMessage(windowId, data){
-					let fName = "qapp.attachNoteToMessage()";
+					let fName = `qapp.attachNoteToMessage(${windowId})`;
 
 					if(!data){
 						QDEB&&console.debug(`${fName} - no note data`);
