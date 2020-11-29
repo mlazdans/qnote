@@ -51,7 +51,7 @@
 		"message": "Erste N Zeichen in QNote-Spalte anzeigen"
 	},
 	"focus.on.display": {
-		"message": "In angezeigter QNote sofort weiter schreiben (nur bei Post-it)"
+		"message": "In angezeigter QNote sofort weiter schreiben"
 	},
 	"overwrite.existing.notes": {
 		"message": "Vorhandene Notizen überschreiben"

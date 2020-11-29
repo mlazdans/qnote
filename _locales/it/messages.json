@@ -51,7 +51,7 @@
 		"message": "Visualizza i primi \"n\" caratteri nella colonna QNote"
 	},
 	"focus.on.display": {
-		"message": "Attiva QNote dopo la visualizzazione (solo pannello fluttuante)"
+		"message": "Attiva QNote dopo la visualizzazione"
 	},
 	"overwrite.existing.notes": {
 		"message": "Sovrascrivo le note esistenti?"

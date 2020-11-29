@@ -51,7 +51,7 @@
 		"message": "Afficher les n premiers caractères dans la colonne QNote : n ="
 	},
 	"focus.on.display": {
-		"message": "Cibler QNote à l’affichage (panneau flottant uniquement)"
+		"message": "Cibler QNote à l’affichage"
 	},
 	"overwrite.existing.notes": {
 		"message": "Remplacer les notes existantes"
