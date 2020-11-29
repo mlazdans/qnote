@@ -136,7 +136,7 @@ async function initExtension(){
 		QDEB&&console.debug("windows.onCreated(), windowId:", Window.id);
 
 		// This check is needed for WebExtensionNoteWindow
-		if(Window.type === "type"){
+		if(Window.type === "normal"){
 			CurrentWindowId = Window.id;
 		}
 
