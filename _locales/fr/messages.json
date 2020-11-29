@@ -9,7 +9,7 @@
 		"message": "Parcourir…"
 	},
 	"folder.unaccesible": {
-		"message": "Dossier inaccessible : $1"
+		"message": "Dossier introuvable ou inexploitable : $1"
 	},
 	"json.parse.error": {
 		"message": "Erreur d’analyse JSON : $1"
@@ -57,7 +57,7 @@
 		"message": "Remplacer les notes existantes"
 	},
 	"can.use.xnote.folder": {
-		"message": "Il est possible d’utiliser l’ancien dossier XNote++"
+		"message": "(dossier de XNote++ accepté)"
 	},
 	"no.message_id.header": {
 		"message": "Impossible de créer la note : message sans en-tête d’identification (message-id:)"
@@ -66,7 +66,7 @@
 		"message": "Maintenance"
 	},
 	"use.tag.manager": {
-		"message": "(utiliser le gestionnaire d’étiquettes)"
+		"message": "(utiliser le gestionnaire des étiquettes)"
 	},
 	"import.finished.stats": {
 		"message": "Importation terminée :\n$1 notes importées\n$2 notes erronées\n$3 notes existantes\n$4 notes remplacées"
@@ -75,13 +75,13 @@
 		"message": "Impossible d’importer les notes"
 	},
 	"xnote.folder.inaccessible": {
-		"message": "Dossier XNote++ inaccessible"
+		"message": "Dossier de XNote++ introuvable ou inexploitable"
 	},
 	"xnote.folder.found": {
-		"message": "Dossier XNote++ trouvé : $1"
+		"message": "Dossier de XNote++ trouvé : $1"
 	},
 	"storage.export.limitation": {
-		"message": "L’exportation du stockage n’est possible que sur Thunderbird 78 ou supérieur."
+		"message": "Exportation du stockage possible uniquement sous Thunderbird 78 ou supérieur"
 	},
 	"storage.fieldset": {
 		"message": "Stockage"
@@ -120,10 +120,10 @@
 		"message": "un panneau flottant"
 	},
 	"window.option.webext": {
-		"message": "une fenêtre contextuelle"
+		"message": "une fenêtre contextuelle (obsolète)"
 	},
 	"close.and.save": {
-		"message": "Fermer et enregistrer"
+		"message": "Enregistrer et fermer"
 	},
 	"delete": {
 		"message": "Supprimer"
@@ -132,7 +132,7 @@
 		"message": "Activer la recherche"
 	},
 	"enable.print_attach": {
-		"message": "Incorporer à l’impression"
+		"message": "Intégrer à l’impression"
 	},
 	"attach.bottom": {
 		"message": "en bas"
@@ -144,22 +144,22 @@
 		"message": "le titre"
 	},
 	"attach.text": {
-		"message": "le texte"
+		"message": "le contenu"
 	},
 	"enable.message_attach": {
-		"message": "Attacher au message"
+		"message": "Intégrer au message"
 	},
 	"enable.debug.messages": {
 		"message": "Activer les messages de débogage"
 	},
 	"date.format": {
-		"message": "Format de la date : "
+		"message": "Horodatage"
 	},
 	"date.format.custom": {
-		"message": "personnalisé"
+		"message": "Utilisateur"
 	},
 	"formatting.rules": {
-		"message": "Règles de formatage"
+		"message": "Caractères de formatage"
 	},
 	"datetime_group": {
 		"message": "Date et heure"
@@ -186,10 +186,10 @@
 		"message": "(désactivée en attendant une meilleure solution)"
 	},
 	"additional.attach": {
-		"message": "Intégration supplémentaire"
+		"message": "Intégration"
 	},
 	"import.folder.button": {
-		"message": "Importer les notes du dossier"
+		"message": "Importer les notes d’un dossier"
 	},
 	"anchor.window": {
 		"message": "à la fenêtre"
@@ -198,9 +198,36 @@
 		"message": "à la liste des messages"
 	},
 	"anchor.message": {
-		"message": "au message"
+		"message": "au corps du message"
 	},
 	"options": {
 		"message": "Options"
+	},
+	"reset.defaults.button": {
+		"message": "Réinitialiser"
+	},
+	"error": {
+		"message": "Erreur"
+	},
+	"custom.date.locale": {
+		"message": "Langue"
+	},
+	"locale.rules": {
+		"message": "Codes"
+	},
+	"error.saving.note": {
+		"message": "Erreur à l’enregistrement de la note"
+	},
+	"error.deleting.note": {
+		"message": "Erreur à la suppression de la note"
+	},
+	"close.current.note": {
+		"message": "Veuillez fermer la note actuelle."
+	},
+	"always.default.placement": {
+		"message": "Toujours rétablir la position et les dimensions par défaut"
+	},
+	"options.reset": {
+		"message": "Options réinitialisées"
 	}
 }
