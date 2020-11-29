@@ -8,7 +8,6 @@ var ErrMsg = [];
 
 var importFolderButton = document.getElementById('importFolderButton');
 var importFolderLoader = document.getElementById("importFolderLoader");
-// var saveButton = document.getElementById('saveButton');
 var resetDefaultsButton = document.getElementById('resetDefaultsButton');
 var clearStorageButton = document.getElementById('clearStorageButton');
 var exportStorageButton = document.getElementById('exportStorageButton');
@@ -475,16 +474,12 @@ async function initOptionsPage(){
 	initFolderImportButton();
 	initExportStorageButton();
 
-	// saveButton.addEventListener('click', () => saveOptions());
 	clearStorageButton.addEventListener('click', clearStorage);
 	exportStorageButton.addEventListener('click', ext.exportStorage);
 	importFile.addEventListener("change", importInternalStorage);
 	reloadExtensionButton.addEventListener("click", ext.reloadExtension);
 	storageFolderBrowseButton.addEventListener("click", storageFolderBrowse);
 	resetDefaultsButton.addEventListener("click", resetDefaults);
-
-	// Handle click on placement radio parent cell
-	// document.querySelectorAll("input[name=anchorPlacement]").forEach(e => e.parentNode.addEventListener("click", () => e.click()));
 
 	// Handle storage option click
 	document.querySelectorAll("input[name=storageOption]").forEach(e => e.addEventListener("click", storageOptionChange));
