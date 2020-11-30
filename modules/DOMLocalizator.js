@@ -8,11 +8,29 @@ class DOMLocalizator {
 	setTexts(document){
 		for (const node of document.querySelectorAll('[data-i18n]')) {
 			try {
-				let text = this._(node.dataset.i18n);
+				let args = [];
+				let params = [];
+				if(node.dataset.i18n == "implemented.formatting.rules"){
+					for(let p in node.dataset){
+						let m;
+						if(m = p.match(/^param(\d+)$/)){
+							params[m[1]] = node.dataset[p];
+						}
+					}
+
+					let keys = Object.keys(params);
+					keys.sort();
+
+					for(let k of keys){
+						args.push(params[k]);
+					}
+				}
+
+				let text = this._(node.dataset.i18n, args);
 				if(this.isButton(node)){
 					node.value = text;
 				} else {
-					node.appendChild(document.createTextNode(text));
+					node.prepend(document.createTextNode(text));
 				}
 			} catch (e) {
 				console.warn(e);
