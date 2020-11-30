@@ -161,6 +161,9 @@
 	"formatting.rules": {
 		"message": "Formatting rules"
 	},
+	"implemented.formatting.rules": {
+		"message": "(implemented: $1)"
+	},
 	"datetime_group": {
 		"message": "Date and time"
 	},
@@ -210,10 +213,10 @@
 		"message": "Error"
 	},
 	"custom.date.locale": {
-		"message": "Locale for date"
+		"message": "Date localisation"
 	},
 	"locale.rules": {
-		"message": "Locale rules"
+		"message": "Language tags"
 	},
 	"error.saving.note": {
 		"message": "Error saving note"

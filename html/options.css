@@ -163,10 +163,10 @@ td {
 #dateBlock {
 	display: grid;
 	align-items: auto;
-	grid-template-columns: min-content min-content auto;
+	grid-template-columns: min-content min-content;
 }
 
-#dateBlock div {
+#dateBlock > div {
 	white-space: nowrap;
 	margin: auto 0;
 }
