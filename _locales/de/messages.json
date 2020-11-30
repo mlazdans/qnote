@@ -57,7 +57,7 @@
 		"message": "Vorhandene Notizen überschreiben"
 	},
 	"can.use.xnote.folder": {
-		"message": "(sie können den bestehenden XNote++ Ordner verwenden)"
+		"message": "(Sie können den bestehenden XNote++ Ordner verwenden)"
 	},
 	"no.message_id.header": {
 		"message": "QNote kann nicht erstellt werden: Email besitzt keine 'Nachrichten-ID'"
@@ -120,7 +120,7 @@
 		"message": "Post-it"
 	},
 	"window.option.webext": {
-		"message": "Eigenes Fenster"
+		"message": "Eigenes Fenster (Option abgekündigt)"
 	},
 	"close.and.save": {
 		"message": "Schließen und Speichern"
@@ -202,5 +202,32 @@
 	},
 	"options": {
 		"message": "Einstellungen"
+	},
+	"reset.defaults.button": {
+		"message": "Auf Standardeinstellungen zurücksetzen"
+	},
+	"error": {
+		"message": "Fehler"
+	},
+	"custom.date.locale": {
+		"message": "Sprachkennung"
+	},
+	"locale.rules": {
+		"message": "Auswahl"
+	},
+	"error.saving.note": {
+		"message": "Fehler beim Speichern"
+	},
+	"error.deleting.note": {
+		"message": "Fehler beim Löschen"
+	},
+	"close.current.note": {
+		"message": "Bitte aktuelle QNote schließen"
+	},
+	"always.default.placement": {
+		"message": "Für Größe und Position immer Standard verwenden"
+	},
+	"options.reset": {
+		"message": "Einstellungen wurden zurückgesetzt"
 	}
 }
