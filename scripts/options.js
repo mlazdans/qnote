@@ -444,6 +444,8 @@ async function initOptionsPage(){
 
 	// Add auto-save to the controls
 	// Also prevent if note dirty
+	// Also prevent too fast changing
+	let saving = 0;
 	let saveListener = (el, method, doSave = true) => el.addEventListener(method, e => {
 		if(ext.CurrentNote.dirty){
 			ErrMsg = [_("close.current.note")];
@@ -451,7 +453,12 @@ async function initOptionsPage(){
 			e.preventDefault();
 			e.stopImmediatePropagation();
 		} else if(doSave) {
-			saveOptions();
+			setTimeout(() => {
+				if(!--saving){
+					saveOptions();
+				}
+			}, 200);
+			saving++;
 		}
 	});
 	document.querySelectorAll("input[type=text],input[type=number]").forEach(el => saveListener(el, "keyup"));
