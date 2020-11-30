@@ -161,6 +161,9 @@
 	"formatting.rules": {
 		"message": "Regeln zur Formatierung"
 	},
+	"implemented.formatting.rules": {
+		"message": "(umgesetzt: $1)"
+	},
 	"datetime_group": {
 		"message": "Datum und Uhrzeit"
 	},

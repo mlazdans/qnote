@@ -161,6 +161,9 @@
 	"formatting.rules": {
 		"message": "Regole di formattazione"
 	},
+	"implemented.formatting.rules": {
+		"message": "(implementato: $1)"
+	},
 	"datetime_group": {
 		"message": "Data e ora"
 	},
@@ -210,10 +213,10 @@
 		"message": "Errore"
 	},
 	"custom.date.locale": {
-		"message": "Impostazioni locali Data"
+		"message": "Data locale"
 	},
 	"locale.rules": {
-		"message": "Regole locali"
+		"message": "Tag linguaggio"
 	},
 	"error.saving.note": {
 		"message": "Errore durante il salvataggio della nota"

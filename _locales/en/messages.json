@@ -213,7 +213,7 @@
 		"message": "Error"
 	},
 	"custom.date.locale": {
-		"message": "Date localisation"
+		"message": "Date localization"
 	},
 	"locale.rules": {
 		"message": "Language tags"

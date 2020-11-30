@@ -161,6 +161,9 @@
 	"formatting.rules": {
 		"message": "Caractères de formatage"
 	},
+	"implemented.formatting.rules": {
+		"message": "(implantés : $1)"
+	},
 	"datetime_group": {
 		"message": "Date et heure"
 	},
@@ -210,10 +213,10 @@
 		"message": "Erreur"
 	},
 	"custom.date.locale": {
-		"message": "Langue"
+		"message": "Localisation de la date"
 	},
 	"locale.rules": {
-		"message": "Codes"
+		"message": "Identifiants de langues"
 	},
 	"error.saving.note": {
 		"message": "Erreur à l’enregistrement de la note"
