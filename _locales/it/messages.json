@@ -57,7 +57,7 @@
 		"message": "Sovrascrivo le note esistenti?"
 	},
 	"can.use.xnote.folder": {
-		"message": "(puoi usare la cartella esistente di XNote++ folder)"
+		"message": "(puoi usare la cartella XNote++)"
 	},
 	"no.message_id.header": {
 		"message": "Non posso creare la nota. Messaggio senza 'message-id:' intestazione"
@@ -120,7 +120,7 @@
 		"message": "Pannello fluttuante"
 	},
 	"window.option.webext": {
-		"message": "Finestra popup"
+		"message": "Finestra Popup (deprecata)"
 	},
 	"close.and.save": {
 		"message": "Chiudi e salva"
@@ -202,5 +202,32 @@
 	},
 	"options": {
 		"message": "Opzioni"
+	},
+	"reset.defaults.button": {
+		"message": "Reset a default"
+	},
+	"error": {
+		"message": "Errore"
+	},
+	"custom.date.locale": {
+		"message": "Impostazioni locali Data"
+	},
+	"locale.rules": {
+		"message": "Regole locali"
+	},
+	"error.saving.note": {
+		"message": "Errore durante il salvataggio della nota"
+	},
+	"error.deleting.note": {
+		"message": "Errore durante l'eliminazione della nota"
+	},
+	"close.current.note": {
+		"message": "Per favore chiudi la nota corrente"
+	},
+	"always.default.placement": {
+		"message": "Usa sempre posizione e dimensione di default"
+	},
+	"options.reset": {
+		"message": "Le opzioni sono state ripristinate"
 	}
 }
