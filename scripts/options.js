@@ -186,13 +186,7 @@ function initDateFormats(){
 
 function dateFormatChange(){
 	let select = window.document.getElementById('dateFormatPredefined');
-	let customBlock = window.document.getElementById('block_dateFormat');
-
-	if(select.value){
-		customBlock.style.display = 'none';
-	} else {
-		customBlock.style.display = '';
-	}
+	document.querySelectorAll(".customDateFormat").forEach(e => e.style.display = select.value ? 'none' : '');
 }
 
 async function initExportStorageButton() {
@@ -460,7 +454,7 @@ async function initOptionsPage(){
 			saveOptions();
 		}
 	});
-	document.querySelectorAll("input[type=text],input[type=number]").forEach(el => saveListener(el, "keydown"));
+	document.querySelectorAll("input[type=text],input[type=number]").forEach(el => saveListener(el, "keyup"));
 	document.querySelectorAll("select,input[type=number]").forEach(el => saveListener(el, "change"));
 	document.querySelectorAll("input[type=checkbox],input[type=radio]").forEach(el => saveListener(el, "click"));
 

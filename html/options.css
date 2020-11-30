@@ -37,7 +37,7 @@ fieldset {
 }
 
 select, input[type=text], input[type=number] {
-	/* border: 1px solid #96c9ef; */
+	margin-left: 8px; /* Hack to match select */
 	border: 1px solid var(--in-content-box-border-color);
 }
 
@@ -158,4 +158,15 @@ td {
 /* Col 5 */
 #posGrid .col:nth-child(5) .cell {
 	background-position-x: left;
+}
+
+#dateBlock {
+	display: grid;
+	align-items: auto;
+	grid-template-columns: min-content min-content auto;
+}
+
+#dateBlock div {
+	white-space: nowrap;
+	margin: auto 0;
 }

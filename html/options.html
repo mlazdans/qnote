@@ -94,23 +94,28 @@
 			<td><input type="number" data-preference="showFirstChars" id="input_showFirstChars" min="0" max="999" class="size2" /></td>
 		</tr>
 	</table>
-	<table>
-		<tr>
-			<td><label for="dateFormatPredefined" data-i18n="date.format"></label></td>
-			<td><select data-preference="dateFormatPredefined" id="dateFormatPredefined"></select></td>
-			<td><label for="dateLocale" data-i18n="custom.date.locale"></label></td>
-			<td><input type="text" id="dateLocale" name="dateLocale" data-preference="dateLocale" size="5"></td>
-			<td><a href="https://www.techonthenet.com/js/language_tags.php" class="text-link" data-i18n="locale.rules"></a></td>
-		</tr>
-	</table>
-	<div id="block_dateFormat" style="display: none;">
-		<table>
-			<tr>
-				<td><label for="dateFormat" data-i18n="date.format"></label></td>
-				<td><input type="text" id="dateFormat" name="dateFormat" data-preference="dateFormat"></td>
-				<td><a href="https://www.php.net/manual/en/datetime.format.php" class="text-link" data-i18n="formatting.rules"></a> (dDjlNwzWFmMntLYyGHisv)</td>
-			</tr>
-		</table>
+	<div id="dateBlock">
+		<div>
+			<label for="dateFormatPredefined" data-i18n="date.format"></label>
+		</div>
+		<div>
+			<select data-preference="dateFormatPredefined" id="dateFormatPredefined"></select>
+		</div>
+		<div></div>
+
+		<div class="customDateFormat"><label for="dateFormat" data-i18n="date.format"></label></div>
+		<div class="customDateFormat">
+			<input type="text" id="dateFormat" name="dateFormat" data-preference="dateFormat">
+			<span><a href="https://www.php.net/manual/en/datetime.format.php" class="text-link" data-i18n="formatting.rules"></a> (dDjlNwzWFmMntLYyGHisv)</span>
+		</div>
+		<div class="customDateFormat"></div>
+
+		<div><label for="dateLocale" data-i18n="custom.date.locale"></label></div>
+		<div>
+			<input type="text" id="dateLocale" name="dateLocale" data-preference="dateLocale" size="5">
+			<span><a href="https://www.techonthenet.com/js/language_tags.php" class="text-link" data-i18n="locale.rules"></a></span>
+		</div>
+		<div></div>
 	</div>
 </fieldset>
 <fieldset>
