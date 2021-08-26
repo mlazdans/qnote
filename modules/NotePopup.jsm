@@ -142,10 +142,10 @@ class NotePopup extends BasePopup {
 	}
 
 	focus(){
-		console.log("focus", this.browser, this.panel);
+		// console.log("focus", this.browser, this.panel);
 		// console.log("focus", this.panel.getElementsByTagName('body'));
-		this.panel.focus();
-		this.browser.focus();
+		// this.panel.focus();
+		// this.browser.focus();
 		// if(this.contentDocument.readyState !== "complete"){
 		// 	let self = this;
 		// 	let stateListener = e => {
