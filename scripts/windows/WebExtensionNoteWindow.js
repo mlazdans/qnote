@@ -31,7 +31,7 @@ class WebExtensionNoteWindow extends NoteWindow {
 	async pop() {
 		return super.pop(async opt => {
 			opt = Object.assign(opt, {
-				url: "html/popup.html",
+				url: "html/wepopup.html",
 				type: "popup"
 			});
 
