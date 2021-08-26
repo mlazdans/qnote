@@ -32,15 +32,6 @@ class NotePopup extends BasePopup {
 
 		super(extension, panel, popupURL, browserStyle, fixedWidth, blockParser);
 
-		// this.panel = panel;
-
-		// this.browser.setAttribute("messagemanagergroup", "browsers");
-		// let policy = ExtensionParent.WebExtensionPolicy.getByID(extension.id);
-		// this.browser.setAttribute(
-		// 	"initialBrowsingContextGroupId",
-		// 	policy.browsingContextGroupId
-		// );
-
 		this.popupURL = popupURL;
 		this.options = options;
 		this.domId = domId;
@@ -53,79 +44,6 @@ class NotePopup extends BasePopup {
 			};
 		}
 	}
-
-	/**
-	 * @param {string} contents
-	 */
-	// set contents(contents) {
-	// 	this.clontentsEl.innerHTML = contents;
-	// }
-
-	/**
-	 * @param {string} title
-	 */
-	// set title(title){
-	// 	this.titleTextEl.innerHTML = title;
-	// }
-
-	// get title(){
-	// 	return this.titleTextEl.innerHTML;
-	// }
-
-	// get isFocused(){
-	// 	let cae = this.contentDocument.activeElement;
-
-	// 	return cae ? cae.tagName !== 'BODY' : false;
-	// }
-
-	// get contentDocument(){
-	// 	try {
-	// 		// console.log("contentDocument", 	this.browser.contentDocument);
-	// 		return this.browser.contentWindow.document;
-	// 	} catch (e) {
-	// 		console.error(e);
-	// 	}
-	// }
-
-	// get popupEl(){
-	// 	return this.getFirstElementByClassName("qpopup");
-	// }
-
-	// get titleEl(){
-	// 	return this.getFirstElementByClassName("qpopup-title");
-	// }
-
-	// get titleTextEl(){
-	// 	return this.getFirstElementByClassName("qpopup-title-text");
-	// }
-
-	// get closeEl(){
-	// 	return this.getFirstElementByClassName("qpopup-title-closebutton");
-	// }
-
-	// get clontentsEl(){
-	// 	return this.getFirstElementByClassName("qpopup-contents");
-	// }
-
-	// get resizeEl(){
-	// 	return this.getFirstElementByClassName("qpopup-controls-resize");
-	// }
-
-	// get customControlsEl(){
-	// 	return this.getFirstElementByClassName("qpopup-custom-controls");
-	// }
-
-	// get iframeEl() {
-	// 	return this.getFirstElementByClassName("qpopup-contents-frame");
-	// }
-
-	// get iframeWindow() {
-	// 	return this.iframeEl.contentWindow;
-	// }
-
-	// get iframeDocument() {
-	// 	return this.iframeWindow.document;
-	// }
 
 	moveTo(x, y){
 		this.panel.moveTo(x, y);
@@ -141,21 +59,8 @@ class NotePopup extends BasePopup {
 		popup.style.height = height + 'px';
 	}
 
+	// TODO: fix
 	focus(){
-		// console.log("focus", this.browser, this.panel);
-		// console.log("focus", this.panel.getElementsByTagName('body'));
-		// this.panel.focus();
-		// this.browser.focus();
-		// if(this.contentDocument.readyState !== "complete"){
-		// 	let self = this;
-		// 	let stateListener = e => {
-		// 		self.contentDocument.removeEventListener("readystatechange", stateListener)
-		// 		self.focus();
-		// 	};
-		// 	this.contentDocument.addEventListener("readystatechange", stateListener);
-		// } else {
-		// 	this.iframeEl.focus();
-		// }
 	}
 
 	close() {
@@ -194,83 +99,10 @@ class NotePopup extends BasePopup {
 
 	pop(){
 		let self = this;
-		let { left, top, width, height, title, anchor, anchorPlacement } = this.options;
+		let { left, top, width, height, anchor, anchorPlacement } = this.options;
 		let window = self.window;
 
-		// ExtensionParent.apiManager.on("extension-browser-inserted", (m, br) => {
-		// 	console.log("extension-browser-inserted", br);
-		// });
-
-		// var initNote = () => {
-		// 	// MAYBE: install default .close();
-		// 	// closeButton.addEventListener("click", e => {
-		// 	// });
-
-		// 	this.attachEvents();
-
-		// 	// this.moveTo(left, top);
-		// 	this.sizeTo(width, height);
-		// 	this.shown = true;
-		// };
-
 		return new Promise(resolve => {
-			// let loadListener = (e0) => {
-			// 	console.log("loadListener", e0.target.URL, self.popupURL);
-			// 	//self.browser.style.display = "none";
-
-			// 	// We are not interested when about:blank been loaded
-			// 	if(e0.target.URL !== self.popupURL){
-			// 		return;
-			// 	}
-
-			// 	self.contentReady.then((e1, e2) => {
-			// 		self.title = title;
-			// 		self.contentDocument.addEventListener("focus", e => {
-			// 			if(self.onFocus){
-			// 				self.onFocus(e);
-			// 			}
-			// 			self.iframeWindow.focus();
-			// 		});
-
-			// 		self.contentDocument.addEventListener("blur", e => {
-			// 			if(self.onBlur){
-			// 				self.onBlur(e);
-			// 			}
-			// 		});
-
-			// 		initNote();
-			// 		resolve(true);
-			// 	});
-			// 	// browserLoaded
-			// 	// n.contentReady.then(()=>{
-			// 	// });
-			// 	// n.browserReady.then(()=>{
-			// 	// });
-			// };
-
-			// self.browser.addEventListener("DOMContentLoaded", loadListener);
-
-			// console.log("self.browser", self.browser, self.panel, self.popupURL, self);
-			// console.log("doc", self.browser.messageManager);
-
-			// let wm = Cc["@mozilla.org/appshell/window-mediator;1"].getService(Ci.nsIWindowMediator);
-			// let windows = wm.getEnumerator(null);
-			// while (windows.hasMoreElements()) {
-			// 	let domWindow = windows.getNext();
-			// 	console.log("domWindow", domWindow);
-			// 	// try {
-			// 	// 	domWindow = domWindow.QueryInterface(Ci.nsIDOMWindow);
-			// 	// 	console.log("domWindow", domWindow);
-			// 	// } catch(x) {
-			// 	// 	console.log(x);
-			// 	// }
-			// }
-
-			// var domWindow = self.browser.QueryInterface(Ci.nsIXULBrowserWindow);
-			// console.log("domWindow", domWindow);
-
-			// self.browser.addEventListener("load", loadListener, true);
-
 			let elements = {
 				window: "",
 				threadpane: "threadContentArea",
@@ -317,138 +149,4 @@ class NotePopup extends BasePopup {
 			resolve(true);
 		});
 	}
-
-	// attachEvents(){
-	// 	let self = this;
-	// 	let window = this.window;
-	// 	let panel = this.panel;
-	// 	let mDown = new WeakMap();
-
-	// 	let titleTextEl = this.titleTextEl;
-	// 	let titleEl = this.titleEl;
-	// 	let resizeEl = this.resizeEl;
-
-	// 	let { minWidth, minHeight, maxWidth, maxHeight } = this.options;
-
-	// 	// let tDrag = mouse => {
-	// 	// 	let popup = self.popupEl;
-	// 	// 	let el = mouse.target;
-	// 	// 	let startX = mouse.screenX;
-	// 	// 	let startY = mouse.screenY;
-	// 	// 	let startLeft = panel.screenX;
-	// 	// 	let startTop = panel.screenY;
-
-	// 	// 	el.style.cursor = 'move';
-
-	// 	// 	let mover = e => {
-	// 	// 		let x = e.screenX - startX + startLeft;
-	// 	// 		let y = e.screenY - startY + startTop;
-	// 	// 		panel.moveTo(x, y);
-	// 	// 		return {
-	// 	// 			// left: e.screenX - window.screenX,
-	// 	// 			// top: e.screenY - window.screenY
-	// 	// 			left: x,
-	// 	// 			top: y
-	// 	// 			// x: e.screenX - startX + startLeft - window.screenX,
-	// 	// 			// y: e.screenY - startY + startTop - window.screenY
-	// 	// 		}
-	// 	// 	};
-
-	// 	// 	let handleDragEnd = e => {
-	// 	// 		window.removeEventListener("mousemove", mover);
-	// 	// 		window.removeEventListener("mouseup", handleDragEnd);
-	// 	// 		popup.style.opacity = '1';
-	// 	// 		el.style.cursor = '';
-	// 	// 		if(self.onMove){
-	// 	// 			self.onMove(mover(e), e);
-	// 	// 		}
-	// 	// 	}
-
-	// 	// 	window.addEventListener("mouseup", handleDragEnd);
-	// 	// 	window.addEventListener("mousemove", mover);
-
-	// 	// 	popup.style.opacity = '0.4';
-	// 	// };
-
-	// 	// let tResize =  e => {
-	// 	// 	let popup = self.popupEl;
-	// 	// 	let startX = e.screenX;
-	// 	// 	let startY = e.screenY;
-	// 	// 	let startW = popup.offsetWidth;
-	// 	// 	let startH = popup.offsetHeight;
-
-	// 	// 	let rectLimit = {
-	// 	// 		minWidth: minWidth || 200,
-	// 	// 		minHeight: minHeight || 125,
-	// 	// 		maxWidth: maxWidth || 800,
-	// 	// 		maxHeight: maxHeight || 500
-	// 	// 	};
-
-	// 	// 	let resizer = (e) => {
-	// 	// 		let w = startW + e.screenX - startX;
-	// 	// 		let h = startH + e.screenY - startY;
-
-	// 	// 		w = w > rectLimit.maxWidth ? rectLimit.maxWidth : w;
-	// 	// 		w = w < rectLimit.minWidth ? rectLimit.minWidth : w;
-
-	// 	// 		h = h > rectLimit.maxHeight ? rectLimit.maxHeight : h;
-	// 	// 		h = h < rectLimit.minHeight ? rectLimit.minHeight : h;
-
-	// 	// 		popup.style.width = w + 'px';
-	// 	// 		popup.style.height = h + 'px';
-
-	// 	// 		return {
-	// 	// 			width: w,
-	// 	// 			height: h
-	// 	// 		}
-	// 	// 	};
-
-	// 	// 	let handleDragEnd = e => {
-	// 	// 		window.removeEventListener("mousemove", resizer);
-	// 	// 		window.removeEventListener("mouseup", handleDragEnd);
-	// 	// 		popup.style.opacity = '1';
-
-	// 	// 		if(self.onResize){
-	// 	// 			self.onResize(resizer(e), e);
-	// 	// 		}
-	// 	// 	}
-
-	// 	// 	window.addEventListener("mouseup", handleDragEnd);
-	// 	// 	window.addEventListener("mousemove", resizer);
-
-	// 	// 	popup.style.opacity = '0.4';
-	// 	// };
-
-	// 	// mDown.set(titleEl, tDrag);
-	// 	// mDown.set(titleTextEl, tDrag);
-	// 	// mDown.set(resizeEl, tResize);
-
-	// 	// let handleDragStart = e => {
-	// 	// 	if(mDown.has(e.target)){
-	// 	// 		mDown.get(e.target)(e);
-	// 	// 	}
-	// 	// }
-
-	// 	// this.panel.addEventListener('mousedown', handleDragStart, false);
-	// }
-
-	// addControl(domEl){
-	// 	this.customControlsEl.appendChild(domEl);
-	// }
-
-	// getFirstElementByClassName(className){
-	// 	try {
-	// 		return this.contentDocument.querySelectorAll('.' + className).item(0);
-	// 	} catch (e) {
-	// 		console.error(e);
-	// 	}
-	// }
-
-	// getFirstElementByTagName(tagName){
-	// 	try {
-	// 		return this.contentDocument.getElementsByTagName(tagName).item(0);
-	// 	} catch (e) {
-	// 		console.error(e);
-	// 	}
-	// }
 }

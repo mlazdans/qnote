@@ -4,7 +4,7 @@ var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePo
 var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 var { DOMLocalizator } = ChromeUtils.import(extension.rootURI.resolve("modules/DOMLocalizator.js"));
 
-var PopupEventDispatcher = new QEventDispatcher(["oncreated", "onremoved", "onmove", "onresize", "oncontrols"]);
+var PopupEventDispatcher = new QEventDispatcher(["oncreated", "onremoved", "onmove", "onresize"]);
 
 var qpopup = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown() {
@@ -12,13 +12,6 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 
 	getAPI(context) {
 		var QDEB = true;
-
-		// const { contentWindow } = context;
-		// console.log("contentWindow", contentWindow);
-
-		// var { extension } = context;
-		// console.log("res", extension.rootURI.resolve("modules/DOMLocalizator.js"));
-		// console.debug("context", extension.id);
 
 		this.i18n = new DOMLocalizator(id => {
 			return extension.localizeMessage(id);
@@ -129,21 +122,6 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						};
 					}
 				}).api(),
-				onControls: new ExtensionCommon.EventManager({
-					context,
-					name: "qpopup.onControls",
-					register: fire => {
-						const l = (action, controlId, popupInfo) => {
-							fire.async(action, controlId, popupInfo);
-						};
-
-						PopupEventDispatcher.addListener("oncontrols", l);
-
-						return () => {
-							PopupEventDispatcher.removeListener("oncontrols", l);
-						};
-					}
-				}).api(),
 				async setDebug(on){
 					QDEB = on;
 				},
@@ -186,12 +164,6 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						popup.sizeTo(pi.width, pi.height);
 					}
 
-					// pi.width = pi.width > options.maxWidth ? options.maxWidth : pi.width;
-					// pi.width = pi.width < options.minWidth ? options.minWidth : pi.width;
-
-					// pi.height = pi.height > options.maxHeight ? options.maxHeight : pi.height;
-					// pi.height = pi.height < options.minHeight ? options.minHeight : pi.height;
-
 					// MAYBE: implement lose focus too
 					if(focused){
 						popup.focus();
@@ -206,56 +178,20 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				async create(options){
 					QDEB&&console.debug("qpopup.create()");
 					let {
-						windowId, top, left, width, height, url, title, controlsCSS, anchor, anchorPlacement,
-						minWidth, minHeight, maxWidth, maxHeight
+						windowId, top, left, width, height, anchor, anchorPlacement
 					} = options;
 
 					let window = id2RealWindow(windowId);
 
 					var popup = new NotePopup({
 						window: window,
-						title: title,
 						top: top,
 						left: left,
 						width: width,
 						height: height,
-						// minWidth: minWidth,
-						// minHeight: minHeight,
-						// maxWidth: maxWidth,
-						// maxHeight: maxHeight,
 						anchor: anchor,
 						anchorPlacement: anchorPlacement
 					});
-
-					// popup.onResize = p => {
-					// 	popup.popupInfo.width = p.width;
-					// 	popup.popupInfo.height = p.height;
-					// 	PopupEventDispatcher.fireListeners("onresize", popup.popupInfo);
-					// };
-
-					// popup.onMove = p => {
-					// 	// NOTE: This coordinate is reported in CSS pixels, not in hardware pixels. That means it can be affected by the zoom level; to compute the actual number of physical screen pixels, you should use the nsIDOMWindowUtils.screenPixelsPerCSSPixel property.
-					// 	// window.windowUtils.screenPixelsPerCSSPixel
-					// 	popup.popupInfo.left = p.left - window.mozInnerScreenX;
-					// 	popup.popupInfo.top = p.top - window.mozInnerScreenY;
-					// 	PopupEventDispatcher.fireListeners("onmove", popup.popupInfo);
-					// };
-
-					// popup.onClose = () => {
-					// 	if(popupManager.has(popup.popupInfo.id)){
-					// 		this.remove(popup.popupInfo.id, false);
-					// 	}
-					// };
-
-					// TODO: implement
-					// popup.onFocus = e => {
-					// 	popup.popupInfo.focused = true;
-					// 	PopupEventDispatcher.fireListeners("onfocus", popup.popupInfo);
-					// };
-					// popup.onBlur = e => {
-					// 	popup.popupInfo.focused = false;
-					// 	PopupEventDispatcher.fireListeners("onblur", popup.popupInfo);
-					// };
 
 					popup.popupInfo = options;
 					popup.popupInfo.id = popupManager.add(popup);
@@ -263,61 +199,6 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					PopupEventDispatcher.fireListeners("oncreated", popup.popupInfo);
 
 					return popup.pop().then(status => {
-						// API.i18n.setTexts(popup.contentDocument);
-						// if(controlsCSS){
-						// 	let head = popup.getFirstElementByTagName('head');
-						// 	let css = `<link rel="stylesheet" href="${controlsCSS}" type="text/css">`
-						// 	head.insertAdjacentHTML('beforeend', css);
-						// }
-
-						// if(url){
-						// 	popup.iframeEl.src = extension.getURL(url);
-						// }
-
-						// popup.iframeEl.addEventListener("load", e => {
-						// 	API.i18n.setTexts(popup.iframeDocument);
-						// 	let uControls = popup.iframeDocument.querySelector('.qpopup-user-controls');
-						// 	for(let el of uControls.children){
-						// 		// let elCl = popup.contentDocument.importNode(el, true);
-						// 		// let elCl = popup.iframeDocument.importNode(el, true);
-						// 		try {
-						// 			let elCl = el.cloneNode(true);
-						// 			popup.addControl(elCl);
-						// 			elCl.addEventListener('click', e => {
-						// 				PopupEventDispatcher.fireListeners("oncontrols", "click", el.id, popup.popupInfo);
-						// 			});
-						// 		} catch (e){
-						// 			console.warn(e);
-						// 		}
-						// 	}
-
-						// 	let MutationObserver = popup.iframeWindow.MutationObserver;
-
-						// 	// TODO: watch controls change
-						// 	// Watch title change
-						// 	if(MutationObserver){
-						// 		new MutationObserver(function(mutations) {
-						// 			try {
-						// 				popup.popupInfo.title = popup.title = mutations[0].target.text;
-						// 			} catch {
-						// 			}
-						// 		}).observe(
-						// 			popup.iframeDocument.querySelector('title'),
-						// 			{ subtree: true, characterData: true, childList: true }
-						// 		);
-						// 	}
-
-						// 	// Set title from iframe document
-						// 	if(popup.iframeDocument.title){
-						// 		popup.popupInfo.title = popup.title = popup.iframeDocument.title;
-						// 	}
-						// });
-
-						// popup.closeEl.addEventListener("click", e => {
-						// 	PopupEventDispatcher.fireListeners("oncontrols", "click", "qpopup-close", popup.popupInfo);
-						// });
-
-						// console.log("popup.pop", popup.panel.screenX);
 						popup.popupInfo.top = popup.panel.screenY;
 						popup.popupInfo.left = popup.panel.screenX;
 

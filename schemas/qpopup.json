@@ -16,10 +16,6 @@
 				"description": "windowId from windows API",
 				"minimum": 0
 			},
-			"url": {
-				"type": "string",
-				"optional": true
-			},
 			"focused": {
 				"type": "boolean",
 				"optional": true
@@ -46,30 +42,6 @@
 			},
 			"height": {
 				"type": "integer",
-				"optional": true
-			},
-			"minWidth": {
-				"type": "integer",
-				"optional": true
-			},
-			"minHeight": {
-				"type": "integer",
-				"optional": true
-			},
-			"maxWidth": {
-				"type": "integer",
-				"optional": true
-			},
-			"maxHeight": {
-				"type": "integer",
-				"optional": true
-			},
-			"title": {
-				"type": "string",
-				"optional": true
-			},
-			"controlsCSS": {
-				"type": "string",
 				"optional": true
 			},
 			"anchor": {
@@ -164,21 +136,6 @@
 		"type": "function",
 		"description": "Fired when a popup is resized.",
 		"parameters": [{
-			"name": "popup",
-			"$ref": "Popup",
-			"description": "Details of the popup that was resized."
-		}]
-	},{
-		"name": "onControls",
-		"type": "function",
-		"description": "Fired when interacts with user controls.",
-		"parameters": [{
-			"name": "controlId",
-			"type": "string"
-		},{
-			"name": "action",
-			"type": "string"
-		},{
 			"name": "popup",
 			"$ref": "Popup",
 			"description": "Details of the popup that was resized."

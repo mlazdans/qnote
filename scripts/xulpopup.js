@@ -87,7 +87,7 @@ let tDrag = mouse => {
 		});
 	};
 
-	let handleDragEnd = e => {
+	let handleDragEnd = () => {
 		window.removeEventListener("mousemove", mover);
 		window.removeEventListener("mouseup", handleDragEnd);
 		popupEl.style.opacity = '1';
@@ -122,12 +122,10 @@ function resizeNote(w, h){
 }
 
 let tResize =  e => {
-	// let popup = self.popupEl;
 	let startX = e.screenX;
 	let startY = e.screenY;
 	let startW = popupEl.offsetWidth;
 	let startH = popupEl.offsetHeight;
-
 
 	let resizer = e => {
 		let w = startW + e.screenX - startX;
@@ -135,7 +133,7 @@ let tResize =  e => {
 		resizeNote(w, h);
 	};
 
-	let handleDragEnd = e => {
+	let handleDragEnd = () => {
 		window.removeEventListener("mousemove", resizer);
 		window.removeEventListener("mouseup", handleDragEnd);
 		popupEl.style.opacity = '1';
@@ -166,16 +164,16 @@ let handleDragStart = e => {
 browser.legacy.compareVersions(ext.TBInfo.version, "91").then(vers => {
 	vers91 = vers;
 	window.addEventListener('mousedown', handleDragStart, false);
-});
 
-ext.browser.qpopup.update(ext.CurrentNote.popupId, {
-	top: note.top,
-	left: note.left,
-	// width: note.width || ext.Prefs.width,
-	// height: note.height || ext.Prefs.height
-});
+	ext.browser.qpopup.update(ext.CurrentNote.popupId, {
+		top: note.top,
+		left: note.left,
+		// width: note.width || ext.Prefs.width,
+		// height: note.height || ext.Prefs.height
+	});
 
-resizeNote(note.width || ext.Prefs.width, note.height || ext.Prefs.height);
+	resizeNote(note.width || ext.Prefs.width, note.height || ext.Prefs.height);
+});
 
 closeEl.addEventListener("click", e => {
 	ext.CurrentNote.silentlyPersistAndClose();
