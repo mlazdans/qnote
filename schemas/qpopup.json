@@ -32,6 +32,14 @@
 				"type": "integer",
 				"optional": true
 			},
+			"offsetTop": {
+				"type": "integer",
+				"optional": true
+			},
+			"offsetLeft": {
+				"type": "integer",
+				"optional": true
+			},
 			"width": {
 				"type": "integer",
 				"optional": true
