@@ -187,3 +187,5 @@ delEl.addEventListener("click", e => {
 	// ext.CurrentNote.close();
 	// ext.browser.qpopup.remove(ext.CurrentNote.popupId);
 });
+
+ext.i18n.setTexts(document);
