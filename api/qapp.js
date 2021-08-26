@@ -262,29 +262,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 	// 	}
 	// }
 
-	formatQNote(data) {
-		// https://searchfox.org/mozilla-central/source/dom/base/nsIDocumentEncoder.idl
-		let flags =
-			Ci.nsIDocumentEncoder.OutputPreformatted
-			| Ci.nsIDocumentEncoder.OutputForPlainTextClipboardCopy
-			// Ci.nsIDocumentEncoder.OutputDropInvisibleBreak
-			// | Ci.nsIDocumentEncoder.OutputFormatFlowed
-			// | Ci.nsIDocumentEncoder.OutputFormatted
-			// | Ci.nsIDocumentEncoder.OutputLFLineBreak
-			;
-
-		// Strip tags, etc
-		let parserUtils = Cc["@mozilla.org/parserutils;1"].getService(Ci.nsIParserUtils);
-		let text = parserUtils.convertToPlainText(data.text, flags, 0);
-		// text = text.replace(/\r\n/g, "<br>");
-		// text = text.replace(/\n/g, "<br>");
-
-		return {
-			title: 'QNote: ' + data.tsFormatted,
-			text: '<pre class="moz-quote-pre" wrap="" style="margin: 0;">' + text + '</pre>'
-		}
-	}
-
 	getAPI(context) {
 		var API = this;
 
@@ -393,35 +370,40 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						domNodes[0].remove();
 					}
 
-					let formatted = API.formatQNote(data);
-
-					let htmlFormatter = (title, text) => {
-						let html = ['<div class="qnote-insidenote" style="margin: 0; padding: 0; border: 1px solid black;">'];
-						if(title){
-							html.push(`<div style="border-bottom: 1px solid black;">${title}</div>`);
-						}
-						if(text){
-							html.push(`<div>${text}</div>`);
-						}
-						html.push('</div>');
-
-						return html.join("");
-					};
-
 					if(prefs.topTitle || prefs.topText){
-						let html = htmlFormatter(
-							prefs.topTitle ? formatted.title : false,
-							prefs.topText ? formatted.text : false,
-						);
-						body.insertAdjacentHTML('afterbegin', html + "<br>");
+						let html = ['<div class="qnote-insidenote qnote-insidenote-top" style="margin: 0; padding: 0; border: 1px solid black;">'];
+
+						if(prefs.topTitle){
+							html.push('<div style="border-bottom: 1px solid black;">QNote: ' + data.tsFormatted + '</div>');
+						}
+
+						if(prefs.topText){
+							html.push('<pre class="moz-quote-pre" wrap="" style="margin: 0;"></pre>');
+						}
+
+						body.insertAdjacentHTML('afterbegin', html.join(""));
+
+						if(prefs.topText){
+							w.document.querySelector('.qnote-insidenote-top > pre').textContent = data.text;
+						}
 					}
 
 					if(prefs.bottomTitle || prefs.bottomText){
-						let html = htmlFormatter(
-							prefs.bottomTitle ? formatted.title : false,
-							prefs.bottomText ? formatted.text : false,
-						);
-						body.insertAdjacentHTML('beforeend', "<br>" + html);
+						let html = ['<div class="qnote-insidenote qnote-insidenote-bottom" style="margin: 0; padding: 0; border: 1px solid black;">'];
+
+						if(prefs.bottomTitle){
+							html.push('<div style="border-bottom: 1px solid black;">QNote: ' + data.tsFormatted + '</div>');
+						}
+
+						if(prefs.bottomText){
+							html.push('<pre class="moz-quote-pre" wrap="" style="margin: 0;"></pre>');
+						}
+
+						body.insertAdjacentHTML('beforeend', html.join(""));
+
+						if(prefs.bottomText){
+							w.document.querySelector('.qnote-insidenote-bottom > pre').textContent = data.text;
+						}
 					}
 				},
 				// We need this step to grab messageUrisToPrint list
@@ -605,35 +587,38 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return;
 					}
 
-
-					let formatted = API.formatQNote(data);
-
-					let htmlFormatter = (title, text) => {
-						let html = [];
-						if(title){
-							html.push(`<div class="qnote-title">${title}</div>`);
-						}
-						if(text){
-							html.push(`<div class="qnote-text">${text}</div>`);
-						}
-
-						return html.join("");
-					};
-
 					if(prefs.topTitle || prefs.topText){
-						let html = htmlFormatter(
-							prefs.topTitle ? formatted.title : false,
-							prefs.topText ? formatted.text : false,
-						);
-						body.insertAdjacentHTML('afterbegin', '<div class="qnote-insidenote qnote-insidenote-top">' + html + '</div>');
+						let html = [];
+						if(prefs.topTitle){
+							html.push('<div class="qnote-title">QNote: ' + data.tsFormatted + '</div>');
+						}
+
+						if(prefs.topText){
+							html.push('<div class="qnote-text"><pre class="moz-quote-pre" wrap="" style="margin: 0;"></pre></div>');
+						}
+
+						body.insertAdjacentHTML('afterbegin', '<div class="qnote-insidenote qnote-insidenote-top">' + html.join("") + '</div>');
+
+						if(prefs.topText){
+							document.querySelector('.qnote-insidenote-top > .qnote-text > pre').textContent = data.text;
+						}
 					}
 
 					if(prefs.bottomTitle || prefs.bottomText){
-						let html = htmlFormatter(
-							prefs.bottomTitle ? formatted.title : false,
-							prefs.bottomText ? formatted.text : false,
-						);
-						body.insertAdjacentHTML('beforeend', '<div class="qnote-insidenote qnote-insidenote-bottom">' + html + '</div>');
+						let html = [];
+						if(prefs.bottomTitle){
+							html.push('<div class="qnote-title">QNote: ' + data.tsFormatted + '</div>');
+						}
+
+						if(prefs.bottomText){
+							html.push('<div class="qnote-text"><pre class="moz-quote-pre" wrap="" style="margin: 0;"></pre></div>');
+						}
+
+						body.insertAdjacentHTML('beforeend', '<div class="qnote-insidenote qnote-insidenote-bottom">' + html.join("") + '</div>');
+
+						if(prefs.bottomText){
+							document.querySelector('.qnote-insidenote-bottom > .qnote-text > pre').textContent = data.text;
+						}
 					}
 				},
 				async saveNoteCache(note){
