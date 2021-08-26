@@ -7,6 +7,7 @@ var titleTextEl = document.querySelector(".qpopup-title-text");
 var resizeEl = document.querySelector(".qpopup-controls-resize");
 var closeEl = document.querySelector(".qpopup-title-closebutton");
 var delEl = document.querySelector("#note-delete");
+var vers91;
 
 // console.log("note", note);
 // document.addEventListener("keydown", e => {
@@ -54,19 +55,33 @@ YTextE.addEventListener("keyup", e => {
 
 let tDrag = mouse => {
 	let el = mouse.target;
-	let startX = mouse.screenX;
-	let startY = mouse.screenY;
+	let startX, startY;
+	if(vers91<0){
+		startX = mouse.screenX - note.left;
+		startY = mouse.screenY - note.top;
+	} else {
+		startX = mouse.screenX;
+		startY = mouse.screenY;
+	}
 
 	el.style.cursor = 'move';
 
 	let mover = e => {
-		let x = e.screenX - startX;
-		let y = e.screenY - startY;
+		let opt;
 
-		ext.browser.qpopup.update(ext.CurrentNote.popupId, {
-			offsetTop: y,
-			offsetLeft: x
-		}).then(pi => {
+		if(vers91<0){
+			opt = {
+				top: e.screenY - startY,
+				left: e.screenX - startX
+			};
+		} else {
+			opt = {
+				offsetTop: e.screenY - startY,
+				offsetLeft: e.screenX - startX
+			};
+		}
+
+		ext.browser.qpopup.update(ext.CurrentNote.popupId, opt).then(pi => {
 			note.top = pi.top;
 			note.left = pi.left;
 		});
@@ -148,7 +163,10 @@ let handleDragStart = e => {
 	}
 }
 
-window.addEventListener('mousedown', handleDragStart, false);
+browser.legacy.compareVersions(ext.TBInfo.version, "91").then(vers => {
+	vers91 = vers;
+	window.addEventListener('mousedown', handleDragStart, false);
+});
 
 ext.browser.qpopup.update(ext.CurrentNote.popupId, {
 	top: note.top,

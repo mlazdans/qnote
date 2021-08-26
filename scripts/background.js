@@ -10,6 +10,7 @@ var CurrentNote;
 var CurrentTabId;
 var CurrentWindowId; // MAYBE: should get rid of and replace with CurrentNote.windowId
 var CurrentLang;
+var TBInfo;
 var i18n = new DOMLocalizator(browser.i18n.getMessage);
 
 function resetTbState(){
@@ -83,6 +84,7 @@ async function initExtension(){
 	QDEB&&console.debug("initExtension()");
 
 	await setUpExtension();
+	TBInfo = await browser.runtime.getBrowserInfo();
 
 	// Return notes to qapp on request
 	browser.qapp.onNoteRequest.addListener(getQAppNoteData);
