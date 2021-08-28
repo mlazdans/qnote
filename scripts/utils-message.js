@@ -30,7 +30,11 @@ async function getMessageKeyId(messageId) {
 
 		let id = parts.headers['message-id'][0];
 
-		return id.substring(1, id.length - 1);
+		if((id[0] == '<') && (id[id.length] == '>')){
+			return id.substring(1, id.length - 1);
+		} else {
+			return id;
+		}
 	};
 
 	return getMessageFull(messageId).then(parts => {
