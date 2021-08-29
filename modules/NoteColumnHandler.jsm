@@ -80,7 +80,9 @@ class NoteColumnHandler {
 			QDEB&&console.debug(`${fName} - FolderDisplayListenerManager: not found`);
 		}
 
-		this.addColumnHandler(w.gDBView);
+		if(w.gDBView){
+			this.addColumnHandler(w.gDBView);
+		}
 
 		return true;
 	}
