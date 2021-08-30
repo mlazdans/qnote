@@ -37,14 +37,20 @@ async function getMessageKeyId(messageId) {
 		}
 	};
 
-	return getMessageFull(messageId).then(parts => {
-		let mid = partsParser(parts);
+	return getMessage(messageId).then(parts => {
+		if(parts.headerMessageId){
+			return parts.headerMessageId
+		} else {
+			return getMessageFull(messageId).then(parts => {
+				let mid = partsParser(parts);
 
-		if(mid){
-			return mid;
+				if(mid){
+					return mid;
+				} else {
+					throw new NoKeyIdError;
+				}
+			});
 		}
-
-		throw new NoKeyIdError;
 	});
 }
 
