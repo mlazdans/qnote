@@ -1,5 +1,6 @@
 .qnote-insidenote pre {
 	all: initial !important;
+	white-space: pre !important;
 }
 
 .qnote-column-header {
