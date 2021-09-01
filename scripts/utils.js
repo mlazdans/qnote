@@ -289,6 +289,11 @@ async function QNotePopForMessage(messageId, flags = POP_NONE) {
 					CurrentNote.focus();
 				}
 
+				if(isPopped){
+					note.left = isPopped.left;
+					note.top = isPopped.top;
+				}
+
 				mpUpdateForNote(note);
 
 				return isPopped;
