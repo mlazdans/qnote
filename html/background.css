@@ -1,3 +1,7 @@
+.qnote-insidenote pre {
+	all: initial !important;
+}
+
 .qnote-column-header {
 	list-style-image: url('../images/icon-column.png');
 }
