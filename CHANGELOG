@@ -1,0 +1,99 @@
+CHANGELOG QNote
+===========================
+
+RELEASE 0.10.3
+-----------------
+- Use Webextension headerMessageId propery (starting with TB85)
+- Fix unnecessary trimming when message-id is w/o brackets (#6)
+- Fix note movement for TB < 91 (#9)
+
+RELEASE 0.10.2
+-----------------
+- Fix compatibility with TB91 (#8)
+
+RELEASE 0.10.1
+-----------------
+- Options: auto save
+- Options: reset to defaults
+- Options: more default positions
+- Options: opt always use default size and position
+- Add date localization
+- Styling tweaks
+- Minor bug fixes
+
+RELEASE 0.10.0
+-----------------
+- Add localized date format option with custom or predefined formats
+- Add default note placement option (only floating panel)
+- Add confirm delete option
+- Save options w/o extension reload
+- Style options page according to selected theme
+- Minor bug fixes
+
+
+RELEASE 0.9.1
+-----------------
+- Attach note to print
+- Attach note to message
+- Removed search from QuickFilter until we find a good solution
+- Lots of bugfixes
+
+RELEASE 0.7.0
+-----------------
+- Add QucikFilter support for filtering notes by contents
+- Various bug fixes
+
+RELEASE 0.6.3
+-----------------
+- Added main toolbar button
+- Attach note to window that opened it instead to main window
+- Updated icons
+- Force note text color to black
+- Minor bug fixes
+
+RELEASE 0.6.2
+-----------------
+- New locales - IT / LV / FR / DE
+- Saving notes using UTF-8 encoded files
+- Fix QNote extension interfere with some other extensions
+
+RELEASE 0.6.1
+-----------------
+- Added Alt+Q keyboard shortcut
+- Better overall keyboard handling
+- Note to grab focus when explicitly click on QNote button or context menu
+- Minor bug fixes
+
+RELEASE 0.6.0
+-----------------
+- Notes will now be saved on disk using more versatile JSON format, not XNote++ format anymore
+- Auto close note after folder or tab change
+- Preserve column width
+- Fix XNote filename handling containing slashes
+
+RELEASE 0.5.4
+-----------------
+- Change note timestamp only if text changed
+- Option to overwrite existing notes when importing xnotes
+- Properly encode/decode .xnote filenames. Some notes did not shown up because of .xnote file names
+- Fix popup losing controls (again)
+- Minor bugfixes
+
+RELEASE 0.5.3
+-----------------
+- Fix popup losing controls
+- Add option for note to gain auto focus
+
+RELEASE 0.5.2
+-----------------
+- Added column with icon and text option
+- Added window option - popup or floating panel
+
+RELEASE 0.4
+-----------------
+- Added storage option - folder or extension storage
+- Closing with empty text will result in note deletion
+
+RELEASE 0.2
+-----------------
+- Fix compatibility with TB78
