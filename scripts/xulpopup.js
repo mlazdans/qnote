@@ -9,21 +9,6 @@ var closeEl = document.querySelector(".qpopup-title-closebutton");
 var delEl = document.querySelector("#note-delete");
 var vers91;
 
-// console.log("note", note);
-// document.addEventListener("keydown", e => {
-// 	console.log("keydown");
-// });
-
-// document.addEventListener("keyup", e => {
-// 	// console.log("keyup", isFocused);
-// 	if(ext.Prefs.focusOnDisplay){
-// 		var isFocused = (document.activeElement === YTextE);
-// 		if(!isFocused){
-// 			YTextE.focus();
-// 		}
-// 	}
-// });
-
 function sfocus(f){
 	if(ext.Prefs.focusOnDisplay){
 		var isFocused = (document.activeElement === YTextE);
@@ -55,29 +40,28 @@ YTextE.addEventListener("keyup", e => {
 
 let tDrag = mouse => {
 	let el = mouse.target;
-	let startX, startY;
-	if(vers91<0){
-		startX = mouse.screenX - note.left;
-		startY = mouse.screenY - note.top;
-	} else {
-		startX = mouse.screenX;
-		startY = mouse.screenY;
-	}
+	let startX = 0, startY = 0;
 
 	el.style.cursor = 'move';
+
+	// Some strange behaviour starting with 91
+	if(vers91<0){
+		startX = note.left;
+		startY = note.top;
+	}
 
 	let mover = e => {
 		let opt;
 
 		if(vers91<0){
 			opt = {
-				top: e.screenY - startY,
-				left: e.screenX - startX
+				top: e.screenY - mouse.screenY + startY,
+				left: e.screenX - mouse.screenX + startX
 			};
 		} else {
 			opt = {
-				offsetTop: e.screenY - startY,
-				offsetLeft: e.screenX - startX
+				offsetTop: e.screenY - mouse.screenY,
+				offsetLeft: e.screenX - mouse.screenX
 			};
 		}
 
@@ -145,7 +129,6 @@ let tResize =  e => {
 	popupEl.style.opacity = '0.4';
 };
 
-
 popupEl.style.width = note.width + 'px';
 popupEl.style.height = note.height + 'px';
 
@@ -164,13 +147,6 @@ let handleDragStart = e => {
 browser.legacy.compareVersions(ext.TBInfo.version, "91").then(vers => {
 	vers91 = vers;
 	window.addEventListener('mousedown', handleDragStart, false);
-
-	ext.browser.qpopup.update(ext.CurrentNote.popupId, {
-		top: note.top,
-		left: note.left,
-		// width: note.width || ext.Prefs.width,
-		// height: note.height || ext.Prefs.height
-	});
 
 	resizeNote(note.width || ext.Prefs.width, note.height || ext.Prefs.height);
 });

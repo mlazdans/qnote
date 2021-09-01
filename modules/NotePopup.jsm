@@ -141,7 +141,8 @@ class NotePopup extends BasePopup {
 				}
 				self.panel.openPopup(aEl, anchorPlacement, adjX, adjY);
 			} else {
-				self.panel.openPopup(null, "topleft", left, top);
+				self.panel.openPopup(null, "after_start", left, top);
+				self.panel.moveTo(left, top);
 			}
 
 			this.shown = true;

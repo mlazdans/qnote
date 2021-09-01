@@ -31,7 +31,7 @@ class XULNoteWindow extends NoteWindow {
 
 			return browser.qpopup.create(opt).then(popupInfo => {
 				this.popupId = popupInfo.id;
-				return true;
+				return popupInfo;
 			});
 		});
 	}

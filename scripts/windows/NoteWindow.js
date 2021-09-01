@@ -203,7 +203,10 @@ class NoteWindow extends QEventDispatcher {
 				opt.top = undefined;
 			}
 
-			return popper(opt).then(isPopped => this.shown = isPopped);
+			return popper(opt).then(isPopped => {
+				this.shown = !!isPopped;
+				return isPopped;
+			});
 		});
 	}
 
