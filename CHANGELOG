@@ -3,7 +3,7 @@ CHANGELOG QNote
 
 RELEASE 0.10.3
 -----------------
-- Use Webextension headerMessageId propery (starting with TB85)
+- Use Webextension headerMessageId property (starting with TB85)
 - Fix unnecessary trimming when message-id is w/o brackets (#6)
 - Fix note movement for TB < 91 (#9)
 
