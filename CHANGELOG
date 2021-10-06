@@ -6,6 +6,7 @@ RELEASE 0.10.4
 - Options: enable / disable spell check
 - Add Romanian locale
 - Add dark theme
+- Fix note resize issues
 
 RELEASE 0.10.3
 -----------------

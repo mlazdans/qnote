@@ -41,30 +41,35 @@ YTextE.addEventListener("keyup", e => {
 
 let tDrag = mouse => {
 	let el = mouse.target;
-	let startX = 0, startY = 0;
+	// let startX = 0, startY = 0;
 
 	el.style.cursor = 'move';
 
 	// Some strange behaviour starting with 91
-	if(vers91<0){
-		startX = note.left;
-		startY = note.top;
-	}
+	// if(vers91<0){
+	// 	startX = note.left;
+	// 	startY = note.top;
+	// }
 
 	let mover = e => {
 		let opt;
 
-		if(vers91<0){
-			opt = {
-				top: e.screenY - mouse.screenY + startY,
-				left: e.screenX - mouse.screenX + startX
-			};
-		} else {
-			opt = {
-				offsetTop: e.screenY - mouse.screenY,
-				offsetLeft: e.screenX - mouse.screenX
-			};
-		}
+		// if(vers91<0){
+		// 	opt = {
+		// 		top: e.clientY - mouse.clientY + startY,
+		// 		left: e.clientX - mouse.clientX + startX
+		// 	};
+		// } else {
+		// 	opt = {
+		// 		offsetTop: e.clientY - mouse.clientY,
+		// 		offsetLeft: e.clientX - mouse.clientX
+		// 	};
+		// }
+
+		opt = {
+			offsetTop: e.clientY - mouse.clientY,
+			offsetLeft: e.clientX - mouse.clientX
+		};
 
 		ext.browser.qpopup.update(ext.CurrentNote.popupId, opt).then(pi => {
 			note.top = pi.top;
@@ -106,15 +111,15 @@ function resizeNote(w, h){
 	note.height = h;
 }
 
-let tResize =  e => {
-	let startX = e.screenX;
-	let startY = e.screenY;
+let tResize =  mouse => {
+	let startX = mouse.clientX;
+	let startY = mouse.clientY;
 	let startW = popupEl.offsetWidth;
 	let startH = popupEl.offsetHeight;
 
 	let resizer = e => {
-		let w = startW + e.screenX - startX;
-		let h = startH + e.screenY - startY;
+		let w = startW + e.clientX - startX;
+		let h = startH + e.clientY - startY;
 		resizeNote(w, h);
 	};
 
@@ -145,6 +150,7 @@ let handleDragStart = e => {
 	}
 }
 
+// TODO: remove version check sometime
 browser.legacy.compareVersions(ext.TBInfo.version, "91").then(vers => {
 	vers91 = vers;
 	window.addEventListener('mousedown', handleDragStart, false);
