@@ -155,7 +155,11 @@ browser.legacy.compareVersions(ext.TBInfo.version, "91").then(vers => {
 	vers91 = vers;
 	window.addEventListener('mousedown', handleDragStart, false);
 
-	resizeNote(note.width || ext.Prefs.width, note.height || ext.Prefs.height);
+	if(ext.Prefs.alwaysDefaultPlacement){
+		resizeNote(ext.Prefs.width, ext.Prefs.height);
+	} else {
+		resizeNote(note.width || ext.Prefs.width, note.height || ext.Prefs.height);
+	}
 });
 
 closeEl.addEventListener("click", e => {
