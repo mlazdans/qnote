@@ -1,6 +1,10 @@
 CHANGELOG QNote
 ===========================
 
+RELEASE 0.10.4
+-----------------
+- Options: enable / disable spell check
+
 RELEASE 0.10.3
 -----------------
 - Use Webextension headerMessageId property (starting with TB85)

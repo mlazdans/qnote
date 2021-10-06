@@ -4,6 +4,8 @@ var note = ext.CurrentNote.note;
 
 var YTextE = document.getElementById('qnote-text');
 
+YTextE.setAttribute("spellcheck", ext.Prefs.enableSpellChecker);
+
 //if(ext.Prefs.focusOnDisplay || !note || !note.text){
 	YTextE.focus();
 //}

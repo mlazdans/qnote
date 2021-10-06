@@ -17,6 +17,7 @@ function getDefaultPrefs() {
 		showFirstChars: 0,
 		showOnSelect: true,
 		focusOnDisplay: false,
+		enableSpellChecker: true,
 		windowOption: "xul",
 		storageOption: "folder",
 		storageFolder: "",

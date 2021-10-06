@@ -53,6 +53,9 @@
 	"focus.on.display": {
 		"message": "Fokusēt zīmīti pēc atvēršanas"
 	},
+	"enable.spell.checker": {
+		"message": "Ieslēgt pareizrakstības pārbaudi"
+	},
 	"overwrite.existing.notes": {
 		"message": "Pārrakstīt esošās zīmītes"
 	},

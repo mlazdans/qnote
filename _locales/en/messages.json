@@ -53,6 +53,9 @@
 	"focus.on.display": {
 		"message": "Focus QNote after display"
 	},
+	"enable.spell.checker": {
+		"message": "Enable spell checker"
+	},
 	"overwrite.existing.notes": {
 		"message": "Overwrite existing notes"
 	},

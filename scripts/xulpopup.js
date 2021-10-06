@@ -24,6 +24,7 @@ window.addEventListener("focus", () => {
 
 window.addEventListener("DOMContentLoaded", () => {
 	sfocus(() => window.focus());
+	YTextE.setAttribute("spellcheck", ext.Prefs.enableSpellChecker);
 });
 
 YTextE.value = note.text;
