@@ -53,6 +53,9 @@
 	"focus.on.display": {
 		"message": "Cibler QNote à l’affichage"
 	},
+	"enable.spell.checker": {
+		"message": "Vérifier l’orthographe"
+	},
 	"overwrite.existing.notes": {
 		"message": "Remplacer les notes existantes"
 	},
