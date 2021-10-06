@@ -1,7 +1,7 @@
-.qnote-insidenote pre {
+/* .qnote-insidenote pre {
 	all: initial !important;
 	white-space: pre !important;
-}
+} */
 
 .qnote-column-header {
 	list-style-image: url('../images/icon-column.png');
@@ -27,6 +27,7 @@
 }
 
 .qnote-text {
+	white-space: pre;
 	color: black;
 	box-sizing: border-box;
 	margin: 0;
@@ -44,4 +45,25 @@
 
 .qnote-insidenote-bottom {
 	margin-top: 0.5em;
+}
+
+@media (prefers-color-scheme: dark) {
+	.qnote-title {
+		color: white;
+		background-image: url(../images/title-background-dark.png);
+		background-color: #4d4d4d;
+		border: solid 1px black;
+	}
+	.qnote-text {
+		color: white;
+		background-color: #2f2f33;
+		background-image: url(../images/txt-background-dark.png);
+		border: solid 1px black;
+	}
+	.qnote-text pre {
+		color: white;
+	}
+	.qnote-insidenote pre {
+		color: white;
+	}
 }

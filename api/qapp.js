@@ -594,13 +594,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						}
 
 						if(prefs.topText){
-							html.push('<div class="qnote-text"><pre class="moz-quote-pre" wrap="" style="margin: 0;"></pre></div>');
+							html.push('<div class="qnote-text"></div>');
 						}
 
 						body.insertAdjacentHTML('afterbegin', '<div class="qnote-insidenote qnote-insidenote-top">' + html.join("") + '</div>');
 
 						if(prefs.topText){
-							document.querySelector('.qnote-insidenote-top > .qnote-text > pre').textContent = data.text;
+							document.querySelector('.qnote-insidenote-top > .qnote-text').textContent = data.text;
 						}
 					}
 
@@ -611,13 +611,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						}
 
 						if(prefs.bottomText){
-							html.push('<div class="qnote-text"><pre class="moz-quote-pre" wrap="" style="margin: 0;"></pre></div>');
+							html.push('<div class="qnote-text"></div>');
 						}
 
 						body.insertAdjacentHTML('beforeend', '<div class="qnote-insidenote qnote-insidenote-bottom">' + html.join("") + '</div>');
 
 						if(prefs.bottomText){
-							document.querySelector('.qnote-insidenote-bottom > .qnote-text > pre').textContent = data.text;
+							document.querySelector('.qnote-insidenote-bottom > .qnote-text').textContent = data.text;
 						}
 					}
 				},
