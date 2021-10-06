@@ -53,6 +53,9 @@
 	"focus.on.display": {
 		"message": "In angezeigter QNote sofort weiter schreiben"
 	},
+	"enable.spell.checker": {
+		"message": "Rechtschreibung prüfen"
+	},
 	"overwrite.existing.notes": {
 		"message": "Vorhandene Notizen überschreiben"
 	},
