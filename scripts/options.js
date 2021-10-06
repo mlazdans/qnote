@@ -1,6 +1,6 @@
 var ext = chrome.extension.getBackgroundPage();
 var i18n = ext.i18n;
-var _ = browser.i18n.getMessage;
+var _ = ext.browser.i18n.getMessage;
 var QDEB = true;
 
 var DefaultPrefs;
@@ -68,12 +68,12 @@ async function saveOptionsDefaultHandler(prefs) {
 
 	// Storage option changed
 	if(prefs.storageOption !== oldPrefs.storageOption){
-		await browser.qapp.clearNoteCache();
+		await ext.browser.qapp.clearNoteCache();
 	}
 
 	// Folder changed
 	if(prefs.storageFolder !== oldPrefs.storageFolder){
-		await browser.qapp.clearNoteCache();
+		await ext.browser.qapp.clearNoteCache();
 	}
 
 	await ext.setUpExtension();
@@ -191,7 +191,7 @@ function dateFormatChange(){
 
 async function initExportStorageButton() {
 	let info = await ext.browser.runtime.getBrowserInfo();
-	let vers = await browser.legacy.compareVersions("78", info.version);
+	let vers = await ext.browser.legacy.compareVersions("78", info.version);
 
 	if(vers<0){
 		exportStorageButton.disabled = false;
@@ -218,7 +218,7 @@ async function initFolderImportButton(){
 			opt.displayDirectory = path;
 		}
 
-		browser.legacy.folderPicker(opt).then(selectedPath => {
+		ext.browser.legacy.folderPicker(opt).then(selectedPath => {
 			importFolderButton.disabled = true;
 			importFolderLoader.style.display = '';
 
@@ -230,7 +230,7 @@ async function initFolderImportButton(){
 				}
 			}).finally(async () => {
 				// Reset cache since we might import some new data
-				await browser.qapp.clearNoteCache();
+				await ext.browser.qapp.clearNoteCache();
 				importFolderButton.disabled = false;
 				importFolderLoader.style.display = 'none';
 			});
@@ -268,7 +268,7 @@ async function storageFolderBrowse(){
 	}
 
 	if(!await ext.isFolderReadable(path)){
-		path = await browser.qapp.getProfilePath();
+		path = await ext.browser.qapp.getProfilePath();
 	}
 
 	let opt = {};
@@ -276,7 +276,7 @@ async function storageFolderBrowse(){
 		opt.displayDirectory = path;
 	}
 
-	browser.legacy.folderPicker(opt).then(selectedPath => {
+	ext.browser.legacy.folderPicker(opt).then(selectedPath => {
 		input_storageFolder.value = selectedPath;
 		saveOptions();
 	});
@@ -294,9 +294,9 @@ function importInternalStorage() {
 			return false;
 		}
 
-		browser.storage.local.set(storage).then(async () => {
+		ext.browser.storage.local.set(storage).then(async () => {
 			alert(_("storage.imported"));
-			await browser.qapp.clearNoteCache();
+			await ext.browser.qapp.clearNoteCache();
 			ext.setUpExtension();
 			initOptionsPageValues();
 		}).catch(e => {
@@ -308,9 +308,9 @@ function importInternalStorage() {
 }
 
 async function clearStorage(){
-	if(await browser.legacy.confirm(_("are.you.sure"))){
+	if(await ext.browser.legacy.confirm(_("are.you.sure"))){
 		return ext.clearStorage().then(async () => {
-			await browser.qapp.clearNoteCache();
+			await ext.browser.qapp.clearNoteCache();
 			ext.setUpExtension();
 			initOptionsPageValues();
 			alert(_("storage.cleared"));
@@ -322,7 +322,7 @@ async function clearStorage(){
 
 async function resetDefaults(){
 	return ext.clearPrefs().then(async () => {
-		await browser.qapp.clearNoteCache();
+		await ext.browser.qapp.clearNoteCache();
 		ext.setUpExtension();
 		initOptionsPageValues();
 		alert(_("options.reset"));
