@@ -1,0 +1,239 @@
+{
+	"description": {
+		"message": "Adăugați note la e-mailurile dvs. Înlocuire pentru XNote++ cu mai multe funcții."
+	},
+	"are.you.sure": {
+		"message": "Esti sigur?"
+	},
+	"browse": {
+		"message": "Alege"
+	},
+	"folder.unaccesible": {
+		"message": "Dosarul nu a fost găsit sau nu poate fi citit: $1"
+	},
+	"json.parse.error": {
+		"message": "Eroare de analiză JSON: $1"
+	},
+	"modify.note": {
+		"message": "Modificați nota"
+	},
+	"delete.note": {
+		"message": "Ștergeți nota"
+	},
+	"reset.note.window": {
+		"message": "Resetați fereastra notei"
+	},
+	"create.new.note": {
+		"message": "Creați o notă nouă"
+	},
+	"toggleqnote": {
+		"message": "Comută nota"
+	},
+	"width.label": {
+		"message": "Lățime"
+	},
+	"height.label": {
+		"message": "Înălțime"
+	},
+	"use.tag.label": {
+		"message": "Folosiți eticheta"
+	},
+	"show.on.select.label": {
+		"message": "Afișați fereastra pop-up la selectarea mesajului"
+	},
+	"save.preferences.button": {
+		"message": "Salvați"
+	},
+	"extension.reload.button": {
+		"message": "Reîncarcă"
+	},
+	"show.first.chars.label": {
+		"message": "Afișați primele X caractere în coloană"
+	},
+	"focus.on.display": {
+		"message": "Focus pe QNote după afișare"
+	},
+	"enable.spell.checker": {
+		"message": "Activați verificatorul ortografic"
+	},
+	"overwrite.existing.notes": {
+		"message": "Suprascrieți notele existente"
+	},
+	"can.use.xnote.folder": {
+		"message": "(puteți utiliza folderul XNote++)"
+	},
+	"no.message_id.header": {
+		"message": "Nu se poate crea o notă. Mesaj fără antetul 'message-id:'"
+	},
+	"maintenance.fieldset": {
+		"message": "Întreținere"
+	},
+	"use.tag.manager": {
+		"message": "(vă rugăm să utilizați managerul de etichete pentru a gestiona etichetele)"
+	},
+	"import.finished.stats": {
+		"message": "Import finalizat:\nnote importate - $1\nnote eronate - $2\nnote existente - $3\nnote suprascrise - $4"
+	},
+	"import.fail": {
+		"message": "Nu s-au putut importa notele"
+	},
+	"xnote.folder.inaccessible": {
+		"message": "Dosarul XNote++ nu a fost găsit sau nu poate fi citit"
+	},
+	"xnote.folder.found": {
+		"message": "S-a găsit folderul XNote++: $1"
+	},
+	"storage.export.limitation": {
+		"message": "'Export stocare' disponibil numai pentru TB>=78"
+	},
+	"storage.fieldset": {
+		"message": "Stocare"
+	},
+	"storage.option.ext": {
+		"message": "În cadrul extensiei"
+	},
+	"storage.option.folder": {
+		"message": "Dosar local"
+	},
+	"storage.cleared": {
+		"message": "Spațiul de stocare a fost golit"
+	},
+	"storage.clear.failed": {
+		"message": "Golirea spațiului de stocare nu a reușit: $1"
+	},
+	"storage.imported": {
+		"message": "Fișierul a fost importat"
+	},
+	"storage.import.failed": {
+		"message": "Importul fișierului nu a reușit: $1"
+	},
+	"storage.clear.button": {
+		"message": "Golește spațiul de stocare"
+	},
+	"storage.export.button": {
+		"message": "Exportă spațiul de stocare"
+	},
+	"storage.import": {
+		"message": "Importă în spațiul de stocare"
+	},
+	"window.fieldset": {
+		"message": "Fereastră"
+	},
+	"window.option.xul": {
+		"message": "Panou plutitor"
+	},
+	"window.option.webext": {
+		"message": "Fereastra pop-up (depreciată)"
+	},
+	"close.and.save": {
+		"message": "Închideți și salvați"
+	},
+	"delete": {
+		"message": "Șterge"
+	},
+	"enable.search": {
+		"message": "Activați căutarea"
+	},
+	"enable.print_attach": {
+		"message": "Atașați la imprimare"
+	},
+	"attach.bottom": {
+		"message": "jos"
+	},
+	"attach.top": {
+		"message": "sus"
+	},
+	"attach.title": {
+		"message": "titlu"
+	},
+	"attach.text": {
+		"message": "text"
+	},
+	"enable.message_attach": {
+		"message": "Atașați la mesaj"
+	},
+	"enable.debug.messages": {
+		"message": "Activați mesajele de depanare"
+	},
+	"date.format": {
+		"message": "Formatul datei"
+	},
+	"date.format.custom": {
+		"message": "-personalizat-"
+	},
+	"formatting.rules": {
+		"message": "Reguli de formatare"
+	},
+	"implemented.formatting.rules": {
+		"message": "(implementat: $1)"
+	},
+	"datetime_group": {
+		"message": "Data și ora"
+	},
+	"date_group": {
+		"message": "Data"
+	},
+	"time_group": {
+		"message": "Ora"
+	},
+	"relative.to": {
+		"message": "Relativ la"
+	},
+	"confirm.delete": {
+		"message": "Confirmă ștergerea"
+	},
+	"default.dimensions.fieldset": {
+		"message": "Dimensiuni și plasare implicite"
+	},
+	"behaviour.fieldset": {
+		"message": "Comportament"
+	},
+	"search.disabled.msg": {
+		"message": "(căutarea a fost dezactivată temporar până când vom găsi o soluție mai bună)"
+	},
+	"additional.attach": {
+		"message": "În plus, atașați"
+	},
+	"import.folder.button": {
+		"message": "Importați note din folder"
+	},
+	"anchor.window": {
+		"message": "Fereastră"
+	},
+	"anchor.threadpane": {
+		"message": "Lista de mesaje"
+	},
+	"anchor.message": {
+		"message": "Mesaj"
+	},
+	"options": {
+		"message": "Opțiuni"
+	},
+	"reset.defaults.button": {
+		"message": "Resetați la valorile implicite"
+	},
+	"error": {
+		"message": "Eroare"
+	},
+	"custom.date.locale": {
+		"message": "Localizarea datei"
+	},
+	"locale.rules": {
+		"message": "Etichete lingvistice"
+	},
+	"error.saving.note": {
+		"message": "Eroare la salvarea notei"
+	},
+	"error.deleting.note": {
+		"message": "Eroare la ștergerea notei"
+	},
+	"close.current.note": {
+		"message": "Vă rugăm să închideți nota actuală"
+	},
+	"always.default.placement": {
+		"message": "Folosiți întotdeauna dimensiunea și poziția implicite"
+	},
+	"options.reset": {
+		"message": "Opțiunile au fost resetate"
+	}
+}
