@@ -52,7 +52,7 @@ img {
 	background: url(../images/close.png) 0 0;
 }
 .qpopup-title-closebutton > img:hover {
-	background: url(../images/close.png) 14px 0;
+	background: url(../images/close.png) 0 14px;
 }
 
 .qpopup-controls {
@@ -197,4 +197,33 @@ textarea {
 
 #note-delete > div:hover {
 	background: url(../images/supprimer.png) 0 0;
+}
+
+@media (prefers-color-scheme: dark) {
+	#note-text {
+		color: white;
+		background-color: #2f2f33;
+		background-image: url(../images/txt-background-dark.png);
+		border: solid 1px black;
+	}
+
+	.qpopup-controls {
+		background-color: #2f2f33;
+	}
+
+	.qpopup-title {
+		color: white;
+		background-image: url(../images/title-background-dark.png);
+		background-color: #4d4d4d;
+		border-bottom: solid 1px black;
+	}
+	.qpopup-controls-resize {
+		background-image: url(../images/redim-dark.png);
+	}
+	.qpopup-title-closebutton > img {
+		background: url(../images/close-dark.png) 0 0;
+	}
+	.qpopup-title-closebutton > img:hover {
+		background: url(../images/close-dark.png) 0 14px;
+	}
 }
