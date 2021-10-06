@@ -32,6 +32,7 @@ var legacy = class extends ExtensionCommon.ExtensionAPI {
 
 					return Services.prompt.confirm(...args);
 				},
+				// https://github.com/mozilla/newtab-dev/blob/master/xpcom/base/nsIVersionComparator.idl
 				async compareVersions(v1, v2){
 					return Services.vc.compare(v1, v2);
 
