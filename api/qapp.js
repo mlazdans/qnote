@@ -73,7 +73,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				return false;
 			},
 			handler: e => {
-				QDEB&&console.debug("KeyboardHandler.handler()", e.code);
+				// QDEB&&console.debug("KeyboardHandler.handler()", e.code);
 				API.EventDispatcher.fireListeners("keydown", e);
 			}
 		}
