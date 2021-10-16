@@ -49,15 +49,16 @@ class NotePopup extends BasePopup {
 		this.panel.moveTo(x, y);
 	}
 
-	sizeTo(width, height){
-		let popup = this.popupEl;
+	// TODO: broken
+	// sizeTo(width, height){
+	// 	let popup = this.popupEl;
 
-		// This seems to set rather size limits?
-		//this.panel.sizeTo(width, height);
+	// 	// This seems to set rather size limits?
+	// 	//this.panel.sizeTo(width, height);
 
-		popup.style.width = width + 'px';
-		popup.style.height = height + 'px';
-	}
+	// 	popup.style.width = width + 'px';
+	// 	popup.style.height = height + 'px';
+	// }
 
 	// TODO: fix
 	focus(){

@@ -158,11 +158,12 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						popup.moveTo(pi.left, pi.top);
 					}
 
-					if(width !== null || height !== null){
-						pi.width = coalesce(width, pi.width);
-						pi.height = coalesce(height, pi.height);
-						popup.sizeTo(pi.width, pi.height);
-					}
+					// TODO: broken
+					// if(width !== null || height !== null){
+					// 	pi.width = coalesce(width, pi.width);
+					// 	pi.height = coalesce(height, pi.height);
+					// 	popup.sizeTo(pi.width, pi.height);
+					// }
 
 					// MAYBE: implement lose focus too
 					if(focused){

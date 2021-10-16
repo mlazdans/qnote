@@ -62,7 +62,11 @@ var Menu = {
 				let messageId = Menu.getId(info);
 
 				if(CurrentNote.messageId === messageId){
-					CurrentNote.reset();
+					CurrentNote.reset().then(() => {
+						CurrentNote.silentlyPersistAndClose().then(() => {
+							QNotePopForMessage(messageId, CurrentNote.flags)
+						});
+					});
 				} else {
 					saveNoteForMessage(messageId, {
 						left: undefined,
