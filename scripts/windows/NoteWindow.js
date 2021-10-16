@@ -10,6 +10,7 @@ class NoteWindow extends QEventDispatcher {
 		this.shown = false;
 		this.dirty = false;
 		this.windowId = windowId;
+		this.flags = undefined;
 	}
 
 	isEqual(n1, n2){

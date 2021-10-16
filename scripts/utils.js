@@ -278,6 +278,7 @@ async function QNotePopForMessage(messageId, flags = POP_NONE) {
 
 	return CurrentNote.loadNoteForMessage(messageId).then(note => {
 		CurrentNote.messageId = messageId;
+		CurrentNote.flags = flags;
 		if(note.exists || createNew){
 			// if(CurrentNote.popping){
 			// 	QDEB&&console.debug("already popping");
