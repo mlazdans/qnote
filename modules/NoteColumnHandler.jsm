@@ -1,4 +1,6 @@
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
+var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
 var EXPORTED_SYMBOLS = ["NoteColumnHandler"];
 
@@ -195,13 +197,18 @@ class NoteColumnHandler {
 			widthStr = `width="${width}"`;
 		}
 
+		let imgURL = extension.getURL("images/icon-column.png");
+
 		let html = '';
 		// Disabled splitter for now, will see
 		//html += `<splitter class="tree-splitter" resizeafter="farthest" ${splitOrdinalStr} />`;
 		html += `<treecol id="qnoteCol" persist="hidden ordinal width sortDirection" ${widthStr} ${colOrdinalStr}
 			label="QNote" minwidth="19" tooltiptext="QNote" currentView="unthreaded"
-			is="treecol-image" class="treecol-image qnote-column-header"/>`
-			;
+			is="treecol-image" class="treecol-image qnote-column-header"><img
+				src="${imgURL}"
+				xmlns="http://www.w3.org/1999/xhtml" class="treecol-icon"
+			/></treecol>`
+		;
 
 		// '<label class="treecol-text" crop="right" value="QNote" />' +
 		// '<image class="treecol-sortdirection" />' +
