@@ -226,17 +226,21 @@ async function initExtension(){
 	browser.menus.onShown.addListener(async info => {
 		await browser.menus.removeAll();
 
-		// Avoid context menu other than from messageList
+		let id;
+
+		// Click other than from messageList
 		if(info.selectedMessages === undefined){
-			return;
+			let msg = await getDisplayedMessageForTab(CurrentTabId);
+			id = msg.id;
+		} else {
+			if(info.selectedMessages.messages.length != 1){
+				return;
+			}
+			id = Menu.getId(info);
 		}
 
-		if(info.selectedMessages.messages.length != 1){
-			return;
-		}
-
-		loadNoteForMessage(Menu.getId(info)).then(note => {
-			Menu[note.exists ? "modify" : "new"]();
+		loadNoteForMessage(id).then(note => {
+			Menu[note.exists ? "modify" : "new"](id);
 			browser.menus.refresh();
 		}).catch(silentCatcher());
 	});

@@ -7,33 +7,26 @@ var Menu = {
 	getId: info => {
 		return Menu.getMessage(info).id;
 	},
-	modify: () => {
+	modify: (id) => {
 		browser.menus.create({
 			id: "modify",
 			title: _("modify.note"),
-			contexts: ["message_list"],
+			contexts: ["message_list", "page", "frame"],
 			onclick(info) {
-				QNotePopForMessage(Menu.getId(info), POP_FOCUS);
+				QNotePopForMessage(id, POP_FOCUS);
 			},
 		});
 
 		browser.menus.create({
 			id: "delete",
 			title: _("delete.note"),
-			contexts: ["message_list"],
+			contexts: ["message_list", "page", "frame"],
 			async onclick(info) {
-				let messageId = Menu.getId(info);
-				if(CurrentNote.messageId === messageId){
-					CurrentNote.deleteAndClose().catch(e => {
-						if(e instanceof DirtyStateError){
-							browser.legacy.alert(_("close.current.note"));
-						} else {
-							throw e;
-						}
-					});
+				if(CurrentNote.messageId === id){
+					await CurrentNote.silentlyDeleteAndClose();
 				} else {
 					if(await confirmDelete()) {
-						deleteNoteForMessage(Menu.getId(info)).then(updateNoteView).catch(e => browser.legacy.alert(_("error.deleting.note"), e.message));
+						deleteNoteForMessage(id).then(updateNoteView).catch(e => browser.legacy.alert(_("error.deleting.note"), e.message));
 					}
 				}
 			},
@@ -42,7 +35,7 @@ var Menu = {
 		browser.menus.create({
 			id: "options",
 			title: _("options"),
-			contexts: ["message_list"],
+			contexts: ["message_list", "page", "frame"],
 			onclick(info) {
 				browser.runtime.openOptionsPage();
 			},
@@ -51,24 +44,22 @@ var Menu = {
 		browser.menus.create({
 			id: "separator-1",
 			type: "separator",
-			contexts: ["message_list"]
+			contexts: ["message_list", "page", "frame"],
 		});
 
 		browser.menus.create({
 			id: "reset",
 			title: _("reset.note.window"),
-			contexts: ["message_list"],
+			contexts: ["message_list", "page", "frame"],
 			onclick(info) {
-				let messageId = Menu.getId(info);
-
-				if(CurrentNote.messageId === messageId){
+				if(CurrentNote.messageId === id){
 					CurrentNote.reset().then(() => {
 						CurrentNote.silentlyPersistAndClose().then(() => {
-							QNotePopForMessage(messageId, CurrentNote.flags)
+							QNotePopForMessage(id, CurrentNote.flags)
 						});
 					});
 				} else {
-					saveNoteForMessage(messageId, {
+					saveNoteForMessage(id, {
 						left: undefined,
 						top: undefined,
 						width: Prefs.width,
@@ -78,13 +69,13 @@ var Menu = {
 			},
 		});
 	},
-	new: () => {
+	new: (id) => {
 		browser.menus.create({
 			id: "create",
 			title: _("create.new.note"),
-			contexts: ["message_list"],
+			contexts: ["message_list", "page", "frame"],
 			async onclick(info) {
-				QNotePopForMessage(Menu.getId(info), POP_FOCUS);
+				QNotePopForMessage(id, POP_FOCUS);
 			},
 		});
 	}
