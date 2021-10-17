@@ -35,12 +35,6 @@ class NoteWindow extends QEventDispatcher {
 			this.note = note;
 			this.loadedNoteData = note.get();
 
-			note.addListener("afterupdate", () => {
-				if(this.messageId){
-					mpUpdateForMessage(this.messageId);
-				}
-			});
-
 			return note;
 		});
 	}

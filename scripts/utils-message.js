@@ -62,6 +62,8 @@ async function createNoteForMessage(id) {
 			if(Prefs.useTag){
 				tagMessage(id, Prefs.tagName, action === "save");
 			}
+
+			mpUpdateForMessage(id);
 		});
 
 		return note;
