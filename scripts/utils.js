@@ -267,6 +267,7 @@ async function exportStorage(){
 }
 
 async function QNotePopForMessage(id, flags = POP_NONE) {
+	await CurrentNote.silentlyPersistAndClose();
 	// Pop only if message changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
 	// if(
 	// 	!CurrentNote.popupId
