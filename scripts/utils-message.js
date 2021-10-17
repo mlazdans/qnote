@@ -1,7 +1,6 @@
 class NoKeyIdError extends Error {};
 class NoMessageError extends Error {};
 
-// messageId = int messageId from messageList
 let messagePartReturner = MessagePart => {
 	if(MessagePart){
 		return MessagePart;
@@ -9,15 +8,15 @@ let messagePartReturner = MessagePart => {
 	throw new NoMessageError;
 };
 
-async function getMessage(messageId){
-	return browser.messages.get(messageId).then(messagePartReturner);
+async function getMessage(id){
+	return browser.messages.get(id).then(messagePartReturner);
 }
 
-async function getMessageFull(messageId){
-	return browser.messages.getFull(messageId).then(messagePartReturner);
+async function getMessageFull(id){
+	return browser.messages.getFull(id).then(messagePartReturner);
 }
 
-async function getMessageKeyId(messageId) {
+async function getMessageKeyId(id) {
 	let partsParser = parts => {
 		// if(parts.headers['x-qnote-text']){
 		// 	let qtext = parts.headers['x-qnote-text'][0];
@@ -37,11 +36,11 @@ async function getMessageKeyId(messageId) {
 		}
 	};
 
-	return getMessage(messageId).then(parts => {
+	return getMessage(id).then(parts => {
 		if(parts.headerMessageId){
 			return parts.headerMessageId
 		} else {
-			return getMessageFull(messageId).then(parts => {
+			return getMessageFull(id).then(parts => {
 				let mid = partsParser(parts);
 
 				if(mid){
@@ -54,34 +53,34 @@ async function getMessageKeyId(messageId) {
 	});
 }
 
-async function createNoteForMessage(messageId) {
-	return getMessageKeyId(messageId).then(keyId => {
+async function createNoteForMessage(id) {
+	return getMessageKeyId(id).then(keyId => {
 		return createNote(keyId);
 	});
 }
 
-async function loadNoteForMessage(messageId) {
-	return createNoteForMessage(messageId).then(note => {
+async function loadNoteForMessage(id) {
+	return createNoteForMessage(id).then(note => {
 		return note.load().then(() => note);
 	});
 }
 
-async function deleteNoteForMessage(messageId){
-	return createNoteForMessage(messageId).then(note => {
+async function deleteNoteForMessage(id){
+	return createNoteForMessage(id).then(note => {
 		return note.delete().then(() => note);
 	});
 }
 
-async function saveNoteForMessage(messageId, data){
-	return loadNoteForMessage(messageId).then(note => {
+async function saveNoteForMessage(id, data){
+	return loadNoteForMessage(id).then(note => {
 		note.set(data);
 		return note.save();
 	});
 }
 
-async function 	tagMessage(messageId, tagName, toTag = true) {
-	return getMessage(messageId).then(message => {
-		QDEB&&console.debug(`tagMessage(messageId:${messageId}, tagName:${tagName}, toTag:${toTag})`);
+async function tagMessage(id, tagName, toTag = true) {
+	return getMessage(id).then(message => {
+		QDEB&&console.debug(`tagMessage(id:${id}, tagName:${tagName}, toTag:${toTag})`);
 		let tags = message.tags;
 
 		if(toTag){
