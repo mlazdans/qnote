@@ -1,6 +1,11 @@
 CHANGELOG QNote
 ===========================
 
+RELEASE 0.10.5
+-----------------
+- Add context menu to message
+- Minor bugfixes
+
 RELEASE 0.10.4
 -----------------
 - Options: enable / disable spell check

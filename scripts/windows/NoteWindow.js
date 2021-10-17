@@ -88,12 +88,10 @@ class NoteWindow extends QEventDispatcher {
 		QDEB&&console.debug(`${fName} - deleting...`);
 
 		if(await confirmDelete()) {
-			return this.note.delete().catch(e => browser.legacy.alert(_("error.deleting.note"), e.message));
-			// return this.note.delete().then(async () => {
-			// 	QDEB&&console.debug(`${fName} - deleted!`);
-			// }).catch(e => browser.legacy.alert(_("error.deleting.note"), e.message));
+			return this.note.delete().then(() => true).catch(e => browser.legacy.alert(_("error.deleting.note"), e.message));
 		} else {
 			QDEB&&console.debug(`${fName} - canceled!`);
+			return false;
 		}
 	}
 
@@ -166,9 +164,11 @@ class NoteWindow extends QEventDispatcher {
 	async deleteAndClose(){
 		return this.wrapDirty(async () => {
 			let fName = `${this.constructor.name}.deleteAndClose()`;
-			return this.deleteNote().then(async () => {
-				QDEB&&console.debug(`${fName} resulted in: ${status}`);
-				this.close();
+			return this.deleteNote().then(async hasDeleted => {
+				QDEB&&console.debug(`${fName} resulted in: ${hasDeleted}`);
+				if(hasDeleted){
+					this.close();
+				}
 			});
 		});
 	}
