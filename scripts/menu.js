@@ -7,6 +7,14 @@ var Menu = {
 	getId: info => {
 		return Menu.getMessage(info).id;
 	},
+	optionsMenu: {
+		id: "options",
+		title: _("options"),
+		contexts: ["message_list", "page", "frame"],
+		onclick(info) {
+			browser.runtime.openOptionsPage();
+		}
+	},
 	modify: (id) => {
 		browser.menus.create({
 			id: "modify",
@@ -32,14 +40,7 @@ var Menu = {
 			},
 		});
 
-		browser.menus.create({
-			id: "options",
-			title: _("options"),
-			contexts: ["message_list", "page", "frame"],
-			onclick(info) {
-				browser.runtime.openOptionsPage();
-			},
-		});
+		browser.menus.create(Menu.optionsMenu);
 
 		browser.menus.create({
 			id: "separator-1",
@@ -78,5 +79,6 @@ var Menu = {
 				QNotePopForMessage(id, POP_FOCUS);
 			},
 		});
+		// browser.menus.create(Menu.optionsMenu);
 	}
 }
