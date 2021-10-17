@@ -1,5 +1,7 @@
-class Note {
+class Note extends QEventDispatcher {
 	constructor(keyId) {
+		super(["aftersave", "afterdelete", "afterupdate"]);
+
 		this.keyId = keyId; // message-id header or another unique id
 		this.exists = false;
 
@@ -59,6 +61,8 @@ class Note {
 		return saver(this.get()).then(() => {
 			QDEB&&console.debug(`${fName} - saved!`);
 			this.exists = true;
+			this.fireListeners("aftersave", this);
+			this.fireListeners("afterupdate", this, "save");
 		});
 	}
 
@@ -66,9 +70,12 @@ class Note {
 		let fName = `${this.constructor.name}.delete()`;
 		QDEB&&console.debug(`${fName} - deleting...`);
 
+		// NOTE: async?
 		return deleter().then(() => {
 			QDEB&&console.debug(`${fName} - deleted!`);
 			this.exists = false;
+			this.fireListeners("afterdelete", this);
+			this.fireListeners("afterupdate", this, "delete");
 		});
 	}
 }

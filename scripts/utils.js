@@ -266,7 +266,7 @@ async function exportStorage(){
 	});
 }
 
-async function QNotePopForMessage(messageId, flags = POP_NONE) {
+async function QNotePopForMessage(id, flags = POP_NONE) {
 	// Pop only if message changed. Avoid popping on same message when, for example, toggle headers pane. Perhaps need configurable?
 	// if(
 	// 	!CurrentNote.popupId
@@ -276,8 +276,8 @@ async function QNotePopForMessage(messageId, flags = POP_NONE) {
 	let createNew = !(flags & POP_EXISTING);
 	let setFocus = flags & POP_FOCUS;
 
-	return CurrentNote.loadNoteForMessage(messageId).then(note => {
-		CurrentNote.messageId = messageId;
+	return CurrentNote.loadNoteForMessage(id).then(note => {
+		CurrentNote.messageId = id;
 		CurrentNote.flags = flags;
 		if(note.exists || createNew){
 			// if(CurrentNote.popping){

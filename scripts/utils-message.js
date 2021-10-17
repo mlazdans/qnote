@@ -55,7 +55,16 @@ async function getMessageKeyId(id) {
 
 async function createNoteForMessage(id) {
 	return getMessageKeyId(id).then(keyId => {
-		return createNote(keyId);
+		let note = createNote(keyId);
+
+		note.addListener("afterupdate", (n, action) => {
+			QDEB&&console.debug("afterupdate", action);
+			if(Prefs.useTag){
+				tagMessage(id, Prefs.tagName, action === "save");
+			}
+		});
+
+		return note;
 	});
 }
 

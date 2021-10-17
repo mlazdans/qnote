@@ -31,15 +31,15 @@ function initCurrentNote(from){
 		throw new TypeError("Prefs.windowOption");
 	}
 
-	CurrentNote.addListener("afterupdate", (NoteWindow, action) => {
-		QDEB&&console.debug("afterupdate", action);
-		if(CurrentNote.messageId){
-			mpUpdateForMessage(CurrentNote.messageId);
-			if(Prefs.useTag){
-				tagMessage(CurrentNote.messageId, Prefs.tagName, action === "save");
-			}
-		}
-	});
+	// CurrentNote.note.addListener("afterupdate", (n, action) => {
+	// 	QDEB&&console.debug("afterupdate", action);
+	// 	if(CurrentNote.messageId){
+	// 		mpUpdateForMessage(CurrentNote.messageId);
+	// 		// if(Prefs.useTag){
+	// 		// 	tagMessage(CurrentNote.messageId, Prefs.tagName, action === "save");
+	// 		// }
+	// 	}
+	// });
 
 	CurrentNote.addListener("afterclose", () => {
 		QDEB&&console.debug("afterclose");

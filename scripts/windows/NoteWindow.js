@@ -1,7 +1,7 @@
 class DirtyStateError extends Error {};
 class NoteWindow extends QEventDispatcher {
 	constructor(windowId) {
-		super(["aftersave", "afterdelete", "afterupdate", "afterclose"]);
+		super(["afterclose"]);
 
 		this.note;
 		this.popupId;
@@ -30,18 +30,18 @@ class NoteWindow extends QEventDispatcher {
 		return true;
 	}
 
-	async loadNote(keyId) {
-		return loadNote(keyId).then(note => {
+	async loadNoteForMessage(id) {
+		return loadNoteForMessage(id).then(note => {
 			this.note = note;
 			this.loadedNoteData = note.get();
 
-			return note;
-		});
-	}
+			note.addListener("afterupdate", () => {
+				if(this.messageId){
+					mpUpdateForMessage(this.messageId);
+				}
+			});
 
-	async loadNoteForMessage(messageId) {
-		return getMessageKeyId(messageId).then(keyId => {
-			return this.loadNote(keyId);
+			return note;
 		});
 	}
 
@@ -88,11 +88,10 @@ class NoteWindow extends QEventDispatcher {
 		QDEB&&console.debug(`${fName} - deleting...`);
 
 		if(await confirmDelete()) {
-			return this.note.delete().then(async () => {
-				QDEB&&console.debug(`${fName} - deleted!`);
-				await this.fireListeners("afterdelete", this);
-				await this.fireListeners("afterupdate", this, "delete");
-			}).catch(e => browser.legacy.alert(_("error.deleting.note"), e.message));
+			return this.note.delete().catch(e => browser.legacy.alert(_("error.deleting.note"), e.message));
+			// return this.note.delete().then(async () => {
+			// 	QDEB&&console.debug(`${fName} - deleted!`);
+			// }).catch(e => browser.legacy.alert(_("error.deleting.note"), e.message));
 		} else {
 			QDEB&&console.debug(`${fName} - canceled!`);
 		}
@@ -102,11 +101,12 @@ class NoteWindow extends QEventDispatcher {
 		let fName = `${this.constructor.name}.saveNote()`;
 		if(this.needSaveOnClose){
 			QDEB&&console.debug(`${fName} - saving...`);
-			return this.note.save().then(async () => {
-				QDEB&&console.debug(`${fName} - saved!`);
-				await this.fireListeners("aftersave", this);
-				await this.fireListeners("afterupdate", this, "save");
-			}).catch(e => browser.legacy.alert(_("error.saving.note"), e.message));
+			return this.note.save().catch(e => browser.legacy.alert(_("error.saving.note"), e.message));
+			// return this.note.save().then(async () => {
+			// 	QDEB&&console.debug(`${fName} - saved!`);
+			// 	await this.fireListeners("aftersave", this);
+			// 	await this.fireListeners("afterupdate", this, "save");
+			// }).catch(e => browser.legacy.alert(_("error.saving.note"), e.message));
 		} else {
 			QDEB&&console.debug(`${fName}, needSaveOnClose = false, do nothing`);
 		}
