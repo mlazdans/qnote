@@ -93,7 +93,9 @@ async function initExtension(){
 	// 	console.warn(`Unhandle: ${event.reason}`, event);
 	// });
 
-	await browser.qapp.init();
+	await browser.qapp.init({
+		storageFolder: Prefs.storageFolder
+	});
 
 	// KeyDown from qapp
 	browser.qapp.onKeyDown.addListener(e => {
