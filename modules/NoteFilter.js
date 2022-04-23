@@ -48,41 +48,14 @@ let WindowObserver = {
 let NoteQF = {
 	name: "qnote",
 	domId: qfQnoteDomId,
-	// propagateState: function(aTemplState, aSticky){
-	// 	console.log("propagateState", aTemplState, aSticky);
-	// },
-	// postFilterProcess: function(aState, aViewWrapper, aFiltering){
-	// 	console.log("postFilterProcess", aState, aViewWrapper, aFiltering);
-	// 	return [aState, false, false];
-	// },
-
-	// onCommand: function(aState, aNode, aEvent, aDocument){
-	// 	console.log("onCommand", aState, aNode, aEvent, aDocument);
-	// 	let qfTextBox = aDocument.getElementById('qfb-qs-textbox');
-	// 	let qfQnoteEl = aDocument.getElementById(qfQnoteDomId);
-	// 	return [qfQnoteEl.checked ? qfTextBox.value : null, true];
-	// },
-	// reflectInDOM: function(aDomNode, aFilterValue, aDocument, aMuxer){
-	// 	let qnoteFilterer = aMuxer.getFilterValueForMutation('qnote');
-	// 	// console.log("reflectInDOM", aFilterValue, aDomNode.checked, qnoteFilterer);
-	// 	if(qnoteFilterer === undefined){
-	// 		aDomNode.checked = NoteFilter.getQNoteQFState()
-	// 		let textFilter = aMuxer.getFilterValueForMutation("text");
-	// 		// console.log("restore filter", textFilter);
-	// 		aMuxer.setFilterValue('qnote', textFilter ? textFilter.text : "");
-	// 	} else {
-	// 		aDomNode.checked = !!qnoteFilterer;
-	// 	}
-
-	// 	// if(aMuxer.activeFilterer.getFilterValue('qnote')){
-	// 	// 	aDomNode.checked = true;
-	// 	// } else {
-	// 	// 	aDomNode.checked = false;
-	// 	// }
-	// 	//aDomNode.checked = !!aFilterValue;
-	// 	// console.log("reflectInDOM - finish", aDomNode.checked);
-	// 	NoteFilter.updateSearch(aMuxer);
-	// },
+	reflectInDOM: function(aDomNode, aFilterValue, aDocument, aMuxer){
+		let state = NoteFilter.getQNoteQFState();
+		let textFilter = aMuxer.getFilterValueForMutation("text");
+		if(state){
+			aMuxer.setFilterValue("qnote", textFilter.text);
+		}
+		NoteFilter.updateSearch(aMuxer);
+	},
 	appendTerms: function(aTermCreator, aTerms, aFilterValue) {
 		// Let us borrow an existing code just for a while :>
 		var phrases = MessageTextFilter._parseSearchString(aFilterValue.toLowerCase());
@@ -115,9 +88,6 @@ let NoteQF = {
 			firstClause = false;
 		}
 	}
-	// domBindExtra: function(aDocument, aMuxer, aNode){
-	// 	console.log("domBindExtra", aDocument, aMuxer, aNode);
-	// }
 };
 
 NoteFilter = {
@@ -158,14 +128,18 @@ NoteFilter = {
 		aMuxer.deferredUpdateSearch();
 	},
 	attachToWindow: w => {
-		// console.log("NoteFilter.attachToWindow()", QuickFilterManager);
+		let state = NoteFilter.getQNoteQFState();
+
 		if(!w.document.getElementById(qfQnoteDomId)){
 			let button = w.document.createXULElement('toolbarbutton');
 			button.setAttribute('id', qfQnoteDomId);
 			button.setAttribute('type', 'checkbox');
 			button.setAttribute('class', 'toolbarbutton-1 qfb-tag-button');
 			button.setAttribute('label', 'QNote');
-			button.setAttribute('value', 'QNote');
+			// button.setAttribute('value', 'QNote');
+			if(state){
+				button.setAttribute('checked', "true");
+			}
 			// button.setAttribute("label", tag.tag);
 			// button.setAttribute("value", tag.key);
 
