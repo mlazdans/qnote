@@ -108,18 +108,18 @@ let NoteQF = {
 	// 	return [aState, false, false];
 	// },
 	onCommand: function(aState, aNode, aEvent, aDocument){
-		console.log("onCommand", aState, aNode, aEvent, aDocument);
+		// console.log("onCommand", aState, aNode, aEvent, aDocument);
 		let qfTextBox = aDocument.getElementById('qfb-qs-textbox');
 		let qfQnoteChecked = aDocument.getElementById(qfQnoteCheckedId);
 		return [qfQnoteChecked.checked ? qfTextBox.value : null, true];
 	},
 	reflectInDOM: function(aDomNode, aFilterValue, aDocument, aMuxer){
 		let qnoteFilterer = aMuxer.getFilterValueForMutation('qnote');
-		console.log("reflectInDOM", aFilterValue, aDomNode.checked, qnoteFilterer);
+		// console.log("reflectInDOM", aFilterValue, aDomNode.checked, qnoteFilterer);
 		if(qnoteFilterer === undefined){
 			aDomNode.checked = NoteFilter.getQNoteQFState()
 			let textFilter = aMuxer.getFilterValueForMutation("text");
-			console.log("restore filter", textFilter);
+			// console.log("restore filter", textFilter);
 			aMuxer.setFilterValue('qnote', textFilter ? textFilter.text : "");
 		} else {
 			aDomNode.checked = !!qnoteFilterer;
@@ -131,7 +131,7 @@ let NoteQF = {
 		// 	aDomNode.checked = false;
 		// }
 		//aDomNode.checked = !!aFilterValue;
-		console.log("reflectInDOM - finish", aDomNode.checked);
+		// console.log("reflectInDOM - finish", aDomNode.checked);
 		NoteFilter.updateSearch(aMuxer);
 	},
 	appendTerms: function(aTermCreator, aTerms, aFilterValue) {
@@ -278,6 +278,7 @@ NoteFilter = {
 		// noteGrabber = options.noteGrabber;
 
 		QuickFilterManager.defineFilter(NoteQF);
+		// MessageTextFilter.defineTextFilter(NoteQF);
 
 		if(MailServices.filters.getCustomTerm(CustomTerm.id)){
 			//console.log("CustomTerm exists", term);
