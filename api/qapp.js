@@ -3,7 +3,7 @@ var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionPa
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var { NoteColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteColumnHandler.jsm"));
 var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
-// var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
+var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js"));
 
@@ -236,10 +236,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		this.EventDispatcher.fireListeners("onShutdown");
 		this.uninstallCSS("html/background.css");
+		NoteFilter.uninstall();
 
 		Components.utils.unload(extension.rootURI.resolve("modules/NoteColumnHandler.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/NotePopup.jsm"));
-		// Components.utils.unload(extension.rootURI.resolve("modules/NoteFilter.jsm"));
+		Components.utils.unload(extension.rootURI.resolve("modules/NoteFilter.jsm"));
 		Components.utils.unload(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 		Components.utils.unload(extension.rootURI.resolve("modules/QCache.js"));
 		Components.utils.unload(extension.rootURI.resolve("modules/DOMLocalizator.js"));
@@ -311,7 +312,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 				}).api(),
 				// TODO: pass windowId
-				async init(){
+				async init(options){
 					QDEB&&console.debug("qapp.init()");
 
 					// Remove old style sheet in case it still lay around, for example, after update
@@ -323,6 +324,15 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					let w = Services.wm.getMostRecentWindow("mail:3pane");
 					API.installColumnHandler(w);
 					API.installKeyboardHandler(w);
+					if(options && options.storageFolder){
+						QDEB&&console.debug("Installing filter");
+						NoteFilter.install({
+							notesRoot: options.storageFolder,
+							w: w
+						});
+					} else {
+						QDEB&&console.debug("options.storageFolder not set, skip install filter");
+					}
 
 					// QDEB&&console.debug("qapp.enablePrintAttacher()", prefs);
 					API.EventDispatcher.addListener('domwindowopened', aSubject => {
@@ -464,15 +474,15 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						w.gFolderDisplay.tree.focus();
 					}
 				},
-				async installQuickFilter(){
-					console.warn("search has been temporarily disabled until we found a better solution");
-					// TODO: need to re-think better solution
-					// wex.loadAllQAppNotes().then(() => {
-					// 	NoteFilter.install({
-					// 		noteGrabber: noteGrabber
-					// 	});
-					// });
-				},
+				// async installQuickFilter(){
+				// 	console.warn("search has been temporarily disabled until we found a better solution");
+				// 	// TODO: need to re-think better solution
+				// 	// wex.loadAllQAppNotes().then(() => {
+				// 	// 	NoteFilter.install({
+				// 	// 		noteGrabber: noteGrabber
+				// 	// 	});
+				// 	// });
+				// },
 				async updateView(windowId, keyId){
 					let fName = `qapp.updateView(${windowId}, ${keyId})`;
 

@@ -167,7 +167,20 @@
 		"type": "function",
 		"description": "Initialize extension",
 		"async": true,
-		"parameters": []
+		"parameters": [{
+			"name": "options",
+			"type": "object",
+			"optional": true,
+			"properties": {
+				"storageFolder": {
+					"type": "string",
+					"optional": true,
+					"default": "",
+					"description": "QNote folder"
+				}
+			},
+			"default": {}
+		}]
 	},{
 		"name": "setDebug",
 		"type": "function",

@@ -1,6 +1,9 @@
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
+var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var { QuickFilterManager, MessageTextFilter, QuickFilterSearchListener } = ChromeUtils.import("resource:///modules/QuickFilterManager.jsm");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
+var { NoteFile } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFile.js"));
 
 var EXPORTED_SYMBOLS = ["NoteFilter"];
 
@@ -18,8 +21,8 @@ var NoteFilter;
 
 {
 
-let noteGrabber;
-let qfQnoteCheckedId = 'qfb-qs-qnote-checked';
+// let noteGrabber;
+let qfQnoteCheckedId = 'qfb-qs-qnote';
 let qnoteCustomTermId = 'qnote@dqdp.net#qnoteText';
 let ops = [Ci.nsMsgSearchOp.Contains, Ci.nsMsgSearchOp.DoesntContain, Ci.nsMsgSearchOp.Is, Ci.nsMsgSearchOp.Isnt];
 
@@ -68,11 +71,29 @@ let CustomTerm = {
 		return ops;
 	},
 	match: function(msgHdr, searchValue, searchOp) {
-		console.log("match", msgHdr, searchValue, searchOp);
+		let note;
+		// console.log("match", msgHdr.messageId);
+		try {
+			note = NoteFile.load(NoteFilter.options.notesRoot, msgHdr.messageId);
+		} catch(e) {
+			// console.log("Error loading", msgHdr.messageId);
+			// throw new ExtensionError(e.message);
+		}
+
+		// if(note){
+		// 	console.log(note, searchValue, note.text.toLowerCase().search(searchValue)>=0);
+		// }
+
+		// if(!note){
+		// 	return false;
+		// }
+
+		// return note && note.exists && (note.text.toLowerCase().search(searchValue)>=0);
+		// console.log("match", msgHdr.messageId, msgHdr, searchValue, searchOp);
 		// // TODO: we get dead objects here because we can not unload CustomTerm
 		// let note = noteGrabber.getNote(msgHdr.messageId);
 
-		// return note && note.exists && (note.text.toLowerCase().search(searchValue)>=0);
+		return note && (note.text.toLowerCase().search(searchValue)>=0);
 	}
 };
 
@@ -87,18 +108,18 @@ let NoteQF = {
 	// 	return [aState, false, false];
 	// },
 	onCommand: function(aState, aNode, aEvent, aDocument){
-		console.log("onCommand", aState, aNode, aEvent, aDocument);
+		// console.log("onCommand", aState, aNode, aEvent, aDocument);
 		let qfTextBox = aDocument.getElementById('qfb-qs-textbox');
 		let qfQnoteChecked = aDocument.getElementById(qfQnoteCheckedId);
 		return [qfQnoteChecked.checked ? qfTextBox.value : null, true];
 	},
 	reflectInDOM: function(aDomNode, aFilterValue, aDocument, aMuxer){
 		let qnoteFilterer = aMuxer.getFilterValueForMutation('qnote');
-		console.log("reflectInDOM", aFilterValue, aDomNode.checked, qnoteFilterer);
+		// console.log("reflectInDOM", aFilterValue, aDomNode.checked, qnoteFilterer);
 		if(qnoteFilterer === undefined){
 			aDomNode.checked = NoteFilter.getQNoteQFState()
 			let textFilter = aMuxer.getFilterValueForMutation("text");
-			console.log("restore filter", textFilter);
+			// console.log("restore filter", textFilter);
 			aMuxer.setFilterValue('qnote', textFilter ? textFilter.text : "");
 		} else {
 			aDomNode.checked = !!qnoteFilterer;
@@ -110,11 +131,11 @@ let NoteQF = {
 		// 	aDomNode.checked = false;
 		// }
 		//aDomNode.checked = !!aFilterValue;
-		console.log("reflectInDOM - finish", aDomNode.checked);
+		// console.log("reflectInDOM - finish", aDomNode.checked);
 		NoteFilter.updateSearch(aMuxer);
 	},
 	appendTerms: function(aTermCreator, aTerms, aFilterValue) {
-		console.log("appendTerms", aFilterValue, aTerms, aTermCreator);
+		// console.log("appendTerms", aFilterValue, aTerms, aTermCreator);
 
 		// Let us borrow an existing code just for a while :>
 		let phrases = MessageTextFilter._parseSearchString(aFilterValue.toLowerCase());
@@ -190,14 +211,19 @@ NoteFilter = {
 		console.debug("NoteFilter.attachToWindow()");
 		if(!w.document.getElementById(qfQnoteCheckedId)){
 			let button = w.document.createXULElement('toolbarbutton');
-			button.setAttribute('id',qfQnoteCheckedId);
-			button.setAttribute('type','checkbox');
-			button.setAttribute('class','toolbarbuton-1');
+			button.setAttribute('id', qfQnoteCheckedId);
+			button.setAttribute('type', 'checkbox');
+			button.setAttribute('class', 'toolbarbutton-1 qfb-tag-button');
 			button.setAttribute('label', 'QNote');
+			button.setAttribute('value', 'QNote');
+			// button.setAttribute("label", tag.tag);
+			// button.setAttribute("value", tag.key);
 
 			let filterBar = w.document.getElementById("quick-filter-bar-filter-text-bar");
-			let senderButton = w.document.getElementById("qfb-qs-sender");
-			filterBar.insertBefore(button, senderButton);
+			// let filterBar = w.document.getElementById("quick-filter-bar-tab-bar");
+			// let senderButton = w.document.getElementById("qfb-qs-sender");
+			// filterBar.insertBefore(button, senderButton);
+			filterBar.appendChild(button);
 		}
 
 		let qfQnoteChecked = w.document.getElementById(qfQnoteCheckedId);
@@ -248,9 +274,11 @@ NoteFilter = {
 		Services.ww.registerNotification(WindowObserver);
 
 		NoteFilter.options = options;
-		noteGrabber = options.noteGrabber;
+		// console.log("NoteFilter.options", NoteFilter.options);
+		// noteGrabber = options.noteGrabber;
 
 		QuickFilterManager.defineFilter(NoteQF);
+		// MessageTextFilter.defineTextFilter(NoteQF);
 
 		if(MailServices.filters.getCustomTerm(CustomTerm.id)){
 			//console.log("CustomTerm exists", term);
@@ -258,9 +286,9 @@ NoteFilter = {
 			MailServices.filters.addCustomTerm(CustomTerm);
 		}
 
-		let w = Services.wm.getMostRecentWindow("mail:3pane");
+		// let w = Services.wm.getMostRecentWindow("mail:3pane");
 
-		NoteFilter.attachToWindow(w);
+		NoteFilter.attachToWindow(options.w);
 
 		// Restore filterer state
 		// let aMuxer = w.QuickFilterBarMuxer;
