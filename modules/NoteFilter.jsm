@@ -55,13 +55,13 @@ let CustomTerm = {
 	name: 'QNote',
 	needsBody: false,
 	getEnabled: function(scope, op) {
-		return false;
+		return true;
 		//return ops.includes(op);
 	},
 	// Currently disabled in search dialogs, because can't figure out how to add text box to the filter
 	// Probably through XUL or something
 	getAvailable: function(scope, op) {
-		return false;
+		return true;
 		//return ops.includes(op);
 	},
 	getAvailableOperators: function(scope, length) {
@@ -72,7 +72,7 @@ let CustomTerm = {
 	},
 	match: function(msgHdr, searchValue, searchOp) {
 		let note;
-		// console.log("match", msgHdr.messageId);
+		// console.log("match", arguments);
 		try {
 			note = NoteFile.load(NoteFilter.options.notesRoot, msgHdr.messageId);
 		} catch(e) {
@@ -135,34 +135,37 @@ let NoteQF = {
 		NoteFilter.updateSearch(aMuxer);
 	},
 	appendTerms: function(aTermCreator, aTerms, aFilterValue) {
-		// console.log("appendTerms", aFilterValue, aTerms, aTermCreator);
-
 		// Let us borrow an existing code just for a while :>
-		let phrases = MessageTextFilter._parseSearchString(aFilterValue.toLowerCase());
-		let term;
-		let firstClause = true;
+		var phrases = MessageTextFilter._parseSearchString(aFilterValue.toLowerCase());
+		var firstClause = true;
+		var l = phrases.length;
 
-		for (let kw of phrases) {
-			term = aTermCreator.createTerm();
+		// console.log("appendTerms", aFilterValue, aTerms, aTermCreator, phrases);
 
-			let value = term.value;
+		// for (let kw of phrases) {
+		for (let i = 0; i < l; i++) {
+			let kw = phrases[i];
+			let term = aTermCreator.createTerm();
+			var value = term.value;
+			// value.attrib = Ci.nsMsgSearchAttrib.Subject;
+			value.attrib = Ci.nsMsgSearchAttrib.Custom;
 			value.str = kw;
-			value.attrib = Ci.nsMsgSearchAttrib.Subject;
-			term.value = value;
+
 
 			term.attrib = Ci.nsMsgSearchAttrib.Custom;
 			term.customId = CustomTerm.id;
 			term.op = Ci.nsMsgSearchOp.Contains;
 			term.booleanAnd = !firstClause; // We need OR-ed with other QuickFilters and AND-ed with phrases
 			term.beginsGrouping = firstClause;
+			term.value = value;
+
+			if (i + 1 == l) {
+				term.endsGrouping = true;
+			}
 
 			aTerms.push(term);
 
 			firstClause = false;
-		}
-
-		if (term) {
-			term.endsGrouping = true;
 		}
 	}
 	// domBindExtra: function(aDocument, aMuxer, aNode){

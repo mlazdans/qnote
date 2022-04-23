@@ -4,6 +4,7 @@ CHANGELOG QNote
 RELEASE 0.10.5
 -----------------
 - Add context menu to message
+- Add QucikFilter support for filtering notes by contents (only for folder storage)
 - Minor bugfixes
 
 RELEASE 0.10.4
