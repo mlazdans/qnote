@@ -1,6 +1,6 @@
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.js"));
+var { QNotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/QNotePopup.js"));
 var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 var { DOMLocalizator } = ChromeUtils.import(extension.rootURI.resolve("modules/DOMLocalizator.js"));
 
@@ -184,7 +184,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 
 					let window = id2RealWindow(windowId);
 
-					var popup = new NotePopup({
+					var popup = new QNotePopup({
 						window: window,
 						top: top,
 						left: left,

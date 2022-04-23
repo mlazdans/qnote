@@ -3,21 +3,19 @@ var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionPa
 var { QuickFilterManager, MessageTextFilter } = ChromeUtils.import("resource:///modules/QuickFilterManager.jsm");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { CustomTerm } = ChromeUtils.import(extension.rootURI.resolve("modules/CustomTerm.js"));
+var { QCustomTerm } = ChromeUtils.import(extension.rootURI.resolve("modules/QCustomTerm.js"));
 
-var EXPORTED_SYMBOLS = ["NoteFilter"];
+var EXPORTED_SYMBOLS = ["QNoteFilter"];
 
 /*
 
 Current problems:
 1) match() does not expect promises
-2) we can addCustomTerm() but can not remove
-This leads to dead object problems once extension goes away.
-Seems that this is TB core related
+2) we can addCustomTerm() but can not remove it
 
 */
 
-var NoteFilter;
+var QNoteFilter;
 
 {
 
@@ -34,11 +32,11 @@ let WindowObserver = {
 					return;
 				}
 
-				// let filterer = NoteFilter.getQF(aSubject.gFolderDisplay);
+				// let filterer = QNoteFilter.getQF(aSubject.gFolderDisplay);
 				// console.log("Attach to win", filterer);
 				let tabmail = document.getElementById('tabmail');
 				if(tabmail){
-					NoteFilter.attachToWindow(aSubject);
+					QNoteFilter.attachToWindow(aSubject);
 				}
 			});
 		}
@@ -49,12 +47,12 @@ let NoteQF = {
 	name: "qnote",
 	domId: qfQnoteDomId,
 	reflectInDOM: function(aDomNode, aFilterValue, aDocument, aMuxer){
-		let state = NoteFilter.getQNoteQFState();
+		let state = QNoteFilter.getQNoteQFState();
 		let textFilter = aMuxer.getFilterValueForMutation("text");
 		if(state){
 			aMuxer.setFilterValue("qnote", textFilter.text);
 		}
-		NoteFilter.updateSearch(aMuxer);
+		QNoteFilter.updateSearch(aMuxer);
 	},
 	appendTerms: function(aTermCreator, aTerms, aFilterValue) {
 		// Let us borrow an existing code just for a while :>
@@ -99,7 +97,7 @@ NoteFilter = {
 		return Services.prefs.QueryInterface(Ci.nsIPrefBranch).getBranch("extensions.qnote.");
 	},
 	getQNoteQFState(){
-		let prefs = NoteFilter.getPrefsO();
+		let prefs = QNoteFilter.getPrefsO();
 		if(prefs.prefHasUserValue("qfValue")){
 			return prefs.getBoolPref("qfValue");
 		} else {
@@ -107,7 +105,7 @@ NoteFilter = {
 		}
 	},
 	saveQNoteQFState(state){
-		return NoteFilter.getPrefsO().setBoolPref("qfValue", state);
+		return QNoteFilter.getPrefsO().setBoolPref("qfValue", state);
 	},
 	getQF(aFolderDisplay){
 		if(!aFolderDisplay){
@@ -119,16 +117,16 @@ NoteFilter = {
 		return "quickFilter" in tab._ext ? tab._ext.quickFilter : null;
 	},
 	removeListener(name, listener){
-		NoteFilter.listeners[name].delete(listener);
+		QNoteFilter.listeners[name].delete(listener);
 	},
 	addListener(name, listener){
-		NoteFilter.listeners[name].add(listener);
+		QNoteFilter.listeners[name].add(listener);
 	},
 	updateSearch: aMuxer => {
 		aMuxer.deferredUpdateSearch();
 	},
 	attachToWindow: w => {
-		let state = NoteFilter.getQNoteQFState();
+		let state = QNoteFilter.getQNoteQFState();
 
 		if(!w.document.getElementById(qfQnoteDomId)){
 			let button = w.document.createXULElement('toolbarbutton');
@@ -156,17 +154,17 @@ NoteFilter = {
 
 		let commandHandler = function() {
 			aMuxer.activeFilterer.setFilterValue('qnote', qfQnoteEl.checked ? qfTextBox.value : null);
-			NoteFilter.updateSearch(aMuxer);
+			QNoteFilter.updateSearch(aMuxer);
 		};
 
 		qfTextBox.addEventListener("command", commandHandler);
 		qfQnoteEl.addEventListener("command", commandHandler);
 
-		NoteFilter.addListener("uninstall", () => {
-			let filterer = NoteFilter.getQF(w.gFolderDisplay);
+		QNoteFilter.addListener("uninstall", () => {
+			let filterer = QNoteFilter.getQF(w.gFolderDisplay);
 			if(filterer){
 				// Should manage state persistence ourselves
-				NoteFilter.saveQNoteQFState(qfQnoteEl.checked);
+				QNoteFilter.saveQNoteQFState(qfQnoteEl.checked);
 				// We need to remove state because QF gets mad if we disable, for example, search and then leave state as is
 				filterer.setFilterValue('qnote', null);
 				// console.log("unset filter", filterer, qfQnoteEl.checked);
@@ -177,14 +175,14 @@ NoteFilter = {
 			qfQnoteEl.parentNode.removeChild(qfQnoteEl);
 		});
 
-		// NoteFilter.updateSearch(aMuxer);
+		// QNoteFilter.updateSearch(aMuxer);
 		// console.log("updateSearch", aMuxer);
 	},
 	install: options => {
-		// console.debug("NoteFilter.install()");
+		// console.debug("QNoteFilter.install()");
 		Services.ww.registerNotification(WindowObserver);
 
-		NoteFilter.options = options;
+		QNoteFilter.options = options;
 
 		var CustomTermOptions = {
 			id: CustomTermId,
@@ -196,7 +194,7 @@ NoteFilter = {
 		if(MailServices.filters.getCustomTerm(CustomTermId)){
 			// console.log("CustomTerm exists");
 		} else {
-			MailServices.filters.addCustomTerm(new CustomTerm(CustomTermOptions));
+			MailServices.filters.addCustomTerm(new QCustomTerm(CustomTermOptions));
 		}
 
 		QuickFilterManager.defineFilter(NoteQF);
@@ -204,14 +202,14 @@ NoteFilter = {
 
 		// let w = Services.wm.getMostRecentWindow("mail:3pane");
 
-		NoteFilter.attachToWindow(options.w);
+		QNoteFilter.attachToWindow(options.w);
 
 		// Restore filterer state
 		// let aMuxer = w.QuickFilterBarMuxer;
 		// let filterer = aMuxer.maybeActiveFilterer;
 		// console.log("filterer", aMuxer, filterer);
 		// if(filterer){
-		// 	if(NoteFilter.getQNoteQFState()){
+		// 	if(QNoteFilter.getQNoteQFState()){
 		// 		let textFilter = filterer.getFilterValue("text");
 		// 		if(textFilter.text){
 		// 			console.log("restore filter", filterer, textFilter);
@@ -221,9 +219,9 @@ NoteFilter = {
 		// }
 
 		// let aMuxer = w.QuickFilterBarMuxer;
-		// let filterer = NoteFilter.getQF(w.gFolderDisplay);
+		// let filterer = QNoteFilter.getQF(w.gFolderDisplay);
 		// if(filterer){
-		// 	if(NoteFilter.getQNoteQFState()){
+		// 	if(QNoteFilter.getQNoteQFState()){
 		// 		let textFilter = filterer.getFilterValue("text");
 		// 		if(textFilter.text){
 		// 			console.log("restore filter", filterer, textFilter);
@@ -263,8 +261,8 @@ NoteFilter = {
 		// });
 	},
 	uninstall: () => {
-		console.debug("NoteFilter.uninstall()");
-		for (let listener of NoteFilter.listeners["uninstall"]) {
+		console.debug("QNoteFilter.uninstall()");
+		for (let listener of QNoteFilter.listeners["uninstall"]) {
 			listener();
 		}
 		QuickFilterManager.killFilter("qnote");

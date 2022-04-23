@@ -1,14 +1,14 @@
 var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { NoteFile } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFile.js"));
+var { QNoteFile } = ChromeUtils.import(extension.rootURI.resolve("modules/QNoteFile.js"));
 
-var EXPORTED_SYMBOLS = ["CustomTerm"];
+var EXPORTED_SYMBOLS = ["QCustomTerm"];
 
 // NOTE:
 // We need completely restart TB if CustomTerm code changes
 // Currenlty there are no means to remove filter or there is but I'm not aware, please let me know: qnote@dqdp.net
-class CustomTerm {
+class QCustomTerm {
 	constructor(options) {
 		this.options = options;
 		this.id = options.id;
@@ -16,7 +16,7 @@ class CustomTerm {
 		this.needsBody = options.needsBody;
 		this.notesRoot = options.notesRoot;
 		this.ops = [Ci.nsMsgSearchOp.Contains, Ci.nsMsgSearchOp.DoesntContain, Ci.nsMsgSearchOp.Is, Ci.nsMsgSearchOp.Isnt];
-		this.NF = new NoteFile;
+		this.NF = new QNoteFile;
 	}
 	getEnabled(scope, op) {
 		return true;

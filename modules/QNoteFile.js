@@ -1,8 +1,8 @@
 var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 
-var EXPORTED_SYMBOLS = ["NoteFile"];
+var EXPORTED_SYMBOLS = ["QNoteFile"];
 
-class NoteFile {
+class QNoteFile {
 	constructor(){
 		this.FU = FileUtils;
 	}

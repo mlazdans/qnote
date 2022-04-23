@@ -1,10 +1,10 @@
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { ExtensionError } = ExtensionUtils;
-var { NoteFile } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFile.js"));
+var { QNoteFile } = ChromeUtils.import(extension.rootURI.resolve("modules/QNoteFile.js"));
 
 var qnote = class extends ExtensionCommon.ExtensionAPI {
 	getAPI(context) {
-		var NF = new NoteFile;
+		var NF = new QNoteFile;
 		return {
 			qnote: {
 				async saveNote(root, keyId, note){

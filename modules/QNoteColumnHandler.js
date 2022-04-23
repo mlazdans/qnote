@@ -2,11 +2,11 @@ var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
-var EXPORTED_SYMBOLS = ["NoteColumnHandler"];
+var EXPORTED_SYMBOLS = ["QNoteColumnHandler"];
 
 var QDEB = true;
 
-class NoteColumnHandler {
+class QNoteColumnHandler {
 	constructor(options) {
 		this.windows = new WeakSet();
 		this.options = options;
@@ -18,11 +18,11 @@ class NoteColumnHandler {
 			// onCreatedView: aFolderDisplay => {
 			// },
 			onActiveCreatedView: aFolderDisplay => {
-				QDEB&&console.debug("NoteColumnHandler: onActiveCreatedView()");
+				QDEB&&console.debug("QNoteColumnHandler: onActiveCreatedView()");
 				self.addColumnHandler(aFolderDisplay.view.dbView);
 			},
 			onDestroyingView: (aFolderDisplay, aFolderIsComingBack) => {
-				QDEB&&console.debug("NoteColumnHandler: onDestroyingView()");
+				QDEB&&console.debug("QNoteColumnHandler: onDestroyingView()");
 				self.removeColumnHandler(aFolderDisplay.view.dbView);
 			}
 			// onMessagesLoaded: (aFolderDisplay, aAll) => {

@@ -1,9 +1,9 @@
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { NoteColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteColumnHandler.js"));
-var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.js"));
-var { NoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFilter.js"));
+var { QNoteColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/QNoteColumnHandler.js"));
+var { QNotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/QNotePopup.js"));
+var { QNoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/QNoteFilter.js"));
 var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js"));
 
@@ -164,7 +164,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			// }
 		};
 
-		this.ColumnHandler = new NoteColumnHandler({
+		this.ColumnHandler = new QNoteColumnHandler({
 			columnHandler: colHandler
 		});
 
@@ -236,16 +236,16 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		this.EventDispatcher.fireListeners("onShutdown");
 		this.uninstallCSS("html/background.css");
-		NoteFilter.uninstall();
+		QNoteFilter.uninstall();
 
-		Components.utils.unload(extension.rootURI.resolve("modules/NoteColumnHandler.js"));
-		Components.utils.unload(extension.rootURI.resolve("modules/NotePopup.js"));
-		Components.utils.unload(extension.rootURI.resolve("modules/NoteFilter.js"));
+		Components.utils.unload(extension.rootURI.resolve("modules/QNoteColumnHandler.js"));
+		Components.utils.unload(extension.rootURI.resolve("modules/QNotePopup.js"));
+		Components.utils.unload(extension.rootURI.resolve("modules/QNoteFilter.js"));
 		Components.utils.unload(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 		Components.utils.unload(extension.rootURI.resolve("modules/QCache.js"));
 		Components.utils.unload(extension.rootURI.resolve("modules/DOMLocalizator.js"));
-		Components.utils.unload(extension.rootURI.resolve("modules/NoteFile.js"));
-		Components.utils.unload(extension.rootURI.resolve("modules/CustomTerm.js"));
+		Components.utils.unload(extension.rootURI.resolve("modules/QNoteFile.js"));
+		Components.utils.unload(extension.rootURI.resolve("modules/QCustomTerm.js"));
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 	}
 
@@ -326,7 +326,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					API.installKeyboardHandler(w);
 					if(options && options.storageFolder){
 						QDEB&&console.debug("Installing filter");
-						NoteFilter.install({
+						QNoteFilter.install({
 							notesRoot: options.storageFolder,
 							w: w
 						});
