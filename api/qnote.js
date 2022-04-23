@@ -4,32 +4,33 @@ var { NoteFile } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFil
 
 var qnote = class extends ExtensionCommon.ExtensionAPI {
 	getAPI(context) {
+		var NF = new NoteFile;
 		return {
 			qnote: {
 				async saveNote(root, keyId, note){
 					try {
-						return NoteFile.save(root, keyId, note)
+						return NF.save(root, keyId, note)
 					} catch(e) {
 						throw new ExtensionError(e.message);
 					}
 				},
 				async deleteNote(root, keyId){
 					try {
-						return NoteFile.delete(root, keyId);
+						return NF.delete(root, keyId);
 					} catch(e) {
 						throw new ExtensionError(e.message);
 					}
 				},
 				async loadNote(root, keyId){
 					try {
-						return NoteFile.load(root, keyId);
+						return NF.load(root, keyId);
 					} catch(e) {
 						throw new ExtensionError(e.message);
 					}
 				},
 				async getAllKeys(root) {
 					try {
-						return NoteFile.getAllKeys(root);
+						return NF.getAllKeys(root);
 					} catch(e) {
 						throw new ExtensionError(e.message);
 					}

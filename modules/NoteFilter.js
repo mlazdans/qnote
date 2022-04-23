@@ -1,9 +1,9 @@
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { QuickFilterManager, MessageTextFilter, QuickFilterSearchListener } = ChromeUtils.import("resource:///modules/QuickFilterManager.jsm");
+var { QuickFilterManager, MessageTextFilter, QuickFilterSearchListener, QuickFilterState } = ChromeUtils.import("resource:///modules/QuickFilterManager.jsm");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
-var { NoteFile } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFile.js"));
+var { CustomTerm } = ChromeUtils.import(extension.rootURI.resolve("modules/CustomTerm.js"));
 
 var EXPORTED_SYMBOLS = ["NoteFilter"];
 
@@ -21,10 +21,8 @@ var NoteFilter;
 
 {
 
-// let noteGrabber;
+let CustomTermId = 'qnote@dqdp.net#qnoteText';
 let qfQnoteDomId = 'qfb-qs-qnote';
-let qnoteCustomTermId = 'qnote@dqdp.net#qnoteText';
-let ops = [Ci.nsMsgSearchOp.Contains, Ci.nsMsgSearchOp.DoesntContain, Ci.nsMsgSearchOp.Is, Ci.nsMsgSearchOp.Isnt];
 
 let WindowObserver = {
 	observe: function(aSubject, aTopic) {
@@ -47,56 +45,6 @@ let WindowObserver = {
 	}
 }
 
-// NOTE:
-// We need completely restart TB if CustomTerm code changes
-// Currenlty there are no means to remove filter or there is but I'm not aware, please let me know: qnote@dqdp.net
-let CustomTerm = {
-	id: qnoteCustomTermId,
-	name: 'QNote',
-	needsBody: false,
-	getEnabled: function(scope, op) {
-		return true;
-		//return ops.includes(op);
-	},
-	// Currently disabled in search dialogs, because can't figure out how to add text box to the filter
-	// Probably through XUL or something
-	getAvailable: function(scope, op) {
-		return true;
-		//return ops.includes(op);
-	},
-	getAvailableOperators: function(scope, length) {
-		if(length){
-			length.value = ops.length;
-		}
-		return ops;
-	},
-	match: function(msgHdr, searchValue, searchOp) {
-		let note;
-		// console.log("match", arguments);
-		try {
-			note = NoteFile.load(NoteFilter.options.notesRoot, msgHdr.messageId);
-		} catch(e) {
-			// console.log("Error loading", msgHdr.messageId);
-			// throw new ExtensionError(e.message);
-		}
-
-		// if(note){
-		// 	console.log(note, searchValue, note.text.toLowerCase().search(searchValue)>=0);
-		// }
-
-		// if(!note){
-		// 	return false;
-		// }
-
-		// return note && note.exists && (note.text.toLowerCase().search(searchValue)>=0);
-		// console.log("match", msgHdr.messageId, msgHdr, searchValue, searchOp);
-		// // TODO: we get dead objects here because we can not unload CustomTerm
-		// let note = noteGrabber.getNote(msgHdr.messageId);
-
-		return note && (note.text.toLowerCase().search(searchValue)>=0);
-	}
-};
-
 let NoteQF = {
 	name: "qnote",
 	domId: qfQnoteDomId,
@@ -109,7 +57,7 @@ let NoteQF = {
 	// },
 
 	// onCommand: function(aState, aNode, aEvent, aDocument){
-	// 	// console.log("onCommand", aState, aNode, aEvent, aDocument);
+	// 	console.log("onCommand", aState, aNode, aEvent, aDocument);
 	// 	let qfTextBox = aDocument.getElementById('qfb-qs-textbox');
 	// 	let qfQnoteEl = aDocument.getElementById(qfQnoteDomId);
 	// 	return [qfQnoteEl.checked ? qfTextBox.value : null, true];
@@ -141,8 +89,6 @@ let NoteQF = {
 		var firstClause = true;
 		var l = phrases.length;
 
-		// console.log("appendTerms", aFilterValue, aTerms, aTermCreator, phrases);
-
 		// for (let kw of phrases) {
 		for (let i = 0; i < l; i++) {
 			let kw = phrases[i];
@@ -154,7 +100,7 @@ let NoteQF = {
 
 
 			term.attrib = Ci.nsMsgSearchAttrib.Custom;
-			term.customId = CustomTerm.id;
+			term.customId = CustomTermId;
 			term.op = Ci.nsMsgSearchOp.Contains;
 			term.booleanAnd = !firstClause; // We need OR-ed with other QuickFilters and AND-ed with phrases
 			term.beginsGrouping = firstClause;
@@ -212,7 +158,7 @@ NoteFilter = {
 		aMuxer.deferredUpdateSearch();
 	},
 	attachToWindow: w => {
-		console.debug("NoteFilter.attachToWindow()");
+		// console.log("NoteFilter.attachToWindow()", QuickFilterManager);
 		if(!w.document.getElementById(qfQnoteDomId)){
 			let button = w.document.createXULElement('toolbarbutton');
 			button.setAttribute('id', qfQnoteDomId);
@@ -261,17 +207,22 @@ NoteFilter = {
 		// console.log("updateSearch", aMuxer);
 	},
 	install: options => {
-		console.debug("NoteFilter.install()");
+		// console.debug("NoteFilter.install()");
 		Services.ww.registerNotification(WindowObserver);
 
 		NoteFilter.options = options;
-		// console.log("NoteFilter.options", NoteFilter.options);
-		// noteGrabber = options.noteGrabber;
 
-		if(MailServices.filters.getCustomTerm(CustomTerm.id)){
-			//console.log("CustomTerm exists", term);
+		var CustomTermOptions = {
+			id: CustomTermId,
+			name: 'QNote',
+			needsBody: false,
+			notesRoot: options.notesRoot
+		};
+
+		if(MailServices.filters.getCustomTerm(CustomTermId)){
+			// console.log("CustomTerm exists");
 		} else {
-			MailServices.filters.addCustomTerm(CustomTerm);
+			MailServices.filters.addCustomTerm(new CustomTerm(CustomTermOptions));
 		}
 
 		QuickFilterManager.defineFilter(NoteQF);
@@ -307,9 +258,9 @@ NoteFilter = {
 		// 	}
 		// }
 
-		//var terms = MailServices.filters.getCustomTerms();
-		//var a = terms.QueryInterface(Ci.nsIMutableArray);
-		//console.log("terms", terms, a);
+		// var terms = MailServices.filters.getCustomTerms();
+		// // var a = terms.QueryInterface(Ci.nsIMutableArray);
+		// console.log("terms", terms);
 		// while (terms.hasMoreElements()) {
 		// 	var f = terms.getNext().QueryInterface(Ci.nsIMsgSearchCustomTerm);
 		// 	console.log("term", f);
