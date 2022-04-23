@@ -88,7 +88,7 @@ let NoteQF = {
 	}
 };
 
-NoteFilter = {
+QNoteFilter = {
 	listeners: {
 		"uninstall": new Set()
 	},
