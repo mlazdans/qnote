@@ -1,14 +1,14 @@
+var { BasePopup } = ChromeUtils.import("resource:///modules/ExtensionPopups.jsm");
+var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
+
 var EXPORTED_SYMBOLS = ["NotePopup"];
 
-const { BasePopup } = ChromeUtils.import("resource:///modules/ExtensionPopups.jsm");
-const { ExtensionCommon } = ChromeUtils.import("resource://gre/modules/ExtensionCommon.jsm");
-const { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
-
-var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var PopupCounter = 0;
 
 class NotePopup extends BasePopup {
 	constructor(options) {
+		const extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
+
 		let domId = "qnote-window-panel-" + (++PopupCounter);
 
 		let { window } = options;

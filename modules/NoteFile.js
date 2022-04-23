@@ -1,8 +1,9 @@
+var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
+
 var EXPORTED_SYMBOLS = ["NoteFile"];
 
 class NoteFile {
 	constructor(){
-		var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 		this.FU = FileUtils;
 	}
 	exists(file){
