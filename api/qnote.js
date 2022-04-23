@@ -3,13 +3,6 @@ var { ExtensionError } = ExtensionUtils;
 var { NoteFile } = ChromeUtils.import(extension.rootURI.resolve("modules/NoteFile.js"));
 
 var qnote = class extends ExtensionCommon.ExtensionAPI {
-	onShutdown(isAppShutdown) {
-		if(isAppShutdown){
-			return;
-		}
-
-		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
-	}
 	getAPI(context) {
 		return {
 			qnote: {

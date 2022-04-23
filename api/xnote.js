@@ -2,13 +2,6 @@ var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 
 var xnote = class extends ExtensionCommon.ExtensionAPI {
-	onShutdown(isAppShutdown) {
-		if(isAppShutdown){
-			return;
-		}
-
-		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
-	}
 	getAPI(context) {
 		const NF_DO_ENCODE = 1;
 		const NF_DO_NOT_ENCODE = 0;
