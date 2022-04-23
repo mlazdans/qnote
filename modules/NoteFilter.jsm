@@ -211,14 +211,19 @@ NoteFilter = {
 		console.debug("NoteFilter.attachToWindow()");
 		if(!w.document.getElementById(qfQnoteCheckedId)){
 			let button = w.document.createXULElement('toolbarbutton');
-			button.setAttribute('id',qfQnoteCheckedId);
-			button.setAttribute('type','checkbox');
-			button.setAttribute('class','toolbarbuton-1');
+			button.setAttribute('id', qfQnoteCheckedId);
+			button.setAttribute('type', 'checkbox');
+			button.setAttribute('class', 'toolbarbutton-1 qfb-tag-button');
 			button.setAttribute('label', 'QNote');
+			button.setAttribute('value', 'QNote');
+			// button.setAttribute("label", tag.tag);
+			// button.setAttribute("value", tag.key);
 
 			let filterBar = w.document.getElementById("quick-filter-bar-filter-text-bar");
-			let senderButton = w.document.getElementById("qfb-qs-sender");
-			filterBar.insertBefore(button, senderButton);
+			// let filterBar = w.document.getElementById("quick-filter-bar-tab-bar");
+			// let senderButton = w.document.getElementById("qfb-qs-sender");
+			// filterBar.insertBefore(button, senderButton);
+			filterBar.appendChild(button);
 		}
 
 		let qfQnoteChecked = w.document.getElementById(qfQnoteCheckedId);
