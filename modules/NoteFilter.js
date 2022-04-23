@@ -22,7 +22,7 @@ var NoteFilter;
 {
 
 // let noteGrabber;
-let qfQnoteCheckedId = 'qfb-qs-qnote';
+let qfQnoteDomId = 'qfb-qs-qnote';
 let qnoteCustomTermId = 'qnote@dqdp.net#qnoteText';
 let ops = [Ci.nsMsgSearchOp.Contains, Ci.nsMsgSearchOp.DoesntContain, Ci.nsMsgSearchOp.Is, Ci.nsMsgSearchOp.Isnt];
 
@@ -99,41 +99,42 @@ let CustomTerm = {
 
 let NoteQF = {
 	name: "qnote",
-	domId: qfQnoteCheckedId,
-	propagateState: function(aTemplState, aSticky){
-		console.log("propagateState", aTemplState, aSticky);
-	},
+	domId: qfQnoteDomId,
+	// propagateState: function(aTemplState, aSticky){
+	// 	console.log("propagateState", aTemplState, aSticky);
+	// },
 	// postFilterProcess: function(aState, aViewWrapper, aFiltering){
 	// 	console.log("postFilterProcess", aState, aViewWrapper, aFiltering);
 	// 	return [aState, false, false];
 	// },
-	onCommand: function(aState, aNode, aEvent, aDocument){
-		// console.log("onCommand", aState, aNode, aEvent, aDocument);
-		let qfTextBox = aDocument.getElementById('qfb-qs-textbox');
-		let qfQnoteChecked = aDocument.getElementById(qfQnoteCheckedId);
-		return [qfQnoteChecked.checked ? qfTextBox.value : null, true];
-	},
-	reflectInDOM: function(aDomNode, aFilterValue, aDocument, aMuxer){
-		let qnoteFilterer = aMuxer.getFilterValueForMutation('qnote');
-		// console.log("reflectInDOM", aFilterValue, aDomNode.checked, qnoteFilterer);
-		if(qnoteFilterer === undefined){
-			aDomNode.checked = NoteFilter.getQNoteQFState()
-			let textFilter = aMuxer.getFilterValueForMutation("text");
-			// console.log("restore filter", textFilter);
-			aMuxer.setFilterValue('qnote', textFilter ? textFilter.text : "");
-		} else {
-			aDomNode.checked = !!qnoteFilterer;
-		}
 
-		// if(aMuxer.activeFilterer.getFilterValue('qnote')){
-		// 	aDomNode.checked = true;
-		// } else {
-		// 	aDomNode.checked = false;
-		// }
-		//aDomNode.checked = !!aFilterValue;
-		// console.log("reflectInDOM - finish", aDomNode.checked);
-		NoteFilter.updateSearch(aMuxer);
-	},
+	// onCommand: function(aState, aNode, aEvent, aDocument){
+	// 	// console.log("onCommand", aState, aNode, aEvent, aDocument);
+	// 	let qfTextBox = aDocument.getElementById('qfb-qs-textbox');
+	// 	let qfQnoteEl = aDocument.getElementById(qfQnoteDomId);
+	// 	return [qfQnoteEl.checked ? qfTextBox.value : null, true];
+	// },
+	// reflectInDOM: function(aDomNode, aFilterValue, aDocument, aMuxer){
+	// 	let qnoteFilterer = aMuxer.getFilterValueForMutation('qnote');
+	// 	// console.log("reflectInDOM", aFilterValue, aDomNode.checked, qnoteFilterer);
+	// 	if(qnoteFilterer === undefined){
+	// 		aDomNode.checked = NoteFilter.getQNoteQFState()
+	// 		let textFilter = aMuxer.getFilterValueForMutation("text");
+	// 		// console.log("restore filter", textFilter);
+	// 		aMuxer.setFilterValue('qnote', textFilter ? textFilter.text : "");
+	// 	} else {
+	// 		aDomNode.checked = !!qnoteFilterer;
+	// 	}
+
+	// 	// if(aMuxer.activeFilterer.getFilterValue('qnote')){
+	// 	// 	aDomNode.checked = true;
+	// 	// } else {
+	// 	// 	aDomNode.checked = false;
+	// 	// }
+	// 	//aDomNode.checked = !!aFilterValue;
+	// 	// console.log("reflectInDOM - finish", aDomNode.checked);
+	// 	NoteFilter.updateSearch(aMuxer);
+	// },
 	appendTerms: function(aTermCreator, aTerms, aFilterValue) {
 		// Let us borrow an existing code just for a while :>
 		var phrases = MessageTextFilter._parseSearchString(aFilterValue.toLowerCase());
@@ -212,9 +213,9 @@ NoteFilter = {
 	},
 	attachToWindow: w => {
 		console.debug("NoteFilter.attachToWindow()");
-		if(!w.document.getElementById(qfQnoteCheckedId)){
+		if(!w.document.getElementById(qfQnoteDomId)){
 			let button = w.document.createXULElement('toolbarbutton');
-			button.setAttribute('id', qfQnoteCheckedId);
+			button.setAttribute('id', qfQnoteDomId);
 			button.setAttribute('type', 'checkbox');
 			button.setAttribute('class', 'toolbarbutton-1 qfb-tag-button');
 			button.setAttribute('label', 'QNote');
@@ -229,44 +230,31 @@ NoteFilter = {
 			filterBar.appendChild(button);
 		}
 
-		let qfQnoteChecked = w.document.getElementById(qfQnoteCheckedId);
+		let qfQnoteEl = w.document.getElementById(qfQnoteDomId);
 		let qfTextBox = w.document.getElementById('qfb-qs-textbox');
 		let aMuxer = w.QuickFilterBarMuxer;
 
-		let buttonHandler = function() {
-			let qfQnoteChecked = w.document.getElementById(qfQnoteCheckedId);
-			let qfTextBox = w.document.getElementById('qfb-qs-textbox');
-			//console.log("buttonHandler", qfQnoteChecked.checked, qfTextBox.value);
-			aMuxer.activeFilterer.setFilterValue('qnote', qfQnoteChecked.checked ? qfTextBox.value : null);
+		let commandHandler = function() {
+			aMuxer.activeFilterer.setFilterValue('qnote', qfQnoteEl.checked ? qfTextBox.value : null);
 			NoteFilter.updateSearch(aMuxer);
 		};
 
-		let textHandler = function() {
-			let qfQnoteChecked = w.document.getElementById(qfQnoteCheckedId);
-			let qfTextBox = w.document.getElementById('qfb-qs-textbox');
-			aMuxer.activeFilterer.setFilterValue('qnote', qfQnoteChecked.checked ? qfTextBox.value : null);
-			// if(qfQnoteChecked.checked){
-			// 	console.log("textHandler", qfQnoteChecked.checked, qfTextBox.value);
-			// 	aMuxer.activeFilterer.setFilterValue('qnote', qfTextBox.value);
-			// }
-		}
-
-		qfTextBox.addEventListener("command", textHandler);
-		qfQnoteChecked.addEventListener("command", buttonHandler);
+		qfTextBox.addEventListener("command", commandHandler);
+		qfQnoteEl.addEventListener("command", commandHandler);
 
 		NoteFilter.addListener("uninstall", () => {
 			let filterer = NoteFilter.getQF(w.gFolderDisplay);
 			if(filterer){
 				// Should manage state persistence ourselves
-				NoteFilter.saveQNoteQFState(qfQnoteChecked.checked);
+				NoteFilter.saveQNoteQFState(qfQnoteEl.checked);
 				// We need to remove state because QF gets mad if we disable, for example, search and then leave state as is
 				filterer.setFilterValue('qnote', null);
-				console.log("unset filter", filterer, qfQnoteChecked.checked);
+				// console.log("unset filter", filterer, qfQnoteEl.checked);
 			}
 
-			qfTextBox.removeEventListener("command", textHandler);
-			qfQnoteChecked.removeEventListener("command", buttonHandler);
-			qfQnoteChecked.parentNode.removeChild(qfQnoteChecked);
+			qfTextBox.removeEventListener("command", commandHandler);
+			qfQnoteEl.removeEventListener("command", commandHandler);
+			qfQnoteEl.parentNode.removeChild(qfQnoteEl);
 		});
 
 		// NoteFilter.updateSearch(aMuxer);
@@ -280,14 +268,14 @@ NoteFilter = {
 		// console.log("NoteFilter.options", NoteFilter.options);
 		// noteGrabber = options.noteGrabber;
 
-		QuickFilterManager.defineFilter(NoteQF);
-		// MessageTextFilter.defineTextFilter(NoteQF);
-
 		if(MailServices.filters.getCustomTerm(CustomTerm.id)){
 			//console.log("CustomTerm exists", term);
 		} else {
 			MailServices.filters.addCustomTerm(CustomTerm);
 		}
+
+		QuickFilterManager.defineFilter(NoteQF);
+		// MessageTextFilter.defineTextFilter(NoteQF);
 
 		// let w = Services.wm.getMostRecentWindow("mail:3pane");
 
