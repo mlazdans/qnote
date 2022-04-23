@@ -22,7 +22,7 @@ var NoteFilter;
 {
 
 // let noteGrabber;
-let qfQnoteCheckedId = 'qfb-qs-qnote-checked';
+let qfQnoteCheckedId = 'qfb-qs-qnote';
 let qnoteCustomTermId = 'qnote@dqdp.net#qnoteText';
 let ops = [Ci.nsMsgSearchOp.Contains, Ci.nsMsgSearchOp.DoesntContain, Ci.nsMsgSearchOp.Is, Ci.nsMsgSearchOp.Isnt];
 
