@@ -1,45 +1,47 @@
-var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
-
 var EXPORTED_SYMBOLS = ["NoteFile"];
 
-let NoteFile = {
+class NoteFile {
+	constructor(){
+		var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
+		this.FU = FileUtils;
+	}
 	exists(file){
 		return file && file.exists();
-	},
+	}
 	encodeFileName(str){
 		return encodeURIComponent(str)
 			.replace(/\*/g, "%2A")
 			.replace(/\~/g, "%7E")
 		;
-	},
+	}
 	decodeFileName(str){
 		return decodeURIComponent(str)
 			.replace(/%2A/g, "*")
 			.replace(/%7E/g, "~")
 		;
-	},
+	}
 	getFile(root, keyId){
-		try {
-			var file = new FileUtils.File(root);
+		// try {
+			var file = new this.FU.File(root);
 
-			file.appendRelativePath(NoteFile.encodeFileName(keyId + '.qnote'));
+			file.appendRelativePath(this.encodeFileName(keyId + '.qnote'));
 
 			return file;
-		} catch {
-			return false;
-		}
-	},
+		// } catch {
+		// 	return false;
+		// }
+	}
 	getExistingFile(root, keyId) {
-		var file = NoteFile.getFile(root, keyId);
+		var file = this.getFile(root, keyId);
 
-		if(NoteFile.exists(file)){
+		if(this.exists(file)){
 			return file;
 		}
 
 		return false;
-	},
+	}
 	load(root, keyId) {
-		var file = NoteFile.getExistingFile(root, keyId);
+		var file = this.getExistingFile(root, keyId);
 
 		if(!file){
 			return false;
@@ -68,15 +70,15 @@ let NoteFile = {
 		} catch {
 			return null;
 		}
-	},
+	}
 	delete(root, keyId){
-		var file = NoteFile.getExistingFile(root, keyId);
+		var file = this.getExistingFile(root, keyId);
 		if(file){
 			file.remove(false);
 		}
-	},
+	}
 	save(root, keyId, note){
-		var file = NoteFile.getFile(root, keyId);
+		var file = this.getFile(root, keyId);
 		let data = JSON.stringify(note);
 
 		let tempFile = file.parent.clone();
@@ -96,16 +98,16 @@ let NoteFile = {
 		fileOutStream.close();
 
 		tempFile.moveTo(null, file.leafName);
-	},
+	}
 	getAllKeys(root) {
-		var file = new FileUtils.File(root);
+		var file = new this.FU.File(root);
 		var eFiles = file.directoryEntries;
 		var notes = [];
 
 		while (eFiles.hasMoreElements()) {
 			var o = eFiles.getNext().QueryInterface(Components.interfaces.nsIFile);
 
-			var fileName = NoteFile.decodeFileName(o.leafName);
+			var fileName = this.decodeFileName(o.leafName);
 			if(fileName.substring(fileName.length - 6) === '.qnote'){
 				notes.push(fileName.substring(0, fileName.length - 6));
 			}
