@@ -1,6 +1,6 @@
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.jsm"));
+var { NotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/NotePopup.js"));
 var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
 var { DOMLocalizator } = ChromeUtils.import(extension.rootURI.resolve("modules/DOMLocalizator.js"));
 
