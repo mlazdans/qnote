@@ -54,9 +54,14 @@ let NoteQF = {
 		}
 		QNoteFilter.updateSearch(aMuxer);
 	},
+	// https://stackoverflow.com/a/6969486/10973173
+	escapeRegExp(string) {
+		return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+	},
 	appendTerms: function(aTermCreator, aTerms, aFilterValue) {
 		// Let us borrow an existing code just for a while :>
-		var phrases = MessageTextFilter._parseSearchString(aFilterValue.toLowerCase());
+		let filterValue = this.escapeRegExp(aFilterValue).toLowerCase();
+		var phrases = MessageTextFilter._parseSearchString(filterValue);
 		var firstClause = true;
 		var l = phrases.length;
 
