@@ -11,6 +11,7 @@ var importFolderLoader = document.getElementById("importFolderLoader");
 var resetDefaultsButton = document.getElementById('resetDefaultsButton');
 var clearStorageButton = document.getElementById('clearStorageButton');
 var exportStorageButton = document.getElementById('exportStorageButton');
+var exportStorageLimitations = document.getElementById('exportStorageLimitations');
 var importFile = document.getElementById("importFile");
 var reloadExtensionButton = document.getElementById("reloadExtensionButton");
 var storageFolderBrowseButton = document.getElementById("storageFolderBrowseButton");
@@ -195,8 +196,10 @@ async function initExportStorageButton() {
 
 	if(vers<0){
 		exportStorageButton.disabled = false;
+		exportStorageLimitations.style.display = "none";
 	} else {
 		exportStorageButton.disabled = true;
+		exportStorageLimitations.style.display = "table-row";
 	}
 }
 
