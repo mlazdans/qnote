@@ -1,4 +1,3 @@
-var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { ExtensionError } = ExtensionUtils;
 var { QNoteFile } = ChromeUtils.import(extension.rootURI.resolve("modules/QNoteFile.js"));
 

@@ -245,6 +245,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		Components.utils.unload(extension.rootURI.resolve("modules/QCache.js"));
 		Components.utils.unload(extension.rootURI.resolve("modules/DOMLocalizator.js"));
 		Components.utils.unload(extension.rootURI.resolve("modules/QNoteFile.js"));
+		Components.utils.unload(extension.rootURI.resolve("modules/XNoteFile.js"));
 		Components.utils.unload(extension.rootURI.resolve("modules/QCustomTerm.js"));
 		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 	}
