@@ -6,9 +6,6 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 		var NF = new XNoteFile;
 		return {
 			xnote: {
-				async getPrefs(){
-					return NF.getPrefs();
-				},
 				async saveNote(root, keyId, note){
 					try {
 						return NF.save(root, keyId, note);
@@ -36,6 +33,9 @@ var xnote = class extends ExtensionCommon.ExtensionAPI {
 					} catch(e) {
 						throw new ExtensionError(e.message);
 					}
+				},
+				async getPrefs(){
+					return NF.getPrefs();
 				},
 				async getStoragePath(path) {
 					return NF.getStoragePath(path);
