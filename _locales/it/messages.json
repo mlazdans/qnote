@@ -81,7 +81,7 @@
 		"message": "Cartella XNote++ non trovata o non leggibile"
 	},
 	"xnote.folder.found": {
-		"message": "Cartella XNote++ non trovata: $1"
+		"message": "Cartella XNote++ non trovata:<br>&nbsp;$1"
 	},
 	"storage.export.limitation": {
 		"message": "'Esporta archivio' disponibile solo in TB>=78"

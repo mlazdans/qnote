@@ -81,7 +81,7 @@
 		"message": "XNote++ folder not found or is not readable"
 	},
 	"xnote.folder.found": {
-		"message": "XNote++ folder found: $1"
+		"message": "XNote++ folder found:<br>&nbsp;$1"
 	},
 	"storage.export.limitation": {
 		"message": "'Export storage' available only on TB>=78"

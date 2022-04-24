@@ -208,9 +208,9 @@ async function initFolderImportButton(){
 
 	if(path){
 		if(await ext.isFolderReadable(path)){
-			document.getElementById('xnoteFolderInfo').textContent = _("xnote.folder.found", path);
+			document.getElementById('xnoteFolderInfo').innerHTML = _("xnote.folder.found", path);
 		} else {
-			document.getElementById('xnoteFolderInfo').textContent = _("xnote.folder.inaccessible", path);
+			document.getElementById('xnoteFolderInfo').innerHTML = _("xnote.folder.inaccessible", path);
 			path = '';
 		}
 	}

@@ -81,7 +81,7 @@
 		"message": "Dosarul XNote++ nu a fost găsit sau nu poate fi citit"
 	},
 	"xnote.folder.found": {
-		"message": "S-a găsit folderul XNote++: $1"
+		"message": "S-a găsit folderul XNote++:<br>&nbsp;$1"
 	},
 	"storage.export.limitation": {
 		"message": "'Export stocare' disponibil numai pentru TB>=78"
