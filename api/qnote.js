@@ -8,7 +8,7 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 			qnote: {
 				async saveNote(root, keyId, note){
 					try {
-						return NF.save(root, keyId, note)
+						return NF.save(root, keyId, note);
 					} catch(e) {
 						throw new ExtensionError(e.message);
 					}
