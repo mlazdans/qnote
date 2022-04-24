@@ -2,6 +2,7 @@ var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var { QNoteFile } = ChromeUtils.import(extension.rootURI.resolve("modules/QNoteFile.js"));
+var { XNoteFile } = ChromeUtils.import(extension.rootURI.resolve("modules/XNoteFile.js"));
 
 var EXPORTED_SYMBOLS = ["QCustomTerm"];
 
@@ -16,7 +17,8 @@ class QCustomTerm {
 		this.needsBody = options.needsBody;
 		this.notesRoot = options.notesRoot;
 		this.ops = [Ci.nsMsgSearchOp.Contains, Ci.nsMsgSearchOp.DoesntContain, Ci.nsMsgSearchOp.Is, Ci.nsMsgSearchOp.Isnt];
-		this.NF = new QNoteFile;
+		this.QN = new QNoteFile;
+		this.XN = new XNoteFile;
 	}
 	getEnabled(scope, op) {
 		return true;
@@ -38,7 +40,10 @@ class QCustomTerm {
 	match(msgHdr, searchValue, searchOp) {
 		var note;
 		try {
-			note = this.NF.load(this.notesRoot, msgHdr.messageId);
+			note = this.QN.load(this.notesRoot, msgHdr.messageId);
+			if(!note){
+				note = this.XN.load(this.notesRoot, msgHdr.messageId);
+			}
 			// console.log("Note", note, this.notesRoot);
 		} catch(e) {
 			// console.log("Error loading", e, msgHdr.messageId, this);
