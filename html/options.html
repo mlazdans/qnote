@@ -213,7 +213,7 @@
 		</tr>
 	</table>
 	<table>
-		<tr>
+		<tr id="exportStorageLimitations">
 			<td colspan="4" data-i18n="storage.export.limitation"></td>
 		</tr>
 		<tr>
@@ -229,6 +229,14 @@
 			<td><input type="file" accept="application/json" id="importFile"></td>
 		</tr>
 	</table>
+</fieldset>
+
+<fieldset>
+	<legend>Notes</legend>
+	<div><strong>Export storage</strong> will export (JSON format) all settings and notes saved inside extension storage.</div>
+	<div><strong>Import storage</strong> will import all settings and notes previously exported.</div>
+	<div><strong>Clear storage</strong> will wipe all settings and notes saved inside extension storage<br>(notes saved in folder won't be affected)</div>
+	<br>
 </fieldset>
 
 </form>
