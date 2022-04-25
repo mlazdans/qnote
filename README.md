@@ -1,6 +1,6 @@
 # Source code for Thunderbird [QNote](https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/) add-on.
 
-To install zip whole folder and rename file's extension to .xpi
+To install extension just zip whole folder and rename file's extension to .xpi and add it to Thunderbird.
 
 # Screenshots
 
