@@ -131,9 +131,6 @@
 	"delete": {
 		"message": "Dzēst"
 	},
-	"enable.search": {
-		"message": "Ieslēgt meklētāju"
-	},
 	"enable.print_attach": {
 		"message": "Pievienot printēšanai"
 	},
@@ -184,9 +181,6 @@
 	},
 	"behaviour.fieldset": {
 		"message": "Uzvedība"
-	},
-	"search.disabled.msg": {
-		"message": "(meklētājs patlaban ir atslēgts kamēr tiek meklēts labāks risinājums)"
 	},
 	"additional.attach": {
 		"message": "Papildus pievienot"

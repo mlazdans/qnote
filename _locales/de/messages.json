@@ -131,9 +131,6 @@
 	"delete": {
 		"message": "Löschen"
 	},
-	"enable.search": {
-		"message": "Suche aktivieren"
-	},
 	"enable.print_attach": {
 		"message": "In der Druckausgabe"
 	},
@@ -187,9 +184,6 @@
 	},
 	"behaviour.fieldset": {
 		"message": "Regeln und Erscheinungsbild"
-	},
-	"search.disabled.msg": {
-		"message": "(die Suche ist noch ausgeschaltet, bis eine gute Lösung gefunden ist)"
 	},
 	"additional.attach": {
 		"message": "Zusätzliche Anzeige der QNote"

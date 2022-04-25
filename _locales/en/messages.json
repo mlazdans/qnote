@@ -131,9 +131,6 @@
 	"delete": {
 		"message": "Delete"
 	},
-	"enable.search": {
-		"message": "Enable search"
-	},
 	"enable.print_attach": {
 		"message": "Attach to print"
 	},
@@ -187,9 +184,6 @@
 	},
 	"behaviour.fieldset": {
 		"message": "Behaviour"
-	},
-	"search.disabled.msg": {
-		"message": "(search has been temporarily disabled until we found a better solution)"
 	},
 	"additional.attach": {
 		"message": "Additionally attach"

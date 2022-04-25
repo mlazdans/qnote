@@ -131,9 +131,6 @@
 	"delete": {
 		"message": "Supprimer"
 	},
-	"enable.search": {
-		"message": "Activer la recherche"
-	},
 	"enable.print_attach": {
 		"message": "Intégrer à l’impression"
 	},
@@ -187,9 +184,6 @@
 	},
 	"behaviour.fieldset": {
 		"message": "Comportement"
-	},
-	"search.disabled.msg": {
-		"message": "(désactivée en attendant une meilleure solution)"
 	},
 	"additional.attach": {
 		"message": "Intégration"

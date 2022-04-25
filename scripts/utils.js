@@ -21,7 +21,6 @@ function getDefaultPrefs() {
 		windowOption: "xul",
 		storageOption: "folder",
 		storageFolder: "",
-		enableSearch: false, // defaults to false for now, because of poor implementation
 
 		printAttachTopTitle: true,
 		printAttachTopText: true,

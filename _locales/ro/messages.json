@@ -131,9 +131,6 @@
 	"delete": {
 		"message": "Șterge"
 	},
-	"enable.search": {
-		"message": "Activați căutarea"
-	},
 	"enable.print_attach": {
 		"message": "Atașați la imprimare"
 	},
@@ -187,9 +184,6 @@
 	},
 	"behaviour.fieldset": {
 		"message": "Comportament"
-	},
-	"search.disabled.msg": {
-		"message": "(căutarea a fost dezactivată temporar până când vom găsi o soluție mai bună)"
 	},
 	"additional.attach": {
 		"message": "În plus, atașați"

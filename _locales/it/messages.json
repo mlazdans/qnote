@@ -131,9 +131,6 @@
 	"delete": {
 		"message": "Cancella"
 	},
-	"enable.search": {
-		"message": "Abilita ricerca"
-	},
 	"enable.print_attach": {
 		"message": "Allega alla stampa"
 	},
@@ -187,9 +184,6 @@
 	},
 	"behaviour.fieldset": {
 		"message": "Comportamento"
-	},
-	"search.disabled.msg": {
-		"message": "(la ricerca è stata temporaneamente disabilitata finché non troviamo una soluzione migliore)"
 	},
 	"additional.attach": {
 		"message": "Allegati aggiuntivi"
