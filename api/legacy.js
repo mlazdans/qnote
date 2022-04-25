@@ -67,6 +67,14 @@ var legacy = class extends ExtensionCommon.ExtensionAPI {
 					} catch {
 						return false;
 					}
+				},
+				async isFolderWritable(path){
+					try {
+						let f = new FileUtils.File(path);
+						return f.isWritable() && f.isDirectory();
+					} catch {
+						return false;
+					}
 				}
 			}
 		}

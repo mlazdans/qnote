@@ -85,5 +85,15 @@
 			"type": "string",
 			"description": "Path to check"
 		}]
+	},{
+		"name": "isFolderWritable",
+		"type": "function",
+		"description": "Returns true if folder is writable",
+		"async": true,
+		"parameters": [{
+			"name": "path",
+			"type": "string",
+			"description": "Path to check"
+		}]
 	}]
 }]
