@@ -167,6 +167,10 @@ async function isFolderReadable(path){
 	return path && await browser.legacy.isFolderReadable(path);
 }
 
+async function isFolderWritable(path){
+	return path && await browser.legacy.isFolderWritable(path);
+}
+
 async function getXNoteStoragePath(){
 	let xnotePrefs = xnotePrefsMapper(await browser.xnote.getPrefs());
 
@@ -175,10 +179,10 @@ async function getXNoteStoragePath(){
 
 		let path = await browser.xnote.getStoragePath(xnotePrefs.storageFolder);
 
-		if(await isFolderReadable(path)){
+		if(await isFolderWritable(path)){
 			return path;
 		} else {
-			QDEB&&console.debug("Does not exists or not readable: ", path);
+			QDEB&&console.debug("XNote++ storage folder not writable: ", path);
 		}
 	}
 
@@ -219,10 +223,11 @@ async function loadPrefsWithDefaults() {
 		// else check if XNote folder exists inside profile directory
 		let path = await getXNoteStoragePath();
 
-		if(await isFolderReadable(path)){
+		if(await isFolderWritable(path)){
 			p.storageOption = 'folder';
 			p.storageFolder = path;
 		} else {
+			QDEB&&console.debug("Storage path not writable:", path);
 			p.storageOption = 'ext';
 		}
 	}
