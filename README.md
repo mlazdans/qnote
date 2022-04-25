@@ -11,6 +11,9 @@
 
 This is source code repository for Thunderbird [QNote](https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/) add-on. To install extension just zip whole folder and rename file's extension to .xpi and add it to Thunderbird.
 
+<p><img src="https://img.shields.io/badge/QNote-v0.11.0-brightgreen">
+<img src="https://img.shields.io/badge/Thunderbird-v68.2.0%20--%20100.0-brightgreen"></p>
+
 # Features
 
 - Add notes to e-mail messages
@@ -24,6 +27,7 @@ This is source code repository for Thunderbird [QNote](https://addons.thunderbir
 - Auto tag message when adding note
 - Fully <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/xnotepp/">XNote++</a> compatible
 - Import / export back to XNote++ format
+- Supports older Thunderbird versions, starting 68.2.0
 
 # Usage
 
