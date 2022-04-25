@@ -129,8 +129,9 @@
 			<td width="50%" valign="top">
 				<table>
 					<tr>
-						<td data-i18n="enable.message_attach"></td>
-
+						<td colspan="5" data-i18n="enable.message_attach"></td>
+					</tr>
+					<tr>
 						<td data-i18n="attach.top" style="text-align: right;"></td>
 						<td><input type="checkbox" id="messageAttachTopTitle" name="messageAttachTopTitle" data-preference="messageAttachTopTitle"></td>
 						<td><label style="font-size: smaller" for="messageAttachTopTitle" data-i18n="attach.title"></label></td>
@@ -138,8 +139,6 @@
 						<td><label style="font-size: smaller" for="messageAttachTopText" data-i18n="attach.text"></label></td>
 					</tr>
 					<tr>
-						<td></td>
-
 						<td data-i18n="attach.bottom" style="text-align: right;"></td>
 						<td><input type="checkbox" id="messageAttachBottomTitle" name="messageAttachBottomTitle" data-preference="messageAttachBottomTitle"></td>
 						<td><label style="font-size: smaller" for="messageAttachBottomTitle" data-i18n="attach.title"></label></td>
@@ -151,8 +150,9 @@
 			<td width="50%" valign="top">
 				<table>
 					<tr>
-						<td data-i18n="enable.print_attach"></td>
-
+						<td colspan="5" data-i18n="enable.print_attach"></td>
+					</tr>
+					<tr>
 						<td data-i18n="attach.top" style="text-align: right;"></td>
 						<td><input type="checkbox" id="printAttachTopTitle" name="printAttachTopTitle" data-preference="printAttachTopTitle"></td>
 						<td><label style="font-size: smaller" for="printAttachTopTitle" data-i18n="attach.title"></label></td>
@@ -160,8 +160,6 @@
 						<td><label style="font-size: smaller" for="printAttachTopText" data-i18n="attach.text"></label></td>
 					</tr>
 					<tr>
-						<td></td>
-
 						<td data-i18n="attach.bottom" style="text-align: right;"></td>
 						<td><input type="checkbox" id="printAttachBottomTitle" name="printAttachBottomTitle" data-preference="printAttachBottomTitle"></td>
 						<td><label style="font-size: smaller" for="printAttachBottomTitle" data-i18n="attach.title"></label></td>
@@ -203,9 +201,14 @@
 			<td><button type="button" id="importFolderButton" data-i18n="import.folder.button"></button></td>
 			<td><button type="button" id="exportQNotesButton">Export as QNotes</button></td>
 			<td><button type="button" id="exportXNotesButton">Export as XNotes++</button></td>
+			<td><div id="importFolderLoader" style="display: none;"><img src="../images/loader.gif" alt="Loading..."></div></td>
+		</tr>
+	</table>
+
+	<table>
+		<tr>
 			<td><input type="checkbox" id="overwriteExistingNotes"></td>
 			<td><label for="overwriteExistingNotes" data-i18n="overwrite.existing.notes"></label></td>
-			<td><div id="importFolderLoader" style="display: none;"><img src="../images/loader.gif" alt="Loading..."></div></td>
 		</tr>
 	</table>
 </fieldset>
