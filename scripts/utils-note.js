@@ -111,3 +111,45 @@ function note2QAppNote(note){
 function sendNoteToQApp(note){
 	return browser.qapp.saveNoteCache(note2QAppNote(note));
 }
+
+/**
+ * @param {string} root
+ * @param {"xnote"|"qnote"} type
+ * @param {Note[]} notes
+ * @param {boolean} overwrite
+ */
+ async function exportNotesToFolder(root, type, notes, overwrite){
+	let stats = {
+		err: 0,
+		exist: 0,
+		imported: 0,
+		overwritten: 0
+	};
+
+	for (const note of notes) {
+		let yn;
+		if(type == "xnote"){
+			yn = new XNote(note.keyId, root);
+		} else {
+			yn = new QNoteFolder(note.keyId, root);
+		}
+
+		await yn.load();
+
+		let exists = yn.exists;
+
+		if(exists && !overwrite){
+			stats.exist++;
+		} else {
+			yn.set(note.get());
+			await yn.save().then(() => {
+				stats[exists ? "overwritten" : "imported"]++;
+			}).catch(e => {
+				console.error(_("error.saving.note"), e.message, yn.keyId);
+				stats.err++;
+			});
+		}
+	}
+
+	return stats;
+}

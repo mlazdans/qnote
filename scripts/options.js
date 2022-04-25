@@ -20,6 +20,9 @@ var overwriteExistingNotes = document.getElementById("overwriteExistingNotes");
 var errorBox = document.getElementById("errorBox");
 var posGrid = document.getElementById("posGrid");
 var anchorPlacement = document.querySelector("[name=anchorPlacement]");
+var storageFieldset_folder = document.getElementById("storageFieldset_folder");
+var exportQNotesButton = document.getElementById('exportQNotesButton');
+var exportXNotesButton = document.getElementById('exportXNotesButton');
 
 var dateFormats = {
 	datetime_group: [
@@ -199,7 +202,7 @@ async function initExportStorageButton() {
 		exportStorageLimitations.style.display = "none";
 	} else {
 		exportStorageButton.disabled = true;
-		exportStorageLimitations.style.display = "table-row";
+		exportStorageLimitations.style.display = "";
 	}
 }
 
@@ -227,9 +230,9 @@ async function initFolderImportButton(){
 
 			return ext.importFolderNotes(selectedPath, !!overwriteExistingNotes.checked).then(stats => {
 				if(stats){
-					alert(_("import.finished.stats", [stats.imported, stats.err, stats.exist, stats.overwritten]));
+					browser.legacy.alert(_("import.finished.stats", [stats.imported, stats.err, stats.exist, stats.overwritten]));
 				} else {
-					alert(_("import.fail"));
+					browser.legacy.alert(_("import.fail"));
 				}
 			}).finally(async () => {
 				// Reset cache since we might import some new data
@@ -239,6 +242,33 @@ async function initFolderImportButton(){
 			});
 		});
 	});
+}
+
+async function initExportNotesButtons(){
+	let listener = (type, button) => {
+		return () => {
+			let opt = {};
+
+			ext.browser.legacy.folderPicker(opt).then(selectedPath => {
+				button.disabled = true;
+				importFolderLoader.style.display = '';
+
+				return ext.exportQAppNotesToFolder(selectedPath, type, !!overwriteExistingNotes.checked).then(stats => {
+					if(stats){
+						browser.legacy.alert(_("import.finished.stats", [stats.imported, stats.err, stats.exist, stats.overwritten]));
+					} else {
+						browser.legacy.alert(_("import.fail"));
+					}
+				}).finally(async () => {
+					button.disabled = false;
+					importFolderLoader.style.display = 'none';
+				});
+			});
+		}
+	};
+
+	exportQNotesButton.addEventListener('click', listener("qnote", exportQNotesButton));
+	exportXNotesButton.addEventListener('click', listener("xnote", exportXNotesButton));
 }
 
 function storageOptionValue(){
@@ -254,12 +284,12 @@ async function storageOptionChange(){
 		input_storageFolder.value = await ext.getXNoteStoragePath();
 	}
 
-	for (const node of document.querySelectorAll('[class="storageFieldset"]')) {
-		if(node.id === 'storageFieldset_' + option){
-			node.style.display = '';
-		} else {
-			node.style.display = 'none';
-		}
+	if(option == 'folder'){
+		storageFieldset_folder.style.display = '';
+		importFolderButton.disabled = true;
+	} else {
+		storageFieldset_folder.style.display = 'none';
+		importFolderButton.disabled = false;
 	}
 }
 
@@ -293,17 +323,17 @@ function importInternalStorage() {
 		try {
 			var storage = JSON.parse(e.target.result);
 		} catch(e){
-			alert(_("json.parse.error", e.message));
+			browser.legacy.alert(_("json.parse.error", e.message));
 			return false;
 		}
 
 		ext.browser.storage.local.set(storage).then(async () => {
-			alert(_("storage.imported"));
+			browser.legacy.alert(_("storage.imported"));
 			await ext.browser.qapp.clearNoteCache();
 			ext.setUpExtension();
 			initOptionsPageValues();
 		}).catch(e => {
-			alert(_("storage.import.failed", e.message));
+			browser.legacy.alert(_("storage.import.failed", e.message));
 		});
 	};
 
@@ -316,9 +346,9 @@ async function clearStorage(){
 			await ext.browser.qapp.clearNoteCache();
 			ext.setUpExtension();
 			initOptionsPageValues();
-			alert(_("storage.cleared"));
+			browser.legacy.alert(_("storage.cleared"));
 		}).catch(e => {
-			alert(_("storage.clear.failed", e.message));
+			browser.legacy.alert(_("storage.clear.failed", e.message));
 		});
 	}
 }
@@ -477,6 +507,7 @@ async function initOptionsPage(){
 	initOptionsPageValues();
 	initFolderImportButton();
 	initExportStorageButton();
+	initExportNotesButtons();
 
 	clearStorageButton.addEventListener('click', clearStorage);
 	exportStorageButton.addEventListener('click', ext.exportStorage);

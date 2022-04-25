@@ -490,3 +490,16 @@ async function focusMessagePane(windowId){
 	QDEB&&console.debug("focusMessagePane()");
 	await browser.qapp.messagePaneFocus(windowId);
 }
+
+/**
+ * @param {string} root
+ * @param {"xnote"|"qnote"} type
+ * @param {boolean} overwrite
+ */
+async function exportQAppNotesToFolder(root, type, overwrite){
+	if(Prefs.storageOption == 'folder'){
+		return loadAllFolderNotes(Prefs.storageFolder).then(notes => exportNotesToFolder(root, type, notes, overwrite));
+	} else {
+		return loadAllExtNotes().then(notes => exportNotesToFolder(root, type, notes, overwrite));
+	}
+}

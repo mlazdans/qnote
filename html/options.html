@@ -176,18 +176,7 @@
 		</tr>
 	</table>
 
-	<div class="storageFieldset" id="storageFieldset_ext">
-		<table>
-			<tr>
-				<td><button type="button" id="importFolderButton" data-i18n="import.folder.button"></button></td>
-				<td><input type="checkbox" id="overwriteExistingNotes"></td>
-				<td><label for="overwriteExistingNotes" data-i18n="overwrite.existing.notes"></label></td>
-				<td><div id="importFolderLoader" style="display: none;"><img src="../images/loader.gif" alt="Loading..."></div></td>
-			</tr>
-		</table>
-	</div>
-
-	<div class="storageFieldset" id="storageFieldset_folder">
+	<div id="storageFieldset_folder">
 		<table>
 			<tr>
 				<td style="width: 100%;"><input type="text" data-preference="storageFolder" id="input_storageFolder" style="width: 100%;" /></td>
@@ -198,6 +187,17 @@
 			</tr>
 		</table>
 	</div>
+
+	<table>
+		<tr>
+			<td><button type="button" id="importFolderButton" data-i18n="import.folder.button"></button></td>
+			<td><button type="button" id="exportQNotesButton">Export as QNotes</button></td>
+			<td><button type="button" id="exportXNotesButton">Export as XNotes</button></td>
+			<td><input type="checkbox" id="overwriteExistingNotes"></td>
+			<td><label for="overwriteExistingNotes" data-i18n="overwrite.existing.notes"></label></td>
+			<td><div id="importFolderLoader" style="display: none;"><img src="../images/loader.gif" alt="Loading..."></div></td>
+		</tr>
+	</table>
 </fieldset>
 
 <fieldset>
@@ -209,9 +209,6 @@
 		</tr>
 	</table>
 	<table>
-		<tr id="exportStorageLimitations">
-			<td colspan="4" data-i18n="storage.export.limitation"></td>
-		</tr>
 		<tr>
 			<td><button type="button" id="resetDefaultsButton" data-i18n="reset.defaults.button"></button></td>
 			<td><button type="button" id="exportStorageButton" data-i18n="storage.export.button"></button></td>
@@ -221,18 +218,18 @@
 	</table>
 	<table>
 		<tr>
-			<td data-i18n="storage.import"></td>
-			<td><input type="file" accept="application/json" id="importFile"></td>
+			<td nowrap data-i18n="storage.import"></td>
+			<td width="100%"><input type="file" accept="application/json" id="importFile"></td>
+		</tr>
+		<tr>
+			<td colspan="2">
+			</td>
 		</tr>
 	</table>
-</fieldset>
-
-<fieldset>
-	<legend>Notes</legend>
+	<div id="exportStorageLimitations" data-i18n="storage.export.limitation"></div>
 	<div><strong>Export storage</strong> will export (JSON format) all settings and notes saved inside extension storage.</div>
 	<div><strong>Import storage</strong> will import all settings and notes previously exported.</div>
 	<div><strong>Clear storage</strong> will wipe all settings and notes saved inside extension storage<br>(notes saved in folder won't be affected)</div>
-	<br>
 </fieldset>
 
 </form>
