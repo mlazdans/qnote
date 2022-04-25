@@ -100,7 +100,7 @@ async function saveOptions(handler){
 	setLabelColor('storageOptionFolder', '');
 
 	if(storageOptionValue() === 'folder'){
-		if(!await ext.isFolderReadable(input_storageFolder.value)){
+		if(!await ext.isFolderWritable(input_storageFolder.value)){
 			setLabelColor('storageOptionFolder', 'red');
 			ErrMsg.push(_("folder.unaccesible", input_storageFolder.value));
 		}
@@ -206,39 +206,59 @@ async function initExportStorageButton() {
 	}
 }
 
-async function initFolderImportButton(){
+async function initXNoteFolderInfo(){
 	var path = await ext.getXNoteStoragePath();
 
 	if(path){
-		if(await ext.isFolderReadable(path)){
+		QDEB&&console.debug("Trying XNote++ foder: ", path);
+		if(await ext.isFolderWritable(path)){
 			document.getElementById('xnoteFolderInfo').innerHTML = _("xnote.folder.found", path);
 		} else {
 			document.getElementById('xnoteFolderInfo').innerHTML = _("xnote.folder.inaccessible", path);
 			path = '';
 		}
 	}
+}
 
-	importFolderButton.addEventListener('click', ()=>{
-		let opt = {};
-		if(path){
-			opt.displayDirectory = path;
-		}
+function defaultStoragePickerOptions(){
+	let path;
+	let opt = {};
 
-		ext.browser.legacy.folderPicker(opt).then(selectedPath => {
-			importFolderButton.disabled = true;
-			importFolderLoader.style.display = '';
+	if(ext.Prefs.storageFolder){
+		path = ext.Prefs.storageFolder;
+	}
 
-			return ext.importFolderNotes(selectedPath, !!overwriteExistingNotes.checked).then(stats => {
-				if(stats){
-					browser.legacy.alert(_("import.finished.stats", [stats.imported, stats.err, stats.exist, stats.overwritten]));
-				} else {
-					browser.legacy.alert(_("import.fail"));
-				}
-			}).finally(async () => {
+	if(path){
+		opt.displayDirectory = path;
+	}
+
+	return opt;
+}
+
+function printImportStats(stats){
+	if(stats){
+		browser.legacy.alert(_("import.finished.stats", [stats.imported, stats.err, stats.exist, stats.overwritten]));
+	} else {
+		browser.legacy.alert(_("import.fail"));
+	}
+}
+
+function setExportImportConstrolsDisabled(yes){
+	exportQNotesButton.disabled = yes;
+	importFolderButton.disabled = yes;
+	exportXNotesButton.disabled = yes;
+	importFolderLoader.style.display = yes ? '' : 'none';
+}
+
+async function initFolderImportButton(){
+	importFolderButton.addEventListener('click', () => {
+		ext.browser.legacy.folderPicker(defaultStoragePickerOptions()).then(selectedPath => {
+			setExportImportConstrolsDisabled(true);
+
+			return ext.importFolderNotes(selectedPath, !!overwriteExistingNotes.checked).then(printImportStats).finally(async () => {
 				// Reset cache since we might import some new data
 				await ext.browser.qapp.clearNoteCache();
-				importFolderButton.disabled = false;
-				importFolderLoader.style.display = 'none';
+				setExportImportConstrolsDisabled(false);
 			});
 		});
 	});
@@ -247,21 +267,11 @@ async function initFolderImportButton(){
 async function initExportNotesButtons(){
 	let listener = (type, button) => {
 		return () => {
-			let opt = {};
+			ext.browser.legacy.folderPicker(defaultStoragePickerOptions()).then(selectedPath => {
+				setExportImportConstrolsDisabled(true);
 
-			ext.browser.legacy.folderPicker(opt).then(selectedPath => {
-				button.disabled = true;
-				importFolderLoader.style.display = '';
-
-				return ext.exportQAppNotesToFolder(selectedPath, type, !!overwriteExistingNotes.checked).then(stats => {
-					if(stats){
-						browser.legacy.alert(_("import.finished.stats", [stats.imported, stats.err, stats.exist, stats.overwritten]));
-					} else {
-						browser.legacy.alert(_("import.fail"));
-					}
-				}).finally(async () => {
-					button.disabled = false;
-					importFolderLoader.style.display = 'none';
+				return ext.exportQAppNotesToFolder(selectedPath, type, !!overwriteExistingNotes.checked).then(printImportStats).finally(async () => {
+					setExportImportConstrolsDisabled(false);
 				});
 			});
 		}
@@ -296,16 +306,16 @@ async function storageOptionChange(){
 async function storageFolderBrowse(){
 	var path = await ext.getXNoteStoragePath();
 
-	if(!await ext.isFolderReadable(path)){
+	if(!await ext.isFolderWritable(path)){
 		path = ext.Prefs.storageFolder;
 	}
 
-	if(!await ext.isFolderReadable(path)){
+	if(!await ext.isFolderWritable(path)){
 		path = await ext.browser.qapp.getProfilePath();
 	}
 
 	let opt = {};
-	if(await ext.isFolderReadable(path)){
+	if(await ext.isFolderWritable(path)){
 		opt.displayDirectory = path;
 	}
 
@@ -504,6 +514,7 @@ async function initOptionsPage(){
 
 	initTags(tags);
 	generatePosGrid();
+	initXNoteFolderInfo();
 	initOptionsPageValues();
 	initFolderImportButton();
 	initExportStorageButton();
