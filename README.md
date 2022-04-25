@@ -1,6 +1,15 @@
-# Source code for Thunderbird [QNote](https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/) add-on.
+# Table of contents
+1. [About](#about)
+2. [Features](#features)
+3. [Usage](#usage)
+4. [Storage](#storage)
+5. [Popup windows](#popup-windows)
+6. [Screenshots](#screenshots)
+7. [Donations](#donations)
 
-To install extension just zip whole folder and rename file's extension to .xpi and add it to Thunderbird.
+# About
+
+This is source code repository for Thunderbird [QNote](https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/) add-on. To install extension just zip whole folder and rename file's extension to .xpi and add it to Thunderbird.
 
 # Features
 
@@ -63,4 +72,4 @@ _Floating panel_ has nicer looks but does not display well on MacOS. Fall back t
 
 # Donations
 
-Some [beer](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CCFL84AMQKV4S&source=url) would be much appreciated ;)
+I enjoy some [beer](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CCFL84AMQKV4S&source=url) now and then. Much appreciated! ;)
