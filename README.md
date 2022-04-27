@@ -57,7 +57,7 @@ There are two options for note window:
 - Floating panel
 - Popup window
 
-_Floating panel_ has nicer looks but does not display well on MacOS. Fall back to _Popup window_ if experience troubles with displaying _Floating panel_.
+_Floating panel_ has nicer looks but does not display well on MacOS. Fall back to _Popup window_ if experience difficulties with _Floating panel_.
 
 # Screenshots
 
