@@ -229,5 +229,11 @@
 	},
 	"options.reset": {
 		"message": "Options has been reset"
+	},
+	"export.qnotes.button": {
+		"message": "Export as QNotes"
+	},
+	"export.xnotes.button": {
+		"message": "Export as XNotes"
 	}
 }

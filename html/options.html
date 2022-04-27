@@ -3,12 +3,12 @@
 <head>
 	<meta charset="utf-8"/>
 	<link rel="stylesheet" href="../html/options.css" type="text/css">
-	<title>QNote options</title>
+	<title></title>
 </head>
 
 <body>
 
-<div>
+<div id="qnotePreferences">
 
 <div id="errorBox" class="updateSettingCrossUserWarningContainer" data-i18n="error"></div>
 
@@ -202,8 +202,8 @@
 	<table>
 		<tr>
 			<td><button type="button" id="importFolderButton" data-i18n="import.folder.button"></button></td>
-			<td><button type="button" id="exportQNotesButton">Export as QNotes</button></td>
-			<td><button type="button" id="exportXNotesButton">Export as XNotes++</button></td>
+			<td><button type="button" id="exportQNotesButton" data-i18n="export.qnotes.button"></button></td>
+			<td><button type="button" id="exportXNotesButton" data-i18n="export.xnotes.button"></button></td>
 			<td><div id="importFolderLoader" style="display: none;"><img src="../images/loader.gif" alt="Loading..."></div></td>
 		</tr>
 	</table>
@@ -212,6 +212,20 @@
 		<tr>
 			<td><input type="checkbox" id="overwriteExistingNotes"></td>
 			<td><label for="overwriteExistingNotes" data-i18n="overwrite.existing.notes"></label></td>
+		</tr>
+	</table>
+	<table align="right">
+		<tr>
+			<td align="right"><strong data-i18n="import.folder.button"></strong></td>
+			<td>Import QNotes and XNotes from folder into extension storage</td>
+		</tr>
+		<tr>
+			<td align="right"><strong data-i18n="export.qnotes.button"></strong></td>
+			<td>Export notes from selected storage to .qnote format</td>
+		</tr>
+		<tr>
+			<td align="right"><strong data-i18n="export.xnotes.button"></strong></td>
+			<td>Export notes from selected storage to .xnote format</td>
 		</tr>
 	</table>
 </fieldset>
@@ -242,10 +256,22 @@
 			</td>
 		</tr>
 	</table>
-	<div id="exportStorageLimitations" data-i18n="storage.export.limitation"></div>
-	<div><strong>Export storage</strong> will export (JSON format) all settings and notes saved inside extension storage.</div>
-	<div><strong>Import storage</strong> will import all settings and notes previously exported.</div>
-	<div><strong>Clear storage</strong> will wipe all settings and notes saved inside extension storage<br>(notes saved in folder won't be affected)</div>
+	<table align="right">
+		<tr>
+			<td align="right"><strong data-i18n="storage.export.button"></strong></td>
+			<td>Export preferences and notes saved in extension storage
+				<div id="exportStorageLimitations" data-i18n="storage.export.limitation"></div>
+			</td>
+		</tr>
+		<tr>
+			<td align="right"><strong data-i18n="storage.import"></strong></td>
+			<td>Import previously exported preferences and notes back in extension storage</td>
+		</tr>
+		<tr>
+			<td align="right"><strong data-i18n="storage.clear.button"></strong></td>
+			<td>Wipe preferences and notes saved in extension storage</td>
+		</tr>
+	</table>
 </fieldset>
 
 </form>
