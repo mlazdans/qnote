@@ -48,7 +48,7 @@ Currently storing notes outside extension is more versatile and preffered way. T
 
 When modifying XNote++ notes (.xnote extension) these will be saved in more versatile JSON format (.qnote extension).
 
-If you are using internal storage then don't forget to export data before removing extension!
+__If you are using internal storage then don't forget to export data before removing extension!__
 
 # Popup windows
 
