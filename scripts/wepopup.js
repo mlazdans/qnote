@@ -4,11 +4,23 @@ var note = ext.CurrentNote.note;
 
 var YTextE = document.getElementById('qnote-text');
 
-YTextE.setAttribute("spellcheck", ext.Prefs.enableSpellChecker);
+function sfocus(f){
+	if(ext.Prefs.focusOnDisplay){
+		var isFocused = (document.activeElement === YTextE);
+		if(!isFocused){
+			f();
+		}
+	}
+}
 
-//if(ext.Prefs.focusOnDisplay || !note || !note.text){
-	YTextE.focus();
-//}
+window.addEventListener("focus", () => {
+	sfocus(() => YTextE.focus());
+});
+
+window.addEventListener("DOMContentLoaded", () => {
+	sfocus(() => window.focus());
+	YTextE.setAttribute("spellcheck", ext.Prefs.enableSpellChecker);
+});
 
 YTextE.value = note.text;
 
