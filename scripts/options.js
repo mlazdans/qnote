@@ -1,7 +1,7 @@
 var ext = chrome.extension.getBackgroundPage();
 var i18n = ext.i18n;
 var _ = ext.browser.i18n.getMessage;
-var QDEB = true;
+var QDEB;
 
 var DefaultPrefs;
 var ErrMsg = [];
