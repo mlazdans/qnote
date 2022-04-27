@@ -123,7 +123,7 @@
 		"message": "Floating panel"
 	},
 	"window.option.webext": {
-		"message": "Popup window (deprecated)"
+		"message": "Popup window"
 	},
 	"close.and.save": {
 		"message": "Close and save"

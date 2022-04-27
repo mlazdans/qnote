@@ -123,7 +123,7 @@
 		"message": "Pannello fluttuante"
 	},
 	"window.option.webext": {
-		"message": "Finestra Popup (deprecata)"
+		"message": "Finestra Popup"
 	},
 	"close.and.save": {
 		"message": "Chiudi e salva"

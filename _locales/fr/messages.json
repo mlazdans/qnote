@@ -123,7 +123,7 @@
 		"message": "un panneau flottant"
 	},
 	"window.option.webext": {
-		"message": "une fenêtre contextuelle (obsolète)"
+		"message": "une fenêtre contextuelle"
 	},
 	"close.and.save": {
 		"message": "Enregistrer et fermer"
