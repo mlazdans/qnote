@@ -65,7 +65,6 @@ let NoteQF = {
 		var firstClause = true;
 		var l = phrases.length;
 
-		// for (let kw of phrases) {
 		for (let i = 0; i < l; i++) {
 			let kw = phrases[i];
 			let term = aTermCreator.createTerm();
@@ -143,13 +142,8 @@ QNoteFilter = {
 			if(state){
 				button.setAttribute('checked', "true");
 			}
-			// button.setAttribute("label", tag.tag);
-			// button.setAttribute("value", tag.key);
 
 			let filterBar = w.document.getElementById("quick-filter-bar-filter-text-bar");
-			// let filterBar = w.document.getElementById("quick-filter-bar-tab-bar");
-			// let senderButton = w.document.getElementById("qfb-qs-sender");
-			// filterBar.insertBefore(button, senderButton);
 			filterBar.appendChild(button);
 		}
 
@@ -172,19 +166,14 @@ QNoteFilter = {
 				QNoteFilter.saveQNoteQFState(qfQnoteEl.checked);
 				// We need to remove state because QF gets mad if we disable, for example, search and then leave state as is
 				filterer.setFilterValue('qnote', null);
-				// console.log("unset filter", filterer, qfQnoteEl.checked);
 			}
 
 			qfTextBox.removeEventListener("command", commandHandler);
 			qfQnoteEl.removeEventListener("command", commandHandler);
 			qfQnoteEl.parentNode.removeChild(qfQnoteEl);
 		});
-
-		// QNoteFilter.updateSearch(aMuxer);
-		// console.log("updateSearch", aMuxer);
 	},
 	install: options => {
-		// console.debug("QNoteFilter.install()");
 		Services.ww.registerNotification(WindowObserver);
 
 		QNoteFilter.options = options;
@@ -203,98 +192,15 @@ QNoteFilter = {
 		}
 
 		QuickFilterManager.defineFilter(NoteQF);
-		// MessageTextFilter.defineTextFilter(NoteQF);
-
-		// let w = Services.wm.getMostRecentWindow("mail:3pane");
 
 		QNoteFilter.attachToWindow(options.w);
-
-		// Restore filterer state
-		// let aMuxer = w.QuickFilterBarMuxer;
-		// let filterer = aMuxer.maybeActiveFilterer;
-		// console.log("filterer", aMuxer, filterer);
-		// if(filterer){
-		// 	if(QNoteFilter.getQNoteQFState()){
-		// 		let textFilter = filterer.getFilterValue("text");
-		// 		if(textFilter.text){
-		// 			console.log("restore filter", filterer, textFilter);
-		// 			textFilter.setFilterValue('qnote', textFilter.text);
-		// 		}
-		// 	}
-		// }
-
-		// let aMuxer = w.QuickFilterBarMuxer;
-		// let filterer = QNoteFilter.getQF(w.gFolderDisplay);
-		// if(filterer){
-		// 	if(QNoteFilter.getQNoteQFState()){
-		// 		let textFilter = filterer.getFilterValue("text");
-		// 		if(textFilter.text){
-		// 			console.log("restore filter", filterer, textFilter);
-		// 			aMuxer.setFilterValue('qnote', textFilter.text);
-		// 		}
-		// 	}
-		// }
-
-		// var terms = MailServices.filters.getCustomTerms();
-		// // var a = terms.QueryInterface(Ci.nsIMutableArray);
-		// console.log("terms", terms);
-		// while (terms.hasMoreElements()) {
-		// 	var f = terms.getNext().QueryInterface(Ci.nsIMsgSearchCustomTerm);
-		// 	console.log("term", f);
-		// }
-
-		// MessageTextFilter.defineTextFilter({
-		// 	name: "qnote",
-		// 	domId: "qfb-qs-qnote-text",
-		// 	attrib: Ci.nsMsgSearchAttrib.Custom,
-		// 	//attrib: Ci.nsMsgSearchAttrib.Subject,
-		// 	defaultState: false,
-		// 	customId: customTerm.id
-		// 	// ,
-		// 	// appendTerms: function(aTermCreator, aTerms, aFilterValue) {
-		// 	// 	console.log("appendTerms TXT");
-		// 	// 	// let text=w.document.getElementById('qfb-qs-textbox').value;
-		// 	// 	// // console.log(aTermCreator, aTerms, aFilterValue, text);
-		// 	// 	// if (text) {
-		// 	// 	// 	searchTerm(text, aTermCreator, aTerms);
-		// 	// 	// }
-		// 	// },
-		// 	// onCommand: function(aState, aNode, aEvent, aDocument){
-		// 	// 	console.log("onCommand", aState, aNode, aEvent, aDocument);
-		// 	// 	return [aState, false];
-		// 	// }
-		// });
 	},
 	uninstall: () => {
-		console.debug("QNoteFilter.uninstall()");
 		for (let listener of QNoteFilter.listeners["uninstall"]) {
 			listener();
 		}
 		QuickFilterManager.killFilter("qnote");
 		Services.ww.unregisterNotification(WindowObserver);
-		// MailServices.filters.addCustomTerm({
-		// 	id: CustomTerm.id,
-		// 	getEnabled: function(scope, op) {
-		// 		return false;
-		// 		//return ops.includes(op);
-		// 	},
-		// 	// Currently disabled in search dialogs, because can't figure out how to add text box to the filter
-		// 	// Probably through XUL or something
-		// 	getAvailable: function(scope, op) {
-		// 		return false;
-		// 		//return ops.includes(op);
-		// 	},
-		// 	getAvailableOperators: function(scope, length) {
-		// 		if(length){
-		// 			length.value = 0;
-		// 		}
-		// 		return [];
-		// 	},
-		// 	match: function(msgHdr, searchValue, searchOp) {
-		// 		console.log("match from disabled");
-		// 		return false;
-		// 	}
-		// });
 	}
 }
 }
