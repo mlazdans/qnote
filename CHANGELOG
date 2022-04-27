@@ -8,7 +8,7 @@ RELEASE 0.11.0
 - Add ability to export notes to folder by choosing QNote or XNote++ formats (#20)
 - Minor bugfixes
 
-RELEASE 0.10.4
+RELEASE 0.10.4 - Oct 15, 2021
 -----------------
 - Options: enable / disable spell check
 - Add Romanian locale
@@ -16,17 +16,17 @@ RELEASE 0.10.4
 - Fix note resize issues
 - Minor bugfixes
 
-RELEASE 0.10.3
+RELEASE 0.10.3 - Oct 8, 2021
 -----------------
 - Use Webextension headerMessageId property (starting with TB85)
 - Fix unnecessary trimming when message-id is w/o brackets (#6)
 - Fix note movement for TB < 91 (#9)
 
-RELEASE 0.10.2
+RELEASE 0.10.2 - Aug 28, 2021
 -----------------
 - Fix compatibility with TB91 (#8)
 
-RELEASE 0.10.1
+RELEASE 0.10.1 - Dec 1, 2020
 -----------------
 - Options: auto save
 - Options: reset to defaults
@@ -36,7 +36,7 @@ RELEASE 0.10.1
 - Styling tweaks
 - Minor bug fixes
 
-RELEASE 0.10.0
+RELEASE 0.10.0 - Nov 23, 2020
 -----------------
 - Add localized date format option with custom or predefined formats
 - Add default note placement option (only floating panel)
@@ -46,19 +46,19 @@ RELEASE 0.10.0
 - Minor bug fixes
 
 
-RELEASE 0.9.1
+RELEASE 0.9.1 - Nov 18, 2020
 -----------------
 - Attach note to print
 - Attach note to message
 - Removed search from QuickFilter until we find a good solution
 - Lots of bugfixes
 
-RELEASE 0.7.0
+RELEASE 0.7.0 - Nov 5, 2020
 -----------------
 - Add QuickFilter support for filtering notes by contents
 - Various bug fixes
 
-RELEASE 0.6.3
+RELEASE 0.6.3 - Oct 26, 2020
 -----------------
 - Added main toolbar button
 - Attach note to window that opened it instead to main window
@@ -66,27 +66,27 @@ RELEASE 0.6.3
 - Force note text color to black
 - Minor bug fixes
 
-RELEASE 0.6.2
+RELEASE 0.6.2 - Oct 15, 2020
 -----------------
 - New locales - IT / LV / FR / DE
 - Saving notes using UTF-8 encoded files
 - Fix QNote extension interfere with some other extensions
 
-RELEASE 0.6.1
+RELEASE 0.6.1 - Oct 8, 2020
 -----------------
 - Added Alt+Q keyboard shortcut
 - Better overall keyboard handling
 - Note to grab focus when explicitly click on QNote button or context menu
 - Minor bug fixes
 
-RELEASE 0.6.0
+RELEASE 0.6.0 - Oct 3, 2020
 -----------------
 - Notes will now be saved on disk using more versatile JSON format, not XNote++ format anymore
 - Auto close note after folder or tab change
 - Preserve column width
 - Fix XNote filename handling containing slashes
 
-RELEASE 0.5.4
+RELEASE 0.5.4 - Oct 2, 2020
 -----------------
 - Change note timestamp only if text changed
 - Option to overwrite existing notes when importing xnotes
@@ -94,21 +94,21 @@ RELEASE 0.5.4
 - Fix popup losing controls (again)
 - Minor bugfixes
 
-RELEASE 0.5.3
+RELEASE 0.5.3 - Sep 30, 2020
 -----------------
 - Fix popup losing controls
 - Add option for note to gain auto focus
 
-RELEASE 0.5.2
+RELEASE 0.5.2 - Sep 29, 2020
 -----------------
 - Added column with icon and text option
 - Added window option - popup or floating panel
 
-RELEASE 0.4
+RELEASE 0.4 - Sep 19, 2020
 -----------------
 - Added storage option - folder or extension storage
 - Closing with empty text will result in note deletion
 
-RELEASE 0.2
+RELEASE 0.2 - Sep 16, 2020
 -----------------
 - Fix compatibility with TB78
