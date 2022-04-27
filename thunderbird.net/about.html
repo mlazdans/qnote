@@ -1,3 +1,6 @@
+<!--
+	QNote about page on https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/
+-->
 <b>Read about: <a href="https://github.com/mlazdans/qnote/issues/10">excessive permissions</a></b>
 
 QNote extension development was started after <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/xnotepp/">XNote++</a> support was dropped. It aims to be XNote++ drop-in replacement. Please report any issues and/or ideas to support e-mail or <a href="https://github.com/mlazdans/qnote/issues">GitHub</a> (please do <em>not</em> use reviews section for that).
@@ -6,25 +9,33 @@ QNote extension development was started after <a href="https://addons.thunderbir
 
 <b>Features:</b>
 <ul>
-	<li>Add notes to messages</li>
-	<li>Save note position, size</li>
-	<li>Column with note icon and/or text preview</li>
-	<li>Note attaching to message</li>
-	<li>Note printing together with message</li>
-	<li>Fully <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/xnotepp/">XNote++</a> compatible</li>
+	<li>Add notes to e-mail messages</li>
+	<li>Save note position, size, multiple default note positions</li>
+	<li>Searchable notes via Thunderbird's QuickFilter</li>
+	<li>Mail pane column with note icon and / or note preview</li>
+	<li>Attach note to message body</li>
+	<li>Attach note when printing</li>
+	<li>Light / dark theme</li>
+	<li>Multiple locales and localized date formats</li>
+	<li>Auto tag message when adding note</li>
+	<li>Fully <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/xnotepp/">XNote++</a> (3.0.0) compatible</li>
+	<li>Import / export back to XNote++ format</li>
+	<li>Supports older Thunderbird versions, starting 68.2.0</li>
 </ul>
 
 <b>Usage:</b>
 <ul>
-	<li>Use right click context menu to delete note or reset note window</li>
-	<li>Use ESC to close note without saving</li>
-	<li>Use Alt+Q to toggle note</li>
+	<li>Alt+Q to toggle note</li>
+	<li>ESC to close note without saving</li>
+	<li>Right click context menu to delete note or reset note window</li>
+	<li>Use QuickFilter to search notes (only for folder storage)</li>
 </ul>
 
-<b>If you are using internal storage (not folder) then don't forget to export data before removing extension !</b>
+<b>If you are using internal storage then don't forget to export data before removing extension!</b>
 
 <b>History:</b>
 <ul>
+	<li>Version 0.11: add search to QucikFilter, import / export notes in various formats and between storage options</li>
 	<li>Version 0.10: configurable localized date format, set default note placement, optional confirm delete, save options w/o extension reload, options page styling according to selected theme</li>
 	<li>Version 0.9: attaching note to message and printer, major rewrite</li>
 	<li>Version 0.8: <em>non published</em></li>
@@ -36,7 +47,7 @@ QNote extension development was started after <a href="https://addons.thunderbir
 
 <b>Know issues:</b>
 <ul>
-	<li>Search is broken and currently disabled and will come back once a better solution is found</li>
-	<li>Does not work very well together with <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/gmail-conversation-view/">Conversations</a> plugin because it does some heavy modifications to TB internals</li>
-	<li>91.x version does not work well on Macs</li>
+	<li>Search is working only when using <i>folder storage</i> option.</li>
+	<li>Does not work very well together with <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/gmail-conversation-view/">Conversations</a> plugin.</li>
+	<li>TB 91.x versions does not work well on Macs when using <i>Floating panel</i> window option.</li>
 </ul>

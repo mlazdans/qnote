@@ -5,7 +5,8 @@
 4. [Storage](#storage)
 5. [Popup windows](#popup-windows)
 6. [Screenshots](#screenshots)
-7. [Donations](#donations)
+7. [Known issues](#known-issues)
+8. [Donations](#donations)
 
 # About
 
@@ -25,7 +26,7 @@ This is source code repository for Thunderbird [QNote](https://addons.thunderbir
 - Light / dark theme
 - Multiple locales and localized date formats
 - Auto tag message when adding note
-- Fully <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/xnotepp/">XNote++</a> compatible
+- Fully <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/xnotepp/">XNote++</a> (3.0.0) compatible
 - Import / export back to XNote++ format
 - Supports older Thunderbird versions, starting 68.2.0
 
@@ -40,12 +41,14 @@ This is source code repository for Thunderbird [QNote](https://addons.thunderbir
 
 There are two options for storing notes:
 
-- inside extension
-- outside extension in folder
+- Inside extension
+- Outside extension in folder
 
 Currently storing notes outside extension is more versatile and preffered way. This enables seaching notes and sharing with different computers using sharing mechanism like Dropbox, NFS, Windows / Samba share, etc. You can also use XNote++ folder.
 
 When modifying XNote++ notes (.xnote extension) these will be saved in more versatile JSON format (.qnote extension).
+
+If you are using internal storage then don't forget to export data before removing extension!
 
 # Popup windows
 
@@ -73,6 +76,12 @@ _Floating panel_ has nicer looks but does not display well on MacOS. Fall back t
 <img width="30%" src="thunderbird.net/screenshots/options1.jpg" alt="Options page 1">
 <img width="30%" src="thunderbird.net/screenshots/options2.jpg" alt="Options page 2">
 </p>
+
+# Known issues
+
+- Search is working only when using _folder storage_ option.
+- Does not work very well together with <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/gmail-conversation-view/">Conversations</a> plugin.
+- TB 91.x versions does not work well on Macs when using _Floating panel_ window option.
 
 # Donations
 
