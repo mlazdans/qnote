@@ -27,7 +27,7 @@ This is source code repository for Thunderbird [QNote](https://addons.thunderbir
 - Multiple locales and localized date formats
 - Auto tag message when adding note
 - Fully <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/xnotepp/">XNote++</a> (3.0.0) compatible
-- Import / export back to XNote++ format
+- Import / export between to XNote++ (\*.xnote) and QNote (\*.qnote) formats
 - Supports older Thunderbird versions, starting 68.2.0
 
 # Usage
