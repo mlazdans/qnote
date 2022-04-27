@@ -84,7 +84,7 @@
 		"message": "XNote++ mape atrasta:<br>&nbsp;$1"
 	},
 	"storage.export.limitation": {
-		"message": "'Glabātuves eksports' pieejams tikai TB>=78"
+		"message": "(pieejams tikai TB>=78)"
 	},
 	"storage.fieldset": {
 		"message": "Glabātuve"

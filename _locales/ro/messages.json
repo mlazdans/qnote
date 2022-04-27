@@ -84,7 +84,7 @@
 		"message": "S-a găsit folderul XNote++:<br>&nbsp;$1"
 	},
 	"storage.export.limitation": {
-		"message": "'Export stocare' disponibil numai pentru TB>=78"
+		"message": "(disponibil numai pentru TB>=78)"
 	},
 	"storage.fieldset": {
 		"message": "Stocare"

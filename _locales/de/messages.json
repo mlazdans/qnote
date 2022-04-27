@@ -84,7 +84,7 @@
 		"message": "XNote++ Ordner gefunden:<br>&nbsp;$1"
 	},
 	"storage.export.limitation": {
-		"message": "'Archiv exportieren' klappt nur mit Thunderbird 78 und höher"
+		"message": "(klappt nur mit Thunderbird 78 und höher)"
 	},
 	"storage.fieldset": {
 		"message": "Archiv"

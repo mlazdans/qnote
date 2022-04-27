@@ -84,7 +84,7 @@
 		"message": "XNote++ folder found:<br>&nbsp;$1"
 	},
 	"storage.export.limitation": {
-		"message": "'Export storage' available only on TB>=78"
+		"message": "(available only on TB>=78)"
 	},
 	"storage.fieldset": {
 		"message": "Storage"
