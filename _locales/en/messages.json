@@ -231,25 +231,25 @@
 		"message": "Options has been reset"
 	},
 	"export.qnotes.button": {
-		"message": "Export as QNotes"
+		"message": "Export QNotes"
 	},
 	"export.xnotes.button": {
-		"message": "Export as XNotes"
+		"message": "Export XNotes"
 	},
 	"import.folder.button.descr": {
-		"message": "Import QNotes and XNotes from folder into extension storage"
+		"message": "Import .qnote or .xnote files into extension storage"
 	},
 	"export.qnotes.button.descr": {
-		"message": "Export notes from selected storage to .qnote format"
+		"message": "Export notes from selected storage .qnote format"
 	},
 	"export.xnotes.button.descr": {
-		"message": "Export notes from selected storage to .xnote format"
+		"message": "Export notes from selected storage .xnote format"
 	},
 	"storage.export.button.descr": {
 		"message": "Export preferences and notes saved in extension storage"
 	},
 	"storage.import.descr": {
-		"message": "Import previously exported preferences and notes back in extension storage"
+		"message": "Import preferences and notes back into extension storage"
 	},
 	"storage.clear.button.descr": {
 		"message": "Wipe preferences and notes saved in extension storage"
