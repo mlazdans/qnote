@@ -229,5 +229,29 @@
 	},
 	"options.reset": {
 		"message": "Options réinitialisées"
+	},
+	"export.qnotes.button": {
+		"message": "Exporter comme qnotes"
+	},
+	"export.xnotes.button": {
+		"message": "Exporter comme xnotes"
+	},
+	"import.folder.button.descr": {
+		"message": "Importer des fichiers .qnote ou .xnote dans le stockage de l’extension"
+	},
+	"export.qnotes.button.descr": {
+		"message": "Exporter les notes du stockage sélectionné au format .qnote"
+	},
+	"export.xnotes.button.descr": {
+		"message": "Exporter les notes du stockage sélectionné au format .xnote"
+	},
+	"storage.export.button.descr": {
+		"message": "Exporter les préférences et les notes enregistrées dans le stockage de l’extension"
+	},
+	"storage.import.descr": {
+		"message": "Importer les préférences et les notes dans le stockage de l’extension"
+	},
+	"storage.clear.button.descr": {
+		"message": "Effacer les préférences et les notes enregistrées dans le stockage de l’extension"
 	}
 }
