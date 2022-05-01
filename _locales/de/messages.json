@@ -229,5 +229,29 @@
 	},
 	"options.reset": {
 		"message": "Einstellungen wurden zurückgesetzt"
+	},
+	"export.qnotes.button": {
+		"message": "Als QNotes exportieren"
+	},
+	"export.xnotes.button": {
+		"message": "Als XNote++ exportieren"
+	},
+	"import.folder.button.descr": {
+		"message": "Dateien vom Typ .qnote oder .xnote ins Archiv importieren"
+	},
+	"export.qnotes.button.descr": {
+		"message": "Notizen im .qnote-Format (JSON) exportieren"
+	},
+	"export.xnotes.button.descr": {
+		"message": "Notizen im .xnote-Format (XNote++) exportieren"
+	},
+	"storage.export.button.descr": {
+		"message": "Einstellungen und Notizen aus dem Archiv exportieren"
+	},
+	"storage.import.descr": {
+		"message": "Einstellungen und Notizen ins Archiv importieren"
+	},
+	"storage.clear.button.descr": {
+		"message": "Alle Einstellungen und Notizen im Archiv löschen"
 	}
 }
