@@ -4,7 +4,7 @@
 	"author": "Martins Lazdans",
 	"default_locale": "en",
 	"description": "__MSG_description__",
-	"version": "0.11.0pre3",
+	"version": "0.11.1pre1",
 	"applications": {
 		"gecko": {
 			"id": "qnote@dqdp.net",
@@ -103,6 +103,14 @@
 				"scopes": ["addon_parent"],
 				"paths": [["qpopup"]],
 				"script": "api/qpopup.js"
+			}
+		},
+		"ResourceUrl": {
+			"schema": "schemas/ResourceUrl.json",
+			"parent": {
+				"scopes": ["addon_parent"],
+				"paths": [["ResourceUrl"]],
+				"script": "api/ResourceUrl.js"
 			}
 		}
 	}
