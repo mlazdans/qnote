@@ -2,8 +2,9 @@ var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var { QuickFilterManager, MessageTextFilter } = ChromeUtils.import("resource:///modules/QuickFilterManager.jsm");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
-var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { QCustomTerm } = ChromeUtils.import(extension.rootURI.resolve("modules/QCustomTerm.js"));
+// var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
+// var { QCustomTerm } = ChromeUtils.import(extension.rootURI.resolve("modules/QCustomTerm.js"));
+var { QCustomTerm } = ChromeUtils.import("resource://qnote/modules/QCustomTerm.js");
 
 var EXPORTED_SYMBOLS = ["QNoteFilter"];
 
@@ -15,102 +16,40 @@ Current problems:
 
 */
 
-var QNoteFilter;
+// var QNoteFilter;
 
 {
 
-let CustomTermId = 'qnote@dqdp.net#qnoteText';
-let qfQnoteDomId = 'qfb-qs-qnote';
+// let CustomTermId = 'qnote@dqdp.net#qnoteText';
+// let qfQnoteDomId = 'qfb-qs-qnote';
 
-let WindowObserver = {
-	observe: function(aSubject, aTopic) {
-		if(aTopic === 'domwindowopened'){
-			aSubject.addEventListener("DOMContentLoaded", e => {
-				let document = e.target;
-
-				if(!document.URL.includes('chrome://messenger/content/messenger')){
-					return;
-				}
-
-				// let filterer = QNoteFilter.getQF(aSubject.gFolderDisplay);
-				// console.log("Attach to win", filterer);
-				let tabmail = document.getElementById('tabmail');
-				if(tabmail){
-					QNoteFilter.attachToWindow(aSubject);
-				}
-			});
-		}
-	}
 }
 
-let NoteQF = {
-	name: "qnote",
-	domId: qfQnoteDomId,
-	reflectInDOM: function(aDomNode, aFilterValue, aDocument, aMuxer){
-		let state = QNoteFilter.getQNoteQFState();
-		let textFilter = aMuxer.getFilterValueForMutation("text");
-		if(state){
-			aMuxer.setFilterValue("qnote", textFilter.text);
-		}
-		QNoteFilter.updateSearch(aMuxer);
-	},
-	// https://stackoverflow.com/a/6969486/10973173
-	escapeRegExp(string) {
-		return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
-	},
-	appendTerms: function(aTermCreator, aTerms, aFilterValue) {
-		// Let us borrow an existing code just for a while :>
-		let filterValue = this.escapeRegExp(aFilterValue).toLowerCase();
-		var phrases = MessageTextFilter._parseSearchString(filterValue);
-		var firstClause = true;
-		var l = phrases.length;
-
-		for (let i = 0; i < l; i++) {
-			let kw = phrases[i];
-			let term = aTermCreator.createTerm();
-			var value = term.value;
-			// value.attrib = Ci.nsMsgSearchAttrib.Subject;
-			value.attrib = Ci.nsMsgSearchAttrib.Custom;
-			value.str = kw;
-
-
-			term.attrib = Ci.nsMsgSearchAttrib.Custom;
-			term.customId = CustomTermId;
-			term.op = Ci.nsMsgSearchOp.Contains;
-			term.booleanAnd = !firstClause; // We need OR-ed with other QuickFilters and AND-ed with phrases
-			term.beginsGrouping = firstClause;
-			term.value = value;
-
-			if (i + 1 == l) {
-				term.endsGrouping = true;
-			}
-
-			aTerms.push(term);
-
-			firstClause = false;
-		}
-	}
-};
-
-QNoteFilter = {
-	listeners: {
+class QNoteFilter {
+	CustomTermId = 'qnote@dqdp.net#qnoteText';
+	qfQnoteDomId = 'qfb-qs-qnote';
+	listeners = {
 		"uninstall": new Set()
-	},
+	}
+
 	// TODO: probably should move to WebExtensions
 	getPrefsO(){
-		return Services.prefs.QueryInterface(Ci.nsIPrefBranch).getBranch("extensions.qnote.");
-	},
+		return this.Services.prefs.QueryInterface(Ci.nsIPrefBranch).getBranch("extensions.qnote.");
+	}
+
 	getQNoteQFState(){
-		let prefs = QNoteFilter.getPrefsO();
+		let prefs = this.getPrefsO();
 		if(prefs.prefHasUserValue("qfValue")){
 			return prefs.getBoolPref("qfValue");
 		} else {
 			return false;
 		}
-	},
+	}
+
 	saveQNoteQFState(state){
-		return QNoteFilter.getPrefsO().setBoolPref("qfValue", state);
-	},
+		return this.getPrefsO().setBoolPref("qfValue", state);
+	}
+
 	getQF(aFolderDisplay){
 		if(!aFolderDisplay){
 			return null;
@@ -119,22 +58,27 @@ QNoteFilter = {
 		let tab = aFolderDisplay._tabInfo;
 
 		return "quickFilter" in tab._ext ? tab._ext.quickFilter : null;
-	},
-	removeListener(name, listener){
-		QNoteFilter.listeners[name].delete(listener);
-	},
-	addListener(name, listener){
-		QNoteFilter.listeners[name].add(listener);
-	},
-	updateSearch: aMuxer => {
-		aMuxer.deferredUpdateSearch();
-	},
-	attachToWindow: w => {
-		let state = QNoteFilter.getQNoteQFState();
+	}
 
-		if(!w.document.getElementById(qfQnoteDomId)){
+	removeListener(name, listener){
+		this.listeners[name].delete(listener);
+	}
+
+	addListener(name, listener){
+		this.listeners[name].add(listener);
+	}
+
+	updateSearch(aMuxer) {
+		aMuxer.deferredUpdateSearch();
+	}
+
+	attachToWindow(w) {
+		let QNoteFilter = this;
+		let state = this.getQNoteQFState();
+
+		if(!w.document.getElementById(this.qfQnoteDomId)){
 			let button = w.document.createXULElement('toolbarbutton');
-			button.setAttribute('id', qfQnoteDomId);
+			button.setAttribute('id', this.qfQnoteDomId);
 			button.setAttribute('type', 'checkbox');
 			button.setAttribute('class', 'toolbarbutton-1 qfb-tag-button');
 			button.setAttribute('label', 'QNote');
@@ -147,7 +91,7 @@ QNoteFilter = {
 			filterBar.appendChild(button);
 		}
 
-		let qfQnoteEl = w.document.getElementById(qfQnoteDomId);
+		let qfQnoteEl = w.document.getElementById(this.qfQnoteDomId);
 		let qfTextBox = w.document.getElementById('qfb-qs-textbox');
 		let aMuxer = w.QuickFilterBarMuxer;
 
@@ -159,7 +103,7 @@ QNoteFilter = {
 		qfTextBox.addEventListener("command", commandHandler);
 		qfQnoteEl.addEventListener("command", commandHandler);
 
-		QNoteFilter.addListener("uninstall", () => {
+		this.addListener("uninstall", () => {
 			let filterer = QNoteFilter.getQF(w.gFolderDisplay);
 			if(filterer){
 				// Should manage state persistence ourselves
@@ -172,35 +116,109 @@ QNoteFilter = {
 			qfQnoteEl.removeEventListener("command", commandHandler);
 			qfQnoteEl.parentNode.removeChild(qfQnoteEl);
 		});
-	},
-	install: options => {
-		Services.ww.registerNotification(WindowObserver);
+	}
 
-		QNoteFilter.options = options;
+	constructor(options) {
+		this.Services = Services;
+		this.QuickFilterManager = QuickFilterManager;
+		let QNoteFilter = this;
+		this.WindowObserver = {
+			observe: function(aSubject, aTopic) {
+				if(aTopic === 'domwindowopened'){
+					aSubject.addEventListener("DOMContentLoaded", e => {
+						let document = e.target;
+
+						if(!document.URL.includes('chrome://messenger/content/messenger')){
+							return;
+						}
+
+						// let filterer = QNoteFilter.getQF(aSubject.gFolderDisplay);
+						// console.log("Attach to win", filterer);
+						let tabmail = document.getElementById('tabmail');
+						if(tabmail){
+							QNoteFilter.attachToWindow(aSubject);
+						}
+					});
+				}
+			}
+		}
+
+		Services.ww.registerNotification(this.WindowObserver);
+
+		this.options = options;
 
 		var CustomTermOptions = {
-			id: CustomTermId,
+			id: this.CustomTermId,
 			name: 'QNote',
 			needsBody: false,
 			notesRoot: options.notesRoot
 		};
 
-		if(MailServices.filters.getCustomTerm(CustomTermId)){
+		if(MailServices.filters.getCustomTerm(this.CustomTermId)){
 			// console.log("CustomTerm exists");
 		} else {
 			MailServices.filters.addCustomTerm(new QCustomTerm(CustomTermOptions));
 		}
 
-		QuickFilterManager.defineFilter(NoteQF);
+		let NoteQF = {
+			name: "qnote",
+			domId: this.qfQnoteDomId,
+			reflectInDOM: function(aDomNode, aFilterValue, aDocument, aMuxer){
+				let state = QNoteFilter.getQNoteQFState();
+				let textFilter = aMuxer.getFilterValueForMutation("text");
+				if(state){
+					aMuxer.setFilterValue("qnote", textFilter.text);
+				}
+				QNoteFilter.updateSearch(aMuxer);
+			},
+			// https://stackoverflow.com/a/6969486/10973173
+			escapeRegExp(string) {
+				return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+			},
+			appendTerms: function(aTermCreator, aTerms, aFilterValue) {
+				// Let us borrow an existing code just for a while :>
+				let filterValue = this.escapeRegExp(aFilterValue).toLowerCase();
+				var phrases = MessageTextFilter._parseSearchString(filterValue);
+				var firstClause = true;
+				var l = phrases.length;
 
-		QNoteFilter.attachToWindow(options.w);
-	},
-	uninstall: () => {
-		for (let listener of QNoteFilter.listeners["uninstall"]) {
+				for (let i = 0; i < l; i++) {
+					let kw = phrases[i];
+					let term = aTermCreator.createTerm();
+					var value = term.value;
+					// value.attrib = Ci.nsMsgSearchAttrib.Subject;
+					value.attrib = Ci.nsMsgSearchAttrib.Custom;
+					value.str = kw;
+
+
+					term.attrib = Ci.nsMsgSearchAttrib.Custom;
+					term.customId = QNoteFilter.CustomTermId;
+					term.op = Ci.nsMsgSearchOp.Contains;
+					term.booleanAnd = !firstClause; // We need OR-ed with other QuickFilters and AND-ed with phrases
+					term.beginsGrouping = firstClause;
+					term.value = value;
+
+					if (i + 1 == l) {
+						term.endsGrouping = true;
+					}
+
+					aTerms.push(term);
+
+					firstClause = false;
+				}
+			}
+		};
+
+		this.QuickFilterManager.defineFilter(NoteQF);
+
+		this.attachToWindow(options.w);
+	}
+
+	uninstall() {
+		for (let listener of this.listeners["uninstall"]) {
 			listener();
 		}
-		QuickFilterManager.killFilter("qnote");
-		Services.ww.unregisterNotification(WindowObserver);
+		this.QuickFilterManager.killFilter("qnote");
+		this.Services.ww.unregisterNotification(this.WindowObserver);
 	}
-}
 }

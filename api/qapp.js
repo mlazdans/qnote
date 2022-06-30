@@ -1,11 +1,12 @@
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { QNoteColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/QNoteColumnHandler.js"));
-var { QNotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/QNotePopup.js"));
-var { QNoteFilter } = ChromeUtils.import(extension.rootURI.resolve("modules/QNoteFilter.js"));
-var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
-var { QCache } = ChromeUtils.import(extension.rootURI.resolve("modules/QCache.js"));
+// var { QNoteColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/QNoteColumnHandler.js"));
+var { QNoteColumnHandler } = ChromeUtils.import("resource://qnote/modules/QNoteColumnHandler.js");
+var { QNotePopup } = ChromeUtils.import("resource://qnote/modules/QNotePopup.js");
+var { QNoteFilter } = ChromeUtils.import("resource://qnote/modules/QNoteFilter.js");
+var { QEventDispatcher } = ChromeUtils.import("resource://qnote/modules/QEventDispatcher.js");
+var { QCache } = ChromeUtils.import("resource://qnote/modules/QCache.js");
 
 var QDEB = true;
 var qapp = class extends ExtensionCommon.ExtensionAPI {
@@ -158,7 +159,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					this.noteRowListener(this.getView(col), row);
 				});
 
-				return note.exists ? extension.rootURI.resolve("images/icon-column.png") : null;
+				return note.exists ? "resource://qnote/images/icon-column.png" : null;
 			},
 			// getSortLongForRow(hdr) {
 			// }
@@ -170,6 +171,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		this.printerAttacherPrefs = {};
 		this.messageAttacherPrefs = {};
+		// this.QNoteFilter = new QNoteFilter();
 	}
 
 	uninstallCSS(cssUri) {
@@ -229,25 +231,31 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		this.ColumnHandler.detachFromWindow(w);
 	}
 
-	onShutdown() {
-		QDEB&&console.debug("QNote.shutdown()");
+	onShutdown(isAppShutdown) {
+		console.debug("QNote.shutdown()");
+
+		if (isAppShutdown) {
+			return;
+		}
 
 		Services.ww.unregisterNotification(this.WindowObserver);
 
 		this.EventDispatcher.fireListeners("onShutdown");
 		this.uninstallCSS("html/background.css");
-		QNoteFilter.uninstall();
+		if(this.QNoteFilter){
+			this.QNoteFilter.uninstall();
+		}
 
-		Components.utils.unload(extension.rootURI.resolve("modules/QNoteColumnHandler.js"));
-		Components.utils.unload(extension.rootURI.resolve("modules/QNotePopup.js"));
-		Components.utils.unload(extension.rootURI.resolve("modules/QNoteFilter.js"));
-		Components.utils.unload(extension.rootURI.resolve("modules/QEventDispatcher.js"));
-		Components.utils.unload(extension.rootURI.resolve("modules/QCache.js"));
-		Components.utils.unload(extension.rootURI.resolve("modules/DOMLocalizator.js"));
-		Components.utils.unload(extension.rootURI.resolve("modules/QNoteFile.js"));
-		Components.utils.unload(extension.rootURI.resolve("modules/XNoteFile.js"));
-		Components.utils.unload(extension.rootURI.resolve("modules/QCustomTerm.js"));
-		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
+		// Components.utils.unload("resource://qnote/modules/QNoteColumnHandler.js");
+		// Components.utils.unload("resource://qnote/modules/QNotePopup.js");
+		// Components.utils.unload("resource://qnote/modules/QNoteFilter.js");
+		// Components.utils.unload("resource://qnote/modules/QEventDispatcher.js");
+		// Components.utils.unload("resource://qnote/modules/QCache.js");
+		// Components.utils.unload("resource://qnote/modules/DOMLocalizator.js");
+		// Components.utils.unload("resource://qnote/modules/QNoteFile.js");
+		// Components.utils.unload("resource://qnote/modules/XNoteFile.js");
+		// Components.utils.unload("resource://qnote/modules/QCustomTerm.js");
+		// Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 	}
 
 	id2RealWindow(w){
@@ -327,10 +335,15 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					API.installKeyboardHandler(w);
 					if(options && options.storageFolder){
 						QDEB&&console.debug("Installing filter");
-						QNoteFilter.install({
+						API.QNoteFilter = new QNoteFilter({
 							notesRoot: options.storageFolder,
 							w: w
 						});
+
+						// QNoteFilter.install({
+						// 	notesRoot: options.storageFolder,
+						// 	w: w
+						// });
 					} else {
 						QDEB&&console.debug("options.storageFolder not set, skip install filter");
 					}
