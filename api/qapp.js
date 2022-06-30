@@ -171,6 +171,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		this.printerAttacherPrefs = {};
 		this.messageAttacherPrefs = {};
+		// this.QNoteFilter = new QNoteFilter();
 	}
 
 	uninstallCSS(cssUri) {
@@ -230,25 +231,31 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		this.ColumnHandler.detachFromWindow(w);
 	}
 
-	onShutdown() {
-		QDEB&&console.debug("QNote.shutdown()");
+	onShutdown(isAppShutdown) {
+		console.debug("QNote.shutdown()");
+
+		if (isAppShutdown) {
+			return;
+		}
 
 		Services.ww.unregisterNotification(this.WindowObserver);
 
 		this.EventDispatcher.fireListeners("onShutdown");
 		this.uninstallCSS("html/background.css");
-		QNoteFilter.uninstall();
+		if(this.QNoteFilter){
+			this.QNoteFilter.uninstall();
+		}
 
-		Components.utils.unload("resource://qnote/modules/QNoteColumnHandler.js");
-		Components.utils.unload("resource://qnote/modules/QNotePopup.js");
-		Components.utils.unload("resource://qnote/modules/QNoteFilter.js");
-		Components.utils.unload("resource://qnote/modules/QEventDispatcher.js");
-		Components.utils.unload("resource://qnote/modules/QCache.js");
-		Components.utils.unload("resource://qnote/modules/DOMLocalizator.js");
-		Components.utils.unload("resource://qnote/modules/QNoteFile.js");
-		Components.utils.unload("resource://qnote/modules/XNoteFile.js");
-		Components.utils.unload("resource://qnote/modules/QCustomTerm.js");
-		Services.obs.notifyObservers(null, "startupcache-invalidate", null);
+		// Components.utils.unload("resource://qnote/modules/QNoteColumnHandler.js");
+		// Components.utils.unload("resource://qnote/modules/QNotePopup.js");
+		// Components.utils.unload("resource://qnote/modules/QNoteFilter.js");
+		// Components.utils.unload("resource://qnote/modules/QEventDispatcher.js");
+		// Components.utils.unload("resource://qnote/modules/QCache.js");
+		// Components.utils.unload("resource://qnote/modules/DOMLocalizator.js");
+		// Components.utils.unload("resource://qnote/modules/QNoteFile.js");
+		// Components.utils.unload("resource://qnote/modules/XNoteFile.js");
+		// Components.utils.unload("resource://qnote/modules/QCustomTerm.js");
+		// Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 	}
 
 	id2RealWindow(w){
@@ -328,10 +335,15 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					API.installKeyboardHandler(w);
 					if(options && options.storageFolder){
 						QDEB&&console.debug("Installing filter");
-						QNoteFilter.install({
+						API.QNoteFilter = new QNoteFilter({
 							notesRoot: options.storageFolder,
 							w: w
 						});
+
+						// QNoteFilter.install({
+						// 	notesRoot: options.storageFolder,
+						// 	w: w
+						// });
 					} else {
 						QDEB&&console.debug("options.storageFolder not set, skip install filter");
 					}
