@@ -83,6 +83,9 @@ async function setUpExtension(){
 async function initExtension(){
 	QDEB&&console.debug("initExtension()");
 	await browser.ResourceUrl.register("qnote");
+	// await browser.ResourceUrl.register("qnote", "modules/");
+	// await browser.ResourceUrl.register("qnote", "api/");
+	// await browser.ResourceUrl.register("qnote", "scripts/");
 
 	await setUpExtension();
 	TBInfo = await browser.runtime.getBrowserInfo();

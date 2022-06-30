@@ -1,8 +1,11 @@
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { QNotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/QNotePopup.js"));
-var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
-var { DOMLocalizator } = ChromeUtils.import(extension.rootURI.resolve("modules/DOMLocalizator.js"));
+// var { QNotePopup } = ChromeUtils.import(extension.rootURI.resolve("modules/QNotePopup.js"));
+// var { QEventDispatcher } = ChromeUtils.import(extension.rootURI.resolve("modules/QEventDispatcher.js"));
+// var { DOMLocalizator } = ChromeUtils.import(extension.rootURI.resolve("modules/DOMLocalizator.js"));
+var { QNotePopup } = ChromeUtils.import("resource://qnote/modules/QNotePopup.js");
+var { QEventDispatcher } = ChromeUtils.import(("resource://qnote/modules/QEventDispatcher.js"));
+var { DOMLocalizator } = ChromeUtils.import(("resource://qnote/modules/DOMLocalizator.js"));
 
 var PopupEventDispatcher = new QEventDispatcher(["oncreated", "onremoved", "onmove", "onresize"]);
 
