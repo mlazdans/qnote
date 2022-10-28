@@ -1,8 +1,5 @@
 var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
-// var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-// var { QNoteFile } = ChromeUtils.import(extension.rootURI.resolve("modules/QNoteFile.js"));
-// var { XNoteFile } = ChromeUtils.import(extension.rootURI.resolve("modules/XNoteFile.js"));
 var { QNoteFile } = ChromeUtils.import("resource://qnote/modules/QNoteFile.js");
 var { XNoteFile } = ChromeUtils.import("resource://qnote/modules/XNoteFile.js");
 

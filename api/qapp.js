@@ -1,7 +1,6 @@
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-// var { QNoteColumnHandler } = ChromeUtils.import(extension.rootURI.resolve("modules/QNoteColumnHandler.js"));
 var { QNoteColumnHandler } = ChromeUtils.import("resource://qnote/modules/QNoteColumnHandler.js");
 var { QNotePopup } = ChromeUtils.import("resource://qnote/modules/QNotePopup.js");
 var { QNoteFilter } = ChromeUtils.import("resource://qnote/modules/QNoteFilter.js");

@@ -2,8 +2,6 @@ var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var { QuickFilterManager, MessageTextFilter } = ChromeUtils.import("resource:///modules/QuickFilterManager.jsm");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
-// var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-// var { QCustomTerm } = ChromeUtils.import(extension.rootURI.resolve("modules/QCustomTerm.js"));
 var { QCustomTerm } = ChromeUtils.import("resource://qnote/modules/QCustomTerm.js");
 
 var EXPORTED_SYMBOLS = ["QNoteFilter"];
