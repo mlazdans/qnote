@@ -13,7 +13,7 @@
 This is source code repository for Thunderbird [QNote](https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/) add-on. To install extension just zip whole folder and rename file's extension to .xpi and add it to Thunderbird.
 
 <p><img src="https://img.shields.io/badge/QNote-v0.11.0-brightgreen">
-<img src="https://img.shields.io/badge/Thunderbird-v68.2.0%20--%20100.0-brightgreen"></p>
+<img src="https://img.shields.io/badge/Thunderbird-v68.2.0%20--%20102.0-brightgreen"></p>
 
 # Features
 
