@@ -40,14 +40,6 @@ var Menu = {
 			},
 		});
 
-		browser.menus.create(Menu.optionsMenu);
-
-		browser.menus.create({
-			id: "separator-1",
-			type: "separator",
-			contexts: ["message_list", "page", "frame"],
-		});
-
 		browser.menus.create({
 			id: "reset",
 			title: _("reset.note.window"),
@@ -69,6 +61,8 @@ var Menu = {
 				}
 			},
 		});
+
+		browser.menus.create(Menu.optionsMenu);
 	},
 	new: (id) => {
 		browser.menus.create({
