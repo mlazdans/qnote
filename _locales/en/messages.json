@@ -21,7 +21,7 @@
 		"message": "Delete note"
 	},
 	"reset.note.window": {
-		"message": "Reset note window"
+		"message": "Reset note position"
 	},
 	"create.new.note": {
 		"message": "Create new note"
@@ -253,5 +253,14 @@
 	},
 	"storage.clear.button.descr": {
 		"message": "Wipe preferences and notes saved in extension storage"
+	},
+	"create.or.update.selected.notes": {
+		"message": "Create or update selected notes"
+	},
+	"delete.selected.notes": {
+		"message": "Delete selected notes"
+	},
+	"reset.selected.notes.windows": {
+		"message": "Reset selected notes positions"
 	}
 }

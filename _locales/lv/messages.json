@@ -21,7 +21,7 @@
 		"message": "Dzēst zīmīti"
 	},
 	"reset.note.window": {
-		"message": "Atiestatīt logu"
+		"message": "Atiestatīt loga pozīcijas"
 	},
 	"create.new.note": {
 		"message": "Izveidot zīmīti"
@@ -196,5 +196,14 @@
 	},
 	"anchor.message": {
 		"message": "Vēstule"
+	},
+	"create.or.update.selected.notes": {
+		"message": "Izveidot vai labot izvēlētās zīmītes"
+	},
+	"delete.selected.notes": {
+		"message": "Dzēst izvēlētās zīmītes"
+	},
+	"reset.selected.notes.windows": {
+		"message": "Atiestatīt izvēlēto zīmīšu logu pozīcijas"
 	}
 }
