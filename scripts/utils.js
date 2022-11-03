@@ -508,3 +508,26 @@ async function exportQAppNotesToFolder(root, type, overwrite){
 		return loadAllExtNotes().then(notes => exportNotesToFolder(root, type, notes, overwrite));
 	}
 }
+
+async function createMultiNote(messageList){
+	await CurrentNote.silentlyPersistAndClose();
+	let note = createNote('multi');
+	CurrentNote.note = note;
+	CurrentNote.loadedNoteData = {};
+
+	let l = () => {
+		messageList.forEach(m => {
+			getMessageKeyId(m.id).then(keyId => {
+				note.keyId = keyId;
+				saveNoteForMessage(m.id, note2QAppNote(note));
+			});
+		});
+		CurrentNote.removeListener("afterclose", l);
+	};
+
+	CurrentNote.addListener("afterclose", l);
+
+	CurrentNote.pop().then(() => {
+		CurrentNote.focus();
+	});
+}
