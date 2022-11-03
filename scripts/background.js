@@ -223,12 +223,17 @@ async function initExtension(){
 		if(command === 'qnote') {
 			QDEB&&console.debug("commands.onCommand()", command);
 
-			let mList = await browser.mailTabs.getSelectedMessages(getTabId(CurrentTabId));
-			if(!CurrentNote.shown  && (mList.messages.length > 1)){
-				createMultiNote(mList.messages);
-			} else {
-				QNotePopToggle(CurrentTabId);
+			let tab = await browser.tabs.get(getTabId(CurrentTabId));
+
+			if(tab.mailTab){
+				let mList = await browser.mailTabs.getSelectedMessages(getTabId(CurrentTabId));
+				if(!CurrentNote.shown  && (mList.messages.length > 1)){
+					createMultiNote(mList.messages);
+					return;
+				}
 			}
+
+			QNotePopToggle(CurrentTabId);
 		}
 	});
 
