@@ -516,12 +516,14 @@ async function createMultiNote(messageList){
 	CurrentNote.loadedNoteData = {};
 
 	let l = () => {
-		messageList.forEach(m => {
-			getMessageKeyId(m.id).then(keyId => {
-				note.keyId = keyId;
-				saveNoteForMessage(m.id, note2QAppNote(note));
+		if(CurrentNote.needSaveOnClose && note.text){
+			messageList.forEach(m => {
+				getMessageKeyId(m.id).then(keyId => {
+					note.keyId = keyId;
+					saveNoteForMessage(m.id, note2QAppNote(note));
+				});
 			});
-		});
+		}
 		CurrentNote.removeListener("afterclose", l);
 	};
 
