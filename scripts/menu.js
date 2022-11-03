@@ -11,11 +11,11 @@ var Menu = {
 		id: "options",
 		title: _("options"),
 		contexts: ["message_list", "page", "frame"],
-		onclick(info) {
+		onclick() {
 			browser.runtime.openOptionsPage();
 		}
 	},
-	modify: (id) => {
+	modify: id => {
 		browser.menus.create({
 			id: "modify",
 			title: _("modify.note"),
@@ -29,7 +29,7 @@ var Menu = {
 			id: "delete",
 			title: _("delete.note"),
 			contexts: ["message_list", "page", "frame"],
-			async onclick(info) {
+			async onclick() {
 				if(CurrentNote.messageId === id){
 					await CurrentNote.silentlyDeleteAndClose();
 				} else {
@@ -44,7 +44,7 @@ var Menu = {
 			id: "reset",
 			title: _("reset.note.window"),
 			contexts: ["message_list", "page", "frame"],
-			onclick(info) {
+			onclick() {
 				if(CurrentNote.messageId === id){
 					CurrentNote.reset().then(() => {
 						CurrentNote.silentlyPersistAndClose().then(() => {
