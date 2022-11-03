@@ -219,11 +219,16 @@ async function initExtension(){
 	});
 
 	// Handle keyboard shortcuts
-	browser.commands.onCommand.addListener(command => {
+	browser.commands.onCommand.addListener(async command => {
 		if(command === 'qnote') {
 			QDEB&&console.debug("commands.onCommand()", command);
 
-			QNotePopToggle(CurrentTabId);
+			let mList = await browser.mailTabs.getSelectedMessages(getTabId(CurrentTabId));
+			if(!CurrentNote.shown  && (mList.messages.length > 1)){
+				createMultiNote(mList.messages);
+			} else {
+				QNotePopToggle(CurrentTabId);
+			}
 		}
 	});
 
