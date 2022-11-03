@@ -52,11 +52,11 @@ class NoteWindow extends QEventDispatcher {
 	}
 
 	async close(){
+		this.fireListeners("afterclose", this);
 		this.popupId = undefined;
 		this.messageId = undefined;
 		this.needSaveOnClose = true;
 		this.shown = false;
-		this.fireListeners("afterclose", this);
 	}
 
 	get modified() {
