@@ -111,3 +111,14 @@ async function tagMessage(id, tagName, toTag = true) {
 async function getDisplayedMessageForTab(tab) {
 	return browser.messageDisplay.getDisplayedMessage(getTabId(tab)).then(messagePartReturner);
 }
+
+async function ifNoteForMessageExists(id) {
+	return new Promise(resolve => {
+		loadNoteForMessage(id).then(note => {
+			if(note.exists){
+				resolve(note);
+			}
+		}).catch(() => {
+		});
+	});
+}

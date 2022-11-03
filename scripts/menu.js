@@ -69,10 +69,85 @@ var Menu = {
 			id: "create",
 			title: _("create.new.note"),
 			contexts: ["message_list", "page", "frame"],
-			async onclick(info) {
+			async onclick() {
 				QNotePopForMessage(id, POP_FOCUS);
 			},
 		});
-		// browser.menus.create(Menu.optionsMenu);
+	},
+	multi: () => {
+		browser.menus.create({
+			id: "create_multi",
+			title: _("create.or.update.selected.notes"),
+			contexts: ["message_list"],
+			async onclick(info) {
+				await CurrentNote.silentlyPersistAndClose();
+				let note = createNote('multi');
+				CurrentNote.note = note;
+				CurrentNote.loadedNoteData = {};
+
+				let l = () => {
+					info.selectedMessages.messages.forEach(m => {
+						getMessageKeyId(m.id).then(keyId => {
+							note.keyId = keyId;
+							saveNoteForMessage(m.id, note2QAppNote(note));
+						});
+					});
+					CurrentNote.removeListener("afterclose", l);
+				};
+
+				CurrentNote.addListener("afterclose", l);
+
+				CurrentNote.pop().then(() => {
+					CurrentNote.focus();
+				});
+			},
+		});
+
+		browser.menus.create({
+			id: "delete_multi",
+			title: _("delete.selected.notes"),
+			contexts: ["message_list"],
+			async onclick(info) {
+				if(await confirmDelete()) {
+					info.selectedMessages.messages.forEach(m => {
+						ifNoteForMessageExists(m.id).then(() => {
+							if(CurrentNote.messageId === m.id){
+								CurrentNote.silentlyDeleteAndClose();
+							} else {
+								deleteNoteForMessage(m.id).then(updateNoteView).catch(e => browser.legacy.alert(_("error.deleting.note"), e.message));
+							}
+						});
+					});
+				}
+			},
+		});
+
+		browser.menus.create({
+			id: "reset_multi",
+			title: _("reset.selected.notes.windows"),
+			contexts: ["message_list"],
+			async onclick(info) {
+				info.selectedMessages.messages.forEach(m => {
+					ifNoteForMessageExists(m.id).then(() => {
+						if(CurrentNote.messageId === m.id){
+							CurrentNote.reset().then(() => {
+								CurrentNote.silentlyPersistAndClose().then(() => {
+									QNotePopForMessage(m.id, CurrentNote.flags)
+								});
+							});
+						} else {
+							saveNoteForMessage(m.id, {
+								left: undefined,
+								top: undefined,
+								width: Prefs.width,
+								height: Prefs.height
+							}).catch(e => browser.legacy.alert(_("error.saving.note"), e.message));
+						}
+					});
+				});
+			},
+		});
+
+		browser.menus.create(Menu.optionsMenu);
 	}
 }

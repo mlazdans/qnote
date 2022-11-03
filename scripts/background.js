@@ -232,23 +232,28 @@ async function initExtension(){
 	browser.menus.onShown.addListener(async info => {
 		await browser.menus.removeAll();
 
-		let id;
-
-		// Click other than from messageList
-		if(info.selectedMessages === undefined){
-			let msg = await getDisplayedMessageForTab(CurrentTabId);
-			id = msg.id;
-		} else {
-			if(info.selectedMessages.messages.length != 1){
-				return;
-			}
-			id = Menu.getId(info);
-		}
-
-		loadNoteForMessage(id).then(note => {
-			Menu[note.exists ? "modify" : "new"](id);
+		if(info.selectedMessages.messages.length > 1){
+			Menu.multi();
 			browser.menus.refresh();
-		}).catch(silentCatcher());
+		} else {
+			let id;
+
+			// Click other than from messageList
+			if(info.selectedMessages === undefined){
+				let msg = await getDisplayedMessageForTab(CurrentTabId);
+				id = msg.id;
+			} else {
+				if(info.selectedMessages.messages.length != 1){
+					return;
+				}
+				id = Menu.getId(info);
+			}
+
+			loadNoteForMessage(id).then(note => {
+				Menu[note.exists ? "modify" : "new"](id);
+				browser.menus.refresh();
+			}).catch(silentCatcher());
+		}
 	});
 
 	// TODO: attach at least note icon to multi message display (since TB78.4)
