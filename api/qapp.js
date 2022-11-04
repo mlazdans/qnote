@@ -249,17 +249,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		if(this.QNoteAction){
 			this.QNoteAction.uninstall();
 		}
-
-		// Components.utils.unload("resource://qnote/modules/QNoteColumnHandler.js");
-		// Components.utils.unload("resource://qnote/modules/QNotePopup.js");
-		// Components.utils.unload("resource://qnote/modules/QNoteFilter.js");
-		// Components.utils.unload("resource://qnote/modules/QEventDispatcher.js");
-		// Components.utils.unload("resource://qnote/modules/QCache.js");
-		// Components.utils.unload("resource://qnote/modules/DOMLocalizator.js");
-		// Components.utils.unload("resource://qnote/modules/QNoteFile.js");
-		// Components.utils.unload("resource://qnote/modules/XNoteFile.js");
-		// Components.utils.unload("resource://qnote/modules/QCustomTerm.js");
-		// Services.obs.notifyObservers(null, "startupcache-invalidate", null);
 	}
 
 	id2RealWindow(w){
@@ -548,15 +537,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						w.gFolderDisplay.tree.focus();
 					}
 				},
-				// async installQuickFilter(){
-				// 	console.warn("search has been temporarily disabled until we found a better solution");
-				// 	// TODO: need to re-think better solution
-				// 	// wex.loadAllQAppNotes().then(() => {
-				// 	// 	NoteFilter.install({
-				// 	// 		noteGrabber: noteGrabber
-				// 	// 	});
-				// 	// });
-				// },
 				async updateView(windowId, keyId){
 					let w = null;
 					if(windowId) {
