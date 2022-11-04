@@ -98,7 +98,7 @@ async function initExtension(){
 	// });
 
 	await browser.qapp.init({
-		storageFolder: Prefs.storageFolder
+		storageFolder: Prefs.storageOption == 'folder' ? Prefs.storageFolder : null
 	});
 
 	// KeyDown from qapp
