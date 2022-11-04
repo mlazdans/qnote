@@ -24,12 +24,6 @@ Current problems:
 }
 
 class QNoteFilter {
-	CustomTermId = 'qnote@dqdp.net#qnoteText';
-	qfQnoteDomId = 'qfb-qs-qnote';
-	listeners = {
-		"uninstall": new Set()
-	}
-
 	// TODO: probably should move to WebExtensions
 	getPrefsO(){
 		return this.Services.prefs.QueryInterface(Ci.nsIPrefBranch).getBranch("extensions.qnote.");
@@ -117,6 +111,11 @@ class QNoteFilter {
 	}
 
 	constructor(options) {
+		this.CustomTermId = 'qnote@dqdp.net#qnoteText';
+		this.qfQnoteDomId = 'qfb-qs-qnote';
+		this.listeners = {
+			"uninstall": new Set()
+		};
 		this.Services = Services;
 		this.QuickFilterManager = QuickFilterManager;
 		let QNoteFilter = this;
