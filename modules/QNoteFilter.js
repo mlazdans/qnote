@@ -14,15 +14,6 @@ Current problems:
 
 */
 
-// var QNoteFilter;
-
-{
-
-// let CustomTermId = 'qnote@dqdp.net#qnoteText';
-// let qfQnoteDomId = 'qfb-qs-qnote';
-
-}
-
 class QNoteFilter {
 	// TODO: probably should move to WebExtensions
 	getPrefsO(){
@@ -107,6 +98,40 @@ class QNoteFilter {
 			qfTextBox.removeEventListener("command", commandHandler);
 			qfQnoteEl.removeEventListener("command", commandHandler);
 			qfQnoteEl.parentNode.removeChild(qfQnoteEl);
+		});
+	}
+
+	searchDialogHandler(aSubject, document){
+		function callbackCustomSearchCondition(mutationList) {
+			mutationList.forEach(mutation => {
+				if(mutation.type == "childList"){
+					mutation.addedNodes.forEach(el => {
+						let boxes;
+						if(el.querySelectorAll && ((boxes = el.querySelectorAll(".search-value-custom")).length > 0)){
+							let textbox = document.createElementNS("http://www.w3.org/1999/xhtml", "input");
+							textbox.classList.add("input-inline");
+							textbox.classList.add("search-value-textbox");
+							textbox.addEventListener("input", function(){
+								textbox.parentNode.setAttribute("value", this.value);
+							});
+
+							boxes[0].appendChild(textbox);
+						}
+					});
+				}
+			});
+		}
+
+		const observer = new aSubject.MutationObserver(callbackCustomSearchCondition);
+
+		observer.observe(document.querySelector("#searchTermList"), {
+			childList: true,
+			attributes: true,
+			subtree: true
+		});
+
+		this.addListener("uninstall", () => {
+			observer.disconnect();
 		});
 	}
 
