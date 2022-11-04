@@ -114,6 +114,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 						// Attach to FilterEditor
 						if(document.URL.includes('chrome://messenger/content/FilterEditor')){
+							API.QNoteFilter.searchDialogHandler(aSubject, document);
 							API.QNoteAction.filterEditorHandler(aSubject, document);
 						}
 					});
