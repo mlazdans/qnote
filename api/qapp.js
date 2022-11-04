@@ -4,6 +4,7 @@ var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var { QNoteColumnHandler } = ChromeUtils.import("resource://qnote/modules/QNoteColumnHandler.js");
 var { QNotePopup } = ChromeUtils.import("resource://qnote/modules/QNotePopup.js");
 var { QNoteFilter } = ChromeUtils.import("resource://qnote/modules/QNoteFilter.js");
+var { QNoteAction } = ChromeUtils.import("resource://qnote/modules/QNoteAction.js");
 var { QEventDispatcher } = ChromeUtils.import("resource://qnote/modules/QEventDispatcher.js");
 var { QCache } = ChromeUtils.import("resource://qnote/modules/QCache.js");
 
@@ -245,6 +246,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			this.QNoteFilter.uninstall();
 		}
 
+		if(this.QNoteAction){
+			this.QNoteAction.uninstall();
+		}
+
 		// Components.utils.unload("resource://qnote/modules/QNoteColumnHandler.js");
 		// Components.utils.unload("resource://qnote/modules/QNotePopup.js");
 		// Components.utils.unload("resource://qnote/modules/QNoteFilter.js");
@@ -389,17 +394,18 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					API.installKeyboardHandler(w);
 					if(options && options.storageFolder){
 						QDEB&&console.debug("Installing filter");
+						// TODO: probably window not needed. Should scan suitable windows instead
 						API.QNoteFilter = new QNoteFilter({
 							notesRoot: options.storageFolder,
 							w: w
 						});
 
-						// QNoteFilter.install({
-						// 	notesRoot: options.storageFolder,
-						// 	w: w
-						// });
+						API.QNoteAction = new QNoteAction({
+							API: API,
+							notesRoot: options.storageFolder
+						});
 					} else {
-						QDEB&&console.debug("options.storageFolder not set, skip install filter");
+						QDEB&&console.debug("options.storageFolder not set, skip install {filter, action}");
 					}
 
 					// QDEB&&console.debug("qapp.enablePrintAttacher()", prefs);
