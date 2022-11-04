@@ -264,6 +264,61 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		}
 	}
 
+	updateView(w, keyId){
+		let fName = `qapp.updateView(w, ${keyId})`;
+
+		if(!w || !w.document){
+			w = Services.wm.getMostRecentWindow("mail:3pane")
+		}
+
+		if(!w || !w.document){
+			QDEB&&console.debug(`${fName} - no window`);
+			return;
+		}
+
+		let mainPopupSet = w.document.getElementById('mainPopupSet');
+		if(!mainPopupSet){
+			QDEB&&console.debug(`${fName} - no mainPopupSet`);
+			return;
+		}
+
+		let aFolderDisplay = w.gFolderDisplay;
+		if(!(aFolderDisplay && aFolderDisplay.view && aFolderDisplay.view.dbView)){
+			QDEB&&console.debug(`${fName} - no dbView`);
+			return;
+		}
+
+		let view = aFolderDisplay.view.dbView;
+		let row;
+
+		if(keyId && view.db){
+			let msgHdr = view.db.getMsgHdrForMessageID(keyId);
+			if(msgHdr){
+				row = view.findIndexOfMsgHdr(msgHdr, false);
+			}
+		} else {
+			row = view.currentlyDisplayedMessage;
+		}
+
+		//let rangeCount = treeSelection.getRangeCount();
+		// nsIMsgDBView.idl
+		// NoteChange(nsMsgViewIndex, PRInt32, nsMsgViewNotificationCodeValue)
+		// const nsMsgViewNotificationCodeValue changed = 2;
+		/**
+		 * Notify tree that rows have changed.
+		 *
+		 * @param aFirstLineChanged   first view index for changed rows.
+		 * @param aNumRows            number of rows changed; < 0 means removed.
+		 * @param aChangeType         changeType.
+		 */
+		// void NoteChange(in nsMsgViewIndex aFirstLineChanged, in long aNumRows,
+		// 	in nsMsgViewNotificationCodeValue aChangeType);
+
+		// MAYBE: probably a good idea to change all rows in a view or at least add func parameter
+		// https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsITreeBoxObject#invalidateCell
+		view.NoteChange(row, 1, 2);
+	}
+
 	// Not used currently
 	// realWindowWrap(realWindow){
 	// 	try {
@@ -497,55 +552,12 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				// 	// });
 				// },
 				async updateView(windowId, keyId){
-					let fName = `qapp.updateView(${windowId}, ${keyId})`;
-
-					let w = API.id2RealWindow(windowId);
-					if(!w || !w.document){
-						QDEB&&console.debug(`${fName} - no window`);
-						return;
+					let w = null;
+					if(windowId) {
+						w = API.id2RealWindow(windowId);
 					}
 
-					let mainPopupSet = w.document.getElementById('mainPopupSet');
-					if(!mainPopupSet){
-						QDEB&&console.debug(`${fName} - no mainPopupSet`);
-						return;
-					}
-
-					let aFolderDisplay = w.gFolderDisplay;
-					if(!(aFolderDisplay && aFolderDisplay.view && aFolderDisplay.view.dbView)){
-						QDEB&&console.debug(`${fName} - no dbView`);
-						return;
-					}
-
-					let view = aFolderDisplay.view.dbView;
-					let row;
-
-					if(keyId && view.db){
-						let msgHdr = view.db.getMsgHdrForMessageID(keyId);
-						if(msgHdr){
-							row = view.findIndexOfMsgHdr(msgHdr, false);
-						}
-					} else {
-						row = view.currentlyDisplayedMessage;
-					}
-
-					//let rangeCount = treeSelection.getRangeCount();
-					// nsIMsgDBView.idl
-					// NoteChange(nsMsgViewIndex, PRInt32, nsMsgViewNotificationCodeValue)
-					// const nsMsgViewNotificationCodeValue changed = 2;
-					/**
-					 * Notify tree that rows have changed.
-					 *
-					 * @param aFirstLineChanged   first view index for changed rows.
-					 * @param aNumRows            number of rows changed; < 0 means removed.
-					 * @param aChangeType         changeType.
-					 */
-					// void NoteChange(in nsMsgViewIndex aFirstLineChanged, in long aNumRows,
-					// 	in nsMsgViewNotificationCodeValue aChangeType);
-
-					// MAYBE: probably a good idea to change all rows in a view or at least add func parameter
-					// https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsITreeBoxObject#invalidateCell
-					view.NoteChange(row, 1, 2);
+					API.updateView(w, keyId);
 				},
 				async setMessageAttacherPrefs(prefs){
 					API.messageAttacherPrefs = prefs;
