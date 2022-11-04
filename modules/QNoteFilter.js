@@ -119,28 +119,6 @@ class QNoteFilter {
 		this.Services = Services;
 		this.QuickFilterManager = QuickFilterManager;
 		let QNoteFilter = this;
-		this.WindowObserver = {
-			observe: function(aSubject, aTopic) {
-				if(aTopic === 'domwindowopened'){
-					aSubject.addEventListener("DOMContentLoaded", e => {
-						let document = e.target;
-
-						if(!document.URL.includes('chrome://messenger/content/messenger')){
-							return;
-						}
-
-						// let filterer = QNoteFilter.getQF(aSubject.gFolderDisplay);
-						// console.log("Attach to win", filterer);
-						let tabmail = document.getElementById('tabmail');
-						if(tabmail){
-							QNoteFilter.attachToWindow(aSubject);
-						}
-					});
-				}
-			}
-		}
-
-		Services.ww.registerNotification(this.WindowObserver);
 
 		this.options = options;
 
@@ -216,6 +194,5 @@ class QNoteFilter {
 			listener();
 		}
 		this.QuickFilterManager.killFilter("qnote");
-		this.Services.ww.unregisterNotification(this.WindowObserver);
 	}
 }

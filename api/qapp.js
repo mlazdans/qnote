@@ -94,13 +94,29 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}, {
 						once: true
 					});
-					// aSubject.addEventListener("DOMContentLoaded", e => {
-					// 	API.EventDispatcher.fireListeners("DOMContentLoaded", aSubject, aTopic, aData, e);
-					// 	if(aSubject.document.readyState === "complete"){
-					// 		API.EventDispatcher.fireListeners("domcomplete", aSubject, aTopic, aData, e);
-					// 	}
-					// }, {
-					// });
+				}
+
+				if(aTopic === 'domwindowopened'){
+					aSubject.addEventListener("DOMContentLoaded", e => {
+						let document = e.target;
+
+						// Attach to QuickFilter
+						if(document.URL.includes('chrome://messenger/content/messenger')){
+							if(document.getElementById('tabmail')){
+								API.QNoteFilter.attachToWindow(aSubject, document);
+							}
+						}
+
+						// Attach to SearchDialog
+						if(document.URL.includes('chrome://messenger/content/SearchDialog')){
+							API.QNoteFilter.searchDialogHandler(aSubject, document);
+						}
+
+						// Attach to FilterEditor
+						if(document.URL.includes('chrome://messenger/content/FilterEditor')){
+							API.QNoteAction.filterEditorHandler(aSubject, document);
+						}
+					});
 				}
 			}
 		};
