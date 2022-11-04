@@ -37,22 +37,36 @@ class QCustomTerm {
 		return this.ops;
 	}
 	match(msgHdr, searchValue, searchOp) {
-		var note;
+		// console.log("match", msgHdr, searchValue, searchOp);
+		let note;
 		try {
 			note = this.QN.load(this.notesRoot, msgHdr.messageId);
 			if(!note){
 				note = this.XN.load(this.notesRoot, msgHdr.messageId);
 			}
-			// console.log("Note", note, this.notesRoot);
-		} catch(e) {
-			// console.log("Error loading", e, msgHdr.messageId, this);
-			// throw new ExtensionError(e.message);
+		} catch(e) { }
+
+		if(!note){
+			return false;
 		}
 
-		// if(note){
-		// 	console.log("matched", note, searchValue, note.text.toLowerCase().search(searchValue)>=0);
-		// }
+		let noteText = note.text.toLowerCase();
+		let keyw = searchValue.toLowerCase();
 
-		return note && (note.text.toLowerCase().search(searchValue)>=0);
+		if(searchOp == Ci.nsMsgSearchOp.Contains){
+			return noteText.search(keyw) >= 0;
+		}
+
+		if(searchOp == Ci.nsMsgSearchOp.DoesntContain){
+			return noteText.search(keyw) == -1;
+		}
+
+		if(searchOp == Ci.nsMsgSearchOp.Is){
+			return noteText == keyw;
+		}
+
+		if(searchOp == Ci.nsMsgSearchOp.Isnt){
+			return noteText != keyw;
+		}
 	}
 };
