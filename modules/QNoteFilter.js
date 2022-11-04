@@ -111,6 +111,7 @@ class QNoteFilter {
 							let textbox = document.createElementNS("http://www.w3.org/1999/xhtml", "input");
 							textbox.classList.add("input-inline");
 							textbox.classList.add("search-value-textbox");
+							textbox.setAttribute("value", boxes[0].getAttribute("value"));
 							textbox.addEventListener("input", function(){
 								textbox.parentNode.setAttribute("value", this.value);
 							});
