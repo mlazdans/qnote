@@ -6,7 +6,6 @@ var EXPORTED_SYMBOLS = ["QNoteAction"];
 
 class QNoteAction {
 	filterEditorHandler(aSubject, document){
-		console.log("filterEditorHandler", aSubject);
 		(function(){
 			let wrapper = aSubject.customElements.get("ruleactiontarget-wrapper");
 			let _getChildNode;
