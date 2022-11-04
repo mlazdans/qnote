@@ -242,7 +242,7 @@ async function initExtension(){
 	browser.menus.onShown.addListener(async info => {
 		await browser.menus.removeAll();
 
-		if(info.selectedMessages.messages.length > 1){
+		if(info && info.selectedMessages && (info.selectedMessages.messages.length > 1)){
 			Menu.multi();
 			browser.menus.refresh();
 		} else {
