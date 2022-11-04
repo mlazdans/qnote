@@ -102,18 +102,18 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 						// Attach to QuickFilter
 						if(document.URL.includes('chrome://messenger/content/messenger')){
-							if(document.getElementById('tabmail')){
+							if(API.QNoteFilter && document.getElementById('tabmail')){
 								API.QNoteFilter.attachToWindow(aSubject, document);
 							}
 						}
 
 						// Attach to SearchDialog
-						if(document.URL.includes('chrome://messenger/content/SearchDialog')){
+						if(API.QNoteFilter && document.URL.includes('chrome://messenger/content/SearchDialog')){
 							API.QNoteFilter.searchDialogHandler(aSubject, document);
 						}
 
 						// Attach to FilterEditor
-						if(document.URL.includes('chrome://messenger/content/FilterEditor')){
+						if(API.QNoteFilter && API.QNoteAction && document.URL.includes('chrome://messenger/content/FilterEditor')){
 							API.QNoteFilter.searchDialogHandler(aSubject, document);
 							API.QNoteAction.filterEditorHandler(aSubject, document);
 						}
