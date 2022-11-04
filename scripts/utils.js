@@ -189,6 +189,10 @@ async function getXNoteStoragePath(){
 	return await browser.xnote.getStoragePath();
 }
 
+async function createQNoteStoragePath(){
+	return browser.qapp.createStoragePath();
+}
+
 async function loadPrefsWithDefaults() {
 	let p = await getPrefs();
 	let defaultPrefs = getDefaultPrefs();
@@ -218,7 +222,6 @@ async function loadPrefsWithDefaults() {
 	}
 
 	if(isEmptyPrefs){
-		// By default we set internal storage
 		// If XNote++ storage_path is set and readable, then use it
 		// else check if XNote folder exists inside profile directory
 		let path = await getXNoteStoragePath();
@@ -227,8 +230,14 @@ async function loadPrefsWithDefaults() {
 			p.storageOption = 'folder';
 			p.storageFolder = path;
 		} else {
-			QDEB&&console.debug("Storage path not writable:", path);
-			p.storageOption = 'ext';
+			path = await createQNoteStoragePath();
+			if(await isFolderWritable(path)){
+				p.storageOption = 'folder';
+				p.storageFolder = path;
+			} else {
+				console.log("Could not initialize QNote storage path");
+				p.storageOption = 'ext';
+			}
 		}
 	}
 

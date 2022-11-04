@@ -678,6 +678,21 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						.get('ProfD', Ci.nsIFile)
 						.path
 					;
+				},
+				async createStoragePath() {
+					let path = Cc['@mozilla.org/file/directory_service;1']
+						.getService(Ci.nsIProperties)
+						.get('ProfD', Ci.nsIFile)
+					;
+					path.appendRelativePath('QNote');
+					if(!path.exists()){
+						try {
+							path.create(Ci.nsIFile.DIRECTORY_TYPE, 0o755);
+						} catch (e) {
+							console.error(e);
+						}
+					}
+					return path.path;
 				}
 			}
 		}

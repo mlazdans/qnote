@@ -71,6 +71,12 @@
 		"async": true,
 		"parameters": []
 	},{
+		"name": "createStoragePath",
+		"type": "function",
+		"description": "Create storage folder under profile",
+		"async": true,
+		"parameters": []
+	},{
 		"name": "updateView",
 		"type": "function",
 		"description": "",
