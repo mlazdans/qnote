@@ -586,10 +586,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 
 					let messagepane = w.document.getElementById('messagepane');
-					if(!messagepane){
+					if(!messagepane || !messagepane.contentDocument){
 						QDEB&&console.debug(`${fName} - no messagepane`);
 						return;
 					}
+
 					let document = messagepane.contentDocument;
 
 					let body = document.getElementsByTagName('body');
