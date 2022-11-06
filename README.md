@@ -12,15 +12,17 @@
 
 This is source code repository for Thunderbird [QNote](https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/) add-on. To install extension just zip whole folder and rename file's extension to .xpi and add it to Thunderbird.
 
-<p><img src="https://img.shields.io/badge/QNote-v0.11.3-brightgreen">
-<img src="https://img.shields.io/badge/Thunderbird-v68.2.0%20--%20107.0-brightgreen"></p>
+<p><img src="https://img.shields.io/badge/QNote-v0.12.0-brightgreen">
+<img src="https://img.shields.io/badge/Thunderbird-v68.2.0%20--%20108.0-brightgreen"></p>
 
 # Features
 
 - Add notes to e-mail messages
 - Save note position, size, multiple default note positions
-- Searchable notes via Thunderbird's QuickFilter
+- Searchable notes via Thunderbird's QuickFilter or Edit / Find / Search Messages
+- Various filter actions via Tools / Message Filters
 - Mail pane column with note icon and / or note preview
+- Multi message  actions: create, update, delete, reset
 - Attach note to message body
 - Attach note when printing
 - Light / dark theme
