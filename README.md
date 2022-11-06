@@ -63,6 +63,8 @@ _Floating panel_ has nicer looks but does not display well on MacOS. Fall back t
 
 # Screenshots
 
+<p><a href="thunderbird.net/screenshots/_combined.png">All screenshots (PNG)</a></p>
+
 <p align="center" width="100%">
 <img width="30%" src="thunderbird.net/screenshots/note.jpg" alt="Note popup">
 <img width="30%" src="thunderbird.net/screenshots/utf8chars.jpg" alt="UTF-8 chars">
