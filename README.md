@@ -74,9 +74,13 @@ _Floating panel_ has nicer looks but does not display well on MacOS. Fall back t
 <img width="30%" src="thunderbird.net/screenshots/menu.jpg" alt="Right click menu">
 </p>
 <p align="center" width="100%">
-<img width="30%" src="thunderbird.net/screenshots/filter.jpg" alt="Searchable notes">
+<img width="30%" src="thunderbird.net/screenshots/quick_filter.jpg" alt="Searchable notes">
 <img width="30%" src="thunderbird.net/screenshots/options1.jpg" alt="Options page 1">
 <img width="30%" src="thunderbird.net/screenshots/options2.jpg" alt="Options page 2">
+</p>
+<p align="center" width="100%">
+<img width="30%" src="thunderbird.net/screenshots/filters.jpg" alt="Message filters">
+<img width="30%" src="thunderbird.net/screenshots/search.jpg" alt="Message search">
 </p>
 
 # Known issues
