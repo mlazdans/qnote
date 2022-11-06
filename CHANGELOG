@@ -1,7 +1,13 @@
 CHANGELOG QNote
 ===========================
 
-RELEASE 0.11.0
+RELEASE 0.12.0
+-----------------
+- Add multi message selection context menu (create, update, delete, reset)
+- Add filters (Edit / Find / Search Messages )
+- Add filter actions (Tools / Message Filters)
+
+RELEASE 0.11.0 - May 12, 2022
 -----------------
 - Add context menu to message
 - Add QuickFilter support for filtering notes (only for folder storage)
