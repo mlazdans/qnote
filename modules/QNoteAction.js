@@ -54,17 +54,16 @@ class QNoteAction {
 		this.Services = Services;
 		this.options = options;
 
-		let CustomActionOptions = {
+		let caAdd = new QCustomActionAdd({
 			name: 'Add QNote',
-			needsBody: true,
 			notesRoot: options.notesRoot,
 			API: options.API
-		};
+		})
 
 		try {
-			MailServices.filters.getCustomAction('qnote@dqdp.net#qnoteAdd');
+			MailServices.filters.getCustomAction(caAdd.id);
 		} catch (e) {
-			MailServices.filters.addCustomAction(new QCustomActionAdd(CustomActionOptions));
+			MailServices.filters.addCustomAction(caAdd);
 		}
 	}
 
