@@ -47,18 +47,18 @@ class QCustomTerm {
 		} catch(e) { }
 
 		if(!note){
-			return false;
+			return searchOp == Ci.nsMsgSearchOp.DoesntContain;
 		}
 
 		let noteText = note.text.toLowerCase();
 		let keyw = searchValue.toLowerCase();
 
 		if(searchOp == Ci.nsMsgSearchOp.Contains){
-			return noteText.search(keyw) >= 0;
+			return !keyw || (noteText.search(keyw) >= 0);
 		}
 
 		if(searchOp == Ci.nsMsgSearchOp.DoesntContain){
-			return noteText.search(keyw) == -1;
+			return !keyw || (noteText.search(keyw) == -1);
 		}
 
 		if(searchOp == Ci.nsMsgSearchOp.Is){
