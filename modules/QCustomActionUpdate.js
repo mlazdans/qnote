@@ -1,13 +1,13 @@
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { QCustomActionAbstract } = ChromeUtils.import("resource://qnote/modules/QCustomActionAbstract.js");
 
-var EXPORTED_SYMBOLS = ["QCustomActionAdd"];
+var EXPORTED_SYMBOLS = ["QCustomActionUpdate"];
 
-class QCustomActionAdd extends QCustomActionAbstract {
+class QCustomActionUpdate extends QCustomActionAbstract {
 	constructor(options) {
 		super(options);
-		this.id = 'qnote@dqdp.net#qnote-action-add';
-		this.xulName = "qnote-ruleactiontarget-add";
+		this.id = 'qnote@dqdp.net#qnote-action-update';
+		this.xulName = "qnote-ruleactiontarget-update";
 	}
 
 	_apply(keyIds, actionValue){
@@ -24,11 +24,9 @@ class QCustomActionAdd extends QCustomActionAbstract {
 				ts: ts
 			};
 
-			if(!this.QN.getExistingFile(this.notesRoot, keyId)){
-				this.QN.save(this.notesRoot, keyId, note);
-				this.API.noteGrabber.delete(keyId);
-				this.API.updateView(w, keyId);
-			}
+			this.QN.save(this.notesRoot, keyId, note);
+			this.API.noteGrabber.delete(keyId);
+			this.API.updateView(w, keyId);
 		});
 	}
 };
