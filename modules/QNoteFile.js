@@ -102,7 +102,7 @@ class QNoteFile {
 		var notes = [];
 
 		while (eFiles.hasMoreElements()) {
-			var o = eFiles.getNext().QueryInterface(Components.interfaces.nsIFile);
+			var o = eFiles.getNext().QueryInterface(Ci.nsIFile);
 
 			var fileName = this.decodeFileName(o.leafName);
 			if(fileName.substring(fileName.length - 6) === '.qnote'){

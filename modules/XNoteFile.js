@@ -136,7 +136,7 @@ class XNoteFile {
 		}
 	}
 	getPrefs(){
-		var _xnotePrefs = Services.prefs.QueryInterface(Components.interfaces.nsIPrefBranch).getBranch("extensions.xnote.");
+		var _xnotePrefs = Services.prefs.QueryInterface(Ci.nsIPrefBranch).getBranch("extensions.xnote.");
 		var defaultPrefs = this.getDefaultPrefs();
 		var p = {};
 
@@ -187,7 +187,7 @@ class XNoteFile {
 		// within the same group is possible on Linux.
 		tempFile.createUnique(tempFile.NORMAL_FILE_TYPE, parseInt("0660",8));
 
-		let fileOutStream = Components.classes['@mozilla.org/network/file-output-stream;1'].createInstance(Components.interfaces.nsIFileOutputStream);
+		let fileOutStream = Components.classes['@mozilla.org/network/file-output-stream;1'].createInstance(Ci.nsIFileOutputStream);
 
 		fileOutStream.init(tempFile, 2, 0x200, false); // Opens for writing only
 		fileOutStream.write(String(note.left), 4);
@@ -219,8 +219,8 @@ class XNoteFile {
 
 		var note = {};
 
-		var fileInStream = Components.classes['@mozilla.org/network/file-input-stream;1'].createInstance(Components.interfaces.nsIFileInputStream);
-		var fileScriptableIO = Components.classes['@mozilla.org/scriptableinputstream;1'].createInstance(Components.interfaces.nsIScriptableInputStream);
+		var fileInStream = Components.classes['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream);
+		var fileScriptableIO = Components.classes['@mozilla.org/scriptableinputstream;1'].createInstance(Ci.nsIScriptableInputStream);
 		fileInStream.init(file, 0x01, parseInt("0444", 8), null);
 		fileScriptableIO.init(fileInStream);
 
@@ -251,7 +251,7 @@ class XNoteFile {
 		var notes = [];
 
 		while (eFiles.hasMoreElements()) {
-			var o = eFiles.getNext().QueryInterface(Components.interfaces.nsIFile);
+			var o = eFiles.getNext().QueryInterface(Ci.nsIFile);
 
 			var fileName = this.decodeFileName(o.leafName);
 			if(fileName.substring(fileName.length - 6) === '.xnote'){

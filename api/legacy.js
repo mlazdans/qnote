@@ -38,14 +38,14 @@ var legacy = class extends ExtensionCommon.ExtensionAPI {
 
 				},
 				async folderPicker(options){
-					let fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(Components.interfaces.nsIFilePicker);
+					let fp = Components.classes["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
 
 					fp.init(Services.wm.getMostRecentWindow(null), "Select storage folder", fp.modeGetFolder);
 					if(options && options.displayDirectory){
 						fp.displayDirectory = new FileUtils.File(options.displayDirectory);
 					}
 
-					return new Promise(function(resolve, reject) {
+					return new Promise(resolve => {
 						fp.open(rv => {
 							if(rv === fp.returnOK){
 								resolve(fp.file.path);

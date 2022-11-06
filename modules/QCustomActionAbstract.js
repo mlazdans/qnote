@@ -49,7 +49,7 @@ class QCustomActionAbstract {
 		let en = msgHdrs.enumerate();
 		let keyIds = [];
 		while (en.hasMoreElements()) {
-			keyIds.push((en.getNext().QueryInterface(Components.interfaces.nsIMsgDBHdr)).messageId);
+			keyIds.push((en.getNext().QueryInterface(Ci.nsIMsgDBHdr)).messageId);
 		};
 		this._apply(keyIds, actionValue);
 	}
