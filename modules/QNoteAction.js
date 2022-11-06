@@ -2,6 +2,7 @@ var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
 var { QCustomActionAdd } = ChromeUtils.import("resource://qnote/modules/QCustomActionAdd.js");
 var { QCustomActionUpdate } = ChromeUtils.import("resource://qnote/modules/QCustomActionUpdate.js");
+var { QCustomActionDelete } = ChromeUtils.import("resource://qnote/modules/QCustomActionDelete.js");
 
 var EXPORTED_SYMBOLS = ["QNoteAction"];
 
@@ -11,6 +12,7 @@ class QNoteAction {
 		this.Services = Services;
 		this.options = options;
 
+		// Add
 		let caAdd = new QCustomActionAdd({
 			name: 'Add QNote',
 			notesRoot: options.notesRoot,
@@ -24,6 +26,7 @@ class QNoteAction {
 		}
 		this.ruleMap[caAdd.id] = caAdd.xulName;
 
+		// Update
 		let caUpdate = new QCustomActionUpdate({
 			name: 'Update QNote',
 			notesRoot: options.notesRoot,
@@ -36,6 +39,20 @@ class QNoteAction {
 			MailServices.filters.addCustomAction(caUpdate);
 		}
 		this.ruleMap[caUpdate.id] = caUpdate.xulName;
+
+		// Delete
+		let caDelete = new QCustomActionDelete({
+			name: 'Delete QNote',
+			notesRoot: options.notesRoot,
+			API: options.API
+		})
+
+		try {
+			MailServices.filters.getCustomAction(caDelete.id);
+		} catch (e) {
+			MailServices.filters.addCustomAction(caDelete);
+		}
+		// this.ruleMap[caDelete.id] = caDelete.xulName;
 	}
 
 	filterEditorHandler(aSubject, document){
