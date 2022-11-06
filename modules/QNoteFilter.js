@@ -102,33 +102,129 @@ class QNoteFilter {
 	}
 
 	searchDialogHandler(aSubject, document){
-		function callbackCustomSearchCondition(mutationList) {
+		// console.log("SearchDialog", aSubject);
+		// aSubject.gSearchTermList.*
+		// updateSearchAttributes
+
+		const applyInputs = box => {
+			if(!box.attributes || !box.attributes.searchAttribute || (box.attributes.searchAttribute.value !== "qnote@dqdp.net#qnoteText")){
+				return;
+			}
+
+			// if(box.tagName != "hbox"){
+			// 	console.log("got replaced");
+			// 	if(box.value){
+			// 		box.setAttribute("value", box.value);
+			// 		box.childList[0].setAttribute("value", box.value);
+			// 	}
+			// 	return;
+			// }
+
+			if(box.children.length){
+				// console.log("got childs", box.children);
+				return;
+			}
+
+			// NOTE: please contact me if you know more clear way to attach text field to search/filter dialogs
+
+			// console.log(box.getAttribute("disabled"), box.getAttribute("value"), box.attributes.searchAttribute, box.attributes.searchAttribute.value === "qnote@dqdp.net#qnoteText", box);
+			// let textbox = aSubject.MozXULElement.parseXULToFragment(`<html:input class="input-inline search-value-input" inherits="disabled" />`);
+			let textbox = document.createElementNS("http://www.w3.org/1999/xhtml", "input");
+			// let textbox = document.createElement("input");
+			// let textbox = document.createXULElement("marrtins");
+			// let textbox = new TestEl();
+			textbox.classList.add("input-inline");
+			textbox.classList.add("search-value-textbox");
+			textbox.classList.add("search-value-input");
+			textbox.setAttribute("inherits", "disabled");
+			textbox.setAttribute("value", box.getAttribute("value"));
+			textbox.setAttribute("replaced", true);
+			textbox.attributes.searchAttribute = box.attributes.searchAttribute;
+			// textbox.setAttribute("value", "dada");
+			textbox.setAttribute("flex", 1);
+			textbox.style.setProperty("width", "100%", "important")
+			// textbox.style.display = "flex";
+			// textbox.setAttribute("type", "text");
+			// textbox.setAttribute("label", "test");
+
+			textbox.addEventListener("input", function(){
+				// console.log("set value", this.value);
+				textbox.setAttribute("value", this.value);
+				// textbox.parentNode.setAttribute("value", this.value);
+				box.setAttribute("value", this.value);
+				// box.value = this.value
+				// box.parentNode.setAttribute("value", this.value);
+			});
+
+			// box.classList.add("search-value-textbox");
+			// box.classList.add("input-container");
+			// box.classList.remove("search-value-custom");
+			// textbox.setAttribute("flex", 1);
+			// textbox.style.display = "flex";
+
+			box.setAttribute("flex", 1);
+			box.style.display = "flex";
+			// box.style.width = "100%";
+			box.style.setProperty("width", "100%", "important")
+			// box.classList.add("text-input");
+
+			box.appendChild(textbox);
+			// aSubject.updateSearchAttributes();
+			// if(box.parentNode){
+			// 	box.parentNode.replaceChild(textbox, box);
+			// }
+		};
+
+		const callbackCustomSearchCondition = mutationList => {
 			mutationList.forEach(mutation => {
 				if(mutation.type == "childList"){
 					mutation.addedNodes.forEach(el => {
 						let boxes;
-						if(el.querySelectorAll && ((boxes = el.querySelectorAll(".search-value-custom")).length > 0)){
-							let textbox = document.createElementNS("http://www.w3.org/1999/xhtml", "input");
-							textbox.classList.add("input-inline");
-							textbox.classList.add("search-value-textbox");
-							textbox.setAttribute("value", boxes[0].getAttribute("value"));
-							textbox.addEventListener("input", function(){
-								textbox.parentNode.setAttribute("value", this.value);
-							});
-
-							boxes[0].appendChild(textbox);
+						if(!el.querySelectorAll || !((boxes = el.querySelectorAll(".search-value-custom")).length)){
+							return;
 						}
+
+						// console.log("mutation.addedNodes");
+						boxes.forEach(applyInputs);
 					});
+				} else if(mutation.type == "attributes"){
+					let box = mutation.target;
+					if(!box.attributes || !box.attributes.searchAttribute || (box.attributes.searchAttribute.value !== "qnote@dqdp.net#qnoteText")){
+						return;
+					}
+					// console.log("mutation=", mutation.attributeName, mutation);
+
+					if(mutation.attributeName == "searchAttribute"){
+						if(mutation.oldValue != box.attributes.searchAttribute){
+							// console.log("mutation.attributeName=searchAttribute", box.getAttribute("value"), box.value);
+							applyInputs(box);
+						}
+					}
+					// if(mutation.attributeName == "value"){
+					// 	console.log("mutation.attributeName=value", box.getAttribute("value"), box.value);
+					// }
+					// if(mutation.attributeName == "value"){
+					// 	console.log("mutation.attributeName=value", el.getAttribute("value"), el.value);
+					// 	// if(!el.querySelectorAll || !((boxes = el.querySelectorAll(".search-value-custom")).length)){
+					// 	// 	return;
+					// 	// }
+
+					// 	// applyInputs(mutation.target);
+					// }
 				}
 			});
 		}
+
+		document.querySelectorAll(".search-value-custom").forEach(applyInputs);
 
 		const observer = new aSubject.MutationObserver(callbackCustomSearchCondition);
 
 		observer.observe(document.querySelector("#searchTermList"), {
 			childList: true,
 			attributes: true,
-			subtree: true
+			subtree: true,
+			attributeOldValue: true
+			// attributeFilter: ["searchAttribute"]
 		});
 
 		this.addListener("uninstall", () => {
