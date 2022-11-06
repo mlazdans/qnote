@@ -262,5 +262,8 @@
 	},
 	"reset.selected.notes.windows": {
 		"message": "Reset selected notes positions"
+	},
+	"could.not.initialize.storage.folder" :{
+		"message": "Could not initialize QNote storage folder!\nPlease review add-on settings."
 	}
 }

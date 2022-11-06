@@ -235,7 +235,7 @@ async function loadPrefsWithDefaults() {
 				p.storageOption = 'folder';
 				p.storageFolder = path;
 			} else {
-				console.log("Could not initialize QNote storage path");
+				browser.legacy.alert(_("could.not.initialize.storage.folder"));
 				p.storageOption = 'ext';
 			}
 		}

@@ -205,5 +205,8 @@
 	},
 	"reset.selected.notes.windows": {
 		"message": "Atiestatīt izvēlēto zīmīšu logu pozīcijas"
+	},
+	"could.not.initialize.storage.folder" :{
+		"message": "Nevar inicializēt QNote glabāšanas mapi!\nLūdzu pārskatiet add-on uzstādījumus."
 	}
 }
