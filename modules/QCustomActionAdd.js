@@ -1,11 +1,10 @@
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { QNoteFile } = ChromeUtils.import("resource://qnote/modules/QNoteFile.js");
 
-var EXPORTED_SYMBOLS = ["QCustomAction"];
+var EXPORTED_SYMBOLS = ["QCustomActionAdd"];
 
-class QCustomAction {
+class QCustomActionAdd {
 	constructor(options) {
-		this.options = options;
 		this.id = 'qnote@dqdp.net#qnoteAdd';
 		this.name = options.name;
 		this.needsBody = options.needsBody;

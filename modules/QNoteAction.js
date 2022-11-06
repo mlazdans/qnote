@@ -1,6 +1,6 @@
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
-var { QCustomAction } = ChromeUtils.import("resource://qnote/modules/QCustomAction.js");
+var { QCustomActionAdd } = ChromeUtils.import("resource://qnote/modules/QCustomActionAdd.js");
 
 var EXPORTED_SYMBOLS = ["QNoteAction"];
 
@@ -64,7 +64,7 @@ class QNoteAction {
 		try {
 			MailServices.filters.getCustomAction('qnote@dqdp.net#qnoteAdd');
 		} catch (e) {
-			MailServices.filters.addCustomAction(new QCustomAction(CustomActionOptions));
+			MailServices.filters.addCustomAction(new QCustomActionAdd(CustomActionOptions));
 		}
 	}
 
