@@ -40,6 +40,10 @@ if(note.title !== undefined){
 }
 titleTextEl.textContent = title;
 
+if(note.placeholder){
+	YTextE.setAttribute("placeholder", note.placeholder);
+}
+
 YTextE.addEventListener("keyup", e => {
 	note.text = YTextE.value;
 });

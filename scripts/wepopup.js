@@ -33,7 +33,9 @@ if(note.title !== undefined){
 	}
 }
 
-//window.mozInnerScreenX
+if(note.placeholder){
+	YTextE.setAttribute("placeholder", note.placeholder);
+}
 
 const popupClose = () => {
 	browser.windows.get(CurrentNote.windowId).then(Window => {

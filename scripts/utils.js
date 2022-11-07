@@ -535,7 +535,8 @@ async function createMultiNote(messageList, overwrite = false){
 	await CurrentNote.silentlyPersistAndClose();
 	let note = createNote('multi');
 	CurrentNote.note = note;
-	CurrentNote.note.title = "Multi note";
+	CurrentNote.note.title = _("multi.note");
+	CurrentNote.note.placeholder = _("multi.note.warning");
 	CurrentNote.loadedNoteData = {};
 
 	let l = () => {

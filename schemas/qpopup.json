@@ -55,6 +55,10 @@
 			"title": {
 				"type": "string",
 				"optional": true
+			},
+			"placeholder": {
+				"type": "string",
+				"optional": true
 			}
 		}
 	}],

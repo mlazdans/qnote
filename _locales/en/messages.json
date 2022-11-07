@@ -265,5 +265,11 @@
 	},
 	"could.not.initialize.storage.folder" :{
 		"message": "Could not initialize QNote storage folder!\nPlease review add-on settings."
+	},
+	"multi.note":{
+		"message": "Multi note"
+	},
+	"multi.note.warning":{
+		"message": "Note will be added to all selected messages if note does not exists already."
 	}
 }
