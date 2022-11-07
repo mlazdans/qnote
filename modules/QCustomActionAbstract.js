@@ -5,7 +5,7 @@ var EXPORTED_SYMBOLS = ["QCustomActionAbstract"];
 
 class QCustomActionAbstract {
 	constructor(options) {
-		this.needsBody = true;
+		this.needsBody = false;
 		this.isAsync = false;
 		this.allowDuplicates = false;
 
