@@ -118,6 +118,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 							API.QNoteFilter.searchDialogHandler(aSubject, document);
 							API.QNoteAction.filterEditorHandler(aSubject, document);
 						}
+
+						// Multi message view
+						if(document.URL.includes('chrome://messenger/content/multimessageview')){
+							// console.log("multimessageview", aSubject, document);
+						}
 					});
 				}
 			}
@@ -700,18 +705,39 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					 * @type Document
 					 */
 					let document = messagepane.contentDocument;
-					let rows = document.querySelectorAll('li .item_header');
+					let cw = messagepane.contentWindow;
+					// let messenger = w.messenger;
+					let aFolderDisplay = w.gFolderDisplay;
+					if(!(aFolderDisplay && aFolderDisplay.view && aFolderDisplay.view.dbView)){
+						QDEB&&console.debug(`${fName} - no dbView`);
+						return;
+					}
 
-					// Index should match li index I guess...
-					NoteArray.forEach((note, i) => {
-						if(note.exists){
-							if(!rows[i].querySelector(".qnote-mm")){
-								let qNote = document.createElement('span');
-								qNote.classList.add("qnote-mm");
-								rows[i].appendChild(qNote);
-							}
-						}
+					let view = aFolderDisplay.view.dbView;
+					let summaryNodes = cw.gMessageSummary._msgNodes;
+
+					document.querySelectorAll(".qnote-mm").forEach(e => {
+						e.remove();
 					});
+
+					if(summaryNodes){
+						NoteArray.forEach(note => {
+							let msgHdr = view.db.getMsgHdrForMessageID(note.keyId);
+							if(msgHdr){
+								// summaryKey based on mail\base\content\multimessageview.js
+								let summaryKey = msgHdr.messageKey + msgHdr.folder.URI;
+								if(note.exists && summaryNodes[summaryKey]){
+									let row = summaryNodes[summaryKey].querySelector('.item_header');
+									if(row){
+										let qNote = document.createElement('span');
+										qNote.classList.add("qnote-mm");
+
+										row.appendChild(qNote);
+									}
+								}
+							}
+						});
+					}
 				},
 				async saveNoteCache(note){
 					API.noteGrabber.set(note.keyId, note);
