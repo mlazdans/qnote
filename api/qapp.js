@@ -398,23 +398,19 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					let w = Services.wm.getMostRecentWindow("mail:3pane");
 					API.installColumnHandler(w);
 					API.installKeyboardHandler(w);
-					if(options && (options.storageOption == "folder") && options.storageFolder){
-						QDEB&&console.debug("Installing filter");
+
 						// TODO: probably window not needed. Should scan suitable windows instead
+					QDEB&&console.debug("Installing custom filter");
 						API.QNoteFilter = new QNoteFilter({
-							notesRoot: options.storageFolder,
+						API: API,
 							w: w
 						});
 
+					QDEB&&console.debug("Installing custom action");
 						API.QNoteAction = new QNoteAction({
 							API: API,
-							notesRoot: options.storageFolder
 						});
-					} else {
-						QDEB&&console.debug("options.storageFolder not set, skip install {filter, action}");
-					}
 
-					// QDEB&&console.debug("qapp.enablePrintAttacher()", prefs);
 					API.EventDispatcher.addListener('domwindowopened', aSubject => {
 						this.printerAttacher(aSubject);
 					});
