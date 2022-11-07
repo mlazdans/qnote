@@ -39,16 +39,25 @@ class NoteWindow extends QEventDispatcher {
 		});
 	}
 
-	async update(){
-		console.error("Not implemented");
+	/**
+	 * @abstract
+	 */
+	 async update(){
+		throw new Error('Must be implemented by subclass!');
 	}
 
-	async focus() {
-		console.error("Not implemented");
+	/**
+	 * @abstract
+	 */
+	 async focus() {
+		throw new Error('Must be implemented by subclass!');
 	}
 
+	/**
+	 * @abstract
+	 */
 	async isFocused() {
-		console.error("Not implemented");
+		throw new Error('Must be implemented by subclass!');
 	}
 
 	async close(){
