@@ -209,10 +209,8 @@ async function initExtension(){
 
 		if(tabInfo.mailTab){
 			let mList = await browser.mailTabs.getSelectedMessages(getTabId(Tab || CurrentTabId));
-			if(!CurrentNote.shown  && (mList.messages.length > 1)){
+			if(!CurrentNote.shown && (mList.messages.length > 1)){
 				createMultiNote(mList.messages, false);
-				// TODO: attach at least note icon to multi message display (since TB78.4)
-				// mpUpdateForMultiMessage()
 				return;
 			}
 		}
@@ -282,6 +280,11 @@ async function initExtension(){
 			await CurrentNote.silentlyPersistAndClose();
 
 			CurrentTabId = getTabId(Tab);
+
+			// disble icons for multi select
+			updateIcons(false);
+
+			mpUpdateForMultiMessage(Messages);
 		});
 	}
 

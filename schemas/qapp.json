@@ -104,6 +104,21 @@
 			"$ref": "NoteData"
 		}]
 	},{
+		"name": "attachNotesToMultiMessage",
+		"type": "function",
+		"description": "",
+		"async": true,
+		"parameters": [{
+			"name": "windowId",
+			"type": "integer",
+			"description": "windowId from windows API"
+		},{
+			"type": "array",
+			"items": {
+				"$ref": "NoteData"
+			}
+		}]
+	},{
 		"name": "setPrinterAttacherPrefs",
 		"type": "function",
 		"description": "",

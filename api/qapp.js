@@ -661,6 +661,47 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						}
 					}
 				},
+				/**
+				 * @param {number} windowId
+				 * @param {Array} NoteArray
+				 */
+				async attachNotesToMultiMessage(windowId, NoteArray){
+					let fName = `qapp.attachNotesToMultiMessage(${windowId})`;
+
+					if(!NoteArray){
+						QDEB&&console.debug(`${fName} - no note data`);
+						return;
+					}
+
+					let w = API.id2RealWindow(windowId);
+					if(!w || !w.document){
+						QDEB&&console.debug(`${fName} - no window`);
+						return;
+					}
+
+					let messagepane = w.document.getElementById('multimessage');
+					if(!messagepane || !messagepane.contentDocument){
+						QDEB&&console.debug(`${fName} - no multimessage`);
+						return;
+					}
+
+					/**
+					 * @type Document
+					 */
+					let document = messagepane.contentDocument;
+					let rows = document.querySelectorAll('li .item_header');
+
+					// Index should match li index I guess...
+					NoteArray.forEach((note, i) => {
+						if(note.exists){
+							if(!rows[i].querySelector(".qnote-mm")){
+								let qNote = document.createElement('span');
+								qNote.classList.add("qnote-mm");
+								rows[i].appendChild(qNote);
+							}
+						}
+					});
+				},
 				async saveNoteCache(note){
 					API.noteGrabber.set(note.keyId, note);
 				},

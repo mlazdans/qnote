@@ -399,6 +399,19 @@ async function mpUpdateForMessage(messageId){
 	}).catch(silentCatcher());
 }
 
+/**
+ * @param {Array} messages - message array returned from API
+ * */
+async function mpUpdateForMultiMessage(messages){
+	let noteArray = [];
+	for(let m of messages){
+		await loadNoteForMessage(m.id).then(note => {
+			noteArray.push(note2QAppNote(note));
+		});
+	};
+	browser.qapp.attachNotesToMultiMessage(CurrentWindowId, noteArray);
+}
+
 async function mpUpdateCurrent(){
 	return getDisplayedMessageForTab(CurrentTabId).then(message => {
 		return mpUpdateForMessage(message.id);
