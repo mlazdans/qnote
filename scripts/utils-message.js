@@ -89,6 +89,15 @@ async function saveNoteForMessage(id, data){
 	});
 }
 
+async function saveNoteForMessageIfNotExists(id, data){
+	return loadNoteForMessage(id).then(note => {
+		if(!note.exists){
+			note.set(data);
+			return note.save();
+		}
+	});
+}
+
 async function tagMessage(id, tagName, toTag = true) {
 	return getMessage(id).then(message => {
 		QDEB&&console.debug(`tagMessage(id:${id}, tagName:${tagName}, toTag:${toTag})`);

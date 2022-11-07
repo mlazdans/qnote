@@ -204,41 +204,47 @@ async function initExtension(){
 		}
 	});
 
+	const toggler = async Tab => {
+		let tabInfo = await browser.tabs.get(getTabId(Tab || CurrentTabId));
+
+		if(tabInfo.mailTab){
+			let mList = await browser.mailTabs.getSelectedMessages(getTabId(Tab || CurrentTabId));
+			if(!CurrentNote.shown  && (mList.messages.length > 1)){
+				createMultiNote(mList.messages, false);
+				// TODO: attach at least note icon to multi message display (since TB78.4)
+				// mpUpdateForMultiMessage()
+				return;
+			}
+		}
+
+		QNotePopToggle(Tab || CurrentTabId);
+	};
+
 	// Click on main toolbar
 	browser.browserAction.onClicked.addListener(Tab => {
 		QDEB&&console.debug("browserAction.onClicked()");
 
-		QNotePopToggle(Tab || CurrentTabId);
+		// QNotePopToggle(Tab || CurrentTabId);
+		toggler(Tab);
 	});
 
 	// // Click on QNote button
 	browser.messageDisplayAction.onClicked.addListener(Tab => {
 		QDEB&&console.debug("messageDisplayAction.onClicked()");
 
-		QNotePopToggle(Tab || CurrentTabId);
+		// QNotePopToggle(Tab || CurrentTabId);
+		toggler(Tab);
 	});
 
 	// Handle keyboard shortcuts
-	browser.commands.onCommand.addListener(async command => {
+	browser.commands.onCommand.addListener(command => {
 		if(command === 'qnote') {
 			QDEB&&console.debug("commands.onCommand()", command);
-
-			let tab = await browser.tabs.get(getTabId(CurrentTabId));
-
-			if(tab.mailTab){
-				let mList = await browser.mailTabs.getSelectedMessages(getTabId(CurrentTabId));
-				if(!CurrentNote.shown  && (mList.messages.length > 1)){
-					createMultiNote(mList.messages);
-					return;
-				}
-			}
-
-			QNotePopToggle(CurrentTabId);
+			toggler();
 		}
 	});
 
 	// Context menu on message
-	// TODO: menu delete all notes from selected messages?
 	browser.menus.onShown.addListener(async info => {
 		await browser.menus.removeAll();
 
