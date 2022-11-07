@@ -272,9 +272,18 @@ async function initExtension(){
 		}
 	});
 
-	// TODO: attach at least note icon to multi message display (since TB78.4)
-	// browser.messageDisplay.onMessagesDisplayed.addListener(async (Tab, Messages) => {
-	// });
+	if(browser.messageDisplay.onMessagesDisplayed){
+		browser.messageDisplay.onMessagesDisplayed.addListener(async (Tab, Messages) => {
+			// Will be hadled by onMessageDisplayed
+			if(Messages.length<2){
+				return;
+			}
+
+			await CurrentNote.silentlyPersistAndClose();
+
+			CurrentTabId = getTabId(Tab);
+		});
+	}
 
 	// TODO: add "install", "update" handling if neccessary
 	// if temporary - add reload button to the main toolbar to speed up developement
