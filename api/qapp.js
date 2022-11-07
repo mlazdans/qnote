@@ -398,7 +398,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					let w = Services.wm.getMostRecentWindow("mail:3pane");
 					API.installColumnHandler(w);
 					API.installKeyboardHandler(w);
-					if(options && options.storageFolder){
+					if(options && (options.storageOption == "folder") && options.storageFolder){
 						QDEB&&console.debug("Installing filter");
 						// TODO: probably window not needed. Should scan suitable windows instead
 						API.QNoteFilter = new QNoteFilter({
@@ -422,8 +422,20 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				async setDebug(on){
 					API.ColumnHandler.setDebug(QDEB = on);
 				},
-				async setPrinterAttacherPrefs(prefs){
-					API.printerAttacherPrefs = prefs;
+				async setPrefs(Prefs){
+					API.messageAttacherPrefs = {
+						topTitle: Prefs.messageAttachTopTitle,
+						topText: Prefs.messageAttachTopText,
+						bottomTitle: Prefs.messageAttachBottomTitle,
+						bottomText: Prefs.messageAttachBottomText
+					};
+					API.printerAttacherPrefs = {
+						topTitle: Prefs.printAttachTopTitle,
+						topText: Prefs.printAttachTopText,
+						bottomTitle: Prefs.printAttachBottomTitle,
+						bottomText: Prefs.printAttachBottomText
+					};
+					API.ColumnHandler.columnHandler.limit = Prefs.showFirstChars;
 				},
 				async attachNoteToPrinter(windowId, data){
 					let fName = "qapp.attachNoteToPrinter()";
@@ -561,9 +573,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 
 					API.updateView(w, keyId);
-				},
-				async setMessageAttacherPrefs(prefs){
-					API.messageAttacherPrefs = prefs;
 				},
 				async attachNoteToMessage(windowId, data){
 					let fName = `qapp.attachNoteToMessage(${windowId})`;
@@ -710,9 +719,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				},
 				async deleteNoteCache(keyId){
 					API.noteGrabber.delete(keyId);
-				},
-				async setColumnTextLimit(limit){
-					API.ColumnHandler.columnHandler.limit = limit;
 				},
 				async getProfilePath() {
 					return Cc['@mozilla.org/file/directory_service;1']

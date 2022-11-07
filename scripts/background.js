@@ -48,6 +48,22 @@ function initCurrentNote(from){
 }
 
 // We call this after options has been changed
+async function sendPrefs(){
+	browser.qapp.setPrefs({
+		storageOption: Prefs.storageOption,
+		storageFolder: Prefs.storageFolder,
+		showFirstChars: Prefs.showFirstChars,
+		printAttachTopTitle: Prefs.printAttachTopTitle,
+		printAttachTopText: Prefs.printAttachTopText,
+		printAttachBottomTitle: Prefs.printAttachBottomTitle,
+		printAttachBottomText: Prefs.printAttachBottomText,
+		messageAttachTopTitle: Prefs.messageAttachTopTitle,
+		messageAttachTopText: Prefs.messageAttachTopText,
+		messageAttachBottomTitle: Prefs.messageAttachBottomTitle,
+		messageAttachBottomText: Prefs.messageAttachBottomText,
+	});
+}
+
 async function setUpExtension(){
 	CurrentWindowId = await getCurrentWindowId();
 	CurrentTabId = await getCurrentTabId();
@@ -63,21 +79,7 @@ async function setUpExtension(){
 	browser.qapp.setDebug(QDEB);
 	browser.qpopup.setDebug(QDEB);
 
-	browser.qapp.setColumnTextLimit(Prefs.showFirstChars);
-
-	browser.qapp.setPrinterAttacherPrefs({
-		topTitle: Prefs.printAttachTopTitle,
-		topText: Prefs.printAttachTopText,
-		bottomTitle: Prefs.printAttachBottomTitle,
-		bottomText: Prefs.printAttachBottomText
-	});
-
-	browser.qapp.setMessageAttacherPrefs({
-		topTitle: Prefs.messageAttachTopTitle,
-		topText: Prefs.messageAttachTopText,
-		bottomTitle: Prefs.messageAttachBottomTitle,
-		bottomText: Prefs.messageAttachBottomText
-	});
+	sendPrefs();
 }
 
 async function initExtension(){
