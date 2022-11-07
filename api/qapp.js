@@ -20,6 +20,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		// We'll update cache and call listener once item arrives
 		// init() caller must install onNoteRequest listener
 		this.noteGrabber = new QCache();
+		this.Prefs = {};
 
 		this.EventDispatcher = new QEventDispatcher(["domwindowopened", "domwindowclosed", "keydown", "onShutdown", "domcomplete"]);
 		this.KeyboardHandler = {
@@ -419,6 +420,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					API.ColumnHandler.setDebug(QDEB = on);
 				},
 				async setPrefs(Prefs){
+					API.Prefs = Prefs;
 					API.messageAttacherPrefs = {
 						topTitle: Prefs.messageAttachTopTitle,
 						topText: Prefs.messageAttachTopText,
