@@ -10,12 +10,11 @@ class QNoteAction {
 	constructor(options) {
 		this.ruleMap = {};
 		this.Services = Services;
-		this.options = options;
+		this.API = options.API;
 
 		// Add
 		let caAdd = new QCustomActionAdd({
 			name: 'Add QNote',
-			notesRoot: options.notesRoot,
 			API: options.API
 		})
 
@@ -29,7 +28,6 @@ class QNoteAction {
 		// Update
 		let caUpdate = new QCustomActionUpdate({
 			name: 'Update QNote',
-			notesRoot: options.notesRoot,
 			API: options.API
 		})
 
@@ -43,7 +41,6 @@ class QNoteAction {
 		// Delete
 		let caDelete = new QCustomActionDelete({
 			name: 'Delete QNote',
-			notesRoot: options.notesRoot,
 			API: options.API
 		})
 
@@ -52,7 +49,7 @@ class QNoteAction {
 		} catch (e) {
 			MailServices.filters.addCustomAction(caDelete);
 		}
-		// this.ruleMap[caDelete.id] = caDelete.xulName;
+		this.ruleMap[caDelete.id] = caDelete.xulName;
 	}
 
 	filterEditorHandler(aSubject, document){
@@ -91,8 +88,34 @@ class QNoteAction {
 
 		// TODO: should find a better way processing these classes below
 		// They depend on window.MozXULElement (aSubject)
-		class actiontargetQNoteAdd extends aSubject.MozXULElement {
+		class atQNote extends aSubject.MozXULElement {
 			connectedCallback() {
+				if(Action.API.getStorageFolder()){
+					if(this._connectedCallback){
+						this._connectedCallback();
+					}
+				} else {
+					let textbox = document.createElementNS("http://www.w3.org/1999/xhtml", "span");
+					textbox.textContent = "Actions currently available only with folder storage option";
+					textbox.style.display = "inline";
+					textbox.style.padding = "1ex";
+					textbox.style.verticalAlign = "middle";
+					this.appendChild(textbox);
+				}
+				updateParentNode(this.closest(".ruleaction"));
+			}
+		}
+		class actiontargetQNoteAdd extends atQNote {
+			_connectedCallback() {
+				const input = aSubject.document.createElementNS("http://www.w3.org/1999/xhtml", "input");
+				input.classList.add("ruleactionitem", "input-inline");
+				this.classList.add("input-container");
+				this.classList.add("textbox-input");
+				this.appendChild(input);
+			}
+		}
+		class actiontargetQNoteUpdate extends atQNote {
+			_connectedCallback() {
 				const input = aSubject.document.createElementNS("http://www.w3.org/1999/xhtml", "input");
 				input.classList.add("ruleactionitem", "input-inline");
 				this.classList.add("input-container");
@@ -101,12 +124,10 @@ class QNoteAction {
 				updateParentNode(this.closest(".ruleaction"));
 			}
 		}
-		class actiontargetQNoteUpdate extends aSubject.MozXULElement {
-			connectedCallback() {
-				const input = aSubject.document.createElementNS("http://www.w3.org/1999/xhtml", "input");
-				input.classList.add("ruleactionitem", "input-inline");
-				this.classList.add("input-container");
-				this.classList.add("textbox-input");
+		class actiontargetQNoteDelete extends atQNote {
+			_connectedCallback() {
+				// Add dummy child
+				const input = aSubject.document.createElementNS("http://www.w3.org/1999/xhtml", "span");
 				this.appendChild(input);
 				updateParentNode(this.closest(".ruleaction"));
 			}
@@ -118,6 +139,10 @@ class QNoteAction {
 
 		if(!aSubject.customElements.get("qnote@dqdp.net#qnote-action-update")){
 			aSubject.customElements.define("qnote-ruleactiontarget-update", actiontargetQNoteUpdate);
+		}
+
+		if(!aSubject.customElements.get("qnote@dqdp.net#qnote-action-delete")){
+			aSubject.customElements.define("qnote-ruleactiontarget-delete", actiontargetQNoteDelete);
 		}
 	}
 

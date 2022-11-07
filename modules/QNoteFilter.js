@@ -1,5 +1,4 @@
 var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
-var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var { QuickFilterManager, MessageTextFilter } = ChromeUtils.import("resource:///modules/QuickFilterManager.jsm");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
 var { QCustomTerm } = ChromeUtils.import("resource://qnote/modules/QCustomTerm.js");
@@ -102,10 +101,7 @@ class QNoteFilter {
 	}
 
 	searchDialogHandler(aSubject, document){
-		// console.log("SearchDialog", aSubject);
-		// aSubject.gSearchTermList.*
-		// updateSearchAttributes
-
+		const API = this.options.API;
 		const applyInputs = box => {
 			if(!box.attributes || !box.attributes.searchAttribute || (box.attributes.searchAttribute.value !== "qnote@dqdp.net#qnoteText")){
 				return;
@@ -120,8 +116,27 @@ class QNoteFilter {
 			// 	return;
 			// }
 
+			if(!API.getStorageFolder()){
+				let textbox = document.createElementNS("http://www.w3.org/1999/xhtml", "span");
+				textbox.textContent = "Filtering currently available only with Folder storage option";
+				textbox.style.display = "inline";
+
+				// If warning message exists, replace it
+				if(box.children.length){
+					box.replace(textbox, box.children[0]);
+				} else {
+					box.appendChild(textbox);
+				}
+				return;
+			} else {
+				// Remove text node in case storage option has changed
+				if(box.children.length && (box.children[0].attributes.searchAttribute != box.attributes.searchAttribute)){
+					box.removeChild(box.children[0]);
+				}
+			}
+
+			// If input exists
 			if(box.children.length){
-				// console.log("got childs", box.children);
 				return;
 			}
 
@@ -244,17 +259,12 @@ class QNoteFilter {
 
 		this.options = options;
 
-		var CustomTermOptions = {
-			id: this.CustomTermId,
-			name: 'QNote',
-			needsBody: false,
-			notesRoot: options.notesRoot
-		};
 
 		if(MailServices.filters.getCustomTerm(this.CustomTermId)){
-			// console.log("CustomTerm exists");
 		} else {
-			MailServices.filters.addCustomTerm(new QCustomTerm(CustomTermOptions));
+			MailServices.filters.addCustomTerm(new QCustomTerm({
+				API: QNoteFilter.options.API
+			}));
 		}
 
 		let NoteQF = {

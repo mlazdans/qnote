@@ -15,9 +15,15 @@ class QCustomActionDelete extends QCustomActionAbstract {
 	}
 
 	_apply(keyIds, actionValue){
+		let notesRoot = this.API.getStorageFolder();
+
+		if(!notesRoot){
+			return;
+		}
+
 		let w = this.Services.wm.getMostRecentWindow("mail:3pane");
 		keyIds.forEach(keyId => {
-			this.QN.delete(this.notesRoot, keyId);
+			this.QN.delete(notesRoot, keyId);
 			this.API.noteGrabber.delete(keyId);
 			this.API.updateView(w, keyId);
 		});

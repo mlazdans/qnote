@@ -331,6 +331,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		view.NoteChange(row, 1, 2);
 	}
 
+	getStorageFolder(){
+		return this.Prefs.storageOption == "folder" ? this.Prefs.storageFolder : "";
+	}
+
 	// Not used currently
 	// realWindowWrap(realWindow){
 	// 	try {
@@ -400,17 +404,17 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					API.installColumnHandler(w);
 					API.installKeyboardHandler(w);
 
-						// TODO: probably window not needed. Should scan suitable windows instead
+					// TODO: probably window not needed. Should scan suitable windows instead
 					QDEB&&console.debug("Installing custom filter");
-						API.QNoteFilter = new QNoteFilter({
+					API.QNoteFilter = new QNoteFilter({
 						API: API,
-							w: w
-						});
+						w: w
+					});
 
 					QDEB&&console.debug("Installing custom action");
-						API.QNoteAction = new QNoteAction({
-							API: API,
-						});
+					API.QNoteAction = new QNoteAction({
+						API: API,
+					});
 
 					API.EventDispatcher.addListener('domwindowopened', aSubject => {
 						this.printerAttacher(aSubject);

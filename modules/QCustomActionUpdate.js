@@ -11,7 +11,9 @@ class QCustomActionUpdate extends QCustomActionAbstract {
 	}
 
 	_apply(keyIds, actionValue){
-		if(!actionValue){
+		let notesRoot = this.API.getStorageFolder();
+
+		if(!actionValue || !notesRoot){
 			return;
 		}
 
@@ -24,7 +26,7 @@ class QCustomActionUpdate extends QCustomActionAbstract {
 				ts: ts
 			};
 
-			this.QN.save(this.notesRoot, keyId, note);
+			this.QN.save(notesRoot, keyId, note);
 			this.API.noteGrabber.delete(keyId);
 			this.API.updateView(w, keyId);
 		});

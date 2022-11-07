@@ -10,15 +10,16 @@ var EXPORTED_SYMBOLS = ["QCustomTerm"];
 // Currenlty there are no means to remove filter or there is but I'm not aware, please let me know: qnote@dqdp.net
 class QCustomTerm {
 	constructor(options) {
-		this.options = options;
-		this.id = options.id;
-		this.name = options.name;
-		this.needsBody = options.needsBody;
-		this.notesRoot = options.notesRoot;
+		this.id = 'qnote@dqdp.net#qnoteText';
+		this.name = options.name || "QNote";
+		this.needsBody = false;
+
 		this.ops = [Ci.nsMsgSearchOp.Contains, Ci.nsMsgSearchOp.DoesntContain, Ci.nsMsgSearchOp.Is, Ci.nsMsgSearchOp.Isnt];
 		this.QN = new QNoteFile;
 		this.XN = new XNoteFile;
+		this.API = options.API;
 	}
+
 	getEnabled(scope, op) {
 		return true;
 		//return ops.includes(op);
@@ -37,12 +38,17 @@ class QCustomTerm {
 		return this.ops;
 	}
 	match(msgHdr, searchValue, searchOp) {
-		// console.log("match", msgHdr, searchValue, searchOp);
+		let notesRoot = this.API.getStorageFolder();
+
+		if(!notesRoot){
+			return false;
+		}
+
 		let note;
 		try {
-			note = this.QN.load(this.notesRoot, msgHdr.messageId);
+			note = this.QN.load(notesRoot, msgHdr.messageId);
 			if(!note){
-				note = this.XN.load(this.notesRoot, msgHdr.messageId);
+				note = this.XN.load(notesRoot, msgHdr.messageId);
 			}
 		} catch(e) { }
 

@@ -10,7 +10,6 @@ class QCustomActionAbstract {
 		this.allowDuplicates = false;
 
 		this.name = options.name;
-		this.notesRoot = options.notesRoot;
 
 		this.QN = new QNoteFile;
 		this.API = options.API;
