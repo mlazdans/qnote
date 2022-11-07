@@ -29,9 +29,14 @@ window.addEventListener("DOMContentLoaded", () => {
 
 YTextE.value = note.text;
 
-let title = 'QNote';
-if(note.ts){
-	title += ': ' + ext.qDateFormat(note.ts);
+let title;
+if(note.title !== undefined){
+	title = note.title;
+} else {
+	title = 'QNote';
+	if(note.ts){
+		title += ': ' + ext.qDateFormat(note.ts);
+	}
 }
 titleTextEl.textContent = title;
 

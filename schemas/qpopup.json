@@ -51,6 +51,10 @@
 			"anchorPlacement": {
 				"type": "string",
 				"optional": true
+			},
+			"title": {
+				"type": "string",
+				"optional": true
 			}
 		}
 	}],

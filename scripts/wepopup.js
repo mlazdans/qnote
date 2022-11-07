@@ -24,9 +24,13 @@ window.addEventListener("DOMContentLoaded", () => {
 
 YTextE.value = note.text;
 
-document.title = 'QNote';
-if(note.ts){
-	document.title += ': ' + ext.qDateFormat(note.ts);
+if(note.title !== undefined){
+	document.title = note.title;
+} else {
+	document.title = 'QNote';
+	if(note.ts){
+		document.title += ': ' + ext.qDateFormat(note.ts);
+	}
 }
 
 //window.mozInnerScreenX
