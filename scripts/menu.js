@@ -80,7 +80,7 @@ var Menu = {
 			title: _("create.or.update.selected.notes"),
 			contexts: ["message_list"],
 			async onclick(info) {
-				createMultiNote(info.selectedMessages.messages);
+				createMultiNote(info.selectedMessages.messages, true);
 			},
 		});
 
