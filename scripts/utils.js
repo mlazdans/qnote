@@ -366,12 +366,18 @@ async function QNotePopToggle(Tab) {
 	}
 }
 
-// TODO: icons should be updated to specified tab
 async function updateIcons(on){
 	let icon = on ? "images/icon.svg" : "images/icon-disabled.svg";
 
-	browser.browserAction.setIcon({path: icon});
-	browser.messageDisplayAction.setIcon({path: icon});
+	browser.browserAction.setIcon({
+		path: icon,
+		tabId: CurrentTabId
+	});
+
+	browser.messageDisplayAction.setIcon({
+		path: icon,
+		tabId: CurrentTabId
+	});
 }
 
 // Not so silent :>
