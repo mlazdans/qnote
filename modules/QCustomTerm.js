@@ -8,6 +8,10 @@ var EXPORTED_SYMBOLS = ["QCustomTerm"];
 // NOTE:
 // We need completely restart TB if CustomTerm code changes
 // Currenlty there are no means to remove filter or there is but I'm not aware, please let me know: qnote@dqdp.net
+
+// TODO: try brind all calls to options.API
+// TODO: scopes
+
 class QCustomTerm {
 	constructor(options) {
 		this.id = 'qnote@dqdp.net#qnoteText';
@@ -22,13 +26,9 @@ class QCustomTerm {
 
 	getEnabled(scope, op) {
 		return true;
-		//return ops.includes(op);
 	}
-	// Currently disabled in search dialogs, because can't figure out how to add text box to the filter
-	// Probably through XUL or something
 	getAvailable(scope, op) {
 		return true;
-		//return ops.includes(op);
 	}
 	getAvailableOperators(scope, length) {
 		if(length){
@@ -52,27 +52,22 @@ class QCustomTerm {
 			}
 		} catch(e) { }
 
-		if(!note){
-			return searchOp == Ci.nsMsgSearchOp.DoesntContain;
-		}
-
-		let noteText = note.text.toLowerCase();
 		let keyw = searchValue.toLowerCase();
 
 		if(searchOp == Ci.nsMsgSearchOp.Contains){
-			return !keyw || (noteText.search(keyw) >= 0);
+			return note && (!keyw || (note.text.toLowerCase().search(keyw) >= 0));
 		}
 
 		if(searchOp == Ci.nsMsgSearchOp.DoesntContain){
-			return !keyw || (noteText.search(keyw) == -1);
+			return (!note && !keyw) || (note && keyw && (note.text.toLowerCase().search(keyw) == -1));
 		}
 
 		if(searchOp == Ci.nsMsgSearchOp.Is){
-			return noteText == keyw;
+			return note && note.text.toLowerCase() == keyw;
 		}
 
 		if(searchOp == Ci.nsMsgSearchOp.Isnt){
-			return noteText != keyw;
+			return note && note.text.toLowerCase() != keyw;
 		}
 	}
 };
