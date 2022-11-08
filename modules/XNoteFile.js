@@ -22,7 +22,7 @@ class XNoteFile {
 			version: '2.3.1'
 		};
 	}
-	// NOTE: Seems that "yyyy-mm-dd - HH:MM" format has been hardcoded for some time?
+	// Seems that "yyyy-mm-dd - HH:MM" format has been hardcoded for some time?
 	noteDateToDate(dateString) {
 		let dateParsers = [
 			// "yyyy-mm-dd - HH:MM"
