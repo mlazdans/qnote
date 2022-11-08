@@ -109,7 +109,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						}
 
 						// Attach to SearchDialog
-						if(API.QNoteFilter && document.URL.includes('chrome://messenger/content/SearchDialog')){
+						if(API.QNoteFilter && (
+							document.URL.includes('chrome://messenger/content/SearchDialog') ||
+							document.URL.includes('chrome://messenger/content/virtualFolderProperties')
+						)){
 							API.QNoteFilter.searchDialogHandler(aSubject, document);
 						}
 
