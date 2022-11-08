@@ -122,12 +122,13 @@ async function getDisplayedMessageForTab(tab) {
 }
 
 async function ifNoteForMessageExists(id) {
-	return new Promise(resolve => {
+	return new Promise((resolve, reject) => {
 		loadNoteForMessage(id).then(note => {
 			if(note.exists){
 				resolve(note);
+			} else {
+				reject();
 			}
-		}).catch(() => {
 		});
 	});
 }

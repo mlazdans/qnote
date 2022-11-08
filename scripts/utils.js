@@ -545,10 +545,10 @@ async function createMultiNote(messageList, overwrite = false){
 	CurrentNote.note.placeholder = _("multi.note.warning");
 	CurrentNote.loadedNoteData = {};
 
-	let l = () => {
+	let l = async () => {
 		if(CurrentNote.needSaveOnClose && note.text){
-			messageList.forEach(m => {
-				getMessageKeyId(m.id).then(keyId => {
+			for(const m of messageList){
+				await getMessageKeyId(m.id).then(keyId => {
 					note.keyId = keyId;
 					if(overwrite){
 						saveNoteForMessage(m.id, note2QAppNote(note));
@@ -556,7 +556,8 @@ async function createMultiNote(messageList, overwrite = false){
 						saveNoteForMessageIfNotExists(m.id, note2QAppNote(note));
 					}
 				});
-			});
+			};
+			mpUpdateForMultiMessage(messageList);
 		}
 		CurrentNote.removeListener("afterclose", l);
 	};

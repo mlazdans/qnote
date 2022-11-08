@@ -75,6 +75,7 @@ var Menu = {
 		});
 	},
 	multi: () => {
+		// Create multi
 		browser.menus.create({
 			id: "create_multi",
 			title: _("create.or.update.selected.notes"),
@@ -84,31 +85,34 @@ var Menu = {
 			},
 		});
 
+		// Delete multi
 		browser.menus.create({
 			id: "delete_multi",
 			title: _("delete.selected.notes"),
 			contexts: ["message_list"],
 			async onclick(info) {
 				if(await confirmDelete()) {
-					info.selectedMessages.messages.forEach(m => {
-						ifNoteForMessageExists(m.id).then(() => {
+					for(const m of info.selectedMessages.messages){
+						await ifNoteForMessageExists(m.id).then(() => {
 							if(CurrentNote.messageId === m.id){
 								CurrentNote.silentlyDeleteAndClose();
 							} else {
 								deleteNoteForMessage(m.id).then(updateNoteView).catch(e => browser.legacy.alert(_("error.deleting.note"), e.message));
 							}
-						});
-					});
+						}).catch(() => { });
+					}
+					mpUpdateForMultiMessage(info.selectedMessages.messages);
 				}
 			},
 		});
 
+		// Reset multi
 		browser.menus.create({
 			id: "reset_multi",
 			title: _("reset.selected.notes.windows"),
 			contexts: ["message_list"],
 			async onclick(info) {
-				info.selectedMessages.messages.forEach(m => {
+				for(const m of info.selectedMessages.messages){
 					ifNoteForMessageExists(m.id).then(() => {
 						if(CurrentNote.messageId === m.id){
 							CurrentNote.reset().then(() => {
@@ -124,8 +128,8 @@ var Menu = {
 								height: Prefs.height
 							}).catch(e => browser.legacy.alert(_("error.saving.note"), e.message));
 						}
-					});
-				});
+					}).catch(() => { });
+				}
 			},
 		});
 
