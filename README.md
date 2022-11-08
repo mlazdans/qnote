@@ -37,7 +37,8 @@ This is source code repository for Thunderbird [QNote](https://addons.thunderbir
 - Alt+Q to toggle note
 - ESC to close note without saving
 - Right click context menu to delete note or reset note window
-- Use QuickFilter to search notes
+- Use QuickFilter or Message Search to search notes (only for folder storage)
+- Use Filter Manager to create custom actions (only for folder storage)
 
 # Storage
 
