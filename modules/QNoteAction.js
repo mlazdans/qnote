@@ -3,6 +3,8 @@ var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm"
 var { QCustomActionAdd } = ChromeUtils.import("resource://qnote/modules/QCustomActionAdd.js");
 var { QCustomActionUpdate } = ChromeUtils.import("resource://qnote/modules/QCustomActionUpdate.js");
 var { QCustomActionDelete } = ChromeUtils.import("resource://qnote/modules/QCustomActionDelete.js");
+var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
+var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
 var EXPORTED_SYMBOLS = ["QNoteAction"];
 
@@ -96,7 +98,7 @@ class QNoteAction {
 					}
 				} else {
 					let textbox = document.createElementNS("http://www.w3.org/1999/xhtml", "span");
-					textbox.textContent = "Actions currently available only with folder storage option";
+					textbox.textContent = extension.localizeMessage("actions.unavailable");
 					textbox.style.display = "inline";
 					textbox.style.padding = "1ex";
 					textbox.style.verticalAlign = "middle";

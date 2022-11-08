@@ -2,6 +2,8 @@ var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
 var { QuickFilterManager, MessageTextFilter } = ChromeUtils.import("resource:///modules/QuickFilterManager.jsm");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
 var { QCustomTerm } = ChromeUtils.import("resource://qnote/modules/QCustomTerm.js");
+var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
+var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
 var EXPORTED_SYMBOLS = ["QNoteFilter"];
 
@@ -89,7 +91,7 @@ class QNoteFilter {
 			if(!QNoteFilter.options.API.getStorageFolder()){
 				qfQnoteEl.setAttribute("disabled", true);
 				qfQnoteEl.setAttribute("checked", false);
-				qfQnoteEl.setAttribute("tooltiptext", "Filtering currently available only with Folder storage option");
+				qfQnoteEl.setAttribute("tooltiptext", extension.localizeMessage("filters.unavailable"));
 				aMuxer.activeFilterer.setFilterValue("qnote", null);
 			} else {
 				qfQnoteEl.setAttribute("disabled", false);
@@ -136,7 +138,7 @@ class QNoteFilter {
 
 			if(!API.getStorageFolder()){
 				let textbox = document.createElementNS("http://www.w3.org/1999/xhtml", "span");
-				textbox.textContent = "Filtering currently available only with Folder storage option";
+				textbox.textContent = extension.localizeMessage("filters.unavailable");
 				textbox.style.display = "inline";
 
 				// If warning message exists, replace it

@@ -271,5 +271,11 @@
 	},
 	"multi.note.warning":{
 		"message": "Note will be added to all selected messages if note does not exists already."
+	},
+	"actions.unavailable":{
+		"message": "Actions available only with folder storage option"
+	},
+	"filters.unavailable":{
+		"message": "Filters available only with folder storage option"
 	}
 }
