@@ -253,5 +253,20 @@
 	},
 	"storage.clear.button.descr": {
 		"message": "Cancella le preferenze e le note salvate nella memoria di estensione"
+	},
+	"could.not.initialize.storage.folder" :{
+		"message": "Impossibile inizializzare la cartella di archiviazione di QNote!\nRivedi le impostazioni del componente aggiuntivo."
+	},
+	"multi.note":{
+		"message": "Nota Multipla"
+	},
+	"multi.note.warning":{
+		"message": "Se la nota non esiste già, verrà aggiunta a tutti i messaggi selezionati."
+	},
+	"actions.unavailable":{
+		"message": "Azioni disponibili solo con l'opzione di archiviazione delle cartelle"
+	},
+	"filters.unavailable":{
+		"message": "Filtri disponibili solo con l'opzione di archiviazione delle cartelle"
 	}
 }
