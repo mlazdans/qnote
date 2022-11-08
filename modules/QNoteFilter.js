@@ -62,12 +62,19 @@ class QNoteFilter {
 			let button = w.document.createXULElement('toolbarbutton');
 			button.setAttribute('id', this.qfQnoteDomId);
 			button.setAttribute('type', 'checkbox');
-			button.setAttribute('class', 'toolbarbutton-1 qfb-tag-button');
+			button.setAttribute('class', 'toolbarbutton-1');
+			button.setAttribute('orient', 'horizontal');
 			button.setAttribute('label', 'QNote');
 			// button.setAttribute('value', 'QNote');
-			if(state){
-				button.setAttribute('checked', "true");
-			}
+			// if(!QNoteFilter.options.API.getStorageFolder()){
+			// 	button.setAttribute("disabled", true);
+			// 	button.setAttribute('checked', false);
+			// } else {
+			// 	button.setAttribute("disabled", false);
+				if(state){
+					button.setAttribute('checked', true);
+				}
+			// }
 
 			let filterBar = w.document.getElementById("quick-filter-bar-filter-text-bar");
 			filterBar.appendChild(button);
@@ -77,13 +84,24 @@ class QNoteFilter {
 		let qfTextBox = w.document.getElementById('qfb-qs-textbox');
 		let aMuxer = w.QuickFilterBarMuxer;
 
-		let commandHandler = function() {
-			aMuxer.activeFilterer.setFilterValue('qnote', qfQnoteEl.checked ? qfTextBox.value : null);
+		let commandHandler = e => {
+			// console.log("commandHandler", QNoteFilter.options.API.getStorageFolder(), e);
+			if(!QNoteFilter.options.API.getStorageFolder()){
+				qfQnoteEl.setAttribute("disabled", true);
+				qfQnoteEl.setAttribute("checked", false);
+				qfQnoteEl.setAttribute("tooltiptext", "Filtering currently available only with Folder storage option");
+				aMuxer.activeFilterer.setFilterValue("qnote", null);
+			} else {
+				qfQnoteEl.setAttribute("disabled", false);
+				qfQnoteEl.setAttribute("tooltiptext", "");
+				aMuxer.activeFilterer.setFilterValue("qnote", qfQnoteEl.checked ? qfTextBox.value : null);
+			}
 			QNoteFilter.updateSearch(aMuxer);
 		};
 
 		qfTextBox.addEventListener("command", commandHandler);
 		qfQnoteEl.addEventListener("command", commandHandler);
+		qfTextBox.inputField.addEventListener("focus", commandHandler);
 
 		this.addListener("uninstall", () => {
 			let filterer = QNoteFilter.getQF(w.gFolderDisplay);
@@ -91,7 +109,7 @@ class QNoteFilter {
 				// Should manage state persistence ourselves
 				QNoteFilter.saveQNoteQFState(qfQnoteEl.checked);
 				// We need to remove state because QF gets mad if we disable, for example, search and then leave state as is
-				filterer.setFilterValue('qnote', null);
+				filterer.setFilterValue("qnote", null);
 			}
 
 			qfTextBox.removeEventListener("command", commandHandler);
