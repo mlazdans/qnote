@@ -18,7 +18,15 @@ class QCustomTerm {
 		this.name = options.name || "QNote";
 		this.needsBody = false;
 
-		this.ops = [Ci.nsMsgSearchOp.Contains, Ci.nsMsgSearchOp.DoesntContain, Ci.nsMsgSearchOp.Is, Ci.nsMsgSearchOp.Isnt];
+		this.ops = [
+			Ci.nsMsgSearchOp.Contains,
+			Ci.nsMsgSearchOp.DoesntContain,
+			Ci.nsMsgSearchOp.Is,
+			Ci.nsMsgSearchOp.Isnt,
+			Ci.nsMsgSearchOp.BeginsWith,
+			Ci.nsMsgSearchOp.EndsWith
+		];
+
 		this.QN = new QNoteFile;
 		this.XN = new XNoteFile;
 		this.API = options.API;
@@ -68,6 +76,14 @@ class QCustomTerm {
 
 		if(searchOp == Ci.nsMsgSearchOp.Isnt){
 			return note && note.text.toLowerCase() != keyw;
+		}
+
+		if(searchOp == Ci.nsMsgSearchOp.BeginsWith){
+			return note && (!keyw || note.text.toLowerCase().startsWith(keyw));
+		}
+
+		if(searchOp == Ci.nsMsgSearchOp.EndsWith){
+			return note && (!keyw || note.text.toLowerCase().endsWith(keyw));
 		}
 	}
 };
