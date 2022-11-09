@@ -161,6 +161,9 @@
 	"formatting.rules": {
 		"message": "Formatēšanas noteikumi"
 	},
+	"implemented.formatting.rules": {
+		"message": "(īstenoti: $1)"
+	},
 	"datetime_group": {
 		"message": "Laiks un datums"
 	},
@@ -197,6 +200,60 @@
 	"anchor.message": {
 		"message": "Vēstule"
 	},
+	"options": {
+		"message": "Uzstādījumi"
+	},
+	"reset.defaults.button": {
+		"message": "Atstatīt"
+	},
+	"error": {
+		"message": "Kļūda"
+	},
+	"custom.date.locale": {
+		"message": "Datuma lokalizācija"
+	},
+	"locale.rules": {
+		"message": "Valodu tagi"
+	},
+	"error.saving.note": {
+		"message": "Kļūda saglabājot zīmīti"
+	},
+	"error.deleting.note": {
+		"message": "Kļūda dzēšot zīmīti"
+	},
+	"close.current.note": {
+		"message": "Lūdzu aizveriet tekošo zīmīti"
+	},
+	"always.default.placement": {
+		"message": "Vienmēr lietot noklusēto izmēru un pozīciju"
+	},
+	"options.reset": {
+		"message": "Uzstādījumi atiestatīti"
+	},
+	"export.qnotes.button": {
+		"message": "Eksportēt QNotes"
+	},
+	"export.xnotes.button": {
+		"message": "Eksportēt XNotes"
+	},
+	"import.folder.button.descr": {
+		"message": "Importēt .qnote vai .xnote failus iekšējā glabātuvē"
+	},
+	"export.qnotes.button.descr": {
+		"message": "Eksportēt zīmītes no izvēlētās glabātuves .qnote formātā"
+	},
+	"export.xnotes.button.descr": {
+		"message": "Eksportēt zīmītes no izvēlētās glabātuves .xnote formātā"
+	},
+	"storage.export.button.descr": {
+		"message": "Eksportēt uzstādījumus un zīmītes no iekšējās glabātuves"
+	},
+	"storage.import.descr": {
+		"message": "Importēt uzstādījumus un zīmītes atpakaļ iekšējā glabātuvē"
+	},
+	"storage.clear.button.descr": {
+		"message": "Izdzēst uzstādījumus un zīmītes no iekšējās glabātuves"
+	},
 	"create.or.update.selected.notes": {
 		"message": "Izveidot vai labot izvēlētās zīmītes"
 	},
@@ -214,5 +271,11 @@
 	},
 	"multi.note.warning":{
 		"message": "Zīmīte tiks pievienota visām izvēlētajām vēstulēm, kurām vēl tās nav."
+	},
+	"actions.unavailable":{
+		"message": "Filtru darbības pieejamas tikai mapes glabātuvei"
+	},
+	"filters.unavailable":{
+		"message": "Filtri pieejami tikai mapes glabātuvei"
 	}
 }

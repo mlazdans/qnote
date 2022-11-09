@@ -229,5 +229,53 @@
 	},
 	"options.reset": {
 		"message": "Opțiunile au fost resetate"
+	},
+	"export.qnotes.button": {
+		"message": "Exportați QNotes"
+	},
+	"export.xnotes.button": {
+		"message": "Exportați XNotes"
+	},
+	"import.folder.button.descr": {
+		"message": "Importați fișiere .qnote sau .xnote în stocarea extensiei"
+	},
+	"export.qnotes.button.descr": {
+		"message": "Exportați notele din stocarea selectată în format .qnote"
+	},
+	"export.xnotes.button.descr": {
+		"message": "Exportați notele din stocarea selectată în format .xnote"
+	},
+	"storage.export.button.descr": {
+		"message": "Exportați preferințele și notele salvate în stocarea extensiei"
+	},
+	"storage.import.descr": {
+		"message": "Importați preferințele și notele înapoi în stocarea extensiei"
+	},
+	"storage.clear.button.descr": {
+		"message": "Ștergeți preferințele și notele salvate în stocarea extensiei"
+	},
+	"create.or.update.selected.notes": {
+		"message": "Creați sau actualizați notele selectate"
+	},
+	"delete.selected.notes": {
+		"message": "Ștergeți notele selectate"
+	},
+	"reset.selected.notes.windows": {
+		"message": "Resetați pozițiile notelor selectate"
+	},
+	"could.not.initialize.storage.folder" :{
+		"message": "Nu s-a putut inițializa folderul de stocare QNote!\nVă rugăm să examinați setările suplimentului."
+	},
+	"multi.note":{
+		"message": "Note multiple"
+	},
+	"multi.note.warning":{
+		"message": "Nota va fi adăugată la toate mesajele selectate dacă nota nu există deja."
+	},
+	"actions.unavailable":{
+		"message": "Acțiuni disponibile numai cu opțiunea de stocare în folder"
+	},
+	"filters.unavailable":{
+		"message": "Filtre disponibile numai cu opțiunea de stocare a folderelor"
 	}
 }

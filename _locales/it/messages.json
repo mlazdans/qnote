@@ -254,6 +254,15 @@
 	"storage.clear.button.descr": {
 		"message": "Cancella le preferenze e le note salvate nella memoria di estensione"
 	},
+	"create.or.update.selected.notes": {
+		"message": "Crea o aggiorna le note selezionate"
+	},
+	"delete.selected.notes": {
+			"message": "Elimina le note selezionate"
+	},
+	"reset.selected.notes.windows": {
+			"message": "Ripristina le posizioni delle note selezionate"
+	},
 	"could.not.initialize.storage.folder" :{
 		"message": "Impossibile inizializzare la cartella di archiviazione di QNote!\nRivedi le impostazioni del componente aggiuntivo."
 	},
