@@ -8,7 +8,7 @@ var Menu = {
 		return Menu.getMessage(info).id;
 	},
 	paste: async id => {
-		let oldNote = getFromClipboard();
+		let oldNote = await getFromClipboard();
 		createNoteForMessage(id).then(newNote => {
 			newNote.set({
 				left: oldNote.left,
@@ -29,7 +29,7 @@ var Menu = {
 			browser.runtime.openOptionsPage();
 		}
 	},
-	modify: id => {
+	modify: async id => {
 		// Modify
 		browser.menus.create({
 			id: "modify",
@@ -56,10 +56,12 @@ var Menu = {
 		browser.menus.create({
 			id: "paste",
 			title: _("paste"),
-			enabled: isClipboardSet(),
+			enabled: await isClipboardSet(),
 			contexts: ["message_list", "page", "frame"],
 			async onclick() {
-				Menu.paste(id);
+				if(await isClipboardSet()){
+					Menu.paste(id);
+				}
 			}
 		});
 
@@ -104,7 +106,7 @@ var Menu = {
 
 		browser.menus.create(Menu.optionsMenu);
 	},
-	new: id => {
+	new: async id => {
 		// Create new
 		browser.menus.create({
 			id: "create",
@@ -116,7 +118,7 @@ var Menu = {
 		});
 
 		// New paste
-		if(isClipboardSet()){
+		if(await isClipboardSet()){
 			browser.menus.create({
 				id: "paste",
 				title: _("paste"),
@@ -127,7 +129,7 @@ var Menu = {
 			});
 		}
 	},
-	multi: () => {
+	multi: async () => {
 		// Create multi
 		browser.menus.create({
 			id: "create_multi",
@@ -143,12 +145,14 @@ var Menu = {
 			id: "paste_multi",
 			title: _("paste.into.selected.messages"),
 			contexts: ["message_list"],
-			enabled: isClipboardSet(),
+			enabled: await isClipboardSet(),
 			async onclick(info) {
-				for(const m of info.selectedMessages.messages){
-					await Menu.paste(m.id);
-				};
-				mpUpdateForMultiMessage(info.selectedMessages.messages);
+				if(await isClipboardSet()){
+					for(const m of info.selectedMessages.messages){
+						await Menu.paste(m.id);
+					};
+					mpUpdateForMultiMessage(info.selectedMessages.messages);
+				}
 			}
 		});
 

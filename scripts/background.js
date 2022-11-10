@@ -250,7 +250,7 @@ async function initExtension(){
 		await browser.menus.removeAll();
 
 		if(info && info.selectedMessages && (info.selectedMessages.messages.length > 1)){
-			Menu.multi();
+			await Menu.multi();
 			browser.menus.refresh();
 		} else {
 			let id;
@@ -266,8 +266,8 @@ async function initExtension(){
 				id = Menu.getId(info);
 			}
 
-			loadNoteForMessage(id).then(note => {
-				Menu[note.exists ? "modify" : "new"](id);
+			loadNoteForMessage(id).then(async note => {
+				await Menu[note.exists ? "modify" : "new"](id);
 				browser.menus.refresh();
 			}).catch(silentCatcher());
 		}

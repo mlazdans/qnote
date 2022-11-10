@@ -1,5 +1,43 @@
 [{
 	"namespace": "qnote",
+	"types": [{
+		"id": "QNoteData",
+		"name": "data",
+		"type": "object",
+		"description": "Note data",
+		"properties": {
+			"left": {
+				"type": "integer",
+				"optional": true,
+				"description": "Windows left position"
+			},
+			"top": {
+				"type": "integer",
+				"optional": true,
+				"description": "Windows top position"
+			},
+			"width": {
+				"type": "integer",
+				"optional": true,
+				"description": "Windows width"
+			},
+			"height": {
+				"type": "integer",
+				"optional": true,
+				"description": "Windows height"
+			},
+			"text": {
+				"type": "string",
+				"optional": true,
+				"description": "Note text"
+			},
+			"ts": {
+				"type": "integer",
+				"optional": true,
+				"description": "Modification timestamp"
+			}
+		}
+	}],
 	"functions": [{
 		"name": "getAllKeys",
 		"type": "function",
@@ -52,42 +90,21 @@
 			"type": "string",
 			"description": "QNote key"
 		},{
-			"name": "data",
-			"type": "object",
-			"properties": {
-				"left": {
-					"type": "integer",
-					"optional": true,
-					"description": "Windows left position"
-				},
-				"top": {
-					"type": "integer",
-					"optional": true,
-					"description": "Windows top position"
-				},
-				"width": {
-					"type": "integer",
-					"optional": true,
-					"description": "Windows width"
-				},
-				"height": {
-					"type": "integer",
-					"optional": true,
-					"description": "Windows height"
-				},
-				"text": {
-					"type": "string",
-					"optional": true,
-					"description": "Note text"
-				},
-				"ts": {
-					"type": "integer",
-					"optional": true,
-					"description": "Modification timestamp"
-				}
-			},
-			"default": {},
-			"description": "Data object"
+			"$ref": "QNoteData"
 		}]
+	},{
+		"name": "copyToClipboard",
+		"type": "function",
+		"description": "",
+		"async": true,
+		"parameters": [{
+			"$ref": "QNoteData"
+		}]
+	},{
+		"name": "getFromClipboard",
+		"type": "function",
+		"description": "",
+		"async": true,
+		"parameters": []
 	}]
 }]

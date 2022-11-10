@@ -90,6 +90,7 @@ async function loadAllFolderNotes(folder) {
 // }
 
 // Prepare note for sending to qapp
+// MAYBE: merge these 2 formats into one?
 function note2QAppNote(note){
 	return note ? {
 		keyId: note.keyId,
@@ -97,6 +98,17 @@ function note2QAppNote(note){
 		text: note.text || "",
 		ts: note.ts || 0,
 		tsFormatted: qDateFormat(note.ts)
+	} : null;
+}
+
+function note2QNote(note){
+	return note ? {
+		left: note.left,
+		top: note.top,
+		width: note.width,
+		height: note.height,
+		text: note.text,
+		ts: note.ts
 	} : null;
 }
 
@@ -154,14 +166,16 @@ function sendNoteToQApp(note){
 	return stats;
 }
 
-function addToClipboard(note){
-	Clipboard.note = note;
+async function addToClipboard(note){
+	await browser.qnote.copyToClipboard(note2QNote(note));
 }
 
-function getFromClipboard(){
-	return Clipboard.note;
+async function getFromClipboard(){
+	return browser.qnote.getFromClipboard();
 }
 
-function isClipboardSet(){
-	return (Clipboard.note != undefined) && (Clipboard.note.keyId != undefined) && (Clipboard.note.keyId.length != undefined) && (Clipboard.note.keyId.length > 0);
+async function isClipboardSet(){
+	return getFromClipboard().then(content => {
+		return content && content.text && content.text.trim ? content.text.trim().length > 0 : false;
+	});
 }
