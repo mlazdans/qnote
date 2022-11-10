@@ -716,6 +716,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return;
 					}
 
+					if(!cw || !cw.gMessageSummary || !cw.gMessageSummary._msgNodes){
+						QDEB&&console.debug(`${fName} - no gMessageSummary`);
+						return;
+					}
+
 					let view = aFolderDisplay.view.dbView;
 					let summaryNodes = cw.gMessageSummary._msgNodes;
 
