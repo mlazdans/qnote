@@ -277,5 +277,14 @@
 	},
 	"filters.unavailable": {
 		"message": "Filtri pieejami tikai mapes glabātuvei"
+	},
+	"copy": {
+		"message": "Kopēt"
+	},
+	"paste": {
+		"message": "Ievietot"
+	},
+	"paste.into.selected.messages": {
+		"message": "Ievietot vēstulēs"
 	}
 }
