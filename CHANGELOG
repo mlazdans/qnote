@@ -3,9 +3,9 @@ CHANGELOG QNote
 
 RELEASE 0.12.* - Nov 9, 2022
 -----------------
-- Add multi message selection context menu (create, update, delete, reset)
+- Add multi message selection context menu (create, update, delete, reset, copy, paste)
 - Add icon to multi message selection list
-- Add filters (Edit / Find / Search Messages )
+- Add filters (Edit / Find / Search Messages)
 - Add filter actions (Tools / Message Filters)
 - Add clipboard Copy / Paste
 - Lots of fixes and code cleanup

@@ -21,8 +21,9 @@ This is source code repository for Thunderbird [QNote](https://addons.thunderbir
 - Save note position, size, multiple default note positions
 - Searchable notes via Thunderbird's QuickFilter or Edit / Find / Search Messages
 - Various filter actions via Tools / Message Filters
+- Clipboard Copy / Paste
 - Mail pane column with note icon and / or note preview
-- Multi message  actions: create, update, delete, reset
+- Actions on multi message selection: create, update, delete, reset, copy, paste
 - Attach note to message body
 - Attach note when printing
 - Light / dark theme
