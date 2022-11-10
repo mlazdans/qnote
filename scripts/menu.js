@@ -7,6 +7,20 @@ var Menu = {
 	getId: info => {
 		return Menu.getMessage(info).id;
 	},
+	paste: async id => {
+		let oldNote = await getFromClipboard();
+		createNoteForMessage(id).then(newNote => {
+			newNote.set({
+				left: oldNote.left,
+				top: oldNote.top,
+				width: oldNote.width,
+				height: oldNote.height,
+				text: oldNote.text,
+				ts: Date.now()
+			});
+			newNote.save();
+		});
+	},
 	optionsMenu: {
 		id: "options",
 		title: _("options"),
@@ -15,16 +29,43 @@ var Menu = {
 			browser.runtime.openOptionsPage();
 		}
 	},
-	modify: id => {
+	modify: async id => {
+		// Modify
 		browser.menus.create({
 			id: "modify",
 			title: _("modify.note"),
 			contexts: ["message_list", "page", "frame"],
 			onclick(info) {
 				QNotePopForMessage(id, POP_FOCUS);
-			},
+			}
 		});
 
+		// Copy
+		browser.menus.create({
+			id: "copy",
+			title: _("copy"),
+			contexts: ["message_list", "page", "frame"],
+			onclick() {
+				loadNoteForMessage(id).then(note => {
+					addToClipboard(note);
+				});
+			}
+		});
+
+		// Existing paste
+		browser.menus.create({
+			id: "paste",
+			title: _("paste"),
+			enabled: await isClipboardSet(),
+			contexts: ["message_list", "page", "frame"],
+			async onclick() {
+				if(await isClipboardSet()){
+					Menu.paste(id);
+				}
+			}
+		});
+
+		// Delete
 		browser.menus.create({
 			id: "delete",
 			title: _("delete.note"),
@@ -37,9 +78,10 @@ var Menu = {
 						deleteNoteForMessage(id).then(updateNoteView).catch(e => browser.legacy.alert(_("error.deleting.note"), e.message));
 					}
 				}
-			},
+			}
 		});
 
+		// Reset
 		browser.menus.create({
 			id: "reset",
 			title: _("reset.note.window"),
@@ -59,22 +101,35 @@ var Menu = {
 						height: Prefs.height
 					}).catch(e => browser.legacy.alert(_("error.saving.note"), e.message));
 				}
-			},
+			}
 		});
 
 		browser.menus.create(Menu.optionsMenu);
 	},
-	new: (id) => {
+	new: async id => {
+		// Create new
 		browser.menus.create({
 			id: "create",
 			title: _("create.new.note"),
 			contexts: ["message_list", "page", "frame"],
 			async onclick() {
 				QNotePopForMessage(id, POP_FOCUS);
-			},
+			}
 		});
+
+		// New paste
+		if(await isClipboardSet()){
+			browser.menus.create({
+				id: "paste",
+				title: _("paste"),
+				contexts: ["message_list", "page", "frame"],
+				async onclick() {
+					Menu.paste(id);
+				}
+			});
+		}
 	},
-	multi: () => {
+	multi: async () => {
 		// Create multi
 		browser.menus.create({
 			id: "create_multi",
@@ -82,7 +137,23 @@ var Menu = {
 			contexts: ["message_list"],
 			async onclick(info) {
 				createMultiNote(info.selectedMessages.messages, true);
-			},
+			}
+		});
+
+		// Paste multi
+		browser.menus.create({
+			id: "paste_multi",
+			title: _("paste.into.selected.messages"),
+			contexts: ["message_list"],
+			enabled: await isClipboardSet(),
+			async onclick(info) {
+				if(await isClipboardSet()){
+					for(const m of info.selectedMessages.messages){
+						await Menu.paste(m.id);
+					};
+					mpUpdateForMultiMessage(info.selectedMessages.messages);
+				}
+			}
 		});
 
 		// Delete multi
@@ -103,7 +174,7 @@ var Menu = {
 					}
 					mpUpdateForMultiMessage(info.selectedMessages.messages);
 				}
-			},
+			}
 		});
 
 		// Reset multi
@@ -130,7 +201,7 @@ var Menu = {
 						}
 					}).catch(() => { });
 				}
-			},
+			}
 		});
 
 		browser.menus.create(Menu.optionsMenu);

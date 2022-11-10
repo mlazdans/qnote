@@ -263,19 +263,19 @@
 	"reset.selected.notes.windows": {
 		"message": "Resetați pozițiile notelor selectate"
 	},
-	"could.not.initialize.storage.folder" :{
+	"could.not.initialize.storage.folder": {
 		"message": "Nu s-a putut inițializa folderul de stocare QNote!\nVă rugăm să examinați setările suplimentului."
 	},
-	"multi.note":{
+	"multi.note": {
 		"message": "Note multiple"
 	},
-	"multi.note.warning":{
+	"multi.note.warning": {
 		"message": "Nota va fi adăugată la toate mesajele selectate dacă nota nu există deja."
 	},
-	"actions.unavailable":{
+	"actions.unavailable": {
 		"message": "Acțiuni disponibile numai cu opțiunea de stocare în folder"
 	},
-	"filters.unavailable":{
+	"filters.unavailable": {
 		"message": "Filtre disponibile numai cu opțiunea de stocare a folderelor"
 	}
 }

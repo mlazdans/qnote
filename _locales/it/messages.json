@@ -263,19 +263,19 @@
 	"reset.selected.notes.windows": {
 			"message": "Ripristina le posizioni delle note selezionate"
 	},
-	"could.not.initialize.storage.folder" :{
+	"could.not.initialize.storage.folder": {
 		"message": "Impossibile inizializzare la cartella di archiviazione di QNote!\nRivedi le impostazioni del componente aggiuntivo."
 	},
-	"multi.note":{
+	"multi.note": {
 		"message": "Nota Multipla"
 	},
-	"multi.note.warning":{
+	"multi.note.warning": {
 		"message": "Se la nota non esiste già, verrà aggiunta a tutti i messaggi selezionati."
 	},
-	"actions.unavailable":{
+	"actions.unavailable": {
 		"message": "Azioni disponibili solo con l'opzione di archiviazione delle cartelle"
 	},
-	"filters.unavailable":{
+	"filters.unavailable": {
 		"message": "Filtri disponibili solo con l'opzione di archiviazione delle cartelle"
 	}
 }
