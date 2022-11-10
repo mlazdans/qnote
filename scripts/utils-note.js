@@ -153,3 +153,15 @@ function sendNoteToQApp(note){
 
 	return stats;
 }
+
+function addToClipboard(note){
+	Clipboard.note = note;
+}
+
+function getFromClipboard(){
+	return Clipboard.note;
+}
+
+function isClipboardSet(){
+	return (Clipboard.note != undefined) && (Clipboard.note.keyId != undefined) && (Clipboard.note.keyId.length != undefined) && (Clipboard.note.keyId.length > 0);
+}

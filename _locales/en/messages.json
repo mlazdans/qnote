@@ -277,5 +277,14 @@
 	},
 	"filters.unavailable":{
 		"message": "Filters available only with folder storage option"
+	},
+	"copy": {
+		"message": "Copy"
+	},
+	"paste": {
+		"message": "Paste"
+	},
+	"paste.into.selected.messages": {
+		"message": "Paste into messages"
 	}
 }

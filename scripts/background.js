@@ -12,6 +12,7 @@ var CurrentWindowId; // MAYBE: should get rid of and replace with CurrentNote.wi
 var CurrentLang;
 var TBInfo;
 var i18n = new DOMLocalizator(browser.i18n.getMessage);
+var Clipboard = {};
 
 function resetTbState(){
 	browser.menus.removeAll();
