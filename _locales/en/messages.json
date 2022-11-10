@@ -263,19 +263,19 @@
 	"reset.selected.notes.windows": {
 		"message": "Reset selected notes positions"
 	},
-	"could.not.initialize.storage.folder" :{
+	"could.not.initialize.storage.folder": {
 		"message": "Could not initialize QNote storage folder!\nPlease review add-on settings."
 	},
-	"multi.note":{
+	"multi.note": {
 		"message": "Multi note"
 	},
-	"multi.note.warning":{
+	"multi.note.warning": {
 		"message": "Note will be added to all selected messages if note does not exists already."
 	},
-	"actions.unavailable":{
+	"actions.unavailable": {
 		"message": "Actions available only with folder storage option"
 	},
-	"filters.unavailable":{
+	"filters.unavailable": {
 		"message": "Filters available only with folder storage option"
 	},
 	"copy": {

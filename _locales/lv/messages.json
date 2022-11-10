@@ -263,19 +263,19 @@
 	"reset.selected.notes.windows": {
 		"message": "Atiestatīt izvēlēto zīmīšu logu pozīcijas"
 	},
-	"could.not.initialize.storage.folder" :{
+	"could.not.initialize.storage.folder": {
 		"message": "Nevar inicializēt QNote glabāšanas mapi!\nLūdzu pārskatiet add-on uzstādījumus."
 	},
-	"multi.note":{
+	"multi.note": {
 		"message": "Multi zīmītes"
 	},
-	"multi.note.warning":{
+	"multi.note.warning": {
 		"message": "Zīmīte tiks pievienota visām izvēlētajām vēstulēm, kurām vēl tās nav."
 	},
-	"actions.unavailable":{
+	"actions.unavailable": {
 		"message": "Filtru darbības pieejamas tikai mapes glabātuvei"
 	},
-	"filters.unavailable":{
+	"filters.unavailable": {
 		"message": "Filtri pieejami tikai mapes glabātuvei"
 	}
 }
