@@ -21,7 +21,7 @@
 		"message": "Supprimer la note"
 	},
 	"reset.note.window": {
-		"message": "Réinitialiser la fenêtre"
+		"message": "Réinitialiser la position de la note"
 	},
 	"create.new.note": {
 		"message": "Créer une note"
@@ -253,5 +253,38 @@
 	},
 	"storage.clear.button.descr": {
 		"message": "Effacer les préférences et les notes enregistrées dans le stockage de l’extension"
+	},
+	"create.or.update.selected.notes": {
+		"message": "Créer ou mettre à jour les notes sélectionnées"
+	},
+	"delete.selected.notes": {
+		"message": "Supprimer les notes sélectionnées"
+	},
+	"reset.selected.notes.windows": {
+		"message": "Réinitialiser les positions des notes sélectionnées"
+	},
+	"could.not.initialize.storage.folder": {
+		"message": "Impossible d’initialiser le dossier de stockage de QNote !\nVérifiez les paramètres de l’extension."
+	},
+	"multi.note": {
+		"message": "Note multiple"
+	},
+	"multi.note.warning": {
+		"message": "La note sera ajoutée à tous les messages sélectionnés s’ils n’en ont pas déjà une."
+	},
+	"actions.unavailable": {
+		"message": "Actions disponibles uniquement avec l’option de stockage dans un dossier"
+	},
+	"filters.unavailable": {
+		"message": "Filtres disponibles uniquement avec l’option de stockage dans un dossier"
+	},
+	"copy": {
+		"message": "Copier"
+	},
+	"paste": {
+		"message": "Coller"
+	},
+	"paste.into.selected.messages": {
+		"message": "Coller dans les messages"
 	}
 }
