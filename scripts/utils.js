@@ -539,7 +539,7 @@ async function exportQAppNotesToFolder(root, type, overwrite){
 
 async function createMultiNote(messageList, overwrite = false){
 	await CurrentNote.silentlyPersistAndClose();
-	let note = createNote('multi');
+	let note = createNote('qnote.multi');
 	CurrentNote.note = note;
 	CurrentNote.note.title = _("multi.note");
 	CurrentNote.note.placeholder = _("multi.note.warning");
