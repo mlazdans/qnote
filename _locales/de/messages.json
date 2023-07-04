@@ -253,5 +253,38 @@
 	},
 	"storage.clear.button.descr": {
 		"message": "Alle Einstellungen und Notizen im Archiv löschen"
+	},
+	"create.or.update.selected.notes": {
+		"message": "Ausgewählte Notizen neu erstellen oder ändern"
+	},
+	"delete.selected.notes": {
+		"message": "Ausgewählte Notizen löschen"
+	},
+	"reset.selected.notes.windows": {
+		"message": "Positionen der ausgewählten Notizen auf Standard zurücksetzen"
+	},
+	"could.not.initialize.storage.folder": {
+		"message": "Konnte angegebenen Ordner fürs QNote-Archiv nicht verwenden!\nBitte Add-on-Einstellungen prüfen."
+	},
+	"multi.note": {
+		"message": "Mehrfach-Notiz"
+	},
+	"multi.note.warning": {
+		"message": "Notiz zu allen ausgewählten Emails hinzufügen, falls nicht schon vorhanden."
+	},
+	"actions.unavailable": {
+		"message": "Nur möglich, falls Archiv in Ordner (Lokaler Datenträger) gespeichert ist."
+	},
+	"filters.unavailable": {
+		"message": "Filter nur verfügbar, falls Archiv in Ordner (Lokaler Datenträger) gespeichert"
+	},
+	"copy": {
+		"message": "Kopieren"
+	},
+	"paste": {
+		"message": "Einfügen"
+	},
+	"paste.into.selected.messages": {
+		"message": "Zu allen ausgewählten Emails hinzufügen"
 	}
 }
