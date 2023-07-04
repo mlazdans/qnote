@@ -290,6 +290,28 @@ async function initExtension(){
 		});
 	}
 
+	messenger.NotifyTools.onNotifyBackground.addListener(async (data) => {
+		if(data.command == "pop"){
+			browser.messages.query({
+				headerMessageId: data.messageId
+			}).then(async MList => {
+				if(MList.messages && (MList.messages.length === 1)){
+					let Message = MList.messages[0];
+					let flags = POP_EXISTING;
+					if(Prefs.focusOnDisplay){
+						flags |= POP_FOCUS;
+					}
+
+					QNotePopForMessage(Message.id, flags).then(isPopped =>{
+						// Focus message pane in case popped
+						if(isPopped && !Prefs.focusOnDisplay){
+							focusMessagePane(CurrentNote.windowId);
+						}
+					});
+				}
+			});
+		}
+	});
 	// TODO: add "install", "update" handling if neccessary
 	// if temporary - add reload button to the main toolbar to speed up developement
 	// messenger.runtime.onInstalled.addListener(async ({ reason, temporary })

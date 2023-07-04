@@ -10,6 +10,8 @@ var { QNoteAction } = ChromeUtils.import("resource://qnote/modules/QNoteAction.j
 var { QEventDispatcher } = ChromeUtils.import("resource://qnote/modules/QEventDispatcher.js");
 var { QCache } = ChromeUtils.import("resource://qnote/modules/QCache.js");
 
+Services.scriptloader.loadSubScript(extension.rootURI.resolve("scripts/notifyTools.js"), null, "UTF-8");
+
 var QDEB = true;
 var qapp = class extends ExtensionCommon.ExtensionAPI {
 	constructor(...args){
@@ -681,6 +683,17 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 							document.querySelector('.qnote-insidenote-bottom > .qnote-text').textContent = data.text;
 						}
 					}
+
+					// Double click on embedded message
+					document.querySelectorAll('.qnote-insidenote').forEach(function(e, i){
+						e.addEventListener("dblclick", function(){
+							notifyTools.notifyBackground({
+								command: "pop",
+								messageId: data.keyId
+							});
+							return false;
+						});
+					});
 				},
 				/**
 				 * @param {number} windowId
