@@ -112,6 +112,15 @@
 				"paths": [["ResourceUrl"]],
 				"script": "api/ResourceUrl.js"
 			}
+		},
+		"NotifyTools": {
+			"schema": "schemas/NotifyTools.json",
+			"parent": {
+				"scopes": ["addon_parent"],
+				"paths": [["NotifyTools"]],
+				"script": "api/NotifyTools.js",
+				"events": ["startup"]
+			}
 		}
 	}
 }
