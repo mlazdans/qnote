@@ -1,5 +1,7 @@
 var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
-var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+var Services = globalThis.Services || ChromeUtils.import(
+  "resource://gre/modules/Services.jsm"
+).Services;
 
 var legacy = class extends ExtensionCommon.ExtensionAPI {
 	getAPI(context) {

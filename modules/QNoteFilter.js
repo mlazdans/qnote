@@ -1,4 +1,6 @@
-var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+const Services = globalThis.Services || ChromeUtils.import(
+  "resource://gre/modules/Services.jsm"
+).Services;
 var { QuickFilterManager, MessageTextFilter } = ChromeUtils.import("resource:///modules/QuickFilterManager.jsm");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
 var { QCustomTerm } = ChromeUtils.import("resource://qnote/modules/QCustomTerm.js");

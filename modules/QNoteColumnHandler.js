@@ -1,4 +1,6 @@
-var { Services } = ChromeUtils.import("resource://gre/modules/Services.jsm");
+const Services = globalThis.Services || ChromeUtils.import(
+  "resource://gre/modules/Services.jsm"
+).Services;
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
