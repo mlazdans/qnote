@@ -17,7 +17,6 @@
 	background-repeat: repeat-x;
 	background-position: bottom;
 	background-color: #fff08d;
-	display: flex;
 	align-items: baseline;
 	font-size: small;
 	font-weight: bolder;
@@ -27,7 +26,6 @@
 }
 
 .qnote-text {
-	white-space: pre;
 	color: black;
 	box-sizing: border-box;
 	margin: 0;
