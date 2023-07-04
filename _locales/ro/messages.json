@@ -277,5 +277,14 @@
 	},
 	"filters.unavailable": {
 		"message": "Filtre disponibile numai cu opțiunea de stocare a folderelor"
+	},
+	"copy": {
+		"message": "Copiați"
+	},
+	"paste": {
+		"message": "Lipiți"
+	},
+	"paste.into.selected.messages": {
+		"message": "Lipiți în mesaje"
 	}
 }
