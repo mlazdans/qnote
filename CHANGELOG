@@ -1,6 +1,12 @@
 CHANGELOG QNote
 ===========================
 
+RELEASE 0.12.3 - Jul 4, 2023
+-----------------
+- Double click on embedded note opens note popup (#35)
+- Fix embedded note incorrect text wrapping (#39)
+- Fix QuickFilter on focus triggers unnecessary search (#43)
+
 RELEASE 0.12.* - Nov 9, 2022
 -----------------
 - Add multi message selection context menu (create, update, delete, reset, copy, paste)
