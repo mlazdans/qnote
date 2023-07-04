@@ -277,5 +277,14 @@
 	},
 	"filters.unavailable": {
 		"message": "Filtri disponibili solo con l'opzione di archiviazione delle cartelle"
+	},
+	"copy": {
+		"message": "Copia"
+	},
+	"paste": {
+		"message": "Incolla"
+	},
+	"paste.into.selected.messages": {
+		"message": "Incolla nel messaggio"
 	}
 }
