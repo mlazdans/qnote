@@ -631,7 +631,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// Bail if no data or trying to attach to alien message
 					if(aMessageDisplay.displayedMessage.messageId !== data.keyId){
 						QDEB&&console.debug(`${fName} - trying to attach to alien message`);
-						return
+						return;
 					}
 
 					QDEB&&console.debug(`${fName}`);
