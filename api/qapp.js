@@ -608,7 +608,23 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return;
 					}
 
-					let messagepane = w.document.getElementById('messagepane');
+					let messagepane;
+					let aMessageDisplay;
+
+					if(w.gTabmail){
+						let ww = w.gTabmail.tabInfo.find(
+							t => t.mode.name == "mail3PaneTab"
+						).chromeBrowser.contentWindow;
+
+						let mailMessageWindow = ww.messageBrowser.contentWindow;
+
+						messagepane = mailMessageWindow.document.getElementById('messagepane');
+						aMessageDisplay = mailMessageWindow.gMessage;
+					} else {
+						messagepane = w.document.getElementById('messagepane');
+						aMessageDisplay = w.gMessageDisplay.displayedMessage;
+					}
+
 					if(!messagepane || !messagepane.contentDocument){
 						QDEB&&console.debug(`${fName} - no messagepane`);
 						return;
@@ -624,14 +640,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return;
 					}
 
-					let aMessageDisplay = w.gMessageDisplay;
-					if(!(aMessageDisplay && aMessageDisplay.displayedMessage)) {
+					if(!aMessageDisplay) {
 						QDEB&&console.debug(`${fName} - no MessageDisplay`);
 						return;
 					}
 
 					// Bail if no data or trying to attach to alien message
-					if(aMessageDisplay.displayedMessage.messageId !== data.keyId){
+					if(aMessageDisplay.messageId !== data.keyId){
 						QDEB&&console.debug(`${fName} - trying to attach to alien message`);
 						return;
 					}
