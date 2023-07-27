@@ -80,24 +80,32 @@ class QNoteFilter {
 		QDEB&&console.log(`[QNoteFilter] initital state`, state);
 
 		let holder = w.document.createElement('button');
-		holder.pressed = state && state.qnote;
+
+		if(state && ("qnote" in state)){
+			holder.pressed2 = !!state.qnote;
+		} else {
+			holder.pressed2 = true;
+		}
+		state["qnote"] = holder.pressed2;
+		QDEB&&console.log(`[holder.pressed]`, holder.pressed2);
+
 		holder.setAttribute("id", this.qfQnoteDomId);
 		holder.setAttribute("is", "toggle-button");
-		holder.setAttribute("aria-pressed", holder.pressed);
+		holder.setAttribute("aria-pressed", holder.pressed2);
 		holder.textContent = "QNote";
 		holder.classList.add("button");
 		holder.classList.add("check-button");
 		holder.addEventListener("click", () => {
-			holder.pressed = !holder.pressed;
-			holder.setAttribute("aria-pressed", holder.pressed);
+			holder.pressed2 = !holder.pressed2;
+			holder.setAttribute("aria-pressed", holder.pressed2);
 
 			let state = w.quickFilterBar.getFilterValueForMutation(MessageTextFilter.name);
 
-			state["qnote"] = holder.pressed;
+			state["qnote"] = holder.pressed2;
 
 			QDEB&&console.log(`[QNoteFilter] click`, state);
 
-			if(holder.pressed){
+			if(holder.pressed2){
 				w.quickFilterBar.setFilterValue("qnote", state.text);
 			} else {
 				w.quickFilterBar.setFilterValue("qnote", "");
@@ -106,14 +114,10 @@ class QNoteFilter {
 			w.quickFilterBar.updateSearch(holder);
 		});
 
-		if(holder.pressed){
-			w.quickFilterBar.setFilterValue("qnote", state.text);
-		}
-
 		let commandHandler = () => {
 			let state = w.quickFilterBar.getFilterValueForMutation(MessageTextFilter.name);
 			QDEB&&console.log(`[QNoteFilter] text`, state);
-			if(holder.pressed){
+			if(holder.pressed2){
 				w.quickFilterBar.setFilterValue("qnote", state.text);
 			} else {
 				w.quickFilterBar.setFilterValue("qnote", "");
@@ -128,6 +132,13 @@ class QNoteFilter {
 		});
 
 		filterBar.appendChild(holder);
+
+		if(holder.pressed2){
+			w.quickFilterBar.setFilterValue("qnote", state.text);
+		} else {
+			w.quickFilterBar.setFilterValue("qnote", "");
+		}
+
 	}
 
 	attachToWindow(w) {
