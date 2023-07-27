@@ -420,6 +420,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					QDEB&&console.debug("Installing custom filter");
 					API.QNoteFilter = new QNoteFilter({
 						API: API,
+						QDEB: QDEB,
 						w: w
 					});
 
