@@ -8,6 +8,7 @@ var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionPa
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
 var EXPORTED_SYMBOLS = ["QNoteFilter"];
+var QDEB;
 
 /*
 
@@ -58,7 +59,82 @@ class QNoteFilter {
 		aMuxer.deferredUpdateSearch();
 	}
 
+	attachToWindowTB115(win) {
+		let w = win.gTabmail.tabInfo.find(
+			t => t.mode.name == "mail3PaneTab"
+		).chromeBrowser.contentWindow;
+
+		let filterBar = w.document.querySelector("#quick-filter-bar-filter-text-bar > div.button-group");
+
+		if(!filterBar) {
+			return;
+		}
+
+		let node = w.document.getElementById(this.qfQnoteDomId);
+
+		if(node){
+			node.remove();
+		}
+
+		let state = w.quickFilterBar.getFilterValueForMutation(MessageTextFilter.name);
+		QDEB&&console.log(`[QNoteFilter] initital state`, state);
+
+		let holder = w.document.createElement('button');
+		holder.pressed = state && state.qnote;
+		holder.setAttribute("id", this.qfQnoteDomId);
+		holder.setAttribute("is", "toggle-button");
+		holder.setAttribute("aria-pressed", holder.pressed);
+		holder.textContent = "QNote";
+		holder.classList.add("button");
+		holder.classList.add("check-button");
+		holder.addEventListener("click", () => {
+			holder.pressed = !holder.pressed;
+			holder.setAttribute("aria-pressed", holder.pressed);
+
+			let state = w.quickFilterBar.getFilterValueForMutation(MessageTextFilter.name);
+
+			state["qnote"] = holder.pressed;
+
+			QDEB&&console.log(`[QNoteFilter] click`, state);
+
+			if(holder.pressed){
+				w.quickFilterBar.setFilterValue("qnote", state.text);
+			} else {
+				w.quickFilterBar.setFilterValue("qnote", "");
+			}
+
+			w.quickFilterBar.updateSearch(holder);
+		});
+
+		if(holder.pressed){
+			w.quickFilterBar.setFilterValue("qnote", state.text);
+		}
+
+		let commandHandler = () => {
+			let state = w.quickFilterBar.getFilterValueForMutation(MessageTextFilter.name);
+			QDEB&&console.log(`[QNoteFilter] text`, state);
+			if(holder.pressed){
+				w.quickFilterBar.setFilterValue("qnote", state.text);
+			} else {
+				w.quickFilterBar.setFilterValue("qnote", "");
+			}
+		};
+
+		let qfTextBox = w.document.getElementById('qfb-qs-textbox');
+		qfTextBox.addEventListener("command", commandHandler);
+
+		this.addListener("uninstall", () => {
+			qfTextBox.removeEventListener("command", commandHandler);
+		});
+
+		filterBar.appendChild(holder);
+	}
+
 	attachToWindow(w) {
+		if(w.gTabmail){
+			return this.attachToWindowTB115(w);
+		}
+
 		let QNoteFilter = this;
 		let state = this.getQNoteQFState();
 
@@ -299,9 +375,12 @@ class QNoteFilter {
 
 		this.options = options;
 
+		QDEB = options.QDEB;
 
 		if(MailServices.filters.getCustomTerm(this.CustomTermId)){
+			QDEB&&console.log(`[QNoteFilter] CustomTerm ${this.CustomTermId} already defined`);
 		} else {
+			QDEB&&console.log(`[QNoteFilter] Defining CustomTerm ${this.CustomTermId}`);
 			MailServices.filters.addCustomTerm(new QCustomTerm({
 				API: QNoteFilter.options.API
 			}));
@@ -310,14 +389,6 @@ class QNoteFilter {
 		let NoteQF = {
 			name: "qnote",
 			domId: this.qfQnoteDomId,
-			reflectInDOM: function(aDomNode, aFilterValue, aDocument, aMuxer){
-				let state = QNoteFilter.getQNoteQFState();
-				let textFilter = aMuxer.getFilterValueForMutation("text");
-				if(state){
-					aMuxer.setFilterValue("qnote", textFilter.text);
-				}
-				QNoteFilter.updateSearch(aMuxer);
-			},
 			// https://stackoverflow.com/a/6969486/10973173
 			escapeRegExp(string) {
 				return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
@@ -326,6 +397,7 @@ class QNoteFilter {
 				// Let us borrow an existing code just for a while :>
 				let filterValue = this.escapeRegExp(aFilterValue).toLowerCase();
 				var phrases = MessageTextFilter._parseSearchString(filterValue);
+				QDEB&&console.log("[QNoteFilter] appendTerms", phrases);
 				var firstClause = true;
 				var l = phrases.length;
 
