@@ -1,6 +1,11 @@
 CHANGELOG QNote
 ===========================
 
+RELEASE 0.12.4 - Jul 28, 2023
+-----------------
+- Fix some TB 115 issues
+- Column handler does not work with this version
+
 RELEASE 0.12.3 - Jul 4, 2023
 -----------------
 - Double click on embedded note opens note popup (#35)
