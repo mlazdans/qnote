@@ -105,6 +105,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					aSubject.addEventListener("DOMContentLoaded", e => {
 						let document = e.target;
 
+						QDEB&&console.debug(`${fName} [DOMContentLoaded]`, document.URL);
+
 						// Attach to QuickFilter
 						if(document.URL.includes('chrome://messenger/content/messenger')){
 							if(API.QNoteFilter && document.getElementById('tabmail')){
