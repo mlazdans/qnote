@@ -203,7 +203,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		this.printerAttacherPrefs = {};
 		this.messageAttacherPrefs = {};
-		// this.QNoteFilter = new QNoteFilter();
 	}
 
 	uninstallCSS(cssUri) {
@@ -591,47 +590,15 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					API.updateView(w, keyId);
 				},
-				async attachNoteToMessage(windowId, data){
-					let fName = `qapp.attachNoteToMessage(${windowId})`;
-
-					if(!data){
-						QDEB&&console.debug(`${fName} - no note data`);
-						return;
-					}
-
-					let prefs = API.messageAttacherPrefs;
-					if(!prefs){
-						QDEB&&console.debug(`${fName} - no prefs`);
-						return;
-					}
-
-					let w = API.id2RealWindow(windowId);
-					if(!w || !w.document){
-						QDEB&&console.debug(`${fName} - no window`);
-						return;
-					}
-
-					let messagepane;
-					let aMessageDisplay;
-
-					if(w.gTabmail){
-						let ww = w.gTabmail.tabInfo.find(
-							t => t.mode.name == "mail3PaneTab"
-						).chromeBrowser.contentWindow;
-
-						let mailMessageWindow = ww.messageBrowser.contentWindow;
-
-						messagepane = mailMessageWindow.document.getElementById('messagepane');
-						aMessageDisplay = mailMessageWindow.gMessage;
-					} else {
-						messagepane = w.document.getElementById('messagepane');
-						aMessageDisplay = w.gMessageDisplay.displayedMessage;
-					}
+				async attachToMessagePane(messagepane, aMessageDisplay, data){
+					let fName = `qapp.attachToMessagePane()`;
 
 					if(!messagepane || !messagepane.contentDocument){
 						QDEB&&console.debug(`${fName} - no messagepane`);
 						return;
 					}
+
+					let prefs = API.messageAttacherPrefs;
 
 					let document = messagepane.contentDocument;
 
@@ -712,6 +679,66 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 							return false;
 						});
 					});
+				},
+				async attachNoteToMessage(windowId, data){
+					let fName = `qapp.attachNoteToMessage(${windowId})`;
+
+					if(!data){
+						QDEB&&console.debug(`${fName} - no note data`);
+						return;
+					}
+
+					let prefs = API.messageAttacherPrefs;
+					if(!prefs){
+						QDEB&&console.debug(`${fName} - no prefs`);
+						return;
+					}
+
+					let w = API.id2RealWindow(windowId);
+					if(!w || !w.document){
+						QDEB&&console.debug(`${fName} - no window`);
+						return;
+					}
+
+					let messagepane;
+					let aMessageDisplay;
+
+					// about:message, new window
+					if(w.messageBrowser && w.messageBrowser.contentWindow){
+						let mailMessageWindow = w.messageBrowser.contentWindow;
+
+						messagepane = mailMessageWindow.document.getElementById('messagepane');
+						aMessageDisplay = mailMessageWindow.gMessage;
+						this.attachToMessagePane(messagepane, aMessageDisplay, data);
+					} else if(w.gTabmail){
+						// TODO: Update only changed tab. Now we iterate through all mail tabs.
+						w.gTabmail.tabInfo.filter(
+							t => t.mode.name == "mailMessageTab"
+						).map(t => {
+							let mailMessageWindow = t.chromeBrowser.contentWindow;
+
+							messagepane = mailMessageWindow.document.getElementById('messagepane');
+							aMessageDisplay = mailMessageWindow.gMessage;
+
+							this.attachToMessagePane(messagepane, aMessageDisplay, data);
+						});
+
+						// Current pane
+						if(w.gTabmail.currentAbout3Pane){
+							let mail3PaneWindow = w.gTabmail.currentAbout3Pane;
+							let mailMessageWindow = mail3PaneWindow.messageBrowser.contentWindow
+
+							messagepane = mailMessageWindow.document.getElementById('messagepane');
+							aMessageDisplay = mailMessageWindow.gMessage;
+
+							this.attachToMessagePane(messagepane, aMessageDisplay, data);
+						}
+					} else {
+						// Legacy
+						messagepane = w.document.getElementById('messagepane');
+						aMessageDisplay = w.gMessageDisplay.displayedMessage;
+						this.attachToMessagePane(messagepane, aMessageDisplay, data);
+					}
 				},
 				/**
 				 * @param {number} windowId
