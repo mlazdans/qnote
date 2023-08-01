@@ -1,10 +1,11 @@
 CHANGELOG QNote
 ===========================
 
-RELEASE 0.12.4 - Jul 28, 2023
+RELEASE 0.12.5 - Aug 1, 2023
 -----------------
 - Fix some TB 115 issues
-- Column handler does not work with this version
+- Column handler still won't not work with TB 115
+- QuickFilter still won't work with TB 115
 
 RELEASE 0.12.3 - Jul 4, 2023
 -----------------

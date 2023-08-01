@@ -89,6 +89,7 @@ _Floating panel_ has nicer looks but does not display well on MacOS. Fall back t
 
 # Known issues
 - Column handler does not work with TB 115
+- QuickFilter does not work with TB 115. You can still use message search.
 - Search and filters working only when using _folder storage_ option.
 - Does not work very well together with <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/gmail-conversation-view/">Conversations</a> plugin.
 - TB 91.x versions does not work well on Macs when using _Floating panel_ window option.
