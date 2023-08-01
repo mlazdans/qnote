@@ -60,10 +60,33 @@ class QNoteFilter {
 	}
 
 	attachToWindowTB115(win) {
+		// We currently can not attach qnote dom representation to TB115 such as it persist between new window or tab
+		// Bellow are some (unsuccessful) attempts.
+		// Bail for now
+
+		return false;
+
 		let w = win.gTabmail.tabInfo.find(
 			t => t.mode.name == "mail3PaneTab"
 		).chromeBrowser.contentWindow;
 
+		let tabmail = win.document.querySelector("#mail3PaneTabTemplate");
+		let browser = tabmail.content.querySelector("browser");
+
+		console.log("[tabmail]", tabmail, browser);
+
+		const observer = new win.MutationObserver(function(mutations){
+			console.log("[observer]", mutations);
+		});
+
+		observer.observe(tabmail, {
+			childList: true,
+			attributes: true,
+			subtree: true,
+			attributeOldValue: true
+		});
+
+		// Below this point it works but only on main tab. This will destroy new window/tab.
 		let filterBar = w.document.querySelector("#quick-filter-bar-filter-text-bar > div.button-group");
 
 		if(!filterBar) {
@@ -439,7 +462,11 @@ class QNoteFilter {
 			}
 		};
 
-		this.QuickFilterManager.defineFilter(NoteQF);
+		if(options.w.gTabmail){
+			QDEB&&console.log(`[QNoteFilter] broken on TB 115, disabling`);
+		} else {
+			this.QuickFilterManager.defineFilter(NoteQF);
+		}
 
 		this.attachToWindow(options.w);
 	}
