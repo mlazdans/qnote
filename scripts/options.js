@@ -480,7 +480,12 @@ async function initOptionsPage(){
 	if(!ext.Prefs){
 		ext.Prefs = await ext.loadPrefsWithDefaults();
 	}
-	let tags = await ext.browser.messages.listTags();
+	let tags;
+	if(ext.browser.messages.tags){
+		tags = await ext.browser.messages.tags.list();
+	} else {
+		tags = await ext.browser.messages.listTags();
+	}
 	DefaultPrefs = ext.getDefaultPrefs();
 
 	i18n.setTexts(document);

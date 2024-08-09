@@ -18,6 +18,7 @@
 		"64": "images/icon.svg"
 	},
 	"permissions": [
+		"messagesTagsList",
 		"messagesRead",
 		"storage",
 		"unlimitedStorage",
