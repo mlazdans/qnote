@@ -10,6 +10,16 @@ var { QNoteAction } = ChromeUtils.import("resource://qnote/modules/QNoteAction.j
 var { QEventDispatcher } = ChromeUtils.import("resource://qnote/modules/QEventDispatcher.js");
 var { QCache } = ChromeUtils.import("resource://qnote/modules/QCache.js");
 
+var ThreadPaneColumns;
+try {
+	({ ThreadPaneColumns } = ChromeUtils.importESModule("chrome://messenger/content/thread-pane-columns.mjs"));
+} catch (err) {
+	try {
+		({ ThreadPaneColumns } = ChromeUtils.importESModule("chrome://messenger/content/ThreadPaneColumns.mjs"));
+	} catch (err) {
+	}
+}
+
 Services.scriptloader.loadSubScript(extension.rootURI.resolve("scripts/notifyTools.js"), null, "UTF-8");
 
 var QDEB = true;
@@ -197,9 +207,12 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			// }
 		};
 
-		this.ColumnHandler = new QNoteColumnHandler({
-			columnHandler: colHandler
-		});
+		if(ThreadPaneColumns){
+		} else {
+			this.ColumnHandler = new QNoteColumnHandler({
+				columnHandler: colHandler
+			});
+		}
 
 		this.printerAttacherPrefs = {};
 		this.messageAttacherPrefs = {};
@@ -290,6 +303,11 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 	}
 
 	updateView(w, keyId){
+		if(ThreadPaneColumns){
+			ThreadPaneColumns.refreshCustomColumn("qnote");
+			return;
+		}
+
 		let fName = `qapp.updateView(w, ${keyId})`;
 
 		if(!w || !w.document){
@@ -358,6 +376,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 	getAPI(context) {
 		var API = this;
+		context.callOnClose(API);
 
 		return {
 			qapp: {
@@ -414,7 +433,47 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					Services.ww.registerNotification(API.WindowObserver);
 
 					let w = Services.wm.getMostRecentWindow("mail:3pane");
-					API.installColumnHandler(w);
+
+					if(ThreadPaneColumns){
+						const icon = {
+							id: "qnote_exists",
+							url: extension.baseURI.resolve("resource://qnote/images/icon-column.png"),
+						};
+						const icon2 = {
+							id: "qnote_off",
+							url: extension.baseURI.resolve("resource://qnote/images/1x1.gif"),
+						};
+						const iconCellDefinitions = [icon, icon2];
+
+						console.log("ThreadPaneColumns add");
+						ThreadPaneColumns.addCustomColumn('qnote', {
+							name: "QNote",
+							hidden: false,
+							icon: true,
+							resizable: true,
+							sortable: true,
+							textCallback: function(msgHdr){
+								console.log("Text", msgHdr.messageId);
+								let note = API.noteGrabber.get(msgHdr.messageId, () => {
+									ThreadPaneColumns.refreshCustomColumn("qnote");
+								});
+
+								return note.exists ? note.text : null;
+							},
+							iconCellDefinitions: iconCellDefinitions,
+							iconHeaderUrl: extension.baseURI.resolve("resource://qnote/images/icon-column.png"),
+							iconCallback: function(msgHdr){
+								let note = API.noteGrabber.get(msgHdr.messageId, () => {
+									ThreadPaneColumns.refreshCustomColumn("qnote");
+								});
+
+								return note.exists ? "qnote_exists" : "qnote_off";
+							}
+						});
+					} else {
+						API.installColumnHandler(w);
+					}
+
 					API.installKeyboardHandler(w);
 
 					// TODO: probably window not needed. Should scan suitable windows instead
@@ -435,7 +494,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					});
 				},
 				async setDebug(on){
-					API.ColumnHandler.setDebug(QDEB = on);
+					if(ThreadPaneColumns){
+					} else {
+						API.ColumnHandler.setDebug(QDEB = on);
+					}
 				},
 				async setPrefs(Prefs){
 					API.Prefs = Prefs;
@@ -451,7 +513,10 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						bottomTitle: Prefs.printAttachBottomTitle,
 						bottomText: Prefs.printAttachBottomText
 					};
-					API.ColumnHandler.columnHandler.limit = Prefs.showFirstChars;
+					if(ThreadPaneColumns){
+					} else {
+						API.ColumnHandler.columnHandler.limit = Prefs.showFirstChars;
+					}
 				},
 				async attachNoteToPrinter(windowId, data){
 					let fName = "qapp.attachNoteToPrinter()";
@@ -840,5 +905,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				}
 			}
 		}
+	}
+	close() {
+		ThreadPaneColumns.removeCustomColumn('qnote');
 	}
 }
