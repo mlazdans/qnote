@@ -302,7 +302,7 @@ class QNoteFilter {
 			textbox.classList.add("search-value-textbox");
 			textbox.classList.add("search-value-input");
 			textbox.setAttribute("inherits", "disabled");
-			textbox.setAttribute("value", box.getAttribute("value"));
+			textbox.setAttribute("value", box.getAttribute("value") ? box.getAttribute("value") : "");
 			textbox.setAttribute("replaced", true);
 			textbox.attributes.searchAttribute = box.attributes.searchAttribute;
 			// textbox.setAttribute("value", "dada");
