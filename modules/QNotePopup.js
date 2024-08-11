@@ -18,10 +18,9 @@ class QNotePopup extends BasePopup {
 		panel.setAttribute("id", domId);
 		panel.setAttribute("noautohide", true);
 		panel.setAttribute("noautofocus", true);
-		panel.setAttribute("class", "mail-extension-panel panel-no-padding");
-		// panel.setAttribute("class", "browser-extension-panel panel-no-padding");
-		// panel.setAttribute("type", "arrow");
-		// panel.setAttribute("role", "group");
+		panel.setAttribute("class", "mail-extension-panel panel-no-padding browser-extension-panel");
+		panel.setAttribute("type", "arrow");
+		panel.setAttribute("role", "group");
 
 		document.getElementById("mainPopupSet").appendChild(panel);
 
