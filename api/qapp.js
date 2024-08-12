@@ -445,7 +445,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						};
 						const iconCellDefinitions = [icon, icon2];
 
-						console.log("ThreadPaneColumns add");
+						QDEB&&console.log("ThreadPaneColumns.addCustomColumn");
 						ThreadPaneColumns.addCustomColumn('qnote', {
 							name: "QNote",
 							hidden: false,
@@ -453,7 +453,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 							resizable: true,
 							sortable: true,
 							textCallback: function(msgHdr){
-								console.log("Text", msgHdr.messageId);
 								let note = API.noteGrabber.get(msgHdr.messageId, () => {
 									ThreadPaneColumns.refreshCustomColumn("qnote");
 								});
