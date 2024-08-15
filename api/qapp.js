@@ -3,7 +3,6 @@ var Services = globalThis.Services || ChromeUtils.import(
 ).Services;
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { QNoteColumnHandler } = ChromeUtils.import("resource://qnote/modules/QNoteColumnHandler.js");
 var { QNotePopup } = ChromeUtils.import("resource://qnote/modules/QNotePopup.js");
 var { QNoteFilter } = ChromeUtils.import("resource://qnote/modules/QNoteFilter.js");
 var { QNoteAction } = ChromeUtils.import("resource://qnote/modules/QNoteAction.js");
@@ -207,13 +206,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			// }
 		};
 
-		if(ThreadPaneColumns){
-		} else {
-			this.ColumnHandler = new QNoteColumnHandler({
-				columnHandler: colHandler
-			});
-		}
-
 		this.printerAttacherPrefs = {};
 		this.messageAttacherPrefs = {};
 	}
@@ -254,25 +246,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 	uninstallKeyboardHandler(w){
 		this.KeyboardHandler.removeFrom(w);
-	}
-
-	installColumnHandler(w){
-		let API = this;
-		let ch = this.ColumnHandler;
-
-		if(ch.attachToWindow(w)){
-			API.EventDispatcher.addListener('onShutdown', () => ch.detachFromWindow(w));
-		}
-
-		this.EventDispatcher.addListener('domcomplete', aWindow => {
-			if(ch.attachToWindow(aWindow)){
-				API.EventDispatcher.addListener('onShutdown', () => ch.detachFromWindow(aWindow));
-			}
-		});
-	}
-
-	uninstallColumnHandler(w){
-		this.ColumnHandler.detachFromWindow(w);
 	}
 
 	onShutdown(isAppShutdown) {
@@ -469,8 +442,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 								return note.exists ? "qnote_exists" : "qnote_off";
 							}
 						});
-					} else {
-						API.installColumnHandler(w);
 					}
 
 					API.installKeyboardHandler(w);
@@ -493,10 +464,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					});
 				},
 				async setDebug(on){
-					if(ThreadPaneColumns){
-					} else {
-						API.ColumnHandler.setDebug(QDEB = on);
-					}
+					QDEB = on;
 				},
 				async setPrefs(Prefs){
 					API.Prefs = Prefs;
@@ -512,10 +480,12 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						bottomTitle: Prefs.printAttachBottomTitle,
 						bottomText: Prefs.printAttachBottomText
 					};
-					if(ThreadPaneColumns){
-					} else {
-						API.ColumnHandler.columnHandler.limit = Prefs.showFirstChars;
-					}
+
+					// TODO: currently it is not possible to have text and icon simultaneously
+					// if(ThreadPaneColumns){
+					// } else {
+					// 	API.ColumnHandler.columnHandler.limit = Prefs.showFirstChars;
+					// }
 				},
 				async attachNoteToPrinter(windowId, data){
 					let fName = "qapp.attachNoteToPrinter()";
