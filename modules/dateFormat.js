@@ -65,6 +65,7 @@ function dateFormat(locale, format, ts) {
 		j: dt.day,
 		l: dt.weekdayLong,
 		N: dt.weekday,
+		// S: English ordinal suffix for the day of the month, 2 characters
 		w: dt.weekday - 1,
 		z: dt.ordinal - 1,
 		W: dt.weekNumber,
@@ -74,13 +75,23 @@ function dateFormat(locale, format, ts) {
 		n: dt.month,
 		t: dt.daysInMonth,
 		L: dt.isInLeapYear ? 1 : 0,
+		// o: ISO 8601 week-numbering year. This has the same value as Y, except that if the ISO week number (W) belongs to the previous or next year, that year is used instead.
+		// X: An expanded full numeric representation of a year, at least 4 digits, with - for years BCE, and + for years CE.
+		// x: An expanded full numeric representation if required, or a standard full numeral representation if possible (like Y). At least four digits. Years BCE are prefixed with a -. Years beyond (and including) 10000 are prefixed by a +.
 		Y: dt.year,
 		y: dt.year.toString().substr(-2),
+		a: dt.toFormat('a').toLowerCase(),
+		A: dt.toFormat('a'),
+		// B: Swatch Internet time
+		g: dt.toFormat('h'),
 		G: dt.hour,
+		h: dt.toFormat('hh'),
 		H: pad(dt.hour, 2, "0"),
 		i: pad(dt.minute, 2, "0"),
 		s: pad(dt.second, 2, "0"),
+		// u: Microseconds
 		v: dt.millisecond,
+		e: dt.toFormat('z'),
 	};
 
 	format.replace(/\\?(.?)/gi, (c, s) => {
