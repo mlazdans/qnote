@@ -12,8 +12,8 @@
 
 This is source code repository for Thunderbird [QNote](https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/) add-on. To install extension just zip whole folder and rename file's extension to .xpi and add it to Thunderbird.
 
-<p><img src="https://img.shields.io/badge/QNote-v0.12.5-brightgreen">
-<img src="https://img.shields.io/badge/Thunderbird-v68.2.0%20--%20115.0-brightgreen"></p>
+<p><img src="https://img.shields.io/badge/QNote-v0.12.7-brightgreen">
+<img src="https://img.shields.io/badge/Thunderbird-v68.2.0%20--%20128.x-brightgreen"></p>
 
 # Features
 
@@ -88,8 +88,8 @@ _Floating panel_ has nicer looks but does not display well on MacOS. Fall back t
 </p>
 
 # Known issues
-- Column handler does not work with TB 115
-- QuickFilter does not work with TB 115. You can still use message search.
+- Column handler text preview does not work with TB115 and newer
+- QuickFilter does not work with TB115 and newer. You can still use message search.
 - Search and filters working only when using _folder storage_ option.
 - Does not work very well together with <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/gmail-conversation-view/">Conversations</a> plugin.
 - TB 91.x versions does not work well on Macs when using _Floating panel_ window option.

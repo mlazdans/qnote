@@ -1,6 +1,11 @@
 CHANGELOG QNote
 ===========================
 
+RELEASE 0.12.7 - Aug 15, 2024
+-----------------
+- Fix compatibility with TB128 (#54)
+- Fix ColumnHandler with TB115
+
 RELEASE 0.12.5 - Aug 1, 2023
 -----------------
 - Fix some TB 115 issues
