@@ -1,6 +1,13 @@
 CHANGELOG QNote
 ===========================
 
+RELEASE 0.13.0 - Aug 21, 2024
+-----------------
+- Add templating support for attaching to print and message (#34, #47, #52)
+- Add treat note text as HTML option for attaching to print and message
+- Add 'aAghe' date formatting rules (#50)
+- Fix tagging (#56)
+
 RELEASE 0.12.7 - Aug 15, 2024
 -----------------
 - Fix compatibility with TB128 (#54)

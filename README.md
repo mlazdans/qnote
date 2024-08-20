@@ -12,7 +12,7 @@
 
 This is source code repository for Thunderbird [QNote](https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/) add-on. To install extension just zip whole folder and rename file's extension to .xpi and add it to Thunderbird.
 
-<p><img src="https://img.shields.io/badge/QNote-v0.12.7-brightgreen">
+<p><img src="https://img.shields.io/badge/QNote-v0.13.0-brightgreen">
 <img src="https://img.shields.io/badge/Thunderbird-v68.2.0%20--%20128.x-brightgreen"></p>
 
 # Features
@@ -32,6 +32,7 @@ This is source code repository for Thunderbird [QNote](https://addons.thunderbir
 - Fully <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/xnotepp/">XNote++</a> (3.0.0) compatible
 - Import / export between to XNote++ (\*.xnote) and QNote (\*.qnote) formats
 - Supports older Thunderbird versions, starting 68.2.0
+- Templating support for attaching to print and message
 
 # Usage
 
