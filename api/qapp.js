@@ -713,6 +713,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				 * @param {Array} NoteArray
 				 */
 				async attachNotesToMultiMessage(windowId, NoteArray){
+					// TODO: does not work with TB128
 					let fName = `qapp.attachNotesToMultiMessage(${windowId})`;
 
 					if(!NoteArray){
