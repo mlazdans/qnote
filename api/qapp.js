@@ -145,66 +145,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				}
 			}
 		};
-
-		var colHandler = {
-			limit: 0,
-			noteRowListener(view, row) {
-				if(view && Number.isInteger(row)){
-					// That method is part of Mozilla API and has nothing to do with either XNote or QNote :)
-					view.NoteChange(row, 1, 2);
-				}
-			},
-			getMessageId(row, col){
-				try {
-					return this.getView(col).getMsgHdrAt(row).messageId;
-				} catch {
-				}
-			},
-			getView(col){
-				try {
-					return col.element.ownerGlobal.gDBView;
-				} catch {
-					return w.gDBView;
-				}
-			},
-			isEditable(row, col) {
-				return false;
-			},
-			// cycleCell(row, col) {
-			// },
-			getCellText(row, col) {
-				let note = API.noteGrabber.get(this.getMessageId(row, col), () => {
-					this.noteRowListener(this.getView(col), row);
-				});
-
-				if(note.exists && (typeof note.text === 'string')){
-					return note.text.substring(0, this.limit);
-				} else {
-					return null;
-				}
-			},
-			getSortStringForRow(hdr) {
-				let note = API.noteGrabber.get(hdr.messageId);
-
-				return note.exists ? note.text : null;
-			},
-			isString() {
-				return true;
-			},
-			// getCellProperties(row, col, props){
-			// },
-			// getRowProperties(row, props){
-			// },
-			getImageSrc(row, col) {
-				let note = API.noteGrabber.get(this.getMessageId(row, col), () => {
-					this.noteRowListener(this.getView(col), row);
-				});
-
-				return note.exists ? "resource://qnote/images/icon-column.png" : null;
-			},
-			// getSortLongForRow(hdr) {
-			// }
-		};
 	}
 
 	uninstallCSS(cssUri) {
@@ -678,7 +618,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 								el.textContent = data.text;
 							}
 						}
-						}
+					}
 
 					if(API.Prefs.messageAttachBottom){
 						body.insertAdjacentHTML(
