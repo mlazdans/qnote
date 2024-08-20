@@ -286,5 +286,14 @@
 	},
 	"paste.into.selected.messages": {
 		"message": "Coller dans les messages"
+	},
+	"attach.template": {
+		"message": "Modèle"
+	},
+	"attach.treat.text.as.html": {
+		"message": "Traiter le texte en HTML"
+	},
+	"attach.template.reset": {
+		"message": "Réinitialiser le modèle"
 	}
 }

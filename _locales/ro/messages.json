@@ -286,5 +286,14 @@
 	},
 	"paste.into.selected.messages": {
 		"message": "Lipiți în mesaje"
+	},
+	"attach.template": {
+		"message": "Șablon"
+	},
+	"attach.treat.text.as.html": {
+		"message": "Tratează textul ca HTML"
+	},
+	"attach.template.reset": {
+		"message": "Resetează șablonul"
 	}
 }

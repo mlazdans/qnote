@@ -291,6 +291,9 @@
 		"message": "Modello"
 	},
 	"attach.treat.text.as.html": {
-			"message": "Considera il testo come HTML"
+		"message": "Considera il testo come HTML"
+	},
+	"attach.template.reset": {
+		"message": "Ripristina modello"
 	}
 }
