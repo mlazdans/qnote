@@ -205,9 +205,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 			// getSortLongForRow(hdr) {
 			// }
 		};
-
-		this.printerAttacherPrefs = {};
-		this.messageAttacherPrefs = {};
 	}
 
 	uninstallCSS(cssUri) {
@@ -468,18 +465,6 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				},
 				async setPrefs(Prefs){
 					API.Prefs = Prefs;
-					API.messageAttacherPrefs = {
-						topTitle: Prefs.messageAttachTopTitle,
-						topText: Prefs.messageAttachTopText,
-						bottomTitle: Prefs.messageAttachBottomTitle,
-						bottomText: Prefs.messageAttachBottomText
-					};
-					API.printerAttacherPrefs = {
-						topTitle: Prefs.printAttachTopTitle,
-						topText: Prefs.printAttachTopText,
-						bottomTitle: Prefs.printAttachBottomTitle,
-						bottomText: Prefs.printAttachBottomText
-					};
 
 					// TODO: currently it is not possible to have text and icon simultaneously
 					// if(ThreadPaneColumns){
@@ -490,14 +475,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				async attachNoteToPrinter(windowId, data){
 					let fName = "qapp.attachNoteToPrinter()";
 
-					if(!(data && data.exists)){
-						QDEB&&console.debug(`${fName} - no note`);
+					if(!API.Prefs.printAttachTop && !API.Prefs.printAttachBottom){
+						QDEB&&console.debug(`${fName} - no prefs`);
 						return;
 					}
 
-					let prefs = API.printerAttacherPrefs;
-					if(!prefs){
-						QDEB&&console.debug(`${fName} - no prefs`);
+					if(!(data && data.exists)){
+						QDEB&&console.debug(`${fName} - no note`);
 						return;
 					}
 
@@ -523,39 +507,39 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						domNodes[0].remove();
 					}
 
-					if(prefs.topTitle || prefs.topText){
-						let html = ['<div class="qnote-insidenote qnote-insidenote-top" style="margin: 0; padding: 0; border: 1px solid black;">'];
+					if(API.Prefs.printAttachTop){
+						body.insertAdjacentHTML(
+							'afterbegin',
+							'<div class="qnote-insidenote qnote-insidenote-top" style="margin: 0; padding: 0; border: 1px solid black;">' +
+								this.applyTemplate(API.Prefs.attachTemplate, data) +
+							'</div>'
+						);
 
-						if(prefs.topTitle){
-							html.push('<div style="border-bottom: 1px solid black;">QNote: ' + data.tsFormatted + '</div>');
-						}
-
-						if(prefs.topText){
-							html.push('<pre class="moz-quote-pre" wrap="" style="margin: 0;"></pre>');
-						}
-
-						body.insertAdjacentHTML('afterbegin', html.join(""));
-
-						if(prefs.topText){
-							w.document.querySelector('.qnote-insidenote-top > pre').textContent = data.text;
+						const el = document.querySelector('.qnote-insidenote-top .qnote-text-span');
+						if(el){
+							if(API.Prefs.treatTextAsHtml){
+								el.innerHTML = data.text;
+							} else {
+								el.textContent = data.text;
+							}
 						}
 					}
 
-					if(prefs.bottomTitle || prefs.bottomText){
-						let html = ['<div class="qnote-insidenote qnote-insidenote-bottom" style="margin: 0; padding: 0; border: 1px solid black;">'];
+					if(API.Prefs.printAttachBottom){
+						body.insertAdjacentHTML(
+							'beforeend',
+							'<div class="qnote-insidenote qnote-insidenote-bottom" style="margin: 0; padding: 0; border: 1px solid black;">' +
+								this.applyTemplate(API.Prefs.attachTemplate, data) +
+							'</div>'
+						);
 
-						if(prefs.bottomTitle){
-							html.push('<div style="border-bottom: 1px solid black;">QNote: ' + data.tsFormatted + '</div>');
-						}
-
-						if(prefs.bottomText){
-							html.push('<pre class="moz-quote-pre" wrap="" style="margin: 0;"></pre>');
-						}
-
-						body.insertAdjacentHTML('beforeend', html.join(""));
-
-						if(prefs.bottomText){
-							w.document.querySelector('.qnote-insidenote-bottom > pre').textContent = data.text;
+						const el = document.querySelector('.qnote-insidenote-bottom .qnote-text-span');
+						if(el){
+							if(API.Prefs.treatTextAsHtml){
+								el.innerHTML = data.text;
+							} else {
+								el.textContent = data.text;
+							}
 						}
 					}
 				},
@@ -624,15 +608,24 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 					API.updateView(w, keyId);
 				},
+				applyTemplate(t, data) {
+					return t
+						.replace("{{ qnote_date }}", data.tsFormatted)
+						.replace("{{ qnote_text }}", '<span class="qnote-text-span"></span>')
+					;
+				},
 				async attachToMessagePane(messagepane, aMessageDisplay, data){
 					let fName = `qapp.attachToMessagePane()`;
+
+					if(!API.Prefs.messageAttachTop && !API.Prefs.messageAttachBottom){
+						QDEB&&console.debug(`${fName} - no prefs`);
+						return;
+					}
 
 					if(!messagepane || !messagepane.contentDocument){
 						QDEB&&console.debug(`${fName} - no messagepane`);
 						return;
 					}
-
-					let prefs = API.messageAttacherPrefs;
 
 					let document = messagepane.contentDocument;
 
@@ -669,37 +662,39 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return;
 					}
 
-					if(prefs.topTitle || prefs.topText){
-						let html = [];
-						if(prefs.topTitle){
-							html.push('<div class="qnote-title">QNote: ' + data.tsFormatted + '</div>');
+					if(API.Prefs.messageAttachTop){
+						body.insertAdjacentHTML(
+							'afterbegin',
+							'<div class="qnote-insidenote qnote-insidenote-top">' +
+								this.applyTemplate(API.Prefs.attachTemplate, data) +
+							'</div>'
+						);
+
+						const el = document.querySelector('.qnote-insidenote-top .qnote-text-span');
+						if(el){
+							if(API.Prefs.treatTextAsHtml){
+								el.innerHTML = data.text;
+							} else {
+								el.textContent = data.text;
+							}
+						}
 						}
 
-						if(prefs.topText){
-							html.push('<div class="qnote-text"></div>');
-						}
+					if(API.Prefs.messageAttachBottom){
+						body.insertAdjacentHTML(
+							'beforeend',
+							'<div class="qnote-insidenote qnote-insidenote-bottom">' +
+								this.applyTemplate(API.Prefs.attachTemplate, data) +
+							'</div>'
+						);
 
-						body.insertAdjacentHTML('afterbegin', '<div class="qnote-insidenote qnote-insidenote-top">' + html.join("") + '</div>');
-
-						if(prefs.topText){
-							document.querySelector('.qnote-insidenote-top > .qnote-text').textContent = data.text;
-						}
-					}
-
-					if(prefs.bottomTitle || prefs.bottomText){
-						let html = [];
-						if(prefs.bottomTitle){
-							html.push('<div class="qnote-title">QNote: ' + data.tsFormatted + '</div>');
-						}
-
-						if(prefs.bottomText){
-							html.push('<div class="qnote-text"></div>');
-						}
-
-						body.insertAdjacentHTML('beforeend', '<div class="qnote-insidenote qnote-insidenote-bottom">' + html.join("") + '</div>');
-
-						if(prefs.bottomText){
-							document.querySelector('.qnote-insidenote-bottom > .qnote-text').textContent = data.text;
+						const el = document.querySelector('.qnote-insidenote-bottom .qnote-text-span');
+						if(el){
+							if(API.Prefs.treatTextAsHtml){
+								el.innerHTML = data.text;
+							} else {
+								el.textContent = data.text;
+							}
 						}
 					}
 
@@ -717,14 +712,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				async attachNoteToMessage(windowId, data){
 					let fName = `qapp.attachNoteToMessage(${windowId})`;
 
-					if(!data){
-						QDEB&&console.debug(`${fName} - no note data`);
+					if(!API.Prefs.messageAttachTop && !API.Prefs.messageAttachBottom){
+						QDEB&&console.debug(`${fName} - no prefs`);
 						return;
 					}
 
-					let prefs = API.messageAttacherPrefs;
-					if(!prefs){
-						QDEB&&console.debug(`${fName} - no prefs`);
+					if(!data){
+						QDEB&&console.debug(`${fName} - no note data`);
 						return;
 					}
 

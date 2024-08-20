@@ -55,49 +55,37 @@
 				"minimum": 0,
 				"description": ""
 			},
-			"printAttachTopTitle": {
+			"printAttachTop": {
 				"type": "boolean",
 				"optional": true,
 				"default": false,
 				"description": ""
 			},
-			"printAttachTopText": {
+			"printAttachBottom": {
 				"type": "boolean",
 				"optional": true,
 				"default": false,
 				"description": ""
 			},
-			"printAttachBottomTitle": {
+			"messageAttachTop": {
 				"type": "boolean",
 				"optional": true,
 				"default": false,
 				"description": ""
 			},
-			"printAttachBottomText": {
+			"messageAttachBottom": {
 				"type": "boolean",
 				"optional": true,
 				"default": false,
 				"description": ""
 			},
-			"messageAttachTopTitle": {
-				"type": "boolean",
+			"attachTemplate": {
+				"type": "string",
 				"optional": true,
-				"default": false,
+				"default": "",
 				"description": ""
 			},
-			"messageAttachTopText": {
-				"type": "boolean",
-				"optional": true,
-				"default": false,
-				"description": ""
-			},
-			"messageAttachBottomTitle": {
-				"type": "boolean",
-				"optional": true,
-				"default": false,
-				"description": ""
-			},
-			"messageAttachBottomText": {
+			"treatTextAsHtml": {
 				"type": "boolean",
 				"optional": true,
 				"default": false,

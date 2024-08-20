@@ -53,14 +53,12 @@ async function sendPrefs(){
 		storageOption: Prefs.storageOption,
 		storageFolder: Prefs.storageFolder,
 		showFirstChars: Prefs.showFirstChars,
-		printAttachTopTitle: Prefs.printAttachTopTitle,
-		printAttachTopText: Prefs.printAttachTopText,
-		printAttachBottomTitle: Prefs.printAttachBottomTitle,
-		printAttachBottomText: Prefs.printAttachBottomText,
-		messageAttachTopTitle: Prefs.messageAttachTopTitle,
-		messageAttachTopText: Prefs.messageAttachTopText,
-		messageAttachBottomTitle: Prefs.messageAttachBottomTitle,
-		messageAttachBottomText: Prefs.messageAttachBottomText,
+		printAttachTop: Prefs.printAttachTop,
+		printAttachBottom: Prefs.printAttachBottom,
+		messageAttachTop: Prefs.messageAttachTop,
+		messageAttachBottom: Prefs.messageAttachBottom,
+		attachTemplate: Prefs.attachTemplate,
+		treatTextAsHtml: Prefs.treatTextAsHtml,
 	});
 }
 

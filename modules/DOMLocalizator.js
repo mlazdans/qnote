@@ -73,6 +73,9 @@ class DOMLocalizator {
 					node.value = value;
 				}
 				break;
+			case "TEXTAREA":
+				node.value = value;
+				break;
 			default:
 				console.error("Unknown node type " + node.nodeName);
 				console.error(node);

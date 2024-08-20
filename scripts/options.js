@@ -510,6 +510,7 @@ async function initOptionsPage(){
 		}
 	});
 	document.querySelectorAll("input[type=text],input[type=number]").forEach(el => saveListener(el, "keyup"));
+	document.querySelectorAll("textarea").forEach(el => saveListener(el, "change"));
 	document.querySelectorAll("select,input[type=number]").forEach(el => saveListener(el, "change"));
 	document.querySelectorAll("input[type=checkbox],input[type=radio]").forEach(el => saveListener(el, "click"));
 

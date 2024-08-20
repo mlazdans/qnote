@@ -1,12 +1,13 @@
 var _ = browser.i18n.getMessage;
 
-const POP_NONE = 0;
-const POP_FOCUS = (1<<0);
-const POP_EXISTING = (1<<1);
+// Bitmask
+const POP_NONE     = 0;
+const POP_FOCUS    = 1;
+const POP_EXISTING = 2;
 
 // No undefined values please
 function getDefaultPrefs() {
-	return {
+	var defaults = {
 		useTag: false,
 		tagName: "xnote",
 		dateFormat: "Y-m-d H:i", // See https://www.php.net/manual/en/datetime.format.php
@@ -21,24 +22,23 @@ function getDefaultPrefs() {
 		windowOption: "xul",
 		storageOption: "folder",
 		storageFolder: "",
-
-		printAttachTopTitle: true,
-		printAttachTopText: true,
-		printAttachBottomTitle: false,
-		printAttachBottomText: false,
-
-		messageAttachTopTitle: true,
-		messageAttachTopText: true,
-		messageAttachBottomTitle: false,
-		messageAttachBottomText: false,
-
+		printAttachTop: true,
+		printAttachBottom: false,
+		messageAttachTop: true,
+		messageAttachBottom: false,
+		attachTemplate: '',
 		enableDebug: false,
-
 		anchor: "window", // window, threadpane, message
 		anchorPlacement: "center", // see options.js generatePosGrid() for options
 		alwaysDefaultPlacement: false,
-		confirmDelete: false
+		confirmDelete: false,
+		treatTextAsHtml: false,
 	};
+
+	defaults.attachTemplate += '<div class="qnote-title">QNote: {{ qnote_date }}</div>\n';
+	defaults.attachTemplate += '<div class="qnote-text">{{ qnote_text }}</div>';
+
+	return defaults;
 }
 
 function getTabId(Tab){

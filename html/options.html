@@ -129,45 +129,35 @@
 	<legend data-i18n="additional.attach"></legend>
 	<table width="100%">
 		<tr>
-			<td width="50%" valign="top">
-				<table>
+			<td nowrap data-i18n="enable.message_attach"></td>
+			<td><input type="checkbox" id="messageAttachTop" name="messageAttachTop" data-preference="messageAttachTop"></td>
+			<td><label for="messageAttachTop" data-i18n="attach.top"></label></td>
+			<td><input type="checkbox" id="messageAttachBottom" name="messageAttachBottom" data-preference="messageAttachBottom"></td>
+			<td><label for="messageAttachBottom" data-i18n="attach.bottom"></label></td>
+			<td style="width: 100%;"></td>
+		</tr>
+		<tr>
+			<td nowrap data-i18n="enable.print_attach"></td>
+			<td><input type="checkbox" id="printAttachTop" name="printAttachTop" data-preference="printAttachTop"></td>
+			<td><label for="printAttachTop" data-i18n="attach.top"></label></td>
+			<td><input type="checkbox" id="printAttachBottom" name="printAttachBottom" data-preference="printAttachBottom"></td>
+			<td><label for="printAttachBottom" data-i18n="attach.bottom"></label></td>
+			<td style="width: 100%;"></td>
+		</tr>
+		<tr>
+			<td><label for="treatTextAsHtml" data-i18n="attach.treat.text.as.html"></label></td>
+			<td colspan="5"><input type="checkbox" id="treatTextAsHtml" name="treatTextAsHtml" data-preference="treatTextAsHtml"></td>
+		</tr>
+		<tr>
+			<td colspan="6">
+				<table style="width: 100%;">
 					<tr>
-						<td colspan="5" data-i18n="enable.message_attach"></td>
+						<td data-i18n="attach.template"></td>
 					</tr>
 					<tr>
-						<td data-i18n="attach.top" style="text-align: right;"></td>
-						<td><input type="checkbox" id="messageAttachTopTitle" name="messageAttachTopTitle" data-preference="messageAttachTopTitle"></td>
-						<td><label style="font-size: smaller" for="messageAttachTopTitle" data-i18n="attach.title"></label></td>
-						<td><input type="checkbox" id="messageAttachTopText" name="messageAttachTopText" data-preference="messageAttachTopText"></td>
-						<td><label style="font-size: smaller" for="messageAttachTopText" data-i18n="attach.text"></label></td>
-					</tr>
-					<tr>
-						<td data-i18n="attach.bottom" style="text-align: right;"></td>
-						<td><input type="checkbox" id="messageAttachBottomTitle" name="messageAttachBottomTitle" data-preference="messageAttachBottomTitle"></td>
-						<td><label style="font-size: smaller" for="messageAttachBottomTitle" data-i18n="attach.title"></label></td>
-						<td><input type="checkbox" id="messageAttachBottomText" name="messageAttachBottomText" data-preference="messageAttachBottomText"></td>
-						<td><label style="font-size: smaller" for="messageAttachBottomText" data-i18n="attach.text"></label></td>
-					</tr>
-				</table>
-			</td>
-			<td width="50%" valign="top">
-				<table>
-					<tr>
-						<td colspan="5" data-i18n="enable.print_attach"></td>
-					</tr>
-					<tr>
-						<td data-i18n="attach.top" style="text-align: right;"></td>
-						<td><input type="checkbox" id="printAttachTopTitle" name="printAttachTopTitle" data-preference="printAttachTopTitle"></td>
-						<td><label style="font-size: smaller" for="printAttachTopTitle" data-i18n="attach.title"></label></td>
-						<td><input type="checkbox" id="printAttachTopText" name="printAttachTopText" data-preference="printAttachTopText"></td>
-						<td><label style="font-size: smaller" for="printAttachTopText" data-i18n="attach.text"></label></td>
-					</tr>
-					<tr>
-						<td data-i18n="attach.bottom" style="text-align: right;"></td>
-						<td><input type="checkbox" id="printAttachBottomTitle" name="printAttachBottomTitle" data-preference="printAttachBottomTitle"></td>
-						<td><label style="font-size: smaller" for="printAttachBottomTitle" data-i18n="attach.title"></label></td>
-						<td><input type="checkbox" id="printAttachBottomText" name="printAttachBottomText" data-preference="printAttachBottomText"></td>
-						<td><label style="font-size: smaller" for="printAttachBottomText" data-i18n="attach.text"></label></td>
+						<td>
+							<textarea id="attachTemplate" style="width: 100%; resize: vertical;" rows="4" data-preference="attachTemplate" spellcheck="false"></textarea>
+						</td>
 					</tr>
 				</table>
 			</td>
