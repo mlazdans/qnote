@@ -286,5 +286,11 @@
 	},
 	"paste.into.selected.messages": {
 		"message": "Ievietot vēstulēs"
+	},
+	"attach.template": {
+		"message": "Veidne"
+	},
+	"attach.treat.text.as.html": {
+		"message": "Apstrādāt tekstu kā HTML"
 	}
 }

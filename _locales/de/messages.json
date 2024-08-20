@@ -286,5 +286,11 @@
 	},
 	"paste.into.selected.messages": {
 		"message": "Zu allen ausgewählten Emails hinzufügen"
+	},
+	"attach.template": {
+		"message": "Vorlage"
+	},
+	"attach.treat.text.as.html": {
+		"message": "Inhalt ist als HTML formatiert"
 	}
 }
