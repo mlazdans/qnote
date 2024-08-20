@@ -292,5 +292,8 @@
 	},
 	"attach.treat.text.as.html": {
 		"message": "Apstrādāt tekstu kā HTML"
+	},
+	"attach.template.reset": {
+		"message": "Atiestatīt veidni"
 	}
 }

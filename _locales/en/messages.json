@@ -292,5 +292,8 @@
 	},
 	"attach.treat.text.as.html": {
 		"message": "Treat text as HTML"
+	},
+	"attach.template.reset": {
+		"message": "Reset template"
 	}
 }

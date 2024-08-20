@@ -23,6 +23,8 @@ var anchorPlacement = document.querySelector("[name=anchorPlacement]");
 var storageFieldset_folder = document.getElementById("storageFieldset_folder");
 var exportQNotesButton = document.getElementById('exportQNotesButton');
 var exportXNotesButton = document.getElementById('exportXNotesButton');
+var attachTemplate = document.getElementById('attachTemplate');
+var resetTemplate = document.getElementById('resetTemplate');
 
 var dateFormats = {
 	datetime_group: [
@@ -533,6 +535,12 @@ async function initOptionsPage(){
 
 	// Handle storage option click
 	document.querySelectorAll("input[name=storageOption]").forEach(e => e.addEventListener("click", storageOptionChange));
+
+	resetTemplate.addEventListener('click', function(){
+		attachTemplate.value = DefaultPrefs.attachTemplate;
+		saveOptions();
+		return false;
+	});
 }
 
 window.addEventListener("load", ()=>{
