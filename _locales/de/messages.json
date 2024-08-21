@@ -291,6 +291,9 @@
 		"message": "Vorlage"
 	},
 	"attach.treat.text.as.html": {
-		"message": "Inhalt ist als HTML formatiert"
+		"message": "Formatiere QNote mittels HTML"
+	},
+	"attach.template.reset": {
+		"message": "Vorlage zurück auf Standard"
 	}
 }
