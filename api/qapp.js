@@ -650,6 +650,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					});
 				},
 				async attachNoteToMessage(windowId, data){
+					return;
 					let fName = `qapp.attachNoteToMessage(${windowId})`;
 
 					if(!API.Prefs.messageAttachTop && !API.Prefs.messageAttachBottom){
@@ -701,7 +702,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 							this.attachToMessagePane(messagepane, aMessageDisplay, data);
 						}
-					} else {
+					} else if(w.gMessageDisplay && w.gMessageDisplay.displayedMessage) {
 						// Legacy
 						messagepane = w.document.getElementById('messagepane');
 						aMessageDisplay = w.gMessageDisplay.displayedMessage;
