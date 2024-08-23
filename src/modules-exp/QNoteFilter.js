@@ -3,7 +3,7 @@ const Services = globalThis.Services || ChromeUtils.import(
 ).Services;
 var { QuickFilterManager, MessageTextFilter } = ChromeUtils.import("resource:///modules/QuickFilterManager.jsm");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
-var { QCustomTerm } = ChromeUtils.import("resource://qnote/modules/QCustomTerm.js");
+var { QCustomTerm } = ChromeUtils.import("resource://qnote/modules-exp/QCustomTerm.js");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 

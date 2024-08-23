@@ -3,11 +3,11 @@ var Services = globalThis.Services || ChromeUtils.import(
 ).Services;
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { QNotePopup } = ChromeUtils.import("resource://qnote/modules/QNotePopup.js");
-var { QNoteFilter } = ChromeUtils.import("resource://qnote/modules/QNoteFilter.js");
-var { QNoteAction } = ChromeUtils.import("resource://qnote/modules/QNoteAction.js");
+var { QNotePopup } = ChromeUtils.import("resource://qnote/modules-exp/QNotePopup.js");
+var { QNoteFilter } = ChromeUtils.import("resource://qnote/modules-exp/QNoteFilter.js");
+var { QNoteAction } = ChromeUtils.import("resource://qnote/modules-exp/QNoteAction.js");
 var { QEventDispatcher } = ChromeUtils.import("resource://qnote/modules/QEventDispatcher.js");
-var { QCache } = ChromeUtils.import("resource://qnote/modules/QCache.js");
+var { QCache } = ChromeUtils.import("resource://qnote/modules-exp/QCache.js");
 
 var ThreadPaneColumns;
 try {

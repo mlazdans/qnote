@@ -2,9 +2,9 @@ const Services = globalThis.Services || ChromeUtils.import(
   "resource://gre/modules/Services.jsm"
 ).Services;
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
-var { QCustomActionAdd } = ChromeUtils.import("resource://qnote/modules/QCustomActionAdd.js");
-var { QCustomActionUpdate } = ChromeUtils.import("resource://qnote/modules/QCustomActionUpdate.js");
-var { QCustomActionDelete } = ChromeUtils.import("resource://qnote/modules/QCustomActionDelete.js");
+var { QCustomActionAdd } = ChromeUtils.import("resource://qnote/modules-exp/QCustomActionAdd.js");
+var { QCustomActionUpdate } = ChromeUtils.import("resource://qnote/modules-exp/QCustomActionUpdate.js");
+var { QCustomActionDelete } = ChromeUtils.import("resource://qnote/modules-exp/QCustomActionDelete.js");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
