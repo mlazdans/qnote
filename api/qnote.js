@@ -87,17 +87,19 @@ var qnote = class extends ExtensionCommon.ExtensionAPI {
 			qnote: {
 				async saveNote(root, keyId, note){
 					try {
-						return NF.save(root, keyId, note);
+						NF.save(root, keyId, note);
 					} catch(e) {
 						throw new ExtensionError(e.message);
 					}
+					return true;
 				},
 				async deleteNote(root, keyId){
 					try {
-						return NF.delete(root, keyId);
+						NF.delete(root, keyId);
 					} catch(e) {
 						throw new ExtensionError(e.message);
 					}
+					return true;
 				},
 				async loadNote(root, keyId){
 					try {
