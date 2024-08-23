@@ -1,7 +1,7 @@
 var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
-var { QNoteFile } = ChromeUtils.import("resource://qnote/modules/QNoteFile.js");
-var { XNoteFile } = ChromeUtils.import("resource://qnote/modules/XNoteFile.js");
+var { QNoteFile } = ChromeUtils.import("resource://qnote/modules-exp/QNoteFile.js");
+var { XNoteFile } = ChromeUtils.import("resource://qnote/modules-exp/XNoteFile.js");
 
 var EXPORTED_SYMBOLS = ["QCustomTerm"];
 

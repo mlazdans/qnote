@@ -1,6 +1,6 @@
 var { ExtensionError } = ExtensionUtils;
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
-var { XNoteFile } = ChromeUtils.import("resource://qnote/modules/XNoteFile.js");
+var { XNoteFile } = ChromeUtils.import("resource://qnote/modules-exp/XNoteFile.js");
 
 var xnote = class extends ExtensionCommon.ExtensionAPI {
 	getAPI(context) {
