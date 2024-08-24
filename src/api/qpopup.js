@@ -1,15 +1,13 @@
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-const { DOMLocalizator } = ChromeUtils.importESModule("resource://qnote/modules/DOMLocalizator.mjs");
 var { BasePopup } = ChromeUtils.import("resource:///modules/ExtensionPopups.jsm");
-var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 
 var PopupEventDispatcher = new QEventDispatcher(["oncreated", "onremoved", "onmove", "onresize"]);
 var PopupCounter = 0;
 
 class QNotePopup extends BasePopup {
 	constructor(options) {
-		const extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
+		// const extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
 		let domId = "qnote-window-panel-" + (++PopupCounter);
 
@@ -38,12 +36,6 @@ class QNotePopup extends BasePopup {
 		this.domId = domId;
 		this.window = window;
 		this.shown = false;
-
-		// TB68
-		if(this.panel.adjustArrowPosition === undefined){
-			this.panel.adjustArrowPosition = () => {
-			};
-		}
 	}
 
 	moveTo(x, y){
@@ -154,17 +146,12 @@ class QNotePopup extends BasePopup {
 	}
 }
 
-
 var qpopup = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown() {
 	}
 
 	getAPI(context) {
 		var QDEB = true;
-
-		this.i18n = new DOMLocalizator(id => {
-			return extension.localizeMessage(id);
-		});
 
 		function id2RealWindow(windowId){
 			try {
