@@ -4,7 +4,7 @@ import { Preferences } from "../modules/Preferences.mjs";
 import { SelectedMessageReply } from "../modules/utils.mjs";
 import { QPopupOptions } from "../modules/XULNoteWindow.mjs";
 
-class XulPopup {
+class QPopup {
 	note: NoteData;
 	opts: QPopupOptions | undefined;
 	prefs: Preferences;
@@ -235,7 +235,7 @@ let xulPort = browser.runtime.connect();
 xulPort.onMessage.addListener(data => {
 	if("command" in data && data.command === "selectedMessage"){
 		const d = data as SelectedMessageReply;
-		new XulPopup(d.note, d.prefs);
+		new QPopup(d.note, d.prefs);
 	} else {
 		console.error("Unknown message: ", data);
 	}

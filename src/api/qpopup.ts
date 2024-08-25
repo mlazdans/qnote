@@ -96,7 +96,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				mainPopupSet.appendChild(panel);
 
 
-				let popupURL = extension.getURL("html/xulpopup.html");
+				let popupURL = extension.getURL("html/qpopup.html");
 				let browserStyle = false;
 				let fixedWidth = false;
 				let blockParser = false;
