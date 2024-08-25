@@ -51,6 +51,67 @@ type ExtensionPopupsPath = "resource:///modules/ExtensionPopups.jsm";
 type ExtensionParentPath = "resource://gre/modules/ExtensionParent.jsm";
 type ExtensionCommonPath = "resource://gre/modules/ExtensionCommon.jsm";
 type QEventDispatcherPath = "resource://qnote/modules/QEventDispatcher.mjs";
+type XULNoteWindowPath = "resource://qnote/modules/XULNoteWindow.mjs";
+type DOMLocalizatorPath = "resource://qnote/modules/DOMLocalizator.mjs"
+
+interface QEventDispatcherExport {
+	QEventDispatcher: typeof import("../modules/QEventDispatcher.mjs").QEventDispatcher;
+}
+
+interface XULNoteWindowExport {
+	QPopupOptions: import("../modules/XULNoteWindow.mjs").QPopupOptions;
+}
+
+interface DOMLocalizatorExport {
+	DOMLocalizator: typeof import("../modules/DOMLocalizator.mjs").DOMLocalizator;
+}
+
+// const extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
+interface ExtensionParentFire {
+	// Bug 1754866 fire.sync doesn't match documentation.
+	sync(...args: any): any
+	async(...args: any): any
+	raw(...args: any): any
+	asyncWithoutClone(...args: any): any
+}
+
+interface Extension {
+	windowManager: WindowManager
+}
+
+declare class GlobalManager {
+	getExtension(name: string): Extension;
+}
+
+interface ExtensionParent {
+	GlobalManager: GlobalManager;
+
+}
+
+interface ExtensionParentExport {
+	ExtensionParent: ExtensionParent
+}
+
+	// namespace ExtensionParent
+	// {
+	// 	interface Fire {
+	// 		// Bug 1754866 fire.sync doesn't match documentation.
+	// 		sync(...args: any): any
+	// 		async(...args: any): any
+	// 		raw(...args: any): any
+	// 		asyncWithoutClone(...args: any): any
+	// 	}
+
+	// 	interface Extension {
+	// 	}
+
+	// 	class GlobalManager {
+	// 		getExtension(name: string): Extension;
+	// 	}
+	// 	// ExtensionParent: ExtensionParent;
+	// 	// GlobalManager: GlobalManager;
+	// }
+
 
 declare namespace Components
 {
@@ -62,10 +123,12 @@ declare namespace Components
 		public static import(path: IteratorUtilsPath): IteratorUtils;
 		public static import(path: MailServicesPath): MailServicesExport;
 		public static import(path: ExtensionPopupsPath): any;
-		public static import(path: ExtensionParentPath): any;
+		public static import(path: ExtensionParentPath): ExtensionParentExport;
 		public static import(path: ExtensionCommonPath): any;
-		public static importESModule(path: QEventDispatcherPath): QEventDispatcher;
-		public static importESModule(path: string): any;
+		public static importESModule(path: QEventDispatcherPath): QEventDispatcherExport;
+		public static importESModule(path: XULNoteWindowPath): XULNoteWindowExport;
+		public static importESModule(path: DOMLocalizatorPath): DOMLocalizatorExport;
+		// public static importESModule(path: string): any;
 		public static unload(path: string): void;
 		public static defineModuleGetter(param1: any, param2: any, param3: any): void;
 	}
@@ -540,7 +603,7 @@ declare class ParentMessageManager
 
 declare class WindowManager
 {
-
+	get(windowId: number): any
 }
 
 // //https://thunderbird-webextensions.readthedocs.io/en/latest/how-to/experiments.html

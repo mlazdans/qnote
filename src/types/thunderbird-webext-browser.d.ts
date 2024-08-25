@@ -5185,7 +5185,7 @@ declare namespace messenger {
          * (even if the tab itself is currently not visible). The array is empty
          * if no messages are displayed.
          */
-        export function getDisplayedMessages(tabId: number): Promise<messages.MessageHeader[]>;
+        export function getDisplayedMessages(tabId: number): Promise<messages.MessageList>;
 
         /**
          * Opens a message in a new tab or in a new window.
@@ -17655,7 +17655,7 @@ declare namespace browser {
          * (even if the tab itself is currently not visible). The array is empty
          * if no messages are displayed.
          */
-        export function getDisplayedMessages(tabId: number): Promise<messages.MessageHeader[]>;
+        export function getDisplayedMessages(tabId: number): Promise<messages.MessageList>;
 
         /**
          * Opens a message in a new tab or in a new window.
@@ -17670,14 +17670,14 @@ declare namespace browser {
          * Fired when a message is displayed, whether in a 3-pane tab, a message
          * tab, or a message window.
          */
-        export const onMessageDisplayed: WebExtEvent<(tab: tabs.Tab, message: messages.MessageHeader) => void>;
+        // export const onMessageDisplayed: WebExtEvent<(tab: tabs.Tab, message: messages.MessageHeader) => void>;
 
         /**
          * Fired when either a single message is displayed or when multiple
          * messages are displayed, whether in a 3-pane tab, a message tab, or a
          * message window.
          */
-        export const onMessagesDisplayed: WebExtEvent<(tab: tabs.Tab, messages: messages.MessageHeader[]) => void>;
+        export const onMessagesDisplayed: WebExtEvent<(tab: tabs.Tab, messages: messages.MessageList) => void>;
     }
 
     /**
