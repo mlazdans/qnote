@@ -4,7 +4,7 @@ import { QEventDispatcher } from './QEventDispatcher.mjs';
 export class DirtyStateError extends Error {};
 
 var QDEB = true;
-var _ = browser.i18n.getMessage;
+// var _ = browser.i18n.getMessage;
 
 export interface NoteWindow extends QEventDispatcher {
 	note: Note | undefined;
@@ -25,15 +25,16 @@ export interface NoteWindow extends QEventDispatcher {
 export abstract class DefaultNoteWindow extends QEventDispatcher implements NoteWindow {
 	note: Note | undefined;
 	loadedNoteData: NoteData | undefined;
-	// popupId: number | undefined;
+	windowId: number;
 	// messageId: string | undefined;
 	// needSaveOnClose = true;
 	// shown = false;
 	// dirty = false;
 	flags: number | undefined;
 
-	constructor() {
+	constructor(windowId: number) {
 		super(["afterclose"]);
+		this.windowId = windowId;
 	}
 
 	// async loadNoteForMessage(id: MessageId) {

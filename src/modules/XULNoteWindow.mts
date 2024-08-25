@@ -38,12 +38,11 @@ function getDefaultPopupOptions(windowId: number): QPopupOptions {
 }
 
 export class XULNoteWindow extends DefaultNoteWindow {
-	popupId: number;
+	id: number | undefined;
 	prefs: Preferences;
 
-	constructor(popupId: number, prefs: Preferences) {
-		super();
-		this.popupId = popupId;
+	constructor(windowId: number, prefs: Preferences) {
+		super(windowId);
 		this.prefs = prefs;
 	}
 
@@ -65,7 +64,9 @@ export class XULNoteWindow extends DefaultNoteWindow {
 	}
 
 	async close() {
-		browser.qpopup.remove(this.popupId);
+		if(this.id){
+			browser.qpopup.remove(this.id);
+		}
 		super.close();
 	}
 
@@ -85,11 +86,12 @@ export class XULNoteWindow extends DefaultNoteWindow {
 			opt.top = null;
 		}
 
-		browser.qpopup.create(opt).then((popupInfo: PopupOptions) => {
-			if(popupInfo.id)
-				this.popupId = popupInfo.id;
+		browser.qpopup.create(opt).then((pi: QPopupOptions) => {
+			if(pi.id){
+				this.id = pi.id;
+			}
 
-			return popupInfo;
+			return pi;
 		});
 
 		// return super.pop(async opt => {
