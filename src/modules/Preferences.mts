@@ -28,6 +28,7 @@ export class Preferences extends QAppPreferences {
 	anchorPlacement = "center"; // see options.js generatePosGrid() for options
 	alwaysDefaultPlacement = false;
 	confirmDelete = false;
+	enableSpellChecker = true;
 }
 
 // TODO: class
