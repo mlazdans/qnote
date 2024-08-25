@@ -1,11 +1,26 @@
 [{
 	"namespace": "qnote",
 	"types": [{
-		"id": "QNoteData",
+		"id": "NoteData",
 		"name": "data",
 		"type": "object",
 		"description": "Note data",
 		"properties": {
+			"keyId": {
+				"type": "string",
+				"optional": false,
+				"description": ""
+			},
+			"exists": {
+				"type": "boolean",
+				"optional": false,
+				"description": ""
+			},
+			"text": {
+				"type": "string",
+				"optional": true,
+				"description": "Note text"
+			},
 			"left": {
 				"type": "integer",
 				"optional": true,
@@ -26,15 +41,15 @@
 				"optional": true,
 				"description": "Windows height"
 			},
-			"text": {
-				"type": "string",
-				"optional": true,
-				"description": "Note text"
-			},
 			"ts": {
 				"type": "integer",
 				"optional": true,
 				"description": "Modification timestamp"
+			},
+			"tsFormatted": {
+				"type": "string",
+				"optional": true,
+				"description": "Formatted modification timestamp"
 			}
 		}
 	}],
