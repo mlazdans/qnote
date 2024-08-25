@@ -13,10 +13,10 @@ export interface NoteData {
 	// constructor(keyId: string): NoteData;
 }
 
-export interface Note {
+export interface INote {
 	data: NoteData;
 	load(): Promise<boolean>;
-	// get(): NoteData;
+	get(): NoteData;
 	set(data: NoteData): NoteData;
 	save(): Promise<boolean>;
 }
@@ -26,7 +26,7 @@ type NoteDeleter = () => Promise<boolean>;
 
 // export type Note = (QNote | QNoteFolder) & QEventDispatcher;
 
-export abstract class DefaultNote extends QEventDispatcher implements Note {
+export abstract class DefaultNote extends QEventDispatcher implements INote {
 	data: NoteData;
 
 	constructor(keyId: string) {
@@ -53,9 +53,9 @@ export abstract class DefaultNote extends QEventDispatcher implements Note {
 	// 	});
 	// }
 
-	// get(): NoteData {
-	// 	return this.data;
-	// }
+	get(): NoteData {
+		return this.data;
+	}
 
 	set(data: NoteData): NoteData {
 		return this.data = data;

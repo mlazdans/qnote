@@ -1,4 +1,4 @@
-import { Note } from "./Note.mjs";
+import { INote } from "./Note.mjs";
 import { DefaultNoteWindow } from "./NoteWindow.mjs";
 import { Preferences } from "./Preferences.mjs";
 import { PopupAnchor } from "./utils.mjs";
@@ -70,7 +70,7 @@ export class XULNoteWindow extends DefaultNoteWindow {
 		super.close();
 	}
 
-	async pop(note: Note) {
+	async pop(note: INote) {
 		const opt = getDefaultPopupOptions(this.windowId);
 		const Prefs = this.prefs;
 
