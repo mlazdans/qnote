@@ -10,7 +10,7 @@ class QPopup {
 	prefs: Preferences;
 
 	constructor(note: NoteData, prefs: Preferences){
-		console.log("new XulPopup", note, prefs);
+		console.log("new QPopup", note, prefs);
 		this.note = note;
 		this.prefs = prefs;
 		this.display();
