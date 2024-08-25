@@ -29,8 +29,6 @@ Copyright 2019 Brummolix (AutoarchiveReloaded, https://github.com/Brummolix/Auto
 
 /* eslint-disable max-classes-per-file */
 
-/// <reference path="../sharedAll/thunderbird.d.ts" />
-
 //general---------------------------------------------------------------------------------------------------------
 
 //define a Type "keyword"
@@ -498,22 +496,22 @@ declare class ExperimentAPIManager
 
 }
 
-//https://thunderbird-webextensions.readthedocs.io/en/latest/how-to/experiments.html
-interface FolderManager
-{
-	get(accountId: string, path: string): Ci.nsIMsgFolder;
-	convert(realFolder: Ci.nsIMsgFolder): MailFolder;
-}
+// //https://thunderbird-webextensions.readthedocs.io/en/latest/how-to/experiments.html
+// interface FolderManager
+// {
+// 	get(accountId: string, path: string): Ci.nsIMsgFolder;
+// 	convert(realFolder: Ci.nsIMsgFolder): MailFolder;
+// }
 
-//https://thunderbird-webextensions.readthedocs.io/en/latest/how-to/experiments.html
-interface MessageManager
-{
-	get(messageId: number): Ci.nsIMsgDBHdr;
-	convert(realMessage: Ci.nsIMsgDBHdr): MessageHeader;
+// //https://thunderbird-webextensions.readthedocs.io/en/latest/how-to/experiments.html
+// interface MessageManager
+// {
+// 	get(messageId: number): Ci.nsIMsgDBHdr;
+// 	convert(realMessage: Ci.nsIMsgDBHdr): MessageHeader;
 
-	// Start a MessageList from an array or enumerator of nsIMsgDBHdr ???
-	//startMessageList(realFolder.messages);
-}
+// 	// Start a MessageList from an array or enumerator of nsIMsgDBHdr ???
+// 	//startMessageList(realFolder.messages);
+// }
 
 declare class ParentMessageManager
 {
@@ -525,18 +523,18 @@ declare class WindowManager
 
 }
 
-//https://thunderbird-webextensions.readthedocs.io/en/latest/how-to/experiments.html
-interface ExtensionContextExtension
-{
-	folderManager: FolderManager;
-	messageManager: MessageManager;
+// //https://thunderbird-webextensions.readthedocs.io/en/latest/how-to/experiments.html
+// interface ExtensionContextExtension
+// {
+// 	folderManager: FolderManager;
+// 	messageManager: MessageManager;
 
-	experimentAPIManager: ExperimentAPIManager;
-	windowManager: WindowManager;
-	parentMessageManager: ParentMessageManager;
-}
+// 	experimentAPIManager: ExperimentAPIManager;
+// 	windowManager: WindowManager;
+// 	parentMessageManager: ParentMessageManager;
+// }
 
-interface ExtensionContext
-{
-	extension: ExtensionContextExtension;
-}
+// interface ExtensionContext
+// {
+// 	extension: ExtensionContextExtension;
+// }
