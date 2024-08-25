@@ -1,38 +1,39 @@
-import { Note, NoteData } from "./Note.mjs";
+import { Note } from "./Note.mjs";
 import { DefaultNoteWindow } from "./NoteWindow.mjs";
 import { Preferences } from "./Preferences.mjs";
+import { PopupAnchor } from "./utils.mjs";
 
-export interface PopupOptions {
-	id: number | undefined;
-	windowId: number | undefined;
-	focused: boolean | undefined;
-	top: number | undefined;
-	left: number | undefined;
-	offsetTop: number | undefined;
-	offsetLeft: number | undefined;
-	width: number | undefined;
-	height: number | undefined;
-	anchor: string | undefined;
-	anchorPlacement: string | undefined;
-	title: string | undefined;
-	placeholder: string | undefined;
+export type QPopupOptions = {
+	windowId: number;
+	id: number | null;
+	focused: boolean | null;
+	top: number | null;
+	left: number | null;
+	offsetTop: number | null;
+	offsetLeft: number | null;
+	width: number | null;
+	height: number | null;
+	anchor: PopupAnchor | null;
+	anchorPlacement: string | null;
+	title: string | null;
+	placeholder: string | null;
 }
 
-function getDefaultPopupOptions(): PopupOptions {
+function getDefaultPopupOptions(windowId: number): QPopupOptions {
 	return {
-		id: undefined,
-		windowId: undefined,
-		focused: undefined,
-		top: undefined,
-		left: undefined,
-		offsetTop: undefined,
-		offsetLeft: undefined,
-		width: undefined,
-		height: undefined,
-		anchor: undefined,
-		anchorPlacement: undefined,
-		title: undefined,
-		placeholder: undefined,
+		windowId: windowId,
+		id: null,
+		focused: null,
+		top: null,
+		left: null,
+		offsetTop: null,
+		offsetLeft: null,
+		width: null,
+		height: null,
+		anchor: null,
+		anchorPlacement: null,
+		title: null,
+		placeholder: null,
 	}
 }
 
@@ -69,7 +70,7 @@ export class XULNoteWindow extends DefaultNoteWindow {
 	}
 
 	async pop(note: Note) {
-		const opt = getDefaultPopupOptions();
+		const opt = getDefaultPopupOptions(this.windowId);
 		const Prefs = this.prefs;
 
 		opt.width = note.data.width || Prefs.width;
@@ -80,8 +81,8 @@ export class XULNoteWindow extends DefaultNoteWindow {
 		if(Prefs.alwaysDefaultPlacement){
 			opt.width = Prefs.width;
 			opt.height = Prefs.height;
-			opt.left = undefined;
-			opt.top = undefined;
+			opt.left = null;
+			opt.top = null;
 		}
 
 		browser.qpopup.create(opt).then((popupInfo: PopupOptions) => {

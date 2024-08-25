@@ -3,13 +3,13 @@ import { QEventDispatcher } from './QEventDispatcher.mjs';
 export interface NoteData {
 	keyId: string; // message-id header or another unique id
 	exists: boolean;
-	text: string | undefined;
-	left: number | undefined;
-	top: number | undefined;
-	width: number | undefined;
-	height: number | undefined;
-	ts: number | undefined;
-	tsFormatted: string | undefined;
+	text: string | null;
+	left: number | null;
+	top: number | null;
+	width: number | null;
+	height: number | null;
+	ts: number | null;
+	tsFormatted: string | null;
 	// constructor(keyId: string): NoteData;
 }
 
@@ -35,12 +35,12 @@ export abstract class DefaultNote extends QEventDispatcher implements Note {
 			keyId: keyId,
 			exists: false,
 			text: "",
-			left: undefined,
-			top: undefined,
-			width: undefined,
-			height: undefined,
-			ts: undefined,
-			tsFormatted: undefined,
+			left: null,
+			top: null,
+			width: null,
+			height: null,
+			ts: null,
+			tsFormatted: null,
 		};
 	}
 
