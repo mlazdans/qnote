@@ -1,3 +1,7 @@
+import { QEventDispatcher } from "../modules/QEventDispatcher.mjs";
+import { QNotePopup } from "../modules/QNotePopup.mjs";
+import { QPopupOptions } from "../modules/XULNoteWindow.mjs";
+
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var PopupEventDispatcher = new QEventDispatcher(["oncreated", "onremoved", "onmove", "onresize"]);
@@ -6,10 +10,10 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown() {
 	}
 
-	getAPI(context) {
+	getAPI(context: any) {
 		var QDEB = true;
 
-		function id2RealWindow(windowId){
+		function id2RealWindow(windowId: number){
 			try {
 				return extension.windowManager.get(windowId).window;
 			} catch {
@@ -24,28 +28,27 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 
 		var popupManager = {
 			counter: 0,
-			popups: new Map(),
-			add(popup) {
+			popups: new Map<number, QNotePopup>,
+			add(popup: QNotePopup): number {
 				this.popups.set(++this.counter, popup);
 				return this.counter;
 			},
-			remove(id){
-				if(this.get(id)){
-					return this.popups.delete(id);
-				}
+			remove(id: number): boolean {
+				return this.get(id) ? this.popups.delete(id) : false;
 			},
-			get(id){
-				if(this.has(id)){
-					return this.popups.get(id);
+			get(id: number): QNotePopup {
+				let p = this.popups.get(id);
+				if(p){
+					return p;
 				}
-				throw new ExtensionError(`Invalid popup ID: ${id}`);
+				throw new Error(`qpopup: id ${id} not found`);
 			},
-			has(id){
+			has(id: number): boolean {
 				return this.popups.has(id);
 			}
 		}
 
-		function coalesce(...args){
+		function coalesce(...args: any): any {
 			for(let a of args)
 				if(a !== null)
 					return a;
@@ -57,8 +60,8 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				onCreated: new ExtensionCommon.EventManager({
 					context,
 					name: "qpopup.onCreated",
-					register: fire => {
-						const l = value => {
+					register: (fire: ExtensionParent.Fire) => {
+						const l = (value: any) => {
 							fire.async(value);
 						};
 
@@ -72,8 +75,8 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				onRemoved: new ExtensionCommon.EventManager({
 					context,
 					name: "qpopup.onRemoved",
-					register: fire => {
-						const l = value => {
+					register: (fire: ExtensionParent.Fire) => {
+						const l = (value: any) => {
 							fire.async(value);
 						};
 
@@ -87,8 +90,8 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				onMove: new ExtensionCommon.EventManager({
 					context,
 					name: "qpopup.onMove",
-					register: fire => {
-						const l = value => {
+					register: (fire: ExtensionParent.Fire) => {
+						const l = (value: any) => {
 							fire.async(value);
 						};
 
@@ -102,8 +105,8 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				onResize: new ExtensionCommon.EventManager({
 					context,
 					name: "qpopup.onResize",
-					register: fire => {
-						const l = value => {
+					register: (fire: ExtensionParent.Fire) => {
+						const l = (value: any) => {
 							fire.async(value);
 						};
 
@@ -114,40 +117,43 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						};
 					}
 				}).api(),
-				async setDebug(on){
+				async setDebug(on: boolean){
 					QDEB = on;
 				},
-				async remove(id){
+				async remove(id: number){
 					QDEB&&console.debug("qpopup.remove()", id);
-					popupManager.get(id).close();
-					popupManager.remove(id);
-					PopupEventDispatcher.fireListeners("onremoved", id);
+					const p = popupManager.get(id);
+					if(p){
+						p.close();
+						popupManager.remove(id);
+						PopupEventDispatcher.fireListeners("onremoved", id);
+					} else {
+						console.error(`qpopup: id ${id} not found`);
+					}
 				},
-				async get(id){
-					let popup = popupManager.get(id);
-
+				async get(id: number){
+					return popupManager.get(id);
 					// popup.popupInfo.focused = popup.isFocused;
 
-					return popup.popupInfo;
 				},
-				async update(id, options){
+				async update(id: number, options: QPopupOptions){
 					let popup = popupManager.get(id);
 
-					let pi = popup.popupInfo;
+					let pi = popup.options;
 
 					// options come in null-ed
-					let { top, left, width, height, url, title, focused, offsetTop, offsetLeft } = options;
+					let { top, left, title, focused, offsetTop, offsetLeft } = options;
 
 					if(top !== null || left !== null){
 						pi.top = coalesce(top, pi.top);
 						pi.left = coalesce(left, pi.left);
-						popup.moveTo(pi.left, pi.top);
+						popup.moveTo(pi.left||0, pi.top||0);
 					}
 
 					if(offsetTop !== null || offsetLeft !== null){
 						pi.top = pi.top + coalesce(offsetTop, 0);
 						pi.left = pi.left + coalesce(offsetLeft, 0);
-						popup.moveTo(pi.left, pi.top);
+						popup.moveTo(pi.left||0, pi.top||0);
 					}
 
 					// TODO: broken
@@ -162,40 +168,27 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						popup.focus();
 					}
 
-					if(title){
-						popup.title = title;
-					}
+					// if(title){
+					// 	popup.title = title;
+					// }
 
 					return pi;
 				},
-				async create(options){
+				async create(options: QPopupOptions){
 					QDEB&&console.debug("qpopup.create()");
-					let {
-						windowId, top, left, width, height, anchor, anchorPlacement
-					} = options;
+					let window = id2RealWindow(options.windowId);
 
-					let window = id2RealWindow(windowId);
+					var popup = new QNotePopup(window, extension, options);
 
-					var popup = new QNotePopup({
-						window: window,
-						top: top,
-						left: left,
-						width: width,
-						height: height,
-						anchor: anchor,
-						anchorPlacement: anchorPlacement
-					});
+					popup.options.id = popupManager.add(popup);
 
-					popup.popupInfo = options;
-					popup.popupInfo.id = popupManager.add(popup);
-
-					PopupEventDispatcher.fireListeners("oncreated", popup.popupInfo);
+					PopupEventDispatcher.fireListeners("oncreated", popup.options);
 
 					return popup.pop().then(status => {
-						popup.popupInfo.top = popup.panel.screenY;
-						popup.popupInfo.left = popup.panel.screenX;
+						popup.options.top = popup.panel.screenY;
+						popup.options.left = popup.panel.screenX;
 
-						return popup.popupInfo;
+						return popup.options;
 					});
 				}
 			}
