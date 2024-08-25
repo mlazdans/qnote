@@ -1,0 +1,21 @@
+{
+  "name": "qnote",
+  "version": "1.0.0",
+  "description": "QNote addon from Thunderbird",
+  "main": "index.js",
+  "dependencies": {
+    "@types/luxon": "^3.4.2",
+    "luxon": "^3.5.0",
+    "typescript": "^5.5.4"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "",
+  "devDependencies": {
+    "ts-loader": "^9.5.1",
+    "webpack": "^5.94.0",
+    "webpack-cli": "^5.1.4"
+  }
+}

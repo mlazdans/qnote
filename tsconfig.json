@@ -1,0 +1,25 @@
+{
+	"compilerOptions": {
+		"module": "Preserve",
+		"target": "es2018",
+		// "module": "Preserve",
+		// "target": "es2016",
+
+		"esModuleInterop": true,
+		"strict": true,
+
+		"sourceMap": false,
+		// "allowJs": false,
+		"rootDir": "src",
+		"outDir": "dist/release",
+		"typeRoots": [
+			"src/types"
+		],
+		"noImplicitReturns": true,
+		"noUnusedLocals": false,
+		"removeComments": true,
+		// "declaration": true,
+
+		"forceConsistentCasingInFileNames": true
+	}
+}
