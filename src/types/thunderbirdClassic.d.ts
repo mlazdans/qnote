@@ -496,7 +496,18 @@ declare namespace ExtensionCommon
 
 	class EventManager
 	{
-		public constructor(arg: any);
+		public constructor(params: EventManagerParams);
+		public api(): {};
+	}
+
+	interface EventManagerParams {
+		context: object;
+		module?: string;
+		event?: string;
+		extensionApi?: object;
+		name: string;
+		register: Function;
+		inputHandling?: boolean;
 	}
 }
 
