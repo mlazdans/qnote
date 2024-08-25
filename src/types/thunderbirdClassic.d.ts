@@ -47,6 +47,10 @@ declare interface nsIJSCID
 
 type IteratorUtilsPath = "resource:///modules/iteratorUtils.jsm";
 type MailServicesPath = "resource:///modules/MailServices.jsm";
+type ExtensionPopupsPath = "resource:///modules/ExtensionPopups.jsm";
+type ExtensionParentPath = "resource://gre/modules/ExtensionParent.jsm";
+type ExtensionCommonPath = "resource://gre/modules/ExtensionCommon.jsm";
+type QEventDispatcherPath = "resource://qnote/modules/QEventDispatcher.mjs";
 
 declare namespace Components
 {
@@ -57,6 +61,11 @@ declare namespace Components
 
 		public static import(path: IteratorUtilsPath): IteratorUtils;
 		public static import(path: MailServicesPath): MailServicesExport;
+		public static import(path: ExtensionPopupsPath): any;
+		public static import(path: ExtensionParentPath): any;
+		public static import(path: ExtensionCommonPath): any;
+		public static importESModule(path: QEventDispatcherPath): QEventDispatcher;
+		public static importESModule(path: string): any;
 		public static unload(path: string): void;
 		public static defineModuleGetter(param1: any, param2: any, param3: any): void;
 	}
