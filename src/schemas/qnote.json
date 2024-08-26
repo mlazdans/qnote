@@ -1,19 +1,17 @@
 [{
 	"namespace": "qnote",
 	"types": [{
-		"id": "NoteData",
+		"id": "QNoteData",
 		"name": "data",
 		"type": "object",
 		"description": "Note data",
 		"properties": {
 			"keyId": {
 				"type": "string",
-				"optional": false,
-				"description": ""
+				"description": "Unique id"
 			},
 			"exists": {
 				"type": "boolean",
-				"optional": false,
 				"description": ""
 			},
 			"text": {
@@ -45,11 +43,6 @@
 				"type": "integer",
 				"optional": true,
 				"description": "Modification timestamp"
-			},
-			"tsFormatted": {
-				"type": "string",
-				"optional": true,
-				"description": "Formatted modification timestamp"
 			}
 		}
 	}],

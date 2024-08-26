@@ -9,7 +9,6 @@ export interface NoteData {
 	width: number | null;
 	height: number | null;
 	ts: number | null;
-	tsFormatted: string | null;
 	// constructor(keyId: string): NoteData;
 }
 
@@ -40,7 +39,6 @@ export abstract class DefaultNote extends QEventDispatcher implements INote {
 			width: null,
 			height: null,
 			ts: null,
-			tsFormatted: null,
 		};
 	}
 

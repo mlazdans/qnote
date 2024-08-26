@@ -1,4 +1,4 @@
-import { INote, NoteData } from './Note.mjs';
+import { NoteData } from './Note.mjs';
 import { QEventDispatcher } from './QEventDispatcher.mjs';
 
 export class DirtyStateError extends Error {};
@@ -7,7 +7,7 @@ var QDEB = true;
 // var _ = browser.i18n.getMessage;
 
 export interface NoteWindow extends QEventDispatcher {
-	note: INote | undefined;
+	note: NoteData | undefined;
 	loadedNoteData: NoteData | undefined;
 	// messageId: string | undefined;
 	// needSaveOnClose: boolean;
@@ -18,14 +18,14 @@ export interface NoteWindow extends QEventDispatcher {
 	// update(note: NoteData): Promise<void>
 	focus(): Promise<void>
 	isFocused(): Promise<boolean>
-	pop(note: INote): Promise<void>
+	pop(): Promise<void>
 	close(): Promise<void>
 }
 
 export abstract class DefaultNoteWindow extends QEventDispatcher implements NoteWindow {
 	id: number;
 	windowId: number;
-	note: INote;
+	note: NoteData;
 	loadedNoteData: NoteData | undefined;
 	// messageId: string | undefined;
 	// needSaveOnClose = true;
@@ -33,7 +33,7 @@ export abstract class DefaultNoteWindow extends QEventDispatcher implements Note
 	// dirty = false;
 	flags: number | undefined;
 
-	constructor(id: number, windowId: number, note: INote) {
+	constructor(id: number, windowId: number, note: NoteData) {
 		super(["afterclose"]);
 		this.id = id;
 		this.note = note;
@@ -49,7 +49,7 @@ export abstract class DefaultNoteWindow extends QEventDispatcher implements Note
 	// 	});
 	// }
 
-	abstract pop(note: INote): Promise<void>
+	abstract pop(): Promise<void>
 	abstract focus(): Promise<void>
 	abstract isFocused(): Promise<boolean>
 	// abstract update(note: NoteData): Promise<void>
@@ -65,7 +65,7 @@ export abstract class DefaultNoteWindow extends QEventDispatcher implements Note
 	get isModified(): boolean {
 		if(this.note){
 			const n1 = this.loadedNoteData;
-			const n2 = this.note.data;
+			const n2 = this.note;
 			if(n1 && n2){
 				return !this.isEqual(n1, n2);
 			}

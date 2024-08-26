@@ -49,11 +49,19 @@
 				"type": "string",
 				"optional": true
 			},
+			"text": {
+				"type": "string",
+				"optional": true
+			},
 			"placeholder": {
 				"type": "string",
 				"optional": true
 			},
 			"focusOnDisplay": {
+				"type": "boolean",
+				"optional": true
+			},
+			"enableSpellChecker": {
 				"type": "boolean",
 				"optional": true
 			}
