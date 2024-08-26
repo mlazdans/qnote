@@ -52,7 +52,7 @@ module.exports = [
 		name: "scripts",
 		mode: theMode,
 		entry: {
-			xulpopup: "./src/scripts/xulpopup.ts",
+			qpopup: "./src/scripts/qpopup.ts",
 		},
 		output: {
 			path: outputPath+ '/scripts/',

@@ -4,46 +4,45 @@ import { Preferences } from "./Preferences.mjs";
 import { PopupAnchor } from "./utils.mjs";
 
 export type QPopupOptions = {
-	windowId: number;
-	id: number | null;
-	focused: boolean | null;
-	top: number | null;
-	left: number | null;
-	offsetTop: number | null;
-	offsetLeft: number | null;
-	width: number | null;
-	height: number | null;
-	anchor: PopupAnchor | null;
-	anchorPlacement: string | null;
-	title: string | null;
-	placeholder: string | null;
-}
-
-function getDefaultPopupOptions(windowId: number): QPopupOptions {
-	return {
-		windowId: windowId,
-		id: null,
-		focused: null,
-		top: null,
-		left: null,
-		offsetTop: null,
-		offsetLeft: null,
-		width: null,
-		height: null,
-		anchor: null,
-		anchorPlacement: null,
-		title: null,
-		placeholder: null,
-	}
+	id: number;
+	focused?: boolean | null;
+	top?: number | null;
+	left?: number | null;
+	offsetTop?: number | null;
+	offsetLeft?: number | null;
+	width?: number | null;
+	height?: number | null;
+	anchor?: PopupAnchor | null;
+	anchorPlacement?: string | null;
+	title?: string | null;
+	placeholder?: string | null;
+	focusOnDisplay?: boolean | null;
 }
 
 export class XULNoteWindow extends DefaultNoteWindow {
-	id: number | undefined;
 	prefs: Preferences;
 
-	constructor(windowId: number, prefs: Preferences) {
-		super(windowId);
+	constructor(id: number, windowId: number, note: INote, prefs: Preferences) {
+		super(id, windowId, note);
 		this.prefs = prefs;
+
+		const opt: QPopupOptions = { id };
+
+		opt.width = note.data.width || this.prefs.width;
+		opt.height = note.data.height || this.prefs.height;
+		opt.left = note.data.left;
+		opt.top = note.data.top;
+
+		if(this.prefs.alwaysDefaultPlacement){
+			opt.width = this.prefs.width;
+			opt.height = this.prefs.height;
+			opt.left = null;
+			opt.top = null;
+		}
+
+		browser.qpopup.create(windowId, opt).then(() => {
+			console.log(`created popup ${id}`);
+		});
 	}
 
 	// async update(opt: NoteData){
@@ -70,28 +69,9 @@ export class XULNoteWindow extends DefaultNoteWindow {
 		super.close();
 	}
 
-	async pop(note: INote) {
-		const opt = getDefaultPopupOptions(this.windowId);
-		const Prefs = this.prefs;
-
-		opt.width = note.data.width || Prefs.width;
-		opt.height = note.data.height || Prefs.height;
-		opt.left = note.data.left;
-		opt.top = note.data.top;
-
-		if(Prefs.alwaysDefaultPlacement){
-			opt.width = Prefs.width;
-			opt.height = Prefs.height;
-			opt.left = null;
-			opt.top = null;
-		}
-
-		browser.qpopup.create(opt).then((pi: QPopupOptions) => {
-			if(pi.id){
-				this.id = pi.id;
-			}
-
-			return pi;
+	async pop() {
+		browser.qpopup.pop(this.id).then(() => {
+			console.log(`popped popup ${this.id}`);
 		});
 
 		// return super.pop(async opt => {

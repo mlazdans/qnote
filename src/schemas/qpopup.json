@@ -1,19 +1,12 @@
 [{
 	"namespace": "qpopup",
 	"types": [{
-		"id": "Popup",
+		"id": "QPopupOptions",
 		"type": "object",
 		"properties": {
 			"id": {
 				"type": "integer",
-				"optional": true,
 				"description": "Unique popup id",
-				"minimum": 0
-			},
-			"windowId": {
-				"type": "integer",
-				"optional": true,
-				"description": "windowId from windows API",
 				"minimum": 0
 			},
 			"focused": {
@@ -59,6 +52,10 @@
 			"placeholder": {
 				"type": "string",
 				"optional": true
+			},
+			"focusOnDisplay": {
+				"type": "boolean",
+				"optional": true
 			}
 		}
 	}],
@@ -79,7 +76,7 @@
 		"async": "callback",
 		"parameters": [{
 			"type": "integer",
-			"name": "popupId",
+			"name": "id",
 			"minimum": 1
 		}]
 	},{
@@ -87,19 +84,15 @@
 		"type": "function",
 		"async": "callback",
 		"parameters": [{
-			"name": "popupId",
-			"type": "integer",
-			"minimum": 1
-		},{
-			"name": "popup",
-			"$ref": "Popup"
+			"name": "options",
+			"$ref": "QPopupOptions"
 		}]
 	},{
 		"name": "remove",
 		"type": "function",
 		"async": "callback",
 		"parameters": [{
-			"name": "popupId",
+			"name": "id",
 			"type": "integer",
 			"minimum": 1
 		}]
@@ -108,8 +101,21 @@
 		"type": "function",
 		"async": "callback",
 		"parameters": [{
-			"name": "popup",
-			"$ref": "Popup"
+			"type": "integer",
+			"name": "windowId",
+			"minimum": 1
+		},{
+			"name": "options",
+			"$ref": "QPopupOptions"
+		}]
+	},{
+		"name": "pop",
+		"type": "function",
+		"async": "callback",
+		"parameters": [{
+			"type": "integer",
+			"name": "id",
+			"minimum": 1
 		}]
 	}],
 	"events": [{
@@ -117,8 +123,8 @@
 		"type": "function",
 		"description": "Fired when a popup is created.",
 		"parameters": [{
-			"name": "popup",
-			"$ref": "Popup",
+			"name": "options",
+			"$ref": "QPopupOptions",
 			"description": "Details of the popup that was created."
 		}]
 	},{
@@ -126,8 +132,8 @@
 		"type": "function",
 		"description": "Fired when a popup is removed.",
 		"parameters": [{
-			"name": "popup",
-			"$ref": "Popup",
+			"name": "options",
+			"$ref": "QPopupOptions",
 			"description": "Details of the popup that was removed."
 		}]
 	},{
@@ -135,8 +141,8 @@
 		"type": "function",
 		"description": "Fired when a popup is moved.",
 		"parameters": [{
-			"name": "popup",
-			"$ref": "Popup",
+			"name": "options",
+			"$ref": "QPopupOptions",
 			"description": "Details of the popup that was removed."
 		}]
 	},{
@@ -144,8 +150,8 @@
 		"type": "function",
 		"description": "Fired when a popup is resized.",
 		"parameters": [{
-			"name": "popup",
-			"$ref": "Popup",
+			"name": "options",
+			"$ref": "QPopupOptions",
 			"description": "Details of the popup that was resized."
 		}]
 	}]

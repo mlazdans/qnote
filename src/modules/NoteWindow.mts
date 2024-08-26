@@ -23,17 +23,20 @@ export interface NoteWindow extends QEventDispatcher {
 }
 
 export abstract class DefaultNoteWindow extends QEventDispatcher implements NoteWindow {
-	note: INote | undefined;
-	loadedNoteData: NoteData | undefined;
+	id: number;
 	windowId: number;
+	note: INote;
+	loadedNoteData: NoteData | undefined;
 	// messageId: string | undefined;
 	// needSaveOnClose = true;
 	// shown = false;
 	// dirty = false;
 	flags: number | undefined;
 
-	constructor(windowId: number) {
+	constructor(id: number, windowId: number, note: INote) {
 		super(["afterclose"]);
+		this.id = id;
+		this.note = note;
 		this.windowId = windowId;
 	}
 
