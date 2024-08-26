@@ -24,30 +24,30 @@ const tsLoaderRules = [
 const extensions = [".tsx", ".ts", ".js"];
 
 module.exports = [
-	{
-		name: "webextension",
-		mode: theMode,
-		entry: {
-			background: "./src/background.ts",
-			// options: "./src/options/options.ts",
-			// popup: "./src/popup/popup.ts",
-		},
-		output: {
-			path: outputPath,
-		},
-		module: {
-			rules: tsLoaderRules,
-		},
-		resolve: {
-			extensions: extensions,
-			extensionAlias: {
-				".js": [".js", ".ts"],
-				".cjs": [".cjs", ".cts"],
-				".mjs": [".mjs", ".mts"]
-			}
-			// modules: ['.', 'node_modules']
-		},
-	},
+	// {
+	// 	name: "webextension",
+	// 	mode: theMode,
+	// 	entry: {
+	// 		background: "./src/background.ts",
+	// 		// options: "./src/options/options.ts",
+	// 		// popup: "./src/popup/popup.ts",
+	// 	},
+	// 	output: {
+	// 		path: outputPath,
+	// 	},
+	// 	module: {
+	// 		rules: tsLoaderRules,
+	// 	},
+	// 	resolve: {
+	// 		extensions: extensions,
+	// 		extensionAlias: {
+	// 			".js": [".js", ".ts"],
+	// 			".cjs": [".cjs", ".cts"],
+	// 			".mjs": [".mjs", ".mts"]
+	// 		}
+	// 		// modules: ['.', 'node_modules']
+	// 	},
+	// },
 	{
 		name: "scripts",
 		mode: theMode,
