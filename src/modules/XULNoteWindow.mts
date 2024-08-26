@@ -1,4 +1,4 @@
-import { NoteData } from "./Note.mjs";
+import { INote } from "./Note.mjs";
 import { DefaultNoteWindow } from "./NoteWindow.mjs";
 import { Preferences } from "./Preferences.mjs";
 import { PopupAnchor } from "./utils.mjs";
@@ -22,28 +22,32 @@ import { PopupAnchor } from "./utils.mjs";
  *     enableSpellChecker?: boolean | null;
  */
 
-export type QPopupOptions = {
-	id: number;
-	focused?: boolean | null;
-	top?: number | null;
-	left?: number | null;
-	offsetTop?: number | null;
-	offsetLeft?: number | null;
-	width?: number | null;
-	height?: number | null;
-	anchor?: PopupAnchor | null;
-	anchorPlacement?: string | null;
-	title?: string | null;
-	text?: string | null;
-	placeholder?: string | null;
-	focusOnDisplay?: boolean | null;
-	enableSpellChecker?: boolean | null;
+// All fields will be sent to qpopup API, optional fields set to null
+export class QPopupOptions {
+	id: number
+	focused: boolean | null = null
+	top: number | null = null
+	left: number | null = null
+	offsetTop: number | null = null
+	offsetLeft: number | null = null
+	width: number | null = null
+	height: number | null = null
+	anchor: PopupAnchor | null = null
+	anchorPlacement: string | null = null
+	title: string | null = null
+	text: string | null = null
+	placeholder: string | null = null
+	focusOnDisplay: boolean | null = null
+	enableSpellChecker: boolean | null = null
+	constructor(id: number) {
+		this.id = id;
+	}
 }
 
 export class XULNoteWindow extends DefaultNoteWindow {
 	prefs: Preferences;
 
-	constructor(id: number, windowId: number, note: NoteData, prefs: Preferences) {
+	constructor(id: number, windowId: number, note: INote, prefs: Preferences) {
 		super(id, windowId, note);
 		this.prefs = prefs;
 
@@ -53,12 +57,12 @@ export class XULNoteWindow extends DefaultNoteWindow {
 	}
 
 	note2QPopupOptions(): QPopupOptions {
-		const opt: QPopupOptions = { id: this.id };
+		const opt = new QPopupOptions(this.id);
 
-		opt.width = this.note.width || this.prefs.width;
-		opt.height = this.note.height || this.prefs.height;
-		opt.left = this.note.left;
-		opt.top = this.note.top;
+		opt.width = this.note.data.width || this.prefs.width;
+		opt.height = this.note.data.height || this.prefs.height;
+		opt.left = this.note.data.left;
+		opt.top = this.note.data.top;
 
 		if(this.prefs.alwaysDefaultPlacement){
 			opt.width = this.prefs.width;
@@ -67,8 +71,8 @@ export class XULNoteWindow extends DefaultNoteWindow {
 			opt.top = null;
 		}
 
-		opt.text = this.note.text;
-		opt.title = "QNote: " + this.note.ts; // TODO: format
+		opt.text = this.note.data.text;
+		opt.title = "QNote: " + this.note.data.ts; // TODO: format
 
 		return opt;
 	}

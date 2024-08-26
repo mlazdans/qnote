@@ -1,9 +1,9 @@
 import { DOMLocalizator } from "../modules/DOMLocalizator.mjs";
-import { PushNoteMessage, QPopupDOMContentLoadedMessage } from "../modules/Messages.mjs";
-import { NoteData } from "../modules/Note.mjs";
-import { Preferences } from "../modules/Preferences.mjs";
+import { QPopupDOMContentLoadedMessage, UpdateQPoppupMessage } from "../modules/Messages.mjs";
+import { QPopupOptions } from "../modules/XULNoteWindow.mjs";
 
 var QDEB = true;
+
 const urlParams = new URLSearchParams(window.location.search);
 const idParam = urlParams.get("id");
 const width = parseInt(urlParams.get("width") ?? "320");
@@ -20,7 +20,9 @@ if (isNaN(id)) {
 	throw new Error(`Incorrect query parameter: id ${id}`);
 }
 
-QDEB&&console.debug("qpopup(content) new QPopup", id, width, height);
+const Opts = new QPopupOptions(id);
+
+QDEB&&console.debug("qpopup(content) new QPopup: ", id);
 
 const i18n = new DOMLocalizator(browser.i18n.getMessage);
 const YTextE = document.getElementById('note-text') as HTMLTextAreaElement;
@@ -39,51 +41,44 @@ if(!resizeEl) throw new Error("resizeEl not found");
 if(!closeEl) throw new Error("closeEl not found");
 if(!delEl) throw new Error("delEl not found");
 
-var Note: NoteData;
-var Prefs: Preferences;
-// var Opts: QPopupOptions;
+function updateOptions(o: QPopupOptions){
+	console.log("updateOptions");
+	if(Opts.enableSpellChecker !== o.enableSpellChecker)
+		Opts.enableSpellChecker = o.enableSpellChecker;
 
-// function updateOpts(o: QPopupOptions){
-// 	if(Opts.placeholder)YTextE.setAttribute("placeholder", Opts.placeholder);
-// }
+	if(Opts.width !== o.width)
+		Opts.width = o.width;
 
-// if(placeholder)YTextE.setAttribute("placeholder", placeholder);
+	if(Opts.height !== o.height)
+		Opts.height = o.height;
 
-function updatePrefs(p: Preferences){
-	Prefs = p;
-	YTextE.setAttribute("spellcheck", Prefs.enableSpellChecker ? "true" : "false");
-	if(Prefs.alwaysDefaultPlacement){
-		resizeNote(Prefs.width, Prefs.height);
-	}
+	if(Opts.text !== o.text)
+		Opts.text = o.text;
 
-}
+	if(Opts.title !== o.title)
+		Opts.title = o.title;
 
-function updateNote(n: NoteData){
-	Note = n;
-	YTextE.value = Note.text ?? "";
+	if(Opts.placeholder !== o.placeholder)
+		Opts.placeholder = o.placeholder;
 
-	let title = 'QNote';
-	if(Note.tsFormatted){
-		title += ': ' + Note.tsFormatted;
-	}
-	titleTextEl.textContent = title;
+	if(Opts.enableSpellChecker !== null)
+		YTextE.setAttribute("spellcheck", Opts.enableSpellChecker ? "true" : "false");
 
+	if(Opts.text)
+		YTextE.value = Opts.text ?? "";
 
-	if(Note.width){
-		popupEl.style.width = Note.width + 'px';
-	}
+	if(Opts.title)
+		titleTextEl.textContent = Opts.title;
 
-	if(Note.height){
-		popupEl.style.height = Note.height + 'px';
-	}
+	if(Opts.width && Opts.height)
+		resizeNote(Opts.width, Opts.height);
 
-	if(Note.width && Note.height){
-		resizeNote(Note.width, Note.height);
-	}
+	if(Opts.placeholder)
+		YTextE.setAttribute("placeholder", Opts.placeholder);
 }
 
 function sfocus(f: Function){
-	if(Prefs?.focusOnDisplay){
+	if(Opts.focusOnDisplay){
 		var isFocused = (document.activeElement === YTextE);
 		if(!isFocused){
 			f();
@@ -108,22 +103,19 @@ window.addEventListener("DOMContentLoaded", () => {
 
 	xulPort.onMessage.addListener(data => {
 		let reply;
-		if(reply = (new PushNoteMessage).parse(data)){
-			updateNote(reply.note);
-			updatePrefs(reply.prefs);
+		if(reply = (new UpdateQPoppupMessage).parse(data)){
+			if(reply.id === id){
+				updateOptions(reply.opts);
+			}
 		} else {
-			console.error("Unknown message: ", data);
+			console.error("Unknown or incorrect message: ", data);
 		}
 	});
 
 	(new QPopupDOMContentLoadedMessage).post(xulPort, { id });
 });
 
-YTextE.addEventListener("keyup", e => {
-	if(Note) {
-		Note.text = YTextE.value;
-	}
-});
+YTextE.addEventListener("keyup", () => Opts.text = YTextE.value);
 
 let tDrag = (mouse: MouseEvent) => {
 	if(mouse.target === null){
@@ -157,16 +149,15 @@ let tDrag = (mouse: MouseEvent) => {
 		// 	};
 		// }
 
-		const updateOpts: QPopupOptions = {
-			id: id,
-			offsetTop: e.clientY - mouse.clientY,
-			offsetLeft: e.clientX - mouse.clientX,
-		}
+		const updateOpts = new QPopupOptions(id);
+		updateOpts.offsetTop = e.clientY - mouse.clientY;
+		updateOpts.offsetLeft = e.clientX - mouse.clientX;
 
-		browser.qpopup.update(updateOpts).then(pi => {
-			if(Note && pi.top)Note.top = pi.top;
-			if(Note && pi.left)Note.left = pi.left;
-		});
+		browser.qpopup.update(updateOpts);
+		// browser.qpopup.update(updateOpts).then(pi => {
+		// 	if(Note && pi.top)Note.top = pi.top;
+		// 	if(Note && pi.left)Note.left = pi.left;
+		// });
 	};
 
 	let handleDragEnd = () => {
@@ -201,11 +192,6 @@ function resizeNote(w: number, h: number){
 		popupEl.style.height = h + 'px';
 	} else {
 		console.error("popupEl is gone");
-	}
-
-	if(Note){
-		Note.width = w;
-		Note.height = h;
 	}
 }
 

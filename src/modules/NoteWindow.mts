@@ -1,13 +1,17 @@
-import { NoteData } from './Note.mjs';
-import { QEventDispatcher } from './QEventDispatcher.mjs';
+import { INote, NoteData } from './Note.mjs';
+import { QEventDispatcher, QEventListener } from './QEventDispatcher.mjs';
 
 export class DirtyStateError extends Error {};
 
 var QDEB = true;
 // var _ = browser.i18n.getMessage;
 
+type DefaultNoteWindowListener = QEventListener & "afterclose";
+
 export interface NoteWindow extends QEventDispatcher {
-	note: NoteData | undefined;
+	id: number;
+	windowId: number;
+	note: INote;
 	loadedNoteData: NoteData | undefined;
 	// messageId: string | undefined;
 	// needSaveOnClose: boolean;
@@ -25,7 +29,7 @@ export interface NoteWindow extends QEventDispatcher {
 export abstract class DefaultNoteWindow extends QEventDispatcher implements NoteWindow {
 	id: number;
 	windowId: number;
-	note: NoteData;
+	note: INote;
 	loadedNoteData: NoteData | undefined;
 	// messageId: string | undefined;
 	// needSaveOnClose = true;
@@ -33,11 +37,15 @@ export abstract class DefaultNoteWindow extends QEventDispatcher implements Note
 	// dirty = false;
 	flags: number | undefined;
 
-	constructor(id: number, windowId: number, note: NoteData) {
+	constructor(id: number, windowId: number, note: INote) {
 		super(["afterclose"]);
 		this.id = id;
 		this.note = note;
 		this.windowId = windowId;
+	}
+
+	addListener(name: DefaultNoteWindowListener, listener: (w: NoteWindow) => void): void {
+		super.addListener(name, listener);
 	}
 
 	// async loadNoteForMessage(id: MessageId) {
@@ -56,6 +64,7 @@ export abstract class DefaultNoteWindow extends QEventDispatcher implements Note
 
 	async close(){
 		this.fireListeners("afterclose", this);
+		this.removeAllListeners();
 		// this.popupId = undefined;
 		// this.messageId = undefined;
 		// this.needSaveOnClose = true;
@@ -67,7 +76,7 @@ export abstract class DefaultNoteWindow extends QEventDispatcher implements Note
 			const n1 = this.loadedNoteData;
 			const n2 = this.note;
 			if(n1 && n2){
-				return !this.isEqual(n1, n2);
+				return !this.isEqual(n1, n2.data);
 			}
 		}
 		return false;
