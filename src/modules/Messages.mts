@@ -1,5 +1,6 @@
 import { NoteData } from "./Note.mjs";
 import { Preferences } from "./Preferences.mjs";
+import { QPopupOptions } from "./XULNoteWindow.mjs";
 
 // Declarations
 interface MessageData {
@@ -33,9 +34,14 @@ interface QPopupDOMContentLoadedData extends MessageData {
 	id: number
 }
 
-interface PushNoteData extends MessageData {
-	note: NoteData
-	prefs: Preferences
+// interface PushNoteData extends MessageData {
+// 	note: NoteData
+// 	prefs: Preferences
+// }
+
+interface UpdateQPoppupData {
+	id: number,
+	opts: QPopupOptions
 }
 
 // Messages
@@ -52,16 +58,27 @@ export class QPopupDOMContentLoadedMessage extends DefaultMessage {
 	}
 }
 
-export class PushNoteMessage extends DefaultMessage {
-	command = "pushNote";
-	parse(data: any): PushNoteData | undefined {
-		if(!super.parse(data) || !("note" in data) || !("prefs" in data)){
+// export class PushNoteMessage extends DefaultMessage {
+// 	command = "pushNote";
+// 	parse(data: any): PushNoteData | undefined {
+// 		if(!super.parse(data) || !("note" in data) || !("prefs" in data)){
+// 			return undefined;
+// 		}
+
+// 		return {
+// 			note: data.note,
+// 			prefs: data.prefs,
+// 		};
+// 	}
+// }
+
+export class UpdateQPoppupMessage extends DefaultMessage {
+	command = "UpdateQPoppup";
+	parse(data: any): UpdateQPoppupData | undefined {
+		if(!super.parse(data) || !("opts" in data) || !("id" in data)){
 			return undefined;
 		}
 
-		return {
-			note: data.note,
-			prefs: data.prefs,
-		};
+		return data
 	}
 }
