@@ -1,6 +1,7 @@
 import { NoteData } from "./Note.mjs";
 import { Preferences } from "./Preferences.mjs";
 
+// Declarations
 interface MessageData {
 }
 
@@ -27,11 +28,17 @@ abstract class DefaultMessage implements Message {
 	}
 }
 
-// Send
+// Data
 interface QPopupDOMContentLoadedData extends MessageData {
 	id: number
 }
 
+interface PushNoteData extends MessageData {
+	note: NoteData
+	prefs: Preferences
+}
+
+// Messages
 export class QPopupDOMContentLoadedMessage extends DefaultMessage {
 	command = "QPopupDOMContentLoaded";
 	parse(data: any): QPopupDOMContentLoadedData | undefined {
@@ -43,12 +50,6 @@ export class QPopupDOMContentLoadedMessage extends DefaultMessage {
 			id: parseInt(data.id),
 		};
 	}
-}
-
-// Post
-interface PushNoteData extends MessageData {
-	note: NoteData
-	prefs: Preferences
 }
 
 export class PushNoteMessage extends DefaultMessage {

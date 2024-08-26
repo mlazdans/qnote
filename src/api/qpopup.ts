@@ -202,9 +202,8 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				},
 				async create(windowId: number, options: QPopupOptions){
 					QDEB&&console.debug("qpopup.create()");
-					let window = id2RealWindow(windowId);
 
-					var popup = new QNotePopup(window, extension, options);
+					var popup = new QNotePopup(id2RealWindow(windowId), extension, options);
 
 					PopupEventDispatcher.fireListeners("oncreated", popup.options);
 					// browser.runtime.onConnect.addListener(function(connection){
