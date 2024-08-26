@@ -1,11 +1,11 @@
 {
-	"manifest_version": 2,
+	"manifest_version": 3,
 	"name": "QNote",
 	"author": "Martins Lazdans",
 	"default_locale": "en",
 	"description": "__MSG_description__",
 	"version": "0.13.0",
-	"applications": {
+	"browser_specific_settings": {
 		"gecko": {
 			"id": "qnote@dqdp.net",
 			"strict_min_version": "115.0",
@@ -25,36 +25,22 @@
 		"unlimitedStorage",
 		"downloads",
 		"menus",
-		"accountsRead"
+		"accountsRead",
+		"scripting"
 	],
 	"background": {
-		"scripts": [
-			"modules/QEventDispatcher.js",
-			"modules/DOMLocalizator.js",
-			"modules/luxon.js",
-			"modules/dateFormat.js",
-			"scripts/utils-note.js",
-			"scripts/utils-message.js",
-			"scripts/utils.js",
-			"scripts/menu.js",
-			"scripts/notes/Note.js",
-			"scripts/notes/QNote.js",
-			"scripts/notes/XNote.js",
-			"scripts/notes/QNoteFolder.js",
-			"scripts/windows/NoteWindow.js",
-			"scripts/windows/WebExtensionNoteWindow.js",
-			"scripts/windows/XULNoteWindow.js",
-			"scripts/background.js"
-		]
+		"page": "background.html"
 	},
 	"options_ui": {
-		"page": "html/options.html"
+		"page": "html/options.html",
+		"browser_style": false,
+		"open_in_tab": false
 	},
 	"message_display_action": {
 		"default_title": "QNote",
 		"default_icon": "images/icon-disabled.svg"
 	},
-	"browser_action": {
+	"action": {
 		"default_title": "QNote",
 		"default_icon": "images/icon-disabled.svg"
 	},
