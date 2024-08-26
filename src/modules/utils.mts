@@ -378,7 +378,7 @@ export function silentCatcher(){
 
 export async function getCurrentWindowIdAnd(): Promise<number> {
 	return new Promise(async resolve => {
-		return getCurrentWindowId().then((windowId) => {
+		return getCurrentWindowId().then(windowId => {
 			if(windowId)resolve(windowId);
 		});
 	});
@@ -427,20 +427,36 @@ export async function getCurrentTab(){
 }
 
 export async function getCurrentTabId(){
-	var Tab;
-	if(Tab = await getCurrentTab()){
+	return getCurrentTab().then(Tab => {
+		if(Tab?.id){
 		return Tab.id;
 	} else {
-		const windowId = await getCurrentWindowId();
-		if(windowId){
-			if(Tab = await getWindowActiveTab(windowId)){
-				return Tab.id;
-			}
+			return getCurrentWindowIdAnd().then(windowId => getWindowActiveTab(windowId).then(Tab => Tab?.id));
 		}
-	}
+	});
 
-	return undefined;
+	// var Tab;
+	// if(Tab = await getCurrentTab()){
+	// 	return Tab.id;
+	// } else {
+	// 	const windowId = await getCurrentWindowId();
+	// 	if(windowId){
+	// 		if(Tab = await getWindowActiveTab(windowId)){
+	// 			return Tab.id;
+	// 		}
+	// 	}
+	// }
+
+	// return undefined;
 	// return .then(async Tab => Tab ? Tab.id : await getWindowActiveTab(CurrentWindowId)));
+}
+
+export async function getCurrentTabIdAnd(): Promise<number> {
+	return new Promise(async resolve => {
+		return getCurrentTabId().then(tabId => {
+			if(tabId)resolve(tabId);
+		});
+	});
 }
 
 async function getWindowActiveTab(windowId: number){
@@ -489,8 +505,7 @@ export async function confirmDelete(shouldConfirm: boolean): Promise<boolean> {
 }
 
 export async function focusMessagePane(windowId: number){
-	QDEB&&console.debug("focusMessagePane()");
-	await browser.qapp.messagePaneFocus(windowId);
+	return browser.qapp.messagePaneFocus(windowId);
 }
 
 // /**
@@ -504,12 +519,6 @@ export async function focusMessagePane(windowId: number){
 // 	} else {
 // 		return loadAllExtNotes().then(notes => exportNotesToFolder(root, type, notes, overwrite));
 // 	}
-// }
-
-// export async function getQAppNoteData(keyId: string) {
-// 	return loadNote(keyId).then(note => {
-// 		return note2QAppNote(note);
-// 	});
 // }
 
 // Load all note keys from local storage
