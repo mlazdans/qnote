@@ -534,9 +534,16 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					aSubject.addEventListener("DOMContentLoaded", domLoadedListener);
 				},
 				async messagePaneFocus(windowId){
+					// https://developer.thunderbird.net/add-ons/updating/tb115/adapt-to-changes-in-thunderbird-103-115
 					let w = API.id2RealWindow(windowId);
 					if(w && w.gFolderDisplay && w.gFolderDisplay.tree){
+						QDEB&&console.debug("focusMessagePane() - w.gFolderDisplay");
 						w.gFolderDisplay.tree.focus();
+					} else if(w && w.gTabmail && w.gTabmail.currentAbout3Pane){
+						QDEB&&console.debug("focusMessagePane() - w.gTabmail");
+						w.gTabmail.currentAbout3Pane.focus();
+					} else {
+						QDEB&&console.debug("focusMessagePane() - w.gFolderDisplay.tree not found", w);
 					}
 				},
 				async updateView(windowId, keyId){
