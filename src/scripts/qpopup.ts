@@ -1,4 +1,5 @@
 import { DOMLocalizator } from "../modules/DOMLocalizator.mjs";
+import { PushNoteMessage, QPopupDOMContentLoadedMessage } from "../modules/Messages.mjs";
 import { NoteData } from "../modules/Note.mjs";
 import { Preferences } from "../modules/Preferences.mjs";
 
@@ -105,36 +106,9 @@ window.addEventListener("DOMContentLoaded", () => {
 		name: "qpopup"
 	});
 
-	interface ReplyData {
-	}
-
-	interface Reply {
-		command: string
-		parse(data: any): ReplyData | undefined
-	}
-
-	interface PushNoteReplyData extends ReplyData {
-		note: NoteData
-		prefs: Preferences
-	}
-
-	class PushNoteReply implements Reply {
-		command = "pushNote";
-		parse(data: any): PushNoteReplyData | undefined {
-			if(!("note" in data) || !("prefs" in data) || !("command" in data) || (data.command !== "pushNote")){
-				return undefined;
-			}
-
-			return {
-				note: data.note,
-				prefs: data.prefs,
-			};
-		}
-	}
-
 	xulPort.onMessage.addListener(data => {
 		let reply;
-		if(reply = (new PushNoteReply).parse(data)){
+		if(reply = (new PushNoteMessage).parse(data)){
 			updateNote(reply.note);
 			updatePrefs(reply.prefs);
 		} else {
@@ -142,10 +116,7 @@ window.addEventListener("DOMContentLoaded", () => {
 		}
 	});
 
-	xulPort.postMessage({
-		command: "qpopupDOMContentLoaded",
-		id: id
-	});
+	(new QPopupDOMContentLoadedMessage).post(xulPort, { id });
 });
 
 YTextE.addEventListener("keyup", e => {
