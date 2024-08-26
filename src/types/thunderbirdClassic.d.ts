@@ -48,6 +48,7 @@ declare interface nsIJSCID
 type IteratorUtilsPath = "resource:///modules/iteratorUtils.jsm";
 type MailServicesPath = "resource:///modules/MailServices.jsm";
 type ExtensionPopupsPath = "resource:///modules/ExtensionPopups.jsm";
+// type ExtensionPopupsSysPath = "resource:///modules/ExtensionPopups.sys.mjs";
 type ExtensionParentPath = "resource://gre/modules/ExtensionParent.jsm";
 type ExtensionCommonPath = "resource://gre/modules/ExtensionCommon.jsm";
 type QEventDispatcherPath = "resource://qnote/modules/QEventDispatcher.mjs";
@@ -92,25 +93,75 @@ interface ExtensionParentExport {
 	ExtensionParent: ExtensionParent
 }
 
-	// namespace ExtensionParent
-	// {
-	// 	interface Fire {
-	// 		// Bug 1754866 fire.sync doesn't match documentation.
-	// 		sync(...args: any): any
-	// 		async(...args: any): any
-	// 		raw(...args: any): any
-	// 		asyncWithoutClone(...args: any): any
-	// 	}
+// namespace ExtensionParent
+// {
+// 	interface Fire {
+// 		// Bug 1754866 fire.sync doesn't match documentation.
+// 		sync(...args: any): any
+// 		async(...args: any): any
+// 		raw(...args: any): any
+// 		asyncWithoutClone(...args: any): any
+// 	}
 
-	// 	interface Extension {
-	// 	}
+// 	interface Extension {
+// 	}
 
-	// 	class GlobalManager {
-	// 		getExtension(name: string): Extension;
-	// 	}
-	// 	// ExtensionParent: ExtensionParent;
-	// 	// GlobalManager: GlobalManager;
-	// }
+// 	class GlobalManager {
+// 		getExtension(name: string): Extension;
+// 	}
+// 	// ExtensionParent: ExtensionParent;
+// 	// GlobalManager: GlobalManager;
+// }
+
+declare class BP {
+    static for(extension: any, window: any): any;
+    constructor(extension: string, viewNode: any, popupURL: string, browserStyle: any, fixedWidth?: boolean, blockParser?: boolean);
+    extension: any;
+    popupURL: any;
+    viewNode: any;
+    browserStyle: any;
+    window: Window;
+    destroyed: boolean;
+    fixedWidth: boolean;
+    blockParser: boolean;
+    contentReady: any;
+    _resolveContentReady: any;
+    browser: any;
+    browserLoaded: any;
+    browserLoadedDeferred: {
+        resolve: any;
+        reject: any;
+    };
+    browserReady: any;
+    close(): void;
+    destroy(): any;
+    stack: any;
+    destroyBrowser(browser: any, finalize?: boolean): void;
+    receiveMessage({ name, data }: {
+        name: any;
+        data: any;
+    }): void;
+    get DESTROY_EVENT(): void;
+    get STYLESHEETS(): string[];
+    get panel(): any;
+    dimensions: any;
+    handleEvent(event: any): void;
+    createBrowser(viewNode: any, popupURL?: any): any;
+    unblockParser(): void;
+    resizeBrowser({ width, height, detail }: {
+        width: any;
+        height: any;
+        detail: any;
+    }): void;
+    lastCalculatedInViewHeight: number;
+    setBackground(background: any): void;
+    background: any;
+}
+
+interface BasePopupExport
+{
+	BasePopup: typeof BP;
+}
 
 
 declare namespace Components
@@ -122,12 +173,14 @@ declare namespace Components
 
 		public static import(path: IteratorUtilsPath): IteratorUtils;
 		public static import(path: MailServicesPath): MailServicesExport;
-		public static import(path: ExtensionPopupsPath): any;
+		public static import(path: ExtensionPopupsPath): BasePopupExport;
 		public static import(path: ExtensionParentPath): ExtensionParentExport;
 		public static import(path: ExtensionCommonPath): any;
 		public static importESModule(path: QEventDispatcherPath): QEventDispatcherExport;
 		public static importESModule(path: XULNoteWindowPath): XULNoteWindowExport;
 		public static importESModule(path: DOMLocalizatorPath): DOMLocalizatorExport;
+		public static importESModule(path: ExtensionPopupsPath): BasePopupExport;
+		// public static importESModule(path: ExtensionPopupsSysPath): BasePopupExport;
 		// public static importESModule(path: string): any;
 		public static unload(path: string): void;
 		public static defineModuleGetter(param1: any, param2: any, param3: any): void;

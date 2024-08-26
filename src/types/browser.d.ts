@@ -5,58 +5,8 @@ import { QPopupOptions } from '../modules/XULNoteWindow.mts';
 
 export {}
 
-declare class BasePopup {
-    static for(extension: any, window: any): any;
-    constructor(extension: string, viewNode: any, popupURL: string, browserStyle: any, fixedWidth?: boolean, blockParser?: boolean);
-    extension: any;
-    popupURL: any;
-    viewNode: any;
-    browserStyle: any;
-    window: any;
-    destroyed: boolean;
-    fixedWidth: boolean;
-    blockParser: boolean;
-    contentReady: any;
-    _resolveContentReady: any;
-    browser: any;
-    browserLoaded: any;
-    browserLoadedDeferred: {
-        resolve: any;
-        reject: any;
-    };
-    browserReady: any;
-    close(): void;
-    destroy(): any;
-    stack: any;
-    destroyBrowser(browser: any, finalize?: boolean): void;
-    receiveMessage({ name, data }: {
-        name: any;
-        data: any;
-    }): void;
-    get DESTROY_EVENT(): void;
-    get STYLESHEETS(): string[];
-    get panel(): any;
-    dimensions: any;
-    handleEvent(event: any): void;
-    createBrowser(viewNode: any, popupURL?: any): any;
-    unblockParser(): void;
-    resizeBrowser({ width, height, detail }: {
-        width: any;
-        height: any;
-        detail: any;
-    }): void;
-    lastCalculatedInViewHeight: number;
-    setBackground(background: any): void;
-    background: any;
-}
-
 declare global {
 	// ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs")
-
-	interface BasePopupExport
-	{
-		BasePopup: BasePopup;
-	}
 
 	class XULDocument extends Document{
 		createXULElement(name: string): Element;
@@ -105,8 +55,11 @@ declare global {
 		export namespace qpopup {
 			function setDebug(on: boolean): Promise<void>;
 			function remove(id: number): Promise<void>;
-			function create(note: QPopupOptions): Promise<QPopupOptions>;
-			function update(id: number, note: QPopupOptions): Promise<QPopupOptions>;
+			function get(id: number): Promise<QPopupOptions>;
+			function pop(id: number): Promise<void>;
+			function create(windowsId: number, options: QPopupOptions): Promise<void>;
+			function update(options: QPopupOptions): Promise<QPopupOptions>;
+			export const onRemoved: WebExtEvent<(id: number) => void>;
 		}
 		export namespace ResourceUrl {
 			function register(name: string): Promise<void>;
