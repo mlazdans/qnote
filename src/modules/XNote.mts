@@ -18,11 +18,13 @@ export class XNote extends DefaultNote {
 		});
 	}
 
-	save(){
-		return super.saver(() => browser.xnote.saveNote(this.root, this.data.keyId, this.data).then(() => true).catch(() => false));
+	async save(){
+		return browser.xnote.saveNote(this.root, this.data.keyId, this.data).then(() => true).catch(() => false);
+		// return super.saver(() => browser.xnote.saveNote(this.root, this.data.keyId, this.data).then(() => true).catch(() => false));
 	}
 
-	delete() {
-		return super.deleter(() => browser.xnote.deleteNote(this.root, this.data.keyId).then(() => true).catch(() => false));
+	async delete() {
+		return browser.xnote.deleteNote(this.root, this.data.keyId).then(() => true).catch(() => false);
+		// return super.deleter(() => browser.xnote.deleteNote(this.root, this.data.keyId).then(() => true).catch(() => false));
 	}
 }

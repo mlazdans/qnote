@@ -20,16 +20,19 @@ export interface INote {
 	save(): Promise<boolean>;
 }
 
-type NoteSaver = () => Promise<boolean>;
-type NoteDeleter = () => Promise<boolean>;
+// type NoteSaver = () => Promise<boolean>;
+// type NoteDeleter = () => Promise<boolean>;
+
+// const l = ["aftersave", "afterdelete" , "afterupdate"];
+// type NoteListener = typeof l[number];
 
 // export type Note = (QNote | QNoteFolder) & QEventDispatcher;
 
-export abstract class DefaultNote extends QEventDispatcher implements INote {
+export abstract class DefaultNote implements INote {
 	data: NoteData;
 
 	constructor(keyId: string) {
-		super(["aftersave", "afterdelete", "afterupdate"]);
+		// super(["aftersave", "afterdelete", "afterupdate"]);
 		this.data = {
 			keyId: keyId,
 			exists: false,
@@ -41,6 +44,10 @@ export abstract class DefaultNote extends QEventDispatcher implements INote {
 			ts: null,
 		};
 	}
+
+	// addListener(name: NoteListener, listener: Function): void {
+	// 	super.addListener(name, listener);
+	// }
 
 	// async load(loader: Function): Promise<NoteData> {
 	// 	return loader().then((data: NoteData) => {
@@ -63,25 +70,25 @@ export abstract class DefaultNote extends QEventDispatcher implements INote {
 	abstract save(): Promise<boolean>
 	abstract delete(): Promise<boolean>
 
-	protected async saver(saver: NoteSaver): Promise<boolean> {
-		return saver().then(saved => {
-			if(saved){
-				this.data.exists = true;
-				this.fireListeners("aftersave", this);
-				this.fireListeners("afterupdate", this, "save");
-			}
-			return saved;
-		});
-	}
+	// protected async saver(saver: NoteSaver): Promise<boolean> {
+	// 	return saver().then(saved => {
+	// 		if(saved){
+	// 			this.data.exists = true;
+	// 			this.fireListeners("aftersave", this);
+	// 			this.fireListeners("afterupdate", this, "save");
+	// 		}
+	// 		return saved;
+	// 	});
+	// }
 
-	protected async deleter(deleter: NoteDeleter): Promise<boolean> {
-		return deleter().then(deleted => {
-			if(deleted){
-				this.data.exists = false;
-				this.fireListeners("afterdelete", this);
-				this.fireListeners("afterupdate", this, "delete");
-			}
-			return deleted;
-		});
-	}
+	// protected async deleter(deleter: NoteDeleter): Promise<boolean> {
+	// 	return deleter().then(deleted => {
+	// 		if(deleted){
+	// 			this.data.exists = false;
+	// 			this.fireListeners("afterdelete", this);
+	// 			this.fireListeners("afterupdate", this, "delete");
+	// 		}
+	// 		return deleted;
+	// 	});
+	// }
 }

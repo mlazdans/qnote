@@ -25,15 +25,18 @@ export class QNoteFolder extends DefaultNote {
 	}
 
 	async save(){
-		return super.saver(() => browser.qnote.saveNote(this.root, this.data.keyId, this.data).then(() => true).catch(() => false));
+		return browser.qnote.saveNote(this.root, this.data.keyId, this.data).then(() => true).catch(() => false);
+		// return super.saver(() => browser.qnote.saveNote(this.root, this.data.keyId, this.data).then(() => true).catch(() => false));
 	}
 
 	async delete() {
-		return super.deleter(async () => {
-			// Remove XNote, if exists
-			await browser.xnote.deleteNote(this.root, this.data.keyId);
+		await browser.xnote.deleteNote(this.root, this.data.keyId);
+		return browser.qnote.deleteNote(this.root, this.data.keyId);
+		// return super.deleter(async () => {
+		// 	// Remove XNote, if exists
+		// 	await browser.xnote.deleteNote(this.root, this.data.keyId);
 
-			return browser.qnote.deleteNote(this.root, this.data.keyId);
-		});
+		// 	return browser.qnote.deleteNote(this.root, this.data.keyId);
+		// });
 	}
 }

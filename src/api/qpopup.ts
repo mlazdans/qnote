@@ -13,6 +13,14 @@ interface Box {
 	height: number,
 }
 
+function coalesce(...args: any): any {
+	for(let a of args)
+		if(a !== null)
+			return a;
+
+	return null;
+}
+
 var PopupEventDispatcher = new QEventDispatcher(["oncreated", "onremoved", "onmove", "onresize"]);
 
 // Hack around
@@ -67,13 +75,6 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 
 			// // Get all windows: (note this returns a Generator, not an array like the API)
 			// context.extension.windowManager.getAll();
-		}
-
-		function coalesce(...args: any): any {
-			for(let a of args)
-				if(a !== null)
-					return a;
-			return null;
 		}
 
 		// ext no context?
@@ -144,8 +145,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				},
 				async remove(id: number){
 					QDEB&&console.debug("qpopup.remove()", id);
-					const p = popupManager.get(id);
-					p.close();
+					popupManager.get(id).close();
 					popupManager.remove(id);
 					PopupEventDispatcher.fireListeners("onremoved", id);
 				},
@@ -153,52 +153,18 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					return popupManager.get(id).options;
 					// popup.popupInfo.focused = popup.isFocused;
 				},
-				async update(options: QPopupOptions){
-					let popup = popupManager.get(options.id);
-
-					let pi = popup.options;
-
-					// options come in null-ed
-					let { top, left, title, focused, offsetTop, offsetLeft } = options;
-
-					if(top !== null || left !== null){
-						pi.top = coalesce(top, pi.top);
-						pi.left = coalesce(left, pi.left);
-						popup.moveTo(pi.left||0, pi.top||0);
-					}
-
-					if(offsetTop !== null || offsetLeft !== null){
-						pi.top = pi.top + coalesce(offsetTop, 0);
-						pi.left = pi.left + coalesce(offsetLeft, 0);
-						popup.moveTo(pi.left||0, pi.top||0);
-					}
-
-					// TODO: broken
-					// if(width !== null || height !== null){
-					// 	pi.width = coalesce(width, pi.width);
-					// 	pi.height = coalesce(height, pi.height);
-					// 	popup.sizeTo(pi.width, pi.height);
-					// }
-
-					// MAYBE: implement lose focus too
-					if(focused){
-						popup.focus();
-					}
-
-					// if(title){
-					// 	popup.title = title;
-					// }
-
-					return pi;
+				async update(o: QPopupOptions){
+					return popupManager.get(o.id).update(o);
 				},
 				async pop(id: number){
-					const popup = popupManager.get(id);
-					return popup.pop().then(status => {
-						// popup.options.top = popup.panel.screenY;
-						// popup.options.left = popup.panel.screenX;
+					return popupManager.get(id).pop();
+					// const popup = popupManager.get(id);
+					// return popup.pop().then(status => {
+					// 	// popup.options.top = popup.panel.screenY;
+					// 	// popup.options.left = popup.panel.screenX;
 
-						return popup.id;
-					});
+					// 	return popup.id;
+					// });
 				},
 				async create(windowId: number, options: QPopupOptions){
 					QDEB&&console.debug("qpopup.create()");
@@ -330,6 +296,40 @@ class QNotePopup extends BasePopup {
 		return retBox;
 	}
 
+	update(o: QPopupOptions){
+		let { top, left, title, focused, offsetTop, offsetLeft } = o;
+
+		if(top !== null || left !== null){
+			o.top = coalesce(top, o.top);
+			o.left = coalesce(left, o.left);
+			this.moveTo(o.left||0, o.top||0);
+		}
+
+		if(offsetTop !== null || offsetLeft !== null){
+			o.top = o.top + coalesce(offsetTop, 0);
+			o.left = o.left + coalesce(offsetLeft, 0);
+			this.moveTo(o.left||0, o.top||0);
+		}
+
+		// TODO: broken
+		// if(width !== null || height !== null){
+		// 	pi.width = coalesce(width, pi.width);
+		// 	pi.height = coalesce(height, pi.height);
+		// 	popup.sizeTo(pi.width, pi.height);
+		// }
+
+		// MAYBE: implement lose focus too
+		if(focused){
+			this.focus();
+		}
+
+		// if(title){
+		// 	popup.title = title;
+		// }
+
+		return o;
+	}
+
 	pop(){
 		QDEB&&console.debug("qpopup.pop()", this.options);
 		let { left, top, width, height, anchor, anchorPlacement } = this.options;
@@ -360,7 +360,7 @@ class QNotePopup extends BasePopup {
 
 				if(aEl && anchorPlacement){
 					if(anchorPlacement === 'center'){
-						let wBox = {
+						const wBox = {
 							top: (aEl as any).screenY, // TODO any
 							left: (aEl as any).screenX,
 							width: aEl.clientWidth,
