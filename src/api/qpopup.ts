@@ -153,8 +153,43 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					return popupManager.get(id).options;
 					// popup.popupInfo.focused = popup.isFocused;
 				},
-				async update(o: QPopupOptions){
-					return popupManager.get(o.id).update(o);
+				async update(options: QPopupOptions){
+					let popup = popupManager.get(options.id);
+
+					let pi = popup.options;
+
+					// options come in null-ed
+					let { top, left, title, focused, offsetTop, offsetLeft } = options;
+
+					if(top !== null || left !== null){
+						pi.top = coalesce(top, pi.top);
+						pi.left = coalesce(left, pi.left);
+						popup.moveTo(pi.left||0, pi.top||0);
+					}
+
+					if(offsetTop !== null || offsetLeft !== null){
+						pi.top = pi.top + coalesce(offsetTop, 0);
+						pi.left = pi.left + coalesce(offsetLeft, 0);
+						popup.moveTo(pi.left||0, pi.top||0);
+					}
+
+					// TODO: broken
+					// if(width !== null || height !== null){
+					// 	pi.width = coalesce(width, pi.width);
+					// 	pi.height = coalesce(height, pi.height);
+					// 	popup.sizeTo(pi.width, pi.height);
+					// }
+
+					// MAYBE: implement lose focus too
+					if(focused){
+						popup.focus();
+					}
+
+					// if(title){
+					// 	popup.title = title;
+					// }
+
+					return pi;
 				},
 				async pop(id: number){
 					return popupManager.get(id).pop();
@@ -213,6 +248,22 @@ class QNotePopup extends BasePopup {
 		panel.setAttribute("class", "mail-extension-panel panel-no-padding browser-extension-panel");
 		panel.setAttribute("type", "arrow");
 		panel.setAttribute("role", "group");
+
+		// window.addEventListener("click", () => {
+		// 	console.error("click from api");
+		// });
+
+		// window.addEventListener("WebExtPopupResized", () => {
+		// 	console.error("WebExtPopup:Resized from api");
+		// });
+
+		// window.addEventListener("WebExtPopupLoaded", () => {
+		// 	console.error("WebExtPopup:Loaded from api");
+		// });
+
+		// panel.addEventListener("popupshowing", () => {
+		// 	console.error("popupshowing from api");
+		// });
 
 		mainPopupSet.appendChild(panel);
 
@@ -294,40 +345,6 @@ class QNotePopup extends BasePopup {
 		}
 
 		return retBox;
-	}
-
-	update(o: QPopupOptions){
-		let { top, left, title, focused, offsetTop, offsetLeft } = o;
-
-		if(top !== null || left !== null){
-			o.top = coalesce(top, o.top);
-			o.left = coalesce(left, o.left);
-			this.moveTo(o.left||0, o.top||0);
-		}
-
-		if(offsetTop !== null || offsetLeft !== null){
-			o.top = o.top + coalesce(offsetTop, 0);
-			o.left = o.left + coalesce(offsetLeft, 0);
-			this.moveTo(o.left||0, o.top||0);
-		}
-
-		// TODO: broken
-		// if(width !== null || height !== null){
-		// 	pi.width = coalesce(width, pi.width);
-		// 	pi.height = coalesce(height, pi.height);
-		// 	popup.sizeTo(pi.width, pi.height);
-		// }
-
-		// MAYBE: implement lose focus too
-		if(focused){
-			this.focus();
-		}
-
-		// if(title){
-		// 	popup.title = title;
-		// }
-
-		return o;
 	}
 
 	pop(){
