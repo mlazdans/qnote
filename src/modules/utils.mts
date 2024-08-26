@@ -1,4 +1,4 @@
-import * as luxon from 'luxon';
+// import * as luxon from 'luxon';
 import { NoteData } from './Note.mjs';
 import { QNote } from './QNote.mjs';
 import { QNoteFolder } from './QNoteFolder.mjs';
@@ -429,8 +429,8 @@ export async function getCurrentTab(){
 export async function getCurrentTabId(){
 	return getCurrentTab().then(Tab => {
 		if(Tab?.id){
-		return Tab.id;
-	} else {
+			return Tab.id;
+		} else {
 			return getCurrentWindowIdAnd().then(windowId => getWindowActiveTab(windowId).then(Tab => Tab?.id));
 		}
 	});
@@ -705,48 +705,50 @@ export function ts2jsdate(ts: Date | undefined): Date {
 }
 
 export function dateFormat(locale: string, format: string, ts?: Date) {
-	let dt = luxon.DateTime.fromJSDate(ts2jsdate(ts)).setLocale(locale);
+	console.error("TODO: dateFormat");
 
-	function pad(o: any, l: number, c: string){
-		return o.toString().padStart(l, c);
-	}
+	// let dt = luxon.DateTime.fromJSDate(ts2jsdate(ts)).setLocale(locale);
 
-	let Con = {
-		d: pad(dt.day, 2, "0"),
-		D: dt.weekdayShort,
-		j: dt.day,
-		l: dt.weekdayLong,
-		N: dt.weekday,
-		// S: English ordinal suffix for the day of the month, 2 characters
-		w: dt.weekday - 1,
-		z: dt.ordinal - 1,
-		W: dt.weekNumber,
-		F: dt.monthLong,
-		m: pad(dt.month, 2, "0"),
-		M: dt.monthShort,
-		n: dt.month,
-		t: dt.daysInMonth,
-		L: dt.isInLeapYear ? 1 : 0,
-		// o: ISO 8601 week-numbering year. This has the same value as Y, except that if the ISO week number (W) belongs to the previous or next year, that year is used instead.
-		// X: An expanded full numeric representation of a year, at least 4 digits, with - for years BCE, and + for years CE.
-		// x: An expanded full numeric representation if required, or a standard full numeral representation if possible (like Y). At least four digits. Years BCE are prefixed with a -. Years beyond (and including) 10000 are prefixed by a +.
-		Y: dt.year,
-		y: dt.year.toString().substr(-2),
-		a: dt.toFormat('a').toLowerCase(),
-		A: dt.toFormat('a'),
-		// B: Swatch Internet time
-		g: dt.toFormat('h'),
-		G: dt.hour,
-		h: dt.toFormat('hh'),
-		H: pad(dt.hour, 2, "0"),
-		i: pad(dt.minute, 2, "0"),
-		s: pad(dt.second, 2, "0"),
-		// u: Microseconds
-		v: dt.millisecond,
-		e: dt.toFormat('z'),
-	};
+	// function pad(o: any, l: number, c: string){
+	// 	return o.toString().padStart(l, c);
+	// }
 
-	console.error("TODO: format date string");
+	// let Con = {
+	// 	d: pad(dt.day, 2, "0"),
+	// 	D: dt.weekdayShort,
+	// 	j: dt.day,
+	// 	l: dt.weekdayLong,
+	// 	N: dt.weekday,
+	// 	// S: English ordinal suffix for the day of the month, 2 characters
+	// 	w: dt.weekday - 1,
+	// 	z: dt.ordinal - 1,
+	// 	W: dt.weekNumber,
+	// 	F: dt.monthLong,
+	// 	m: pad(dt.month, 2, "0"),
+	// 	M: dt.monthShort,
+	// 	n: dt.month,
+	// 	t: dt.daysInMonth,
+	// 	L: dt.isInLeapYear ? 1 : 0,
+	// 	// o: ISO 8601 week-numbering year. This has the same value as Y, except that if the ISO week number (W) belongs to the previous or next year, that year is used instead.
+	// 	// X: An expanded full numeric representation of a year, at least 4 digits, with - for years BCE, and + for years CE.
+	// 	// x: An expanded full numeric representation if required, or a standard full numeral representation if possible (like Y). At least four digits. Years BCE are prefixed with a -. Years beyond (and including) 10000 are prefixed by a +.
+	// 	Y: dt.year,
+	// 	y: dt.year.toString().substr(-2),
+	// 	a: dt.toFormat('a').toLowerCase(),
+	// 	A: dt.toFormat('a'),
+	// 	// B: Swatch Internet time
+	// 	g: dt.toFormat('h'),
+	// 	G: dt.hour,
+	// 	h: dt.toFormat('hh'),
+	// 	H: pad(dt.hour, 2, "0"),
+	// 	i: pad(dt.minute, 2, "0"),
+	// 	s: pad(dt.second, 2, "0"),
+	// 	// u: Microseconds
+	// 	v: dt.millisecond,
+	// 	e: dt.toFormat('z'),
+	// };
+
+	// console.error("TODO: format date string");
 	// return format.replace(/\\?(.?)/gi, (c: string, s: string): string => {
 	// 	let con = c;
 	// 	if(Con[c] !== undefined){
@@ -760,3 +762,11 @@ export function dateFormat(locale: string, format: string, ts?: Date) {
 	// 	// conStr += con;
 	// });
 }
+
+// export function coalesce(...args: any): any {
+// 	for(let a of args)
+// 		if(a !== null)
+// 			return a;
+
+// 	return null;
+// }
