@@ -5185,7 +5185,13 @@ declare namespace messenger {
          * (even if the tab itself is currently not visible). The array is empty
          * if no messages are displayed.
          */
-        export function getDisplayedMessages(tabId: number): Promise<messages.MessageList>;
+
+        //  MV3:
+        // export function getDisplayedMessages(tabId: number): Promise<messages.MessageList>;
+
+        // MV2:
+        // export function getDisplayedMessages(tabId: number): Promise<messages.MessageHeader[]>;
+        export function getDisplayedMessages(tabId: number): Promise<messages.MessageList | messages.MessageHeader[]>;
 
         /**
          * Opens a message in a new tab or in a new window.
@@ -17655,7 +17661,12 @@ declare namespace browser {
          * (even if the tab itself is currently not visible). The array is empty
          * if no messages are displayed.
          */
-        export function getDisplayedMessages(tabId: number): Promise<messages.MessageList>;
+        //  MV3:
+        // export function getDisplayedMessages(tabId: number): Promise<messages.MessageList>;
+
+        // MV2:
+        // export function getDisplayedMessages(tabId: number): Promise<messages.MessageHeader[]>;
+        export function getDisplayedMessages(tabId: number): Promise<messages.MessageList | messages.MessageHeader[]>;
 
         /**
          * Opens a message in a new tab or in a new window.
@@ -17677,7 +17688,13 @@ declare namespace browser {
          * messages are displayed, whether in a 3-pane tab, a message tab, or a
          * message window.
          */
-        export const onMessagesDisplayed: WebExtEvent<(tab: tabs.Tab, messages: messages.MessageList) => void>;
+
+        // MV3:
+        // export const onMessagesDisplayed: WebExtEvent<(tab: tabs.Tab, messages: messages.MessageList) => void>;
+
+        // MV2:
+        // export const onMessagesDisplayed: WebExtEvent<(tab: tabs.Tab, messages: messages.MessageHeader[]) => void>;
+        export const onMessagesDisplayed: WebExtEvent<(tab: tabs.Tab, messages: messages.MessageHeader[] | messages.MessageList) => void>;
     }
 
     /**

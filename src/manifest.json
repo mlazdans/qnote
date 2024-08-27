@@ -1,11 +1,11 @@
 {
-	"manifest_version": 3,
+	"manifest_version": 2,
 	"name": "QNote",
 	"author": "Martins Lazdans",
 	"default_locale": "en",
 	"description": "__MSG_description__",
 	"version": "0.13.0",
-	"browser_specific_settings": {
+	"applications": {
 		"gecko": {
 			"id": "qnote@dqdp.net",
 			"strict_min_version": "115.0",
@@ -25,22 +25,19 @@
 		"unlimitedStorage",
 		"downloads",
 		"menus",
-		"accountsRead",
-		"scripting"
+		"accountsRead"
 	],
 	"background": {
 		"page": "background.html"
 	},
 	"options_ui": {
-		"page": "html/options.html",
-		"browser_style": false,
-		"open_in_tab": false
+		"page": "html/options.html"
 	},
 	"message_display_action": {
 		"default_title": "QNote",
 		"default_icon": "images/icon-disabled.svg"
 	},
-	"action": {
+	"browser_action": {
 		"default_title": "QNote",
 		"default_icon": "images/icon-disabled.svg"
 	},

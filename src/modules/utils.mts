@@ -358,7 +358,9 @@ async function exportStorage(){
 export async function updateIcons(on: boolean, tabId?: number){
 	let icon = on ? "images/icon.svg" : "images/icon-disabled.svg";
 
-	browser.action.setIcon({
+	let BrowserAction = browser.action ? browser.action : browser.browserAction;
+
+	BrowserAction.setIcon({
 		path: icon,
 		tabId: tabId
 	});
