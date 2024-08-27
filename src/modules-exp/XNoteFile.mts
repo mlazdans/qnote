@@ -204,7 +204,7 @@ export class XNoteFile {
 		// within the same group is possible on Linux.
 		tempFile.createUnique(tempFile.NORMAL_FILE_TYPE, parseInt("0660",8));
 
-		let fileOutStream = Components.classes['@mozilla.org/network/file-output-stream;1'].createInstance(Ci.nsIFileOutputStream);
+		let fileOutStream = Cc['@mozilla.org/network/file-output-stream;1'].createInstance(Ci.nsIFileOutputStream);
 
 		// fileOutStream.init(tempFile, 2, 0x200, false); // Opens for writing only
 		fileOutStream.init(tempFile, 2, 0x200, 0); // false can't be used as number? TODO: test
@@ -239,8 +239,8 @@ export class XNoteFile {
 
 		var note = new NoteData(keyId);
 
-		var fileInStream = Components.classes['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream);
-		var fileScriptableIO = Components.classes['@mozilla.org/scriptableinputstream;1'].createInstance(Ci.nsIScriptableInputStream);
+		var fileInStream = Cc['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream);
+		var fileScriptableIO = Cc['@mozilla.org/scriptableinputstream;1'].createInstance(Ci.nsIScriptableInputStream);
 		fileInStream.init(file, 0x01, parseInt("0444", 8), null);
 		fileScriptableIO.init(fileInStream);
 
