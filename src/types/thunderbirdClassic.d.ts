@@ -54,6 +54,12 @@ type ExtensionCommonPath = "resource://gre/modules/ExtensionCommon.jsm";
 type QEventDispatcherPath = "resource://qnote/modules/QEventDispatcher.mjs";
 type XULNoteWindowPath = "resource://qnote/modules/XULNoteWindow.mjs";
 type DOMLocalizatorPath = "resource://qnote/modules/DOMLocalizator.mjs"
+type QCachePath = "resource://qnote/modules/QCache.mjs"
+type ThreadPaneColumnsPath = "chrome://messenger/content/ThreadPaneColumns.mjs";
+type ThreadPaneColumnsOldPath = "chrome://messenger/content/thread-pane-columns.mjs"
+type QNoteFilePath = "resource://qnote/modules-exp/QNoteFile.mjs";
+type XNoteFilePath = "resource://qnote/modules-exp/XNoteFile.mjs";
+type FileUtilsPath = "resource://gre/modules/FileUtils.jsm";
 
 interface QEventDispatcherExport {
 	QEventDispatcher: typeof import("../modules/QEventDispatcher.mjs").QEventDispatcher;
@@ -67,6 +73,14 @@ interface DOMLocalizatorExport {
 	DOMLocalizator: typeof import("../modules/DOMLocalizator.mjs").DOMLocalizator;
 }
 
+interface QCacheExport {
+	QCache: typeof import("../modules/QCache.mts").QCache;
+}
+
+// interface FileUtilsExport {
+// 	FileUtils: typeof FileUtils
+// }
+
 // const extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 interface ExtensionParentFire {
 	// Bug 1754866 fire.sync doesn't match documentation.
@@ -78,6 +92,7 @@ interface ExtensionParentFire {
 
 interface Extension {
 	windowManager: WindowManager
+	localizeMessage(name: string): string
 }
 
 declare class GlobalManager {
@@ -158,11 +173,9 @@ declare class BP {
     background: any;
 }
 
-interface BasePopupExport
-{
+interface BasePopupExport {
 	BasePopup: typeof BP;
 }
-
 
 declare namespace Components
 {
@@ -176,10 +189,16 @@ declare namespace Components
 		public static import(path: ExtensionPopupsPath): BasePopupExport;
 		public static import(path: ExtensionParentPath): ExtensionParentExport;
 		public static import(path: ExtensionCommonPath): any;
+		public static import(path: FileUtilsPath): any;
 		public static importESModule(path: QEventDispatcherPath): QEventDispatcherExport;
 		public static importESModule(path: XULNoteWindowPath): XULNoteWindowExport;
 		public static importESModule(path: DOMLocalizatorPath): DOMLocalizatorExport;
 		public static importESModule(path: ExtensionPopupsPath): BasePopupExport;
+		public static importESModule(path: QCachePath): QCacheExport;
+		public static importESModule(path: ThreadPaneColumnsPath): any;
+		public static importESModule(path: ThreadPaneColumnsOldPath): any;
+		public static importESModule(path: QNoteFilePath): any;
+		public static importESModule(path: XNoteFilePath): any;
 		// public static importESModule(path: ExtensionPopupsSysPath): BasePopupExport;
 		// public static importESModule(path: string): any;
 		public static unload(path: string): void;
@@ -189,6 +208,36 @@ declare namespace Components
 	//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference
 	namespace interfaces
 	{
+		class AString {
+			length?: number | null
+			value?: string | null
+		}
+
+		class nsISupports {}
+
+		class nsIInputStream extends nsISupports {
+			close(): void;
+		}
+
+		class nsIOutputStream extends nsISupports {
+		}
+
+		class nsIUnicharInputStream extends nsISupports{
+			// unsigned long readString(in unsigned long aCount, out AString aString);
+			readString(aCount: number, aString: AString): number;
+			close(): void;
+		}
+
+		class nsIConverterInputStream extends nsIUnicharInputStream {
+			readonly DEFAULT_REPLACEMENT_CHARACTER = 0xFFFD;
+			readonly ERRORS_ARE_FATAL = 0;
+			init(nsIInputStream: nsIFile, aCharset: string, aBufferSize: number, aReplacementChar: number): void;
+		}
+
+		class nsIFileInputStream extends nsIInputStream {
+			init(file: any,  ioFlags: number, perm: number, behaviorFlags: number | null): void;
+		}
+
 		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIDOMWindow
 		class nsIDOMWindow extends Window
 		{
@@ -325,6 +374,7 @@ declare namespace Components
 		class nsIFileOutputStream
 		{
 			public init(file: nsIFile, ioFlags: number, perm: number, behaviorFlags: number): void;
+			close(): void;
 		}
 
 		class nsIFile
@@ -346,10 +396,10 @@ declare namespace Components
 			public close(): void;
 		}
 
-		class nsIOutputStream
-		{
+		// class nsIOutputStream
+		// {
 
-		}
+		// }
 
 		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIStringBundleService
 		class nsIStringBundleService
@@ -388,6 +438,11 @@ declare namespace Components
 		{
 			public static readonly IsGreaterThan: nsMsgSearchOp;
 			public static readonly Isnt: nsMsgSearchOp;
+			public static readonly Contains: nsMsgSearchOp;
+			public static readonly DoesntContain: nsMsgSearchOp;
+			public static readonly Is: nsMsgSearchOp;
+			public static readonly BeginsWith: nsMsgSearchOp;
+			public static readonly EndsWith: nsMsgSearchOp;
 		}
 
 		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsMsgSearchAttrib
@@ -395,6 +450,7 @@ declare namespace Components
 		{
 			public static readonly AgeInDays: nsMsgSearchAttrib;
 			public static readonly MsgStatus: nsMsgSearchAttrib;
+			public static readonly Custom: nsMsgSearchAttrib;
 		}
 
 		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/nsMsgMessagesFlags
@@ -478,7 +534,23 @@ import Ci = Components.interfaces;
 //https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/FileUtils.jsm
 declare class FileUtils
 {
-	public static getFile(key: string, pathArray: string[], followLinks?: boolean): Ci.nsIFile;
+	File: any
+    MODE_RDONLY: number
+    MODE_WRONLY: number
+    MODE_RDWR: number
+    MODE_CREATE: number
+    MODE_APPEND: number
+    MODE_TRUNCATE: number
+    PERMS_FILE: number
+    PERMS_DIRECTORY: number
+	public static getFile(key: string, pathArray: string[], followLinks?: boolean): Ci.nsIFile
+    getDir(key: any, pathArray: any): any;
+    openFileOutputStream(file: any, modeFlags: any): any;
+    openAtomicFileOutputStream(file: any, modeFlags: any): any;
+    openSafeFileOutputStream(file: any, modeFlags: any): any;
+    _initFileOutputStream(fos: any, file: any, modeFlags: any): any;
+    closeAtomicFileOutputStream(stream: any): void;
+    closeSafeFileOutputStream(stream: any): void;
 }
 
 //https://developer.mozilla.org/en-US/docs/Mozilla/Tech/Toolkit_API/extIApplication
@@ -506,6 +578,7 @@ declare interface MailServicesExport
 declare interface MailServices
 {
 	accounts: MailServicesAccounts;
+	filters: any;
 }
 
 //https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/Add-on_Manager/Addon

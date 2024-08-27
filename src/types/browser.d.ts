@@ -13,7 +13,9 @@ declare global {
 	}
 
 	class MozWindow extends Window {
+		gTabmail: any;
 		document: XULDocument;
+		MutationObserver: typeof MutationObserver;
 	}
 
 	namespace browser {
