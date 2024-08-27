@@ -18,6 +18,7 @@ export class QNoteFolder extends DefaultNote {
 
 		if(data) {
 			this.data = data;
+			this.data.exists = true;
 			return true;
 		}
 

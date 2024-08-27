@@ -12,6 +12,7 @@ export class XNote extends DefaultNote {
 		return browser.xnote.loadNote(this.root, this.data.keyId).then(data => {
 			if(data) {
 				this.data = data;
+				this.data.exists = true;
 				return true;
 			}
 			return false;

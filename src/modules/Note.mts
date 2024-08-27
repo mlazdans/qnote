@@ -1,15 +1,18 @@
 import { QEventDispatcher } from './QEventDispatcher.mjs';
 
-export interface NoteData {
+export class NoteData {
 	keyId: string; // message-id header or another unique id
-	exists: boolean;
-	text: string | null;
-	left: number | null;
-	top: number | null;
-	width: number | null;
-	height: number | null;
-	ts: number | null;
-	// constructor(keyId: string): NoteData;
+	exists: boolean = false;
+	text: string | null = "";
+	left: number | null = null;
+	top: number | null = null;
+	width: number | null = null;
+	height: number | null = null;
+	ts: number | null = null;
+	tsFormatted: string | null = null;
+	constructor(keyId: string) {
+		this.keyId = keyId;
+	};
 }
 
 export interface INote {
@@ -33,16 +36,7 @@ export abstract class DefaultNote implements INote {
 
 	constructor(keyId: string) {
 		// super(["aftersave", "afterdelete", "afterupdate"]);
-		this.data = {
-			keyId: keyId,
-			exists: false,
-			text: "",
-			left: null,
-			top: null,
-			width: null,
-			height: null,
-			ts: null,
-		};
+		this.data = new NoteData(keyId);
 	}
 
 	// addListener(name: NoteListener, listener: Function): void {

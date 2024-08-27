@@ -81,9 +81,9 @@ export class XULNoteWindow extends DefaultNoteWindow {
 		return opt;
 	}
 
-	async update(){
-		return browser.qpopup.update(this.note2QPopupOptions());
-	}
+	// async update(){
+	// 	return browser.qpopup.update(this.note2QPopupOptions());
+	// }
 
 	// TODO: fix
 	async isFocused() {
@@ -100,9 +100,9 @@ export class XULNoteWindow extends DefaultNoteWindow {
 		// });
 	}
 
-	async close() {
-		browser.qpopup.remove(this.id).then(super.close);
-	}
+	// async close() {
+	// 	browser.qpopup.remove(this.id).then(super.close);
+	// }
 
 	async pop() {
 		browser.qpopup.pop(this.id).then(() => {
