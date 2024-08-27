@@ -1,39 +1,34 @@
-var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
+import { NoteData } from "../modules/Note.mjs";
+var FileUtils: FileUtils = ChromeUtils.import("resource://gre/modules/FileUtils.jsm").FileUtils;
 
-var EXPORTED_SYMBOLS = ["QNoteFile"];
-
-class QNoteFile {
-	constructor(){
-		this.FU = FileUtils;
-	}
-
-	exists(file){
+export class QNoteFile {
+	exists(file: any){
 		return file && file.exists();
 	}
 
-	encodeFileName(str){
+	encodeFileName(str: string){
 		return encodeURIComponent(str)
 			.replace(/\*/g, "%2A")
 			.replace(/\~/g, "%7E")
 		;
 	}
 
-	decodeFileName(str){
+	decodeFileName(str: string){
 		return decodeURIComponent(str)
 			.replace(/%2A/g, "*")
 			.replace(/%7E/g, "~")
 		;
 	}
 
-	getFile(root, keyId){
-		var file = new this.FU.File(root);
+	getFile(root:string, keyId: string){
+		var file = new FileUtils.File(root);
 
 		file.appendRelativePath(this.encodeFileName(keyId + '.qnote'));
 
 		return file;
 	}
 
-	getExistingFile(root, keyId) {
+	getExistingFile(root: string, keyId: string) {
 		var file = this.getFile(root, keyId);
 
 		if(this.exists(file)){
@@ -43,7 +38,7 @@ class QNoteFile {
 		return false;
 	}
 
-	load(root, keyId) {
+	load(root: string, keyId: string) {
 		var file = this.getExistingFile(root, keyId);
 
 		if(!file){
@@ -57,7 +52,7 @@ class QNoteFile {
 		con.init(fileInStream, "utf-8", 0, 0xFFFD); // U+FFFD = replacement character
 
 		var data = '';
-		var str = {};
+		var str: Ci.AString = {};
 		while (con.readString(4096, str) != 0) {
 			data += str.value;
 		}
@@ -68,14 +63,14 @@ class QNoteFile {
 		return JSON.parse(data);
 	}
 
-	delete(root, keyId){
+	delete(root: string, keyId: string){
 		var file = this.getExistingFile(root, keyId);
 		if(file){
 			file.remove(false);
 		}
 	}
 
-	save(root, keyId, note){
+	save(root: string, keyId: string, note: NoteData){
 		var file = this.getFile(root, keyId);
 		let data = JSON.stringify(note);
 
@@ -84,7 +79,7 @@ class QNoteFile {
 		tempFile.createUnique(tempFile.NORMAL_FILE_TYPE, parseInt("0660",8));
 
 		let fileOutStream = Cc['@mozilla.org/network/file-output-stream;1'].createInstance(Ci.nsIFileOutputStream);
-		fileOutStream.init(tempFile, 2, 0x200, false); // Opens for writing only
+		fileOutStream.init(tempFile, 2, 0x200, 0); // Opens for writing only
 
 		var con = Cc["@mozilla.org/intl/converter-output-stream;1"].createInstance(Ci.nsIConverterOutputStream);
 		con.init(fileOutStream, "utf-8", 0, 0xFFFD); // U+FFFD = replacement character
@@ -96,8 +91,8 @@ class QNoteFile {
 		tempFile.moveTo(null, file.leafName);
 	}
 
-	getAllKeys(root) {
-		var file = new this.FU.File(root);
+	getAllKeys(root: string) {
+		var file = new FileUtils.File(root);
 		var eFiles = file.directoryEntries;
 		var notes = [];
 

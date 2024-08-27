@@ -1,9 +1,5 @@
-var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
-var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
-var { QNoteFile } = ChromeUtils.import("resource://qnote/modules-exp/QNoteFile.js");
-var { XNoteFile } = ChromeUtils.import("resource://qnote/modules-exp/XNoteFile.js");
-
-var EXPORTED_SYMBOLS = ["QCustomTerm"];
+var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs");
+var { XNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/XNoteFile.mjs");
 
 // NOTE:
 // We need completely restart TB if CustomTerm code changes
@@ -11,12 +7,24 @@ var EXPORTED_SYMBOLS = ["QCustomTerm"];
 
 // TODO: try brind all calls to options.API
 // TODO: scopes
+export interface QCustomTermOptions {
+	QDEB: boolean
+	API: QApp
+	w: MozWindow
+	name: string
+}
 
-class QCustomTerm {
-	constructor(options) {
+export class QCustomTerm {
+	id: string
+	name: string
+	needsBody: boolean = false
+	ops: Array<Ci.nsMsgSearchOp>
+	API: QApp
+	QN: typeof XNoteFile
+	XN: typeof XNoteFile
+	constructor(options: QCustomTermOptions) {
 		this.id = 'qnote@dqdp.net#qnoteText';
 		this.name = options.name || "QNote";
-		this.needsBody = false;
 
 		this.ops = [
 			Ci.nsMsgSearchOp.Contains,
@@ -32,20 +40,20 @@ class QCustomTerm {
 		this.API = options.API;
 	}
 
-	getEnabled(scope, op) {
+	getEnabled(scope: any, op: any) {
 		return true;
 	}
-	getAvailable(scope, op) {
+	getAvailable(scope: any, op: any) {
 		return true;
 	}
-	getAvailableOperators(scope, length) {
+	getAvailableOperators(scope: any, length: any) {
 		if(length){
 			length.value = this.ops.length;
 		}
 
 		return this.ops;
 	}
-	match(msgHdr, searchValue, searchOp) {
+	match(msgHdr: any, searchValue: string, searchOp: Ci.nsMsgSearchOp) {
 		let notesRoot = this.API.getStorageFolder();
 
 		if(!notesRoot){
@@ -86,4 +94,4 @@ class QCustomTerm {
 			return note && (!keyw || note.text.toLowerCase().endsWith(keyw));
 		}
 	}
-};
+}
