@@ -1,5 +1,5 @@
 import { NoteData } from "../modules/Note.mjs";
-var FileUtils: FileUtils = ChromeUtils.import("resource://gre/modules/FileUtils.jsm").FileUtils;
+var FileUtils = ChromeUtils.import("resource://gre/modules/FileUtils.jsm").FileUtils;
 
 export class QNoteFile {
 	exists(file: any){
