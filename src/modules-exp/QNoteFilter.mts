@@ -1,9 +1,7 @@
 var { QuickFilterManager, MessageTextFilter } = ChromeUtils.import("resource:///modules/QuickFilterManager.jsm");
-var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
-var { QCustomTerm } = ChromeUtils.importESModule("resource://qnote/modules-exp/QCustomTerm.mjs");
 var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
 
 // var EXPORTED_SYMBOLS = ["QNoteFilter"];
@@ -19,7 +17,6 @@ export interface QNoteFilterOptions {
 // 2) we can addCustomTerm() but can not remove it
 export class QNoteFilter {
 	options: QNoteFilterOptions;
-	CustomTermId = 'qnote@dqdp.net#qnoteText'
 	qfQnoteDomId = 'qfb-qs-qnote'
 	Services: any;
 	QuickFilterManager: any;
@@ -34,15 +31,6 @@ export class QNoteFilter {
 		this.options = options;
 
 		QDEB = options.QDEB;
-
-		if(MailServices.filters.getCustomTerm(this.CustomTermId)){
-			QDEB&&console.log(`[QNoteFilter] CustomTerm ${this.CustomTermId} already defined`);
-		} else {
-			QDEB&&console.log(`[QNoteFilter] Defining CustomTerm ${this.CustomTermId}`);
-			MailServices.filters.addCustomTerm(new QCustomTerm({
-				API: QNoteFilter.options.API
-			}));
-		}
 
 		let NoteQF = {
 			name: "qnote",
