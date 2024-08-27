@@ -1,5 +1,5 @@
 var { ExtensionError } = ExtensionUtils;
-var { QNoteFile } = ChromeUtils.import("resource://qnote/modules-exp/QNoteFile.js");
+var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs");
 
 var qnote = class extends ExtensionCommon.ExtensionAPI {
 	Transferable(source) {
