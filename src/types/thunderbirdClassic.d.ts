@@ -61,6 +61,7 @@ type QNoteFilePath = "resource://qnote/modules-exp/QNoteFile.mjs";
 type XNoteFilePath = "resource://qnote/modules-exp/XNoteFile.mjs";
 type FileUtilsPath = "resource://gre/modules/FileUtils.jsm";
 type ServicesPath = "resource://gre/modules/Services.jsm";
+type ExtensionUtilsPath = "resource://gre/modules/ExtensionUtils.jsm";
 
 interface QEventDispatcherExport {
 	QEventDispatcher: typeof import("../modules/QEventDispatcher.mjs").QEventDispatcher;
@@ -191,6 +192,7 @@ declare namespace Components
 		public static import(path: ExtensionParentPath): ExtensionParentExport;
 		public static import(path: ExtensionCommonPath): any;
 		public static import(path: FileUtilsPath): any;
+		public static import(path: ExtensionUtilsPath): any;
 		public static importESModule(path: QEventDispatcherPath): QEventDispatcherExport;
 		public static importESModule(path: XULNoteWindowPath): XULNoteWindowExport;
 		public static importESModule(path: DOMLocalizatorPath): DOMLocalizatorExport;
@@ -216,7 +218,14 @@ declare namespace Components
 			value?: string | null
 		}
 
-		class nsISupports {}
+		class nsISupports {
+			QueryInterface<T>(type: Type<T>): T;
+		}
+
+		class nsIInterfaceRequestor extends nsISupports {
+			getInterface<T>(type: Type<T>): T;
+
+		}
 
 		class nsIInputStream extends nsISupports {
 			close(): void;
@@ -256,10 +265,24 @@ declare namespace Components
 			undefine(prop: string): void
 		}
 
+		type nsILoadContext = any; // TODO: ?
+		class nsITransferable extends nsISupports {
+			init(aContext: nsILoadContext): void
+		}
+
+		class nsIWebNavigation extends nsISupports {
+		}
+
+		class nsIDocShellTreeItem extends nsISupports {
+		}
+
+		class nsIDocShell extends nsIDocShellTreeItem {
+		}
+
 		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIDOMWindow
 		class nsIDOMWindow extends Window
 		{
-
+			docShell: nsIDocShell
 		}
 
 		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIPromptService
