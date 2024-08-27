@@ -13,8 +13,8 @@ export class QCache {
 		this.provider = provider;
 	}
 
-	set(keyId: KeyId, data: NoteData){
-		this.cache.set(keyId, data);
+	set(data: NoteData){
+		this.cache.set(data.keyId, data);
 	}
 
 	delete(id: KeyId){
@@ -33,7 +33,7 @@ export class QCache {
 
 		if(this.provider){
 			this.provider(id).then((data: NoteData) => {
-				this.set(id, data);
+				this.set(data);
 				if(listener){
 					listener(id, data);
 				}
