@@ -57,7 +57,7 @@ declare global {
 			function remove(id: number): Promise<void>;
 			function get(id: number): Promise<QPopupOptions>;
 			function pop(id: number): Promise<void>;
-			function create(windowsId: number, options: QPopupOptions): Promise<void>;
+			function create(windowsId: number, options: QPopupOptions | QPopupOptionsPartial): Promise<void>;
 			function update(options: QPopupOptions | QPopupOptionsPartial): Promise<QPopupOptions>;
 			export const onRemoved: WebExtEvent<(id: number) => void>;
 		}

@@ -60,8 +60,8 @@ export class XULNoteWindow extends DefaultNoteWindow {
 		});
 	}
 
-	note2QPopupOptions(): QPopupOptions {
-		const opt = new QPopupOptions(this.id);
+	note2QPopupOptions(): QPopupOptionsPartial {
+		const opt: QPopupOptionsPartial = { id: this.id };
 
 		opt.width = this.note.data.width || this.prefs.width;
 		opt.height = this.note.data.height || this.prefs.height;

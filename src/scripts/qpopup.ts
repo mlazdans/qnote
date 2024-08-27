@@ -1,6 +1,6 @@
 import { DOMLocalizator } from "../modules/DOMLocalizator.mjs";
 import { QPopupDOMContentLoadedMessage, UpdateQPoppupMessage } from "../modules/Messages.mjs";
-import { QPopupOptions } from "../modules/XULNoteWindow.mjs";
+import { QPopupOptions, QPopupOptionsPartial } from "../modules/XULNoteWindow.mjs";
 
 var QDEB = true;
 
@@ -20,7 +20,7 @@ if (isNaN(id)) {
 	throw new Error(`Incorrect query parameter: id ${id}`);
 }
 
-const Opts = new QPopupOptions(id);
+const Opts: QPopupOptionsPartial = { id };
 
 QDEB&&console.debug("qpopup(content) new QPopup: ", id);
 
@@ -41,7 +41,7 @@ if(!resizeEl) throw new Error("resizeEl not found");
 if(!closeEl) throw new Error("closeEl not found");
 if(!delEl) throw new Error("delEl not found");
 
-function updateOptions(o: QPopupOptions){
+function updateOptions(o: QPopupOptions | QPopupOptionsPartial){
 	console.log("updateOptions");
 	if(Opts.enableSpellChecker !== o.enableSpellChecker)
 		Opts.enableSpellChecker = o.enableSpellChecker;
@@ -115,7 +115,10 @@ window.addEventListener("DOMContentLoaded", () => {
 	(new QPopupDOMContentLoadedMessage).post(xulPort, { id });
 });
 
-YTextE.addEventListener("keyup", () => Opts.text = YTextE.value);
+YTextE.addEventListener("keyup", () => browser.qpopup.update({
+	id: id,
+	text: YTextE.value
+}));
 
 let tDrag = (mouse: MouseEvent) => {
 	if(mouse.target === null){
@@ -149,11 +152,10 @@ let tDrag = (mouse: MouseEvent) => {
 		// 	};
 		// }
 
-		const updateOpts = new QPopupOptions(id);
-		updateOpts.offsetTop = e.clientY - mouse.clientY;
-		updateOpts.offsetLeft = e.clientX - mouse.clientX;
+		const offsetTop = e.clientY - mouse.clientY;
+		const offsetLeft = e.clientX - mouse.clientX;
 
-		browser.qpopup.update(updateOpts);
+		browser.qpopup.update({ id, offsetTop, offsetLeft });
 		// browser.qpopup.update(updateOpts).then(pi => {
 		// 	if(Note && pi.top)Note.top = pi.top;
 		// 	if(Note && pi.left)Note.left = pi.left;
