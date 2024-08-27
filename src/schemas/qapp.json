@@ -1,38 +1,54 @@
 [{
-	"namespace": "qapp",
+	"namespace": "qnote",
 	"types": [{
-		"id": "NoteData",
+		"id": "QNoteData",
 		"name": "data",
 		"type": "object",
-		"description": "Note data",
+		"description": "Note data (keep in sync with qnote.json)",
 		"properties": {
 			"keyId": {
 				"type": "string",
-				"default": "",
-				"description": ""
+				"description": "Unique id"
 			},
 			"exists": {
 				"type": "boolean",
-				"default": true,
-				"description": ""
-			},
-			"ts": {
-				"type": "integer",
-				"default": 0,
-				"description": ""
-			},
-			"tsFormatted": {
-				"type": "string",
-				"default": "",
 				"description": ""
 			},
 			"text": {
 				"type": "string",
-				"default": "",
-				"description": ""
+				"optional": true,
+				"description": "Note text"
+			},
+			"left": {
+				"type": "integer",
+				"optional": true,
+				"description": "Windows left position"
+			},
+			"top": {
+				"type": "integer",
+				"optional": true,
+				"description": "Windows top position"
+			},
+			"width": {
+				"type": "integer",
+				"optional": true,
+				"description": "Windows width"
+			},
+			"height": {
+				"type": "integer",
+				"optional": true,
+				"description": "Windows height"
+			},
+			"ts": {
+				"type": "integer",
+				"optional": true,
+				"description": "Modification timestamp"
 			}
 		}
-	},{
+	}]
+},{
+	"namespace": "qapp",
+	"types": [{
 		"id": "Prefs",
 		"name": "data",
 		"type": "object",
@@ -130,7 +146,8 @@
 			"type": "integer",
 			"description": "windowId from windows API"
 		},{
-			"$ref": "NoteData"
+			"name": "note",
+			"$ref": "qnote.QNoteData"
 		}]
 	},{
 		"name": "attachNotesToMultiMessage",
@@ -144,7 +161,7 @@
 		},{
 			"type": "array",
 			"items": {
-				"$ref": "NoteData"
+				"$ref": "qnote.QNoteData"
 			}
 		}]
 	},{
@@ -168,7 +185,8 @@
 		"description": "",
 		"async": true,
 		"parameters": [{
-			"$ref": "NoteData"
+			"name": "data",
+			"$ref": "qnote.QNoteData"
 		}]
 	},{
 		"name": "deleteNoteCache",
