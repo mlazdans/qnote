@@ -1,7 +1,7 @@
 [{
 	"namespace": "qnote",
 	"types": [{
-		"id": "QNoteData",
+		"id": "NoteData",
 		"name": "data",
 		"type": "object",
 		"description": "Note data (keep in sync with qnote.json)",
@@ -147,7 +147,7 @@
 			"description": "windowId from windows API"
 		},{
 			"name": "note",
-			"$ref": "qnote.QNoteData"
+			"$ref": "qnote.NoteData"
 		}]
 	},{
 		"name": "attachNotesToMultiMessage",
@@ -161,7 +161,7 @@
 		},{
 			"type": "array",
 			"items": {
-				"$ref": "qnote.QNoteData"
+				"$ref": "qnote.NoteData"
 			}
 		}]
 	},{
@@ -186,7 +186,7 @@
 		"async": true,
 		"parameters": [{
 			"name": "data",
-			"$ref": "qnote.QNoteData"
+			"$ref": "qnote.NoteData"
 		}]
 	},{
 		"name": "deleteNoteCache",

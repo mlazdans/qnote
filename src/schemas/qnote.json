@@ -1,7 +1,7 @@
 [{
 	"namespace": "qnote",
 	"types": [{
-		"id": "QNoteData",
+		"id": "NoteData",
 		"name": "data",
 		"type": "object",
 		"description": "Note data (keep in sync with qapp.json)",
@@ -98,7 +98,7 @@
 			"type": "string",
 			"description": "QNote key"
 		},{
-			"$ref": "QNoteData"
+			"$ref": "NoteData"
 		}]
 	},{
 		"name": "copyToClipboard",
@@ -106,7 +106,7 @@
 		"description": "",
 		"async": true,
 		"parameters": [{
-			"$ref": "QNoteData"
+			"$ref": "NoteData"
 		}]
 	},{
 		"name": "getFromClipboard",
