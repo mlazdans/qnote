@@ -44,6 +44,10 @@ export class QPopupOptions {
 	}
 }
 
+type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>
+
+export type QPopupOptionsPartial = AtLeast<QPopupOptions, 'id'>
+
 export class XULNoteWindow extends DefaultNoteWindow {
 	prefs: Preferences;
 

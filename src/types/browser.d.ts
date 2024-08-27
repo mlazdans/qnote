@@ -1,7 +1,7 @@
 import 'thunderbird-webext-browser';
 import { NoteData } from '../modules/Note.mjs';
 import { QAppPreferences, XNotePreferences } from '../modules/Preferences.mjs';
-import { QPopupOptions } from '../modules/XULNoteWindow.mts';
+import { QPopupOptions, QPopupOptionsPartial } from '../modules/XULNoteWindow.mts';
 
 export {}
 
@@ -58,7 +58,7 @@ declare global {
 			function get(id: number): Promise<QPopupOptions>;
 			function pop(id: number): Promise<void>;
 			function create(windowsId: number, options: QPopupOptions): Promise<void>;
-			function update(options: QPopupOptions): Promise<QPopupOptions>;
+			function update(options: QPopupOptions | QPopupOptionsPartial): Promise<QPopupOptions>;
 			export const onRemoved: WebExtEvent<(id: number) => void>;
 		}
 		export namespace ResourceUrl {

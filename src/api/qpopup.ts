@@ -261,10 +261,6 @@ class QNotePopup extends BasePopup {
 		// 	console.error("WebExtPopup:Loaded from api");
 		// });
 
-		// panel.addEventListener("popupshowing", () => {
-		// 	console.error("popupshowing from api");
-		// });
-
 		mainPopupSet.appendChild(panel);
 
 		let url = "html/qpopup.html?id=" + id;
@@ -277,6 +273,13 @@ class QNotePopup extends BasePopup {
 		let blockParser = false;
 
 		super(extension, panel, popupURL, browserStyle, fixedWidth, blockParser);
+
+		// TODO: experiment
+		// panel.addEventListener("popupshowing", () => {
+		// 	// const titleEl = document.querySelector(".qpopup-title") as HTMLElement;
+		// 	// console.error("popupshowing from api", panel);
+		// 	// console.error("shadowRoot", panel.shadowRoot);
+		// });
 
 		this.id = id;
 		this.popupURL = popupURL;
