@@ -1,7 +1,7 @@
 const Services = globalThis.Services || ChromeUtils.import(
   "resource://gre/modules/Services.jsm"
 ).Services;
-var { QNoteFile } = ChromeUtils.import("resource://qnote/modules-exp/QNoteFile.js");
+var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs");
 
 var EXPORTED_SYMBOLS = ["QCustomActionAbstract"];
 
