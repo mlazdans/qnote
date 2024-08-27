@@ -60,6 +60,7 @@ type ThreadPaneColumnsOldPath = "chrome://messenger/content/thread-pane-columns.
 type QNoteFilePath = "resource://qnote/modules-exp/QNoteFile.mjs";
 type XNoteFilePath = "resource://qnote/modules-exp/XNoteFile.mjs";
 type FileUtilsPath = "resource://gre/modules/FileUtils.jsm";
+type ServicesPath = "resource://gre/modules/Services.jsm";
 
 interface QEventDispatcherExport {
 	QEventDispatcher: typeof import("../modules/QEventDispatcher.mjs").QEventDispatcher;
@@ -199,6 +200,8 @@ declare namespace Components
 		public static importESModule(path: ThreadPaneColumnsOldPath): any;
 		public static importESModule(path: QNoteFilePath): any;
 		public static importESModule(path: XNoteFilePath): any;
+		public static importESModule(path: FileUtilsPath): any;
+		public static importESModule(path: ServicesPath): any;
 		// public static importESModule(path: ExtensionPopupsSysPath): BasePopupExport;
 		// public static importESModule(path: string): any;
 		public static unload(path: string): void;
@@ -222,6 +225,13 @@ declare namespace Components
 		class nsIOutputStream extends nsISupports {
 		}
 
+		class nsIScriptableInputStream extends nsISupports {
+			init(aInputStream: nsIInputStream): void;
+			read(aCount: number): string;
+			close(): void;
+			// ACString readBytes(in unsigned long aCount);
+		}
+
 		class nsIUnicharInputStream extends nsISupports{
 			// unsigned long readString(in unsigned long aCount, out AString aString);
 			readString(aCount: number, aString: AString): number;
@@ -236,6 +246,14 @@ declare namespace Components
 
 		class nsIFileInputStream extends nsIInputStream {
 			init(file: any,  ioFlags: number, perm: number, behaviorFlags: number | null): void;
+		}
+
+		type nsIIDRef = any; // TODO: ?
+		class nsIProperties extends nsISupports {
+			get(prop: string, iid: nsIIDRef): any
+			set(prop: string, value: any): void
+			has(prop: string): boolean
+			undefine(prop: string): void
 		}
 
 		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIDOMWindow
@@ -374,7 +392,9 @@ declare namespace Components
 		class nsIFileOutputStream
 		{
 			public init(file: nsIFile, ioFlags: number, perm: number, behaviorFlags: number): void;
+			write(aBuf: string, aCount: number): number;
 			close(): void;
+			flush(): void;
 		}
 
 		class nsIFile
@@ -674,6 +694,7 @@ declare namespace Services
 {
 	let ww: nsIWindowWatcher;
 	let wm: Ci.nsIWindowMediator;
+	let prefs: any;
 }
 
 declare namespace ExtensionCommon
