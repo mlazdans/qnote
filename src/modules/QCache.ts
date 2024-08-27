@@ -1,17 +1,23 @@
-var EXPORTED_SYMBOLS = ["QCache"];
+import { NoteData } from "./Note.mjs";
 
-class QCache {
-	constructor(provider){
-		this.blocker = new Map();
+type KeyId = NoteData["keyId"];
+type Listener = (id: KeyId, data: NoteData) => void;
+type Provider = (id: KeyId) => Promise<NoteData>;
+
+export class QCache {
+	private cache: Map<KeyId, NoteData> = new Map();
+	private provider: Provider | undefined;
+
+	constructor(provider?: Provider){
 		this.cache = new Map();
 		this.provider = provider;
 	}
 
-	set(id, data){
-		this.cache.set(id, data);
+	set(keyId: KeyId, data: NoteData){
+		this.cache.set(keyId, data);
 	}
 
-	delete(id){
+	delete(id: KeyId){
 		this.cache.delete(id);
 	}
 
@@ -20,32 +26,26 @@ class QCache {
 	}
 
 	// We will sync return if cache found or async and call provider
-	get(id, listener){
+	get(id: KeyId, listener: Listener): NoteData | undefined {
 		if(this.cache.has(id)){
 			return this.cache.get(id);
 		}
 
-		let blocker = this.blocker;
-
-		// Block concurrent calls on same note as we will update column once it has been loded from local cache, local storage or file
-		// Not 100% sure if necessary but calls to column update can be quite many
-		if(!blocker.has(id)){
-			blocker.set(id, true);
-			this.provider(id).then(data => {
+		if(this.provider){
+			this.provider(id).then((data: NoteData) => {
 				this.set(id, data);
 				if(listener){
 					listener(id, data);
 				}
-			}).finally(() => {
-				// Unblock concurrent calls
-				blocker.delete(id);
 			});
+		} else {
+			console.warn("Called get() but provider not set");
 		}
 
-		return {};
+		return undefined;
 	}
 
-	setProvider(provider){
+	setProvider(provider: Provider){
 		this.provider = provider;
 	}
 }
