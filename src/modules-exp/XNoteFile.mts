@@ -1,18 +1,29 @@
-var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
-const Services = globalThis.Services || ChromeUtils.import(
-  "resource://gre/modules/Services.jsm"
-).Services;
+import { NoteData } from "../modules/Note.mjs";
+import { setProperty } from "../modules/utils.mjs";
 
-var EXPORTED_SYMBOLS = ["XNoteFile"];
+var FileUtils = ChromeUtils.import("resource://gre/modules/FileUtils.jsm").FileUtils;
+var Services = globalThis.Services || ChromeUtils.importESModule("resource://gre/modules/Services.jsm").Services;
 
 const NF_DO_ENCODE = 1;
 const NF_DO_NOT_ENCODE = 0;
 
-class XNoteFile {
+interface XNotePrefs {
+	usetag: boolean,
+	dateformat: string,
+	width: number,
+	height: number,
+	show_on_select: boolean,
+	show_first_x_chars_in_col: number,
+	storage_path: string,
+	version: string
+}
+
+export class XNoteFile {
+	FU;
 	constructor(){
 		this.FU = FileUtils;
 	}
-	getDefaultPrefs() {
+	getDefaultPrefs(): XNotePrefs {
 		return {
 			usetag: false,
 			dateformat: "yyyy-mm-dd - HH:MM",
@@ -25,44 +36,44 @@ class XNoteFile {
 		};
 	}
 	// Seems that "yyyy-mm-dd - HH:MM" format has been hardcoded for some time?
-	noteDateToDate(dateString) {
+	noteDateToDate(dateString: string): Date | undefined {
 		let dateParsers = [
 			// "yyyy-mm-dd - HH:MM"
-			ds => {
+			(ds: string) => {
 				let D = new Date();
 				let [date, time] = ds.split(" - ");
 
 				if(date){
 					let dateParts = date.split("-");
-					D.setFullYear(dateParts[0]);
-					D.setMonth(dateParts[1] - 1);
-					D.setDate(dateParts[2]);
+					D.setFullYear(parseInt(dateParts[0]));
+					D.setMonth(parseInt(dateParts[1]) - 1);
+					D.setDate(parseInt(dateParts[2]));
 				}
 
 				if(time){
 					let timeParts = time.split(":");
-					D.setHours(timeParts[0]);
-					D.setMinutes(timeParts[1]);
+					D.setHours(parseInt(timeParts[0]));
+					D.setMinutes(parseInt(timeParts[1]));
 				}
 
 				return D;
 			},
 			// "dd/mm/yyyy - HH:MM"
-			ds => {
+			(ds: string) => {
 				let D = new Date();
 				let [date, time] = ds.split(" - ");
 
 				if(date){
 					let dateParts = date.split("/");
-					D.setFullYear(dateParts[2]);
-					D.setMonth(dateParts[1] - 1);
-					D.setDate(dateParts[0]);
+					D.setFullYear(parseInt(dateParts[2]));
+					D.setMonth(parseInt(dateParts[1]) - 1);
+					D.setDate(parseInt(dateParts[0]));
 				}
 
 				if(time){
 					let timeParts = time.split(":");
-					D.setHours(timeParts[0]);
-					D.setMinutes(timeParts[1]);
+					D.setHours(parseInt(timeParts[0]));
+					D.setMinutes(parseInt(timeParts[1]));
 				}
 
 				return D;
@@ -75,10 +86,12 @@ class XNoteFile {
 				return D;
 			}
 		}
+
+		return undefined;
 	}
-	dateToNoteDate(d, mask) {
+	dateToNoteDate(d: Date, mask: string) {
 		// If preferred, zeroise() can be moved out of the format() method for performance and reuse purposes
-		var zeroize = function (value, length) {
+		var zeroize = function (value: any, length?: number): string {
 			if (!length) length = 2;
 			value = String(value);
 			for (var i = 0, zeros = ''; i < (length - value.length); i++) {
@@ -87,25 +100,25 @@ class XNoteFile {
 			return zeros + value;
 		};
 
-		return mask.replace(/"[^"]*"|'[^']*'|\b(?:d{1,4}|m{1,4}|yy(?:yy)?|([hHMs])\1?|TT|tt|[lL])\b/g, function($0) {
+		return mask.replace(/"[^"]*"|'[^']*'|\b(?:d{1,4}|m{1,4}|yy(?:yy)?|([hHMs])\1?|TT|tt|[lL])\b/g, function($0: string): string {
 			switch($0) {
-				case 'd':	return d.getDate();
+				case 'd':	return d.getDate().toString();
 				case 'dd':	return zeroize(d.getDate());
 				case 'ddd':	return ['Sun','Mon','Tue','Wed','Thr','Fri','Sat'][d.getDay()];
 				case 'dddd':	return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()];
-				case 'm':	return d.getMonth() + 1;
+				case 'm':	return (d.getMonth() + 1).toString();;
 				case 'mm':	return zeroize(d.getMonth() + 1);
 				case 'mmm':	return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
 				case 'mmmm':	return ['January','February','March','April','May','June','July','August','September','October','November','December'][d.getMonth()];
 				case 'yy':	return String(d.getFullYear()).substr(2);
-				case 'yyyy':	return d.getFullYear();
-				case 'h':	return d.getHours() % 12 || 12;
+				case 'yyyy':	return d.getFullYear().toString();
+				case 'h':	return (d.getHours() % 12 || 12).toString();;
 				case 'hh':	return zeroize(d.getHours() % 12 || 12);
-				case 'H':	return d.getHours();
+				case 'H':	return d.getHours().toString();;
 				case 'HH':	return zeroize(d.getHours());
-				case 'M':	return d.getMinutes();
+				case 'M':	return d.getMinutes().toString();;
 				case 'MM':	return zeroize(d.getMinutes());
-				case 's':	return d.getSeconds();
+				case 's':	return d.getSeconds().toString();;
 				case 'ss':	return zeroize(d.getSeconds());
 				case 'l':	return zeroize(d.getMilliseconds(), 3);
 				case 'L':	var m = d.getMilliseconds();
@@ -118,13 +131,13 @@ class XNoteFile {
 			}
 		});
 	}
-	encodeFileName(str){
+	encodeFileName(str: string){
 		return escape(str).replace(/\//g, "%2F");
 	}
-	decodeFileName(str){
+	decodeFileName(str: string){
 		return unescape(str.replace(/%2F/g, "/"));
 	}
-	noteFile(root, keyId, enFileName = NF_DO_ENCODE){
+	noteFile(root: string, keyId: string, enFileName = NF_DO_ENCODE){
 		try {
 			var file = new FileUtils.File(root);
 			if(enFileName === NF_DO_ENCODE){
@@ -140,10 +153,11 @@ class XNoteFile {
 	getPrefs(){
 		var _xnotePrefs = Services.prefs.QueryInterface(Ci.nsIPrefBranch).getBranch("extensions.xnote.");
 		var defaultPrefs = this.getDefaultPrefs();
-		var p = {};
+		var p = this.getDefaultPrefs();
 
-		for(let k of Object.keys(defaultPrefs)){
+		for(const _k of Object.keys(defaultPrefs)){
 			let f;
+			let k = _k as keyof XNotePrefs;
 			let t = typeof defaultPrefs[k];
 
 			if(t === 'boolean'){
@@ -157,17 +171,18 @@ class XNoteFile {
 			//p[k] = defaultPrefs[k];
 
 			if(f && _xnotePrefs.prefHasUserValue(k)){
-				p[k] = _xnotePrefs[f](k);
-				p[k] = defaultPrefs[k].constructor(p[k]); // Type cast
+				setProperty(p, k, _xnotePrefs[f](k));
+				// p[k] = _xnotePrefs[f](k);
+				// p[k] = defaultPrefs[k].constructor(p[k]); // Type cast
 			}
 		}
 
 		return p;
 	}
-	fileExists(file){
+	fileExists(file: any){
 		return file && file.exists();
 	}
-	getExistingNoteFile(root, keyId){
+	getExistingNoteFile(root: string, keyId: string){
 		let file;
 
 		if(this.fileExists(file = this.noteFile(root, keyId, NF_DO_ENCODE))){
@@ -180,7 +195,7 @@ class XNoteFile {
 
 		return false;
 	}
-	save(root, keyId, note){
+	save(root: string, keyId: string, note: NoteData){
 		var file = this.noteFile(root, keyId);
 
 		let tempFile = file.parent.clone();
@@ -191,35 +206,38 @@ class XNoteFile {
 
 		let fileOutStream = Components.classes['@mozilla.org/network/file-output-stream;1'].createInstance(Ci.nsIFileOutputStream);
 
-		fileOutStream.init(tempFile, 2, 0x200, false); // Opens for writing only
+		// fileOutStream.init(tempFile, 2, 0x200, false); // Opens for writing only
+		fileOutStream.init(tempFile, 2, 0x200, 0); // false can't be used as number? TODO: test
 		fileOutStream.write(String(note.left), 4);
 		fileOutStream.write(String(note.top), 4);
 		fileOutStream.write(String(note.width), 4);
 		fileOutStream.write(String(note.height), 4);
 
-		let d = this.dateToNoteDate(new Date(note.ts), this.getPrefs().dateformat || this.getDefaultPrefs().dateformat);
+		let ts = note.ts ? new Date(note.ts) : new Date();
+		let d = this.dateToNoteDate(ts, this.getPrefs().dateformat || this.getDefaultPrefs().dateformat);
 		fileOutStream.write(d, 32);
 
-		let contentencode = encodeURIComponent(note.text.replace(/\n/g,'<BR>'));
+		let text = note.text ? note.text.replace(/\n/g,'<BR>') : "";
+		let contentencode = encodeURIComponent(text);
 		fileOutStream.write(contentencode, contentencode.length);
 
 		fileOutStream.close();
 
 		tempFile.moveTo(null, file.leafName);
 	}
-	delete(root, keyId){
+	delete(root: string, keyId: string){
 		var file = this.getExistingNoteFile(root, keyId);
 		if(file){
 			file.remove(false);
 		}
 	}
-	load(root, keyId){
+	load(root: string, keyId: string){
 		var file = this.getExistingNoteFile(root, keyId);
 		if(!file){
 			return false;
 		}
 
-		var note = {};
+		var note = new NoteData(keyId);
 
 		var fileInStream = Components.classes['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream);
 		var fileScriptableIO = Components.classes['@mozilla.org/scriptableinputstream;1'].createInstance(Ci.nsIScriptableInputStream);
@@ -232,9 +250,9 @@ class XNoteFile {
 		note.width = parseInt(fileScriptableIO.read(4));
 		note.height = parseInt(fileScriptableIO.read(4));
 		let tsPart = fileScriptableIO.read(32);
-		note.ts = this.noteDateToDate(tsPart);
-		if(note.ts){
-			note.ts = note.ts.getTime();
+		let d = this.noteDateToDate(tsPart);
+		if(d){
+			note.ts = d.getTime();
 		} else {
 			note.ts = 0;
 		}
@@ -247,7 +265,7 @@ class XNoteFile {
 
 		return note;
 	}
-	getAllKeys(root) {
+	getAllKeys(root: string) {
 		var file = new FileUtils.File(root);
 		var eFiles = file.directoryEntries;
 		var notes = [];
@@ -266,7 +284,7 @@ class XNoteFile {
 	getProfilePath() {
 		return Cc['@mozilla.org/file/directory_service;1'].getService(Ci.nsIProperties).get('ProfD', Ci.nsIFile);
 	}
-	getStoragePath(path) {
+	getStoragePath(path: string) {
 		let prof = this.getProfilePath();
 
 		if(path){
