@@ -6,10 +6,12 @@ type Provider = (id: KeyId) => Promise<NoteData>;
 
 export class QCache {
 	private cache: Map<KeyId, NoteData> = new Map();
+	private blocker: Set<KeyId>;
 	private provider: Provider | undefined;
 
 	constructor(provider?: Provider){
 		this.cache = new Map();
+		this.blocker = new Set();
 		this.provider = provider;
 	}
 
@@ -31,13 +33,19 @@ export class QCache {
 			return this.cache.get(id);
 		}
 
+		// Block concurrent calls on same note as we will update column once it has been loded from local cache, local storage or file
+		// TODO: think of better approach
 		if(this.provider){
-			this.provider(id).then((data: NoteData) => {
-				this.set(data);
-				if(listener){
-					listener(id, data);
-				}
-			});
+			if(!this.blocker.has(id)){
+				this.blocker.add(id);
+				this.provider(id).then((data: NoteData) => {
+					this.set(data);
+					if(listener){
+						console.log("call listener", id, data);
+						listener(id, data);
+					}
+				}).finally(() => this.blocker.delete(id));
+			}
 		} else {
 			console.warn("Called get() but provider not set");
 		}
