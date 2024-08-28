@@ -17,7 +17,7 @@ export class NoteData {
 
 export interface INote {
 	data: NoteData;
-	load(): Promise<boolean>;
+	load(): Promise<NoteData>;
 	get(): NoteData;
 	set(data: NoteData): NoteData;
 	save(): Promise<boolean>;
@@ -32,9 +32,11 @@ export interface INote {
 // export type Note = (QNote | QNoteFolder) & QEventDispatcher;
 
 export abstract class DefaultNote implements INote {
+	keyId: string;
 	data: NoteData;
 
 	constructor(keyId: string) {
+		this.keyId = keyId;
 		// super(["aftersave", "afterdelete", "afterupdate"]);
 		this.data = new NoteData(keyId);
 	}
@@ -60,7 +62,7 @@ export abstract class DefaultNote implements INote {
 		return this.data = data;
 	}
 
-	abstract load(): Promise<boolean>
+	abstract load(): Promise<NoteData>
 	abstract save(): Promise<boolean>
 	abstract delete(): Promise<boolean>
 

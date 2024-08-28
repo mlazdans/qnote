@@ -1,4 +1,4 @@
-import { DefaultNote } from './Note.mjs';
+import { DefaultNote, NoteData } from './Note.mjs';
 
 export class XNote extends DefaultNote {
 	root: string;
@@ -8,15 +8,9 @@ export class XNote extends DefaultNote {
 		this.root = root;
 	}
 
-	async load(): Promise<boolean> {
-		return browser.xnote.loadNote(this.root, this.data.keyId).then(data => {
-			if(data) {
-				this.data = data;
-				this.data.exists = true;
-				return true;
-			}
-			return false;
-		});
+	async load(): Promise<NoteData> {
+		this.data = new NoteData(this.keyId);
+		return browser.xnote.loadNote(this.root, this.data.keyId).then(data => this.data = data);
 	}
 
 	async save(){

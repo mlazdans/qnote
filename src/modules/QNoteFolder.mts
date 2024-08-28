@@ -1,4 +1,4 @@
-import { DefaultNote } from './Note.mjs';
+import { DefaultNote, NoteData } from './Note.mjs';
 
 export class QNoteFolder extends DefaultNote {
 	root: string;
@@ -8,21 +8,21 @@ export class QNoteFolder extends DefaultNote {
 		this.root = root;
 	}
 
-	async load(): Promise<boolean> {
-		let data;
+	async load(): Promise<NoteData> {
+		this.data = new NoteData(this.keyId);
 
-		// Check for XNote
-		if(!(data = await browser.qnote.loadNote(this.root, this.data.keyId))){
+		let data = await browser.qnote.loadNote(this.root, this.data.keyId);
+
+		// Check maybe XNote exists
+		if(!data.exists){
 			data = await browser.xnote.loadNote(this.root, this.data.keyId);
 		}
 
-		if(data) {
+		if(data.exists){
 			this.data = data;
-			this.data.exists = true;
-			return true;
 		}
 
-		return false;
+		return this.data;
 	}
 
 	async save(){

@@ -1,19 +1,13 @@
-import { DefaultNote } from './Note.mjs';
+import { DefaultNote, NoteData } from './Note.mjs';
 
 export class QNote extends DefaultNote {
 	constructor(keyId: string) {
 		super(keyId);
 	}
 
-	async load(): Promise<boolean> {
-		return browser.storage.local.get(this.data.keyId).then(store => {
-			if(store[this.data.keyId]){
-				this.data = store[this.data.keyId];
-				return true;
-			}
-
-			return false;
-		});
+	async load(): Promise<NoteData> {
+		this.data = new NoteData(this.keyId);
+		return browser.storage.local.get(this.data.keyId).then(store => store[this.data.keyId] ? this.data = store[this.data.keyId] : this.data);
 	}
 
 	async save() {
