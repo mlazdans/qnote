@@ -38,11 +38,12 @@ export class QNoteFile {
 		return false;
 	}
 
-	load(root: string, keyId: string) {
+	load(root: string, keyId: string): NoteData {
 		var file = this.getExistingFile(root, keyId);
+		var note = new NoteData(keyId);
 
 		if(!file){
-			return false;
+			return note;
 		}
 
 		var fileInStream = Cc['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream);
@@ -52,7 +53,7 @@ export class QNoteFile {
 		con.init(fileInStream, "utf-8", 0, 0xFFFD); // U+FFFD = replacement character
 
 		var data = '';
-		var str: Ci.AString = {};
+		var str: AString = {};
 		while (con.readString(4096, str) != 0) {
 			data += str.value;
 		}
@@ -60,7 +61,11 @@ export class QNoteFile {
 		con.close();
 		fileInStream.close();
 
-		return JSON.parse(data);
+		note = JSON.parse(data);
+		note.exists = true;
+		note.keyId = keyId;
+
+		return note;
 	}
 
 	delete(root: string, keyId: string){
@@ -82,7 +87,8 @@ export class QNoteFile {
 		fileOutStream.init(tempFile, 2, 0x200, 0); // Opens for writing only
 
 		var con = Cc["@mozilla.org/intl/converter-output-stream;1"].createInstance(Ci.nsIConverterOutputStream);
-		con.init(fileOutStream, "utf-8", 0, 0xFFFD); // U+FFFD = replacement character
+		// con.init(fileOutStream, "utf-8", 0, 0xFFFD); // U+FFFD = replacement character
+		con.init(fileOutStream, "utf-8"); // TODO: test - removed extra paramaters
 		con.writeString(data);
 		con.close();
 

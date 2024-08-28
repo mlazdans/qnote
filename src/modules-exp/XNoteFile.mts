@@ -231,13 +231,13 @@ export class XNoteFile {
 			file.remove(false);
 		}
 	}
-	load(root: string, keyId: string){
-		var file = this.getExistingNoteFile(root, keyId);
-		if(!file){
-			return false;
-		}
-
+	load(root: string, keyId: string): NoteData {
 		var note = new NoteData(keyId);
+		var file = this.getExistingNoteFile(root, keyId);
+
+		if(!file){
+			return note;
+		}
 
 		var fileInStream = Cc['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream);
 		var fileScriptableIO = Cc['@mozilla.org/scriptableinputstream;1'].createInstance(Ci.nsIScriptableInputStream);
@@ -262,6 +262,8 @@ export class XNoteFile {
 		fileInStream.close();
 
 		note.text = note.text.replace(/<BR>/g,'\n');
+		note.exists = true;
+		note.keyId = keyId;
 
 		return note;
 	}
