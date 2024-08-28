@@ -12,14 +12,15 @@ declare global {
 	}
 
 	class XULDocument extends Document{
-		createXULElement(name: string): Element;
+		createXULElement(name: string): Element
 	}
 
 	class MozWindow extends Window {
-		gTabmail: any;
-		gFolderDisplay: any;
-		document: XULDocument;
-		MutationObserver: typeof MutationObserver;
+		gFilter: any
+		gTabmail: any
+		gFolderDisplay: any
+		document: XULDocument
+		MutationObserver: typeof MutationObserver
 	}
 
 	namespace browser {

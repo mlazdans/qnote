@@ -45,6 +45,10 @@ declare interface nsIJSCID
 	createInstance<T>(type: Type<T>): T;
 }
 
+declare class nsISupports {
+	QueryInterface<T>(type: Type<T>): T;
+}
+
 type IteratorUtilsPath = "resource:///modules/iteratorUtils.jsm";
 type MailServicesPath = "resource:///modules/MailServices.jsm";
 type ExtensionPopupsPath = "resource:///modules/ExtensionPopups.jsm";
@@ -63,6 +67,9 @@ type FileUtilsPath = "resource://gre/modules/FileUtils.jsm";
 type ServicesPath = "resource://gre/modules/Services.jsm";
 type ExtensionUtilsPath = "resource://gre/modules/ExtensionUtils.jsm";
 type QCustomTermPath = "resource://qnote/modules-exp/QCustomTerm.mjs";
+type QNoteActionPath = "resource://qnote/modules-exp/QNoteAction.mjs";
+type QNoteFilterPath = "resource://qnote/modules-exp/QNoteFilter.mjs";
+type NoteDataPath = "resource://qnote/modules/Note.mjs";
 
 interface QEventDispatcherExport {
 	QEventDispatcher: typeof import("../modules/QEventDispatcher.mjs").QEventDispatcher;
@@ -88,8 +95,20 @@ interface XNoteFileExports {
 	XNoteFile: typeof import("../modules-exp/XNoteFile.mts").XNoteFile;
 }
 
-interface QCustomTermPathExports {
+interface QCustomTermExports {
 	QCustomTerm: typeof import("../modules-exp/QCustomTerm.mts").QCustomTerm;
+}
+
+interface QNoteActionExports {
+	QNoteAction: typeof import("../modules-exp/QNoteAction.mts").QNoteAction;
+}
+
+interface QNoteFilterExports {
+	QNoteFilter: typeof import("../modules-exp/QNoteFilter.mts").QNoteFilter;
+}
+
+interface NoteDataExports {
+	NoteData: typeof import("../modules/Note.mts").NoteData;
 }
 
 // interface FileUtilsExport {
@@ -220,7 +239,11 @@ declare namespace Components
 		public static importESModule(path: XNoteFilePath): XNoteFileExports;
 		public static importESModule(path: FileUtilsPath): any;
 		public static importESModule(path: ServicesPath): any;
-		public static importESModule(path: QCustomTermPath): QCustomTermPathExports;
+		public static importESModule(path: QCustomTermPath): QCustomTermExports;
+		public static importESModule(path: QNoteActionPath): QNoteActionExports;
+		public static importESModule(path: QNoteFilterPath): QNoteFilterExports;
+		public static importESModule(path: NoteDataPath): NoteDataExports;
+
 		// public static importESModule(path: ExtensionPopupsSysPath): BasePopupExport;
 		// public static importESModule(path: string): any;
 		public static unload(path: string): void;
@@ -233,10 +256,6 @@ declare namespace Components
 		class AString {
 			length?: number | null
 			value?: string | null
-		}
-
-		class nsISupports {
-			QueryInterface<T>(type: Type<T>): T;
 		}
 
 		class nsIInterfaceRequestor extends nsISupports {
@@ -667,10 +686,156 @@ declare interface MailServicesExport
 	MailServices: MailServices;
 }
 
+declare class nsMsgFilterType extends nsISupports {
+	/* these longs are all actually of type nsMsgFilterTypeType */
+	static readonly None             = 0x00;
+	static readonly InboxRule        = 0x01;
+	static readonly InboxJavaScript  = 0x02;
+	static readonly Inbox            = 0x03; // InboxRule | InboxJavaScript;
+	static readonly NewsRule         = 0x04;
+	static readonly NewsJavaScript   = 0x08;
+	static readonly News             = 0x0C; // NewsRule | NewsJavaScript;
+	static readonly Incoming         = 0x0F; // Inbox | News;
+	static readonly Manual           = 0x10;
+	static readonly PostPlugin       = 0x20; // After bayes filtering
+	static readonly PostOutgoing     = 0x40; // After sending
+	static readonly Archive          = 0x80; // Before archiving
+	static readonly Periodic         = 0x100;// On a repeating timer
+	static readonly All              = 0x1F; // Incoming | Manual;
+}
+type nsMsgFilterTypeType = nsMsgFilterType;
+type nsMsgSearchScopeValue = number;
+
+declare class nsIMsgFolder extends nsISupports {
+}
+
+declare class nsIMsgDBHdr extends nsISupports {
+	// void setStringProperty(in string propertyName, in  AUTF8String propertyValue);
+	// AUTF8String getStringProperty(in string propertyName);
+	// unsigned long getUint32Property(in string propertyName);
+	// void setUint32Property(in string propertyName,
+	//                        in unsigned long propertyVal);
+
+	// accessors, to make our JS cleaner
+	readonly isRead: boolean;
+	readonly isFlagged: boolean;
+
+	// Special accessor that checks if a message is part of an ignored subthread
+	readonly isKilled: boolean;
+
+	// Mark message routines
+	markRead(read: boolean): void;
+	markFlagged(flagged: boolean): void;
+	markHasAttachments(hasAttachments: boolean): void;
+
+	// static readonly priority: nsMsgPriorityValue;
+
+	/* flag handling routines */
+	flags: number;
+	orFlags(flags: number): number;
+	andFlags(flags: number): number;
+
+	/* various threading stuff */
+	// static readonly threadId: nsMsgKey;
+	// static readonly messageKey: nsMsgKey;
+	// static readonly threadParent: nsMsgKey;
+
+	/* meta information about the message, learned from reading the message */
+
+	/**
+	 * For "Offline" supporting folders (IMAP, NNTP), .messageSize is
+	 * the size of the original message on the server.
+	 * For Local folders, this is the exact size of the message as written to
+	 * the msgStore.
+	 * See also Bug 1764857.
+	 */
+	messageSize: number;
+	lineCount: number;
+	/**
+	 * The offset into the local folder/offline store of the message. This
+	 * will be pluggable store-dependent, e.g., for mail dir it should
+	 * always be 0.
+	 */
+	messageOffset: number;
+	/**
+	 * For "Offline" supporting folders (IMAP, NNTP): .offlineMessageSize is
+	 * the exact size of the local copy of the message in the msgStore.
+	 * If the message is not flagged Offline, this will be zero or unset.
+	 * For Local folders, this is unset or zero.
+	 * See also Bug 1764857.
+	 */
+	offlineMessageSize: number;
+	/* common headers */
+	// date: PRTime;
+	readonly dateInSeconds: number;
+	messageId: string;
+	ccList: string;
+	bccList: string;
+	author: string;
+	subject: string;
+	recipients: string;
+
+	/* anything below here still has to be fixed */
+	setReferences(references: string): void;
+	readonly numReferences: number;
+	getStringReference(refNum: number): string;
+
+	readonly mime2DecodedAuthor: string;
+	readonly mime2DecodedSubject: string;
+	readonly mime2DecodedRecipients: string;
+
+	// Array<octet> getAuthorCollationKey();
+	// Array<octet> getSubjectCollationKey();
+	// Array<octet> getRecipientsCollationKey();
+
+	charset: string;
+
+	/**
+	 * Returns the effective character set for the message (@ref charset).
+	 * For NNTP, if there is no specific set defined for the message,
+	 * the character set of the server instead.
+	 */
+	readonly effectiveCharset: string;
+
+	accountKey: string;
+	readonly folder: nsIMsgFolder;
+
+	/// Array of names of all database properties in the header.
+	readonly properties: Array<string>;
+}
+
+declare class nsIMsgCopyServiceListener extends nsISupports {
+}
+
+declare class nsIMsgWindow extends nsISupports {
+}
+
+declare interface nsIMsgFilterCustomAction {
+	id: string
+	name: string
+	allowDuplicates: boolean
+	isAsync: boolean
+	needsBody: boolean
+	isValidForType(type: nsMsgFilterTypeType, scope: nsMsgSearchScopeValue): boolean
+	validateActionValue(actionValue: string, actionFolder: nsIMsgFolder, filterType: nsMsgFilterTypeType): string
+	applyAction(
+		msgHdrs: Array<nsIMsgDBHdr>,
+		actionValue: string,
+		copyListener: nsIMsgCopyServiceListener,
+		filterType: nsMsgFilterTypeType,
+		msgWindow: nsIMsgWindow
+	): void
+}
+
+declare class nsIMsgFilterService extends nsISupports {
+	getCustomAction(id: string): nsIMsgFilterCustomAction;
+	addCustomAction(aAction: nsIMsgFilterCustomAction): void;
+}
+
 declare interface MailServices
 {
 	accounts: MailServicesAccounts;
-	filters: any;
+	filters: nsIMsgFilterService;
 }
 
 //https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/Add-on_Manager/Addon
