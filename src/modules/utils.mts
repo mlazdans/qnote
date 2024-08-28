@@ -24,8 +24,6 @@ var QDEB = true;
 // var Prefs = new Preferences;
 //
 
-var _ = browser.i18n.getMessage;
-
 // export interface Preferences {
 // 	useTag: boolean,
 // 	tagName: string,
@@ -132,19 +130,19 @@ var _ = browser.i18n.getMessage;
 // 	return p;
 // }
 
-function getProperty<T, K extends keyof T>(obj: T, key: K) {
+export function getProperty<T, K extends keyof T>(obj: T, key: K) {
 	return obj[key];
 }
 
-function setProperty<T, K extends keyof T>(obj: T, key: K, value: T[K]) {
+export function setProperty<T, K extends keyof T>(obj: T, key: K, value: T[K]) {
 	obj[key] = value;
 }
 
-function getPropertyType<T, K extends keyof T>(obj: T, key: K) {
+export function getPropertyType<T, K extends keyof T>(obj: T, key: K) {
 	return typeof obj[key];
 }
 
-async function isPrefsEmpty(): Promise<boolean> {
+export async function isPrefsEmpty(): Promise<boolean> {
 	let p = new Preferences;
 	let k: keyof typeof p;
 
@@ -158,7 +156,7 @@ async function isPrefsEmpty(): Promise<boolean> {
 	return true;
 }
 
-async function getPrefs(){
+export async function getPrefs(){
 	let p = new Preferences;
 	let k: keyof typeof p;
 
@@ -199,41 +197,6 @@ async function saveSinglePref(k: keyof Preferences, v: any) {
 	});
 }
 
-async function importQNotes(notes: Array<NoteData>, overwrite = false){
-	let stats = {
-		err: 0,
-		exist: 0,
-		imported: 0,
-		overwritten: 0
-	};
-
-	for (const note of notes) {
-		let yn = new QNote(note.keyId);
-
-		await yn.load();
-
-		let exists = yn.data.exists;
-
-		if(exists && !overwrite){
-			stats.exist++;
-		} else {
-			yn.set(note);
-			await yn.save().then(() => {
-				stats[exists ? "overwritten" : "imported"]++;
-			}).catch(e => {
-				console.error(_("error.saving.note"), e.message, yn.data.keyId);
-				stats.err++;
-			});
-		}
-	}
-
-	return stats;
-}
-
-async function importFolderNotes(root: string, overwrite = false){
-	return loadAllFolderNotes(root).then(notes => importQNotes(notes, overwrite));
-}
-
 async function isReadable(path: string){
 	return await browser.legacy.isReadable(path);
 }
@@ -242,11 +205,11 @@ async function isFolderReadable(path: string){
 	return await browser.legacy.isFolderReadable(path);
 }
 
-async function isFolderWritable(path: string){
+export async function isFolderWritable(path: string){
 	return await browser.legacy.isFolderWritable(path);
 }
 
-async function getXNoteStoragePath(): Promise<string> {
+export async function getXNoteStoragePath(): Promise<string> {
 	let xnotePrefs = await browser.xnote.getPrefs();
 
 	if(xnotePrefs.storage_path){
@@ -262,67 +225,6 @@ async function getXNoteStoragePath(): Promise<string> {
 	}
 
 	return await browser.xnote.getStoragePath();
-}
-
-async function createQNoteStoragePath(){
-	return browser.qapp.createStoragePath();
-}
-
-export async function loadPrefsWithDefaults() {
-	let p = await getPrefs();
-	let isEmpty = await isPrefsEmpty();
-	// let defaultPrefs = getDefaultPrefs();
-	// let isEmptyPrefs = Object.keys(p).length === 0;
-
-	// Check for xnote settings if no settings at all
-	// if(isEmptyPrefs){
-	// 	let l = xnotePrefsMapper(await browser.xnote.getPrefs());
-	// 	for(let k in defaultPrefs){
-	// 		if(l[k] === undefined){
-	// 			p[k] = defaultPrefs[k];
-	// 		} else {
-	// 			p[k] = l[k];
-	// 		}
-	// 	}
-	// }
-
-	// Apply defaults
-	// for(let k in defaultPrefs){
-	// 	if(p[k] === undefined){
-	// 		p[k] = defaultPrefs[k];
-	// 	}
-	// }
-
-	if(p.tagName){
-		p.tagName = p.tagName.toLowerCase();
-	}
-
-	if(isEmpty){
-		// If XNote++ storage_path is set and readable, then use it
-		// else check if XNote folder exists inside profile directory
-		let path = await getXNoteStoragePath();
-
-		if(await isFolderWritable(path)){
-			p.storageOption = 'folder';
-			p.storageFolder = path;
-		} else {
-			path = await createQNoteStoragePath();
-			if(await isFolderWritable(path)){
-				p.storageOption = 'folder';
-				p.storageFolder = path;
-			} else {
-				browser.legacy.alert(_("could.not.initialize.storage.folder"));
-				p.storageOption = 'ext';
-			}
-		}
-	}
-
-	// Override old default "yyyy-mm-dd - HH:MM"
-	if(p.dateFormat === "yyyy-mm-dd - HH:MM"){
-		p.dateFormat = 'Y-m-d H:i';
-	}
-
-	return p;
 }
 
 // async function reloadExtension(){
@@ -389,10 +291,8 @@ export async function getCurrentWindowIdAnd(): Promise<number> {
 export async function mpUpdateForNote(note: NoteData){
 	// Marks icons active
 	updateIcons(note.exists);
-
-	// Send updated note down to qapp
-	updateNoteView(note);
-
+	browser.qapp.saveNoteCache(note);
+	browser.qapp.updateColumsView();
 	getCurrentWindowIdAnd().then(windowId => browser.qapp.attachNoteToMessage(windowId, note));
 }
 
@@ -492,19 +392,16 @@ async function getWindowActiveTab(windowId: number){
 // 	});
 // }
 
-function updateNoteView(note?: NoteData){
-	if(note){
-		sendNoteToQApp(note).then(() => {
-			getCurrentWindowIdAnd().then(windowId => browser.qapp.updateView(windowId, note.keyId));
-		});
-	} else {
-		getCurrentWindowIdAnd().then(windowId => browser.qapp.updateView(windowId));
-	}
-}
-
-export async function confirmDelete(shouldConfirm: boolean): Promise<boolean> {
-	return shouldConfirm ? await browser.legacy.confirm(_("delete.note"), _("are.you.sure")) : true;
-}
+// NOTE: current ThreadPaneColumns implementation does not allow updating single row anyways
+// function updateNoteView(note?: NoteData){
+// 	if(note){
+// 		sendNoteToQApp(note).then(() => {
+// 			getCurrentWindowIdAnd().then(windowId => browser.qapp.updateView(windowId, note.keyId));
+// 		});
+// 	} else {
+// 		getCurrentWindowIdAnd().then(windowId => browser.qapp.updateView(windowId));
+// 	}
+// }
 
 export async function focusMessagePane(windowId: number){
 	return browser.qapp.messagePaneFocus(windowId);
@@ -622,10 +519,6 @@ export async function loadAllFolderNotes(folder: string): Promise<Array<NoteData
 // 		}
 // 	});
 // }
-
-function sendNoteToQApp(note: NoteData){
-	return browser.qapp.saveNoteCache(note);
-}
 
 // TODO:
 // /**
