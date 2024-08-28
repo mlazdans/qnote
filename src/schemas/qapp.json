@@ -122,20 +122,11 @@
 		"async": true,
 		"parameters": []
 	},{
-		"name": "updateView",
+		"name": "updateColumsView",
 		"type": "function",
 		"description": "",
 		"async": true,
-		"parameters": [{
-			"name": "windowId",
-			"type": "integer",
-			"description": "windowId from windows API"
-		},{
-			"name": "keyId",
-			"optional": true,
-			"type": "string",
-			"description": ""
-		}]
+		"parameters": []
 	},{
 		"name": "attachNoteToMessage",
 		"type": "function",

@@ -3,18 +3,18 @@ Copyright 2019 Brummolix (AutoarchiveReloaded, https://github.com/Brummolix/Auto
 
  This file is part of AutoarchiveReloaded.
 
-    AutoarchiveReloaded is free software: you can redistribute it and/or modify
-    it under the terms of the GNU General Public License as published by
-    the Free Software Foundation, either version 3 of the License, or
-    (at your option) any later version.
+	AutoarchiveReloaded is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
 
-    AutoarchiveReloaded is distributed in the hope that it will be useful,
-    but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-    GNU General Public License for more details.
+	AutoarchiveReloaded is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
 
-    You should have received a copy of the GNU General Public License
-    along with AutoarchiveReloaded.  If not, see <http://www.gnu.org/licenses/>.
+	You should have received a copy of the GNU General Public License
+	along with AutoarchiveReloaded.  If not, see <http://www.gnu.org/licenses/>.
 */
 
 //Attention this file should have NO global imports! Only local imports like import("./something").type are allowed
@@ -62,6 +62,7 @@ type XNoteFilePath = "resource://qnote/modules-exp/XNoteFile.mjs";
 type FileUtilsPath = "resource://gre/modules/FileUtils.jsm";
 type ServicesPath = "resource://gre/modules/Services.jsm";
 type ExtensionUtilsPath = "resource://gre/modules/ExtensionUtils.jsm";
+type QCustomTermPath = "resource://qnote/modules-exp/QCustomTerm.mjs";
 
 interface QEventDispatcherExport {
 	QEventDispatcher: typeof import("../modules/QEventDispatcher.mjs").QEventDispatcher;
@@ -77,6 +78,18 @@ interface DOMLocalizatorExport {
 
 interface QCacheExport {
 	QCache: typeof import("../modules/QCache.mts").QCache;
+}
+
+interface QNoteFileExports {
+	QNoteFile: typeof import("../modules-exp/QNoteFile.mts").QNoteFile;
+}
+
+interface XNoteFileExports {
+	XNoteFile: typeof import("../modules-exp/XNoteFile.mts").XNoteFile;
+}
+
+interface QCustomTermPathExports {
+	QCustomTerm: typeof import("../modules-exp/QCustomTerm.mts").QCustomTerm;
 }
 
 // interface FileUtilsExport {
@@ -95,10 +108,13 @@ interface ExtensionParentFire {
 interface Extension {
 	windowManager: WindowManager
 	localizeMessage(name: string): string
+	rootURI: any
+	baseURI: Ci.nsIURI
+	getURL(url: string): string
 }
 
 declare class GlobalManager {
-	getExtension(name: string): Extension;
+	getExtension(extensionId: string): Extension;
 }
 
 interface ExtensionParent {
@@ -131,48 +147,48 @@ interface ExtensionParentExport {
 // }
 
 declare class BP {
-    static for(extension: any, window: any): any;
-    constructor(extension: string, viewNode: any, popupURL: string, browserStyle: any, fixedWidth?: boolean, blockParser?: boolean);
-    extension: any;
-    popupURL: any;
-    viewNode: any;
-    browserStyle: any;
-    window: Window;
-    destroyed: boolean;
-    fixedWidth: boolean;
-    blockParser: boolean;
-    contentReady: any;
-    _resolveContentReady: any;
-    browser: any;
-    browserLoaded: any;
-    browserLoadedDeferred: {
-        resolve: any;
-        reject: any;
-    };
-    browserReady: any;
-    close(): void;
-    destroy(): any;
-    stack: any;
-    destroyBrowser(browser: any, finalize?: boolean): void;
-    receiveMessage({ name, data }: {
-        name: any;
-        data: any;
-    }): void;
-    get DESTROY_EVENT(): void;
-    get STYLESHEETS(): string[];
-    get panel(): any;
-    dimensions: any;
-    handleEvent(event: any): void;
-    createBrowser(viewNode: any, popupURL?: any): any;
-    unblockParser(): void;
-    resizeBrowser({ width, height, detail }: {
-        width: any;
-        height: any;
-        detail: any;
-    }): void;
-    lastCalculatedInViewHeight: number;
-    setBackground(background: any): void;
-    background: any;
+	static for(extension: any, window: any): any;
+	constructor(extension: string, viewNode: any, popupURL: string, browserStyle: any, fixedWidth?: boolean, blockParser?: boolean);
+	extension: any;
+	popupURL: any;
+	viewNode: any;
+	browserStyle: any;
+	window: Window;
+	destroyed: boolean;
+	fixedWidth: boolean;
+	blockParser: boolean;
+	contentReady: any;
+	_resolveContentReady: any;
+	browser: any;
+	browserLoaded: any;
+	browserLoadedDeferred: {
+		resolve: any;
+		reject: any;
+	};
+	browserReady: any;
+	close(): void;
+	destroy(): any;
+	stack: any;
+	destroyBrowser(browser: any, finalize?: boolean): void;
+	receiveMessage({ name, data }: {
+		name: any;
+		data: any;
+	}): void;
+	get DESTROY_EVENT(): void;
+	get STYLESHEETS(): string[];
+	get panel(): any;
+	dimensions: any;
+	handleEvent(event: any): void;
+	createBrowser(viewNode: any, popupURL?: any): any;
+	unblockParser(): void;
+	resizeBrowser({ width, height, detail }: {
+		width: any;
+		height: any;
+		detail: any;
+	}): void;
+	lastCalculatedInViewHeight: number;
+	setBackground(background: any): void;
+	background: any;
 }
 
 interface BasePopupExport {
@@ -200,10 +216,11 @@ declare namespace Components
 		public static importESModule(path: QCachePath): QCacheExport;
 		public static importESModule(path: ThreadPaneColumnsPath): any;
 		public static importESModule(path: ThreadPaneColumnsOldPath): any;
-		public static importESModule(path: QNoteFilePath): any;
-		public static importESModule(path: XNoteFilePath): any;
+		public static importESModule(path: QNoteFilePath): QNoteFileExports;
+		public static importESModule(path: XNoteFilePath): XNoteFileExports;
 		public static importESModule(path: FileUtilsPath): any;
 		public static importESModule(path: ServicesPath): any;
+		public static importESModule(path: QCustomTermPath): QCustomTermPathExports;
 		// public static importESModule(path: ExtensionPopupsSysPath): BasePopupExport;
 		// public static importESModule(path: string): any;
 		public static unload(path: string): void;
@@ -284,6 +301,19 @@ declare namespace Components
 		}
 
 		class nsIDocShell extends nsIDocShellTreeItem {
+		}
+
+		class nsIStyleSheetService extends nsISupports {
+			readonly AGENT_SHEET = 0
+			readonly USER_SHEET = 1
+			readonly AUTHOR_SHEET = 2
+			sheetRegistered(sheetURI: nsIURI, type: number): boolean
+			unregisterSheet(sheetURI: nsIURI, type: number): void;
+			loadAndRegisterSheet(sheetURI: nsIURI, type: number): void;
+		}
+
+		class nsIIOService extends nsISupports {
+			newURI(aSin: string, aOriginCharset?: string | null, aBaseURI?: nsIURI | null): nsIURI;
 		}
 
 		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIDOMWindow
@@ -440,8 +470,8 @@ declare namespace Components
 			onSearchDone(status: number): void;
 
 			/*
-             * called when a new search begins
-             */
+			 * called when a new search begins
+			 */
 			onNewSearch(): void;
 		}
 
@@ -454,21 +484,14 @@ declare namespace Components
 			flush(): void;
 		}
 
-		class nsIFile
-		{
-
+		class nsIFile extends nsISupports {
+			static readonly NORMAL_FILE_TYPE = 0;
+			static readonly DIRECTORY_TYPE   = 1;
 		}
 
-		class nsIURI
-		{
-
+		class nsIURI extends nsISupports {
+			resolve(relativePath: string): string;
 		}
-
-
-		// class nsIOutputStream
-		// {
-
-		// }
 
 		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIStringBundleService
 		class nsIStringBundleService
@@ -604,22 +627,22 @@ import Ci = Components.interfaces;
 declare class FileUtils
 {
 	File: any
-    MODE_RDONLY: number
-    MODE_WRONLY: number
-    MODE_RDWR: number
-    MODE_CREATE: number
-    MODE_APPEND: number
-    MODE_TRUNCATE: number
-    PERMS_FILE: number
-    PERMS_DIRECTORY: number
+	MODE_RDONLY: number
+	MODE_WRONLY: number
+	MODE_RDWR: number
+	MODE_CREATE: number
+	MODE_APPEND: number
+	MODE_TRUNCATE: number
+	PERMS_FILE: number
+	PERMS_DIRECTORY: number
 	public static getFile(key: string, pathArray: string[], followLinks?: boolean): Ci.nsIFile
-    getDir(key: any, pathArray: any): any;
-    openFileOutputStream(file: any, modeFlags: any): any;
-    openAtomicFileOutputStream(file: any, modeFlags: any): any;
-    openSafeFileOutputStream(file: any, modeFlags: any): any;
-    _initFileOutputStream(fos: any, file: any, modeFlags: any): any;
-    closeAtomicFileOutputStream(stream: any): void;
-    closeSafeFileOutputStream(stream: any): void;
+	getDir(key: any, pathArray: any): any;
+	openFileOutputStream(file: any, modeFlags: any): any;
+	openAtomicFileOutputStream(file: any, modeFlags: any): any;
+	openSafeFileOutputStream(file: any, modeFlags: any): any;
+	_initFileOutputStream(fos: any, file: any, modeFlags: any): any;
+	closeAtomicFileOutputStream(stream: any): void;
+	closeSafeFileOutputStream(stream: any): void;
 }
 
 //https://developer.mozilla.org/en-US/docs/Mozilla/Tech/Toolkit_API/extIApplication
@@ -732,23 +755,31 @@ declare class nsIObserver
 
 }
 
-//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIWindowWatcher
-declare interface nsIWindowWatcher
-{
+declare interface nsIWindowWatcher {
+	unregisterNotification(aObserver: nsIObserver): void;
 	registerNotification(observer: nsIObserver): void;
 }
 
 //https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/Services.jsm
 declare namespace Services
 {
-	let clipboard: Components.interfaces.nsIClipboard;
+	let clipboard: Ci.nsIClipboard;
 	let ww: nsIWindowWatcher;
 	let wm: Ci.nsIWindowMediator;
 	let prefs: any;
+	let scriptloader: any;
+	let io: Components.interfaces.nsIIOService // Cu.nsIIOService & nsINetUtil & nsISpeculativeConnect
 }
 
 declare namespace ExtensionCommon
 {
+	interface Fire {
+		wakeup: Function
+		sync: Function
+		async: Function
+		raw: Function
+	}
+
 	abstract class  ExtensionAPI
 	{
 		public abstract getAPI(context: any): {};

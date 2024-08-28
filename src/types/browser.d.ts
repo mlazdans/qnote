@@ -17,6 +17,7 @@ declare global {
 
 	class MozWindow extends Window {
 		gTabmail: any;
+		gFolderDisplay: any;
 		document: XULDocument;
 		MutationObserver: typeof MutationObserver;
 	}
@@ -49,7 +50,7 @@ declare global {
 			export const onNoteRequest: WebExtEvent<(keyId: string) => void>;
 			export const onKeyDown: WebExtEvent<(e: KeyboardEvent) => void>;
 			function createStoragePath(): Promise<string>;
-			function updateView(windowId: number, keyId?: string): Promise<void>;
+			function updateColumsView(): Promise<void>;
 			function init(): Promise<void>;
 			function setDebug(on: boolean): Promise<void>;
 			function messagePaneFocus(windowId: number): Promise<void>;
