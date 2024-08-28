@@ -6,7 +6,10 @@ import { QPopupOptions, QPopupOptionsPartial } from '../modules/XULNoteWindow.mt
 export {}
 
 declare global {
-	// ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs")
+	class AString {
+		length?: number | null
+		value?: string | null
+	}
 
 	class XULDocument extends Document{
 		createXULElement(name: string): Element;

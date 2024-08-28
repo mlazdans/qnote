@@ -268,6 +268,13 @@ declare namespace Components
 		type nsILoadContext = any; // TODO: ?
 		class nsITransferable extends nsISupports {
 			init(aContext: nsILoadContext): void
+			addDataFlavor(aDataFlavor: string): void;
+			getAnyTransferData(aFlavor: AString, aData: any): void;
+			setTransferData(aFlavor: string, aData: any): void;
+		}
+
+		class nsISupportsString {
+			data: any
 		}
 
 		class nsIWebNavigation extends nsISupports {
@@ -284,6 +291,33 @@ declare namespace Components
 		{
 			docShell: nsIDocShell
 		}
+
+		class nsIClipboardOwner extends nsISupports {
+		}
+
+		class nsIClipboard extends nsISupports {
+			static readonly kSelectionClipboard = 0;
+			static readonly kGlobalClipboard = 1;
+			static readonly kFindClipboard = 2;
+			static readonly kSelectionCache = 3;
+
+			getData(aTransferable: nsITransferable, aWhichClipboard: number): void;
+			setData (aTransferable: nsITransferable, anOwner: nsIClipboardOwner | null, aWhichClipboard: number): void;
+		}
+
+		class nsIUnicharOutputStream extends nsISupports {
+			write(aCount: number): boolean;
+			writeString(str: AString): boolean;
+			close(): void;
+			flush(): void;
+		}
+
+		class nsIConverterOutputStream extends nsIUnicharOutputStream {
+			// public init(stream: nsIOutputStream, charset: string, bufferSize: number, replacementCharacter: number): void;
+			init(aOutStream: nsIFileOutputStream, aCharset: string): void;
+			// public writeString(str: string): boolean;
+		}
+
 
 		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIPromptService
 		class nsIPromptService
@@ -430,14 +464,6 @@ declare namespace Components
 
 		}
 
-		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIConverterOutputStream
-		//https://dxr.mozilla.org/comm-central/source/obj-x86_64-pc-linux-gnu/dist/include/nsIUnicharOutputStream.h?q=nsIUnicharOutputStream&redirect_type=direct#27
-		class nsIConverterOutputStream
-		{
-			public init(stream: nsIOutputStream, charset: string, bufferSize: number, replacementCharacter: number): void;
-			public writeString(str: string): boolean;
-			public close(): void;
-		}
 
 		// class nsIOutputStream
 		// {
@@ -715,6 +741,7 @@ declare interface nsIWindowWatcher
 //https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/Services.jsm
 declare namespace Services
 {
+	let clipboard: Components.interfaces.nsIClipboard;
 	let ww: nsIWindowWatcher;
 	let wm: Ci.nsIWindowMediator;
 	let prefs: any;
