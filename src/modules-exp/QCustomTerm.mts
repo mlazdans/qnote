@@ -8,10 +8,9 @@ var { XNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/XNo
 // TODO: try brind all calls to options.API
 // TODO: scopes
 export interface QCustomTermOptions {
-	QDEB: boolean
 	API: QApp
-	w: MozWindow
-	name: string
+	QDEB: boolean
+	name?: string
 }
 
 export class QCustomTerm {
@@ -20,8 +19,8 @@ export class QCustomTerm {
 	needsBody: boolean = false
 	ops: Array<Ci.nsMsgSearchOp>
 	API: QApp
-	QN: typeof XNoteFile
-	XN: typeof XNoteFile
+	QN
+	XN
 	constructor(options: QCustomTermOptions) {
 		this.id = 'qnote@dqdp.net#qnoteText';
 		this.name = options.name || "QNote";
@@ -53,45 +52,54 @@ export class QCustomTerm {
 
 		return this.ops;
 	}
-	match(msgHdr: any, searchValue: string, searchOp: Ci.nsMsgSearchOp) {
-		let notesRoot = this.API.getStorageFolder();
+	match(msgHdr: any, searchValue: string, searchOp: Ci.nsMsgSearchOp): boolean {
+		const notesRoot = this.API.getStorageFolder();
 
 		if(!notesRoot){
 			return false;
 		}
 
-		let note;
+		var note;
 		try {
 			note = this.QN.load(notesRoot, msgHdr.messageId);
 			if(!note){
 				note = this.XN.load(notesRoot, msgHdr.messageId);
 			}
-		} catch(e) { }
+		} catch(e) {
+			return false;
+		}
 
-		let keyw = searchValue.toLowerCase();
+		if(!note || note.exists){
+			return false;
+		}
+
+		const keyw = searchValue.toLowerCase();
+		const text = note.text ? note.text.toLowerCase() : "";
 
 		if(searchOp == Ci.nsMsgSearchOp.Contains){
-			return note && (!keyw || (note.text.toLowerCase().search(keyw) >= 0));
+			return !keyw || (text.search(keyw) >= 0);
 		}
 
 		if(searchOp == Ci.nsMsgSearchOp.DoesntContain){
-			return (!note && !keyw) || (note && keyw && (note.text.toLowerCase().search(keyw) == -1));
+			return !keyw || (text.search(keyw) == -1);
 		}
 
 		if(searchOp == Ci.nsMsgSearchOp.Is){
-			return note && note.text.toLowerCase() == keyw;
+			return text == keyw;
 		}
 
 		if(searchOp == Ci.nsMsgSearchOp.Isnt){
-			return note && note.text.toLowerCase() != keyw;
+			return text != keyw;
 		}
 
 		if(searchOp == Ci.nsMsgSearchOp.BeginsWith){
-			return note && (!keyw || note.text.toLowerCase().startsWith(keyw));
+			return !keyw || text.startsWith(keyw);
 		}
 
 		if(searchOp == Ci.nsMsgSearchOp.EndsWith){
-			return note && (!keyw || note.text.toLowerCase().endsWith(keyw));
+			return !keyw || text.toLowerCase().endsWith(keyw);
 		}
+
+		return false;
 	}
 }
