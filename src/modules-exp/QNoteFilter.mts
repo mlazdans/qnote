@@ -3,26 +3,21 @@ var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionPa
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
 
-export interface QNoteFilterOptions {
-	API: QApp
-}
-
 // Current problems:
 // 1) match() does not expect promises
 // 2) we can addCustomTerm() but can not remove it
-export class QNoteFilter {
-	options: QNoteFilterOptions;
-	qfQnoteDomId = 'qfb-qs-qnote'
-	Services: any;
+export class QNoteFilter
+{
+	storageFolder: string | undefined // TODO: sync after prefs change
+	ed
+	// qfQnoteDomId = 'qfb-qs-qnote'
 	// QuickFilterManager: any;
-	ed;
 
-	constructor(options: QNoteFilterOptions) {
+	constructor(storageFolder?: string) {
+		this.storageFolder = storageFolder;
 		this.ed = new QEventDispatcher(["uninstall"]);
 		// this.Services = globalThis.Services || ChromeUtils.import("resource://gre/modules/Services.jsm").Services;
 		// this.QuickFilterManager = QuickFilterManager;
-
-		this.options = options;
 
 		// let NoteQF = {
 		// 	name: "qnote",
@@ -303,7 +298,6 @@ export class QNoteFilter {
 	// }
 
 	searchDialogHandler(aSubject: MozWindow, document: Document){
-		const API = this.options.API;
 		const applyInputs = (box: any) => {
 			if(!box.attributes || !box.attributes.searchAttribute || (box.attributes.searchAttribute.value !== "qnote@dqdp.net#qnoteText")){
 				return;
@@ -318,7 +312,7 @@ export class QNoteFilter {
 			// 	return;
 			// }
 
-			if(!API.getStorageFolder()){
+			if(!this.storageFolder){
 				let textbox = document.createElementNS("http://www.w3.org/1999/xhtml", "span") as HTMLSpanElement;
 				if(textbox){
 					textbox.textContent = extension.localizeMessage("filters.unavailable");
@@ -344,7 +338,7 @@ export class QNoteFilter {
 				return;
 			}
 
-			// NOTE: please contact me if you know more clear way to attach text field to search/filter dialogs
+			// NOTE: please contact me if you know more cleaner way to attach text field to search/filter dialogs
 
 			// console.log(box.getAttribute("disabled"), box.getAttribute("value"), box.attributes.searchAttribute, box.attributes.searchAttribute.value === "qnote@dqdp.net#qnoteText", box);
 			// let textbox = aSubject.MozXULElement.parseXULToFragment(`<html:input class="input-inline search-value-input" inherits="disabled" />`);

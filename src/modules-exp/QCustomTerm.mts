@@ -7,23 +7,19 @@ var { XNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/XNo
 
 // TODO: try brind all calls to options.API
 // TODO: scopes
-export interface QCustomTermOptions {
-	API: QApp
-	QDEB: boolean
-	name?: string
-}
-
-export class QCustomTerm {
+export class QCustomTerm implements Ci.nsIMsgSearchCustomTerm {
 	id: string
 	name: string
 	needsBody: boolean = false
-	ops: Array<Ci.nsMsgSearchOp>
-	API: QApp
+	ops: Array<Ci.nsMsgSearchOpValue>
 	QN
 	XN
-	constructor(options: QCustomTermOptions) {
+	storageFolder: string | undefined // TODO: sync after prefs change
+
+	constructor(storageFolder?: string) {
 		this.id = 'qnote@dqdp.net#qnoteText';
-		this.name = options.name || "QNote";
+		this.name = "QNote";
+		this.storageFolder = storageFolder;
 
 		this.ops = [
 			Ci.nsMsgSearchOp.Contains,
@@ -36,7 +32,6 @@ export class QCustomTerm {
 
 		this.QN = new QNoteFile;
 		this.XN = new XNoteFile;
-		this.API = options.API;
 	}
 
 	getEnabled(scope: any, op: any) {
@@ -45,15 +40,11 @@ export class QCustomTerm {
 	getAvailable(scope: any, op: any) {
 		return true;
 	}
-	getAvailableOperators(scope: any, length: any) {
-		if(length){
-			length.value = this.ops.length;
-		}
-
+	getAvailableOperators(scope: nsMsgSearchScopeValue) {
 		return this.ops;
 	}
-	match(msgHdr: any, searchValue: string, searchOp: Ci.nsMsgSearchOp): boolean {
-		const notesRoot = this.API.getStorageFolder();
+	match(msgHdr: nsIMsgDBHdr, searchValue: string, searchOp: Ci.nsMsgSearchOpValue): boolean {
+		const notesRoot = this.storageFolder;
 
 		if(!notesRoot){
 			return false;

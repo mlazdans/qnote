@@ -28,7 +28,7 @@ export class QCache {
 	}
 
 	// We will sync return if cache found or async and call provider
-	get(id: KeyId, listener: Listener): NoteData | undefined {
+	get(id: KeyId, listener?: Listener): NoteData | undefined {
 		if(this.cache.has(id)){
 			return this.cache.get(id);
 		}

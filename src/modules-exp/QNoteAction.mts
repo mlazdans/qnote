@@ -3,41 +3,41 @@
 //   "resource://gre/modules/Services.jsm"
 // ).Services;
 
+import { QCache } from "modules/QCache.mjs";
+
 var { NoteData } = ChromeUtils.importESModule("resource://qnote/modules/Note.mjs");
 var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
+var { ThreadPaneColumns } = ChromeUtils.importESModule("chrome://messenger/content/ThreadPaneColumns.mjs");
+
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
-export interface QNoteActionOptions {
-	API: QApp
-	QDEB: boolean
-}
+export class QNoteAction
+{
+	storageFolder: string | undefined // TODO: sync after prefs change
+	noteGrabber: QCache
+	ruleMap: Map<string, string>
 
-export class QNoteAction {
-	API
-	ruleMap: Map<string, string>;
-	Services
-
-	constructor(options: QNoteActionOptions) {
+	constructor(noteGrabber: QCache, storageFolder?: string) {
+		this.noteGrabber = noteGrabber;
+		this.storageFolder = storageFolder;
 		this.ruleMap = new Map;
-		this.Services = Services;
-		this.API = options.API;
 
 		// Add
-		var caAdd = new QCustomAddAction();
+		var caAdd = new QCustomAddAction(noteGrabber, storageFolder);
 		if(caAdd.install()){
 			this.ruleMap.set(caAdd.id, "qnote-ruleactiontarget-add");
 		}
 
 		// Update
-		var caUpdate = new QCustomUpdateAction();
+		var caUpdate = new QCustomUpdateAction(noteGrabber, storageFolder);
 		if(caUpdate.install()){
 			this.ruleMap.set(caUpdate.id, "qnote-ruleactiontarget-update");
 		}
 
 		// Delete
-		let caDelete = new QCustomDeleteAction()
+		let caDelete = new QCustomDeleteAction(noteGrabber, storageFolder);
 		if(caDelete.install()){
 			this.ruleMap.set(caDelete.id, "qnote-ruleactiontarget-delete");
 		}
@@ -69,7 +69,7 @@ export class QNoteAction {
 			wrapper.prototype._QNoteAddAction = true;
 		})();
 
-		const updateParentNode = (parentNode: HTMLElement) => {
+		const updateParentNode = (parentNode: any) => {
 			if (parentNode.hasAttribute("initialActionIndex")) {
 				let actionIndex = parentNode.getAttribute("initialActionIndex");
 				let filterAction = aSubject.gFilter.getActionAt(actionIndex);
@@ -80,9 +80,10 @@ export class QNoteAction {
 
 		// TODO: should find a better way processing these classes below
 		// They depend on window.MozXULElement (aSubject)
-		class atQNote extends aSubject.MozXULElement {
+		abstract class atQNote extends aSubject.MozXULElement {
+			abstract _connectedCallback(): void
 			connectedCallback() {
-				if(Action.API.getStorageFolder()){
+				if(Action.storageFolder){
 					if(this._connectedCallback){
 						this._connectedCallback();
 					}
@@ -94,7 +95,8 @@ export class QNoteAction {
 					textbox.style.verticalAlign = "middle";
 					this.appendChild(textbox);
 				}
-				updateParentNode(this.closest(".ruleaction"));
+				const el = this.closest(".ruleaction") as HTMLElement;
+				if(el)updateParentNode(el);
 			}
 		}
 		class actiontargetQNoteAdd extends atQNote {
@@ -113,7 +115,9 @@ export class QNoteAction {
 				this.classList.add("input-container");
 				this.classList.add("textbox-input");
 				this.appendChild(input);
-				updateParentNode(this.closest(".ruleaction"));
+
+				const el = this.closest(".ruleaction") as HTMLElement;
+				if(el)updateParentNode(el);
 			}
 		}
 		class actiontargetQNoteDelete extends atQNote {
@@ -121,19 +125,23 @@ export class QNoteAction {
 				// Add dummy child
 				const input = aSubject.document.createElementNS("http://www.w3.org/1999/xhtml", "span");
 				this.appendChild(input);
-				updateParentNode(this.closest(".ruleaction"));
+				const el = this.closest(".ruleaction") as HTMLElement;
+				if(el)updateParentNode(el);
 			}
 		}
 
 		if(!aSubject.customElements.get("qnote@dqdp.net#qnote-action-add")){
+			// @ts-ignore
 			aSubject.customElements.define("qnote-ruleactiontarget-add", actiontargetQNoteAdd);
 		}
 
 		if(!aSubject.customElements.get("qnote@dqdp.net#qnote-action-update")){
+			// @ts-ignore
 			aSubject.customElements.define("qnote-ruleactiontarget-update", actiontargetQNoteUpdate);
 		}
 
 		if(!aSubject.customElements.get("qnote@dqdp.net#qnote-action-delete")){
+			// @ts-ignore
 			aSubject.customElements.define("qnote-ruleactiontarget-delete", actiontargetQNoteDelete);
 		}
 	}
@@ -146,22 +154,22 @@ export class QNoteAction {
 	}
 }
 
-abstract class QCustomActionAbstract implements nsIMsgFilterCustomAction {
+abstract class QCustomActionAbstract implements nsIMsgFilterCustomAction
+{
 	id: string
 	name: string
 	allowDuplicates = false
 	isAsync = false
 	needsBody = false
 
-	private QN
-	private Services
+	storageFolder: string | undefined // TODO: sync after prefs change
+	noteGrabber: QCache
 
-	constructor(id: string, name: string) {
+	constructor(id: string, name: string, noteGrabber: QCache, storageFolder?: string) {
+		this.storageFolder = storageFolder;
+		this.noteGrabber = noteGrabber;
 		this.id = id;
 		this.name = name;
-		this.QN = new QNoteFile;
-		// this.API = options.API;
-		this.Services = Services;
 	}
 
 	isValidForType(type: nsMsgFilterTypeType, scope: nsMsgSearchScopeValue): boolean {
@@ -186,6 +194,10 @@ abstract class QCustomActionAbstract implements nsIMsgFilterCustomAction {
 		}
 		return true;
 	}
+
+	updateView(): void {
+		ThreadPaneColumns?.refreshCustomColumn("qnote");
+	}
 	// applyAction(msgHdrs: Array<nsIMsgDBHdr>, actionValue: string){
 	// 	this.apply(msgHdrs.map(m => {
 	// 		return m.messageId;
@@ -209,13 +221,14 @@ abstract class QCustomActionAbstract implements nsIMsgFilterCustomAction {
 	// }
 };
 
-class QCustomAddAction extends QCustomActionAbstract {
-	constructor() {
-		super('qnote@dqdp.net#qnote-action-add', 'Add QNote');
+class QCustomAddAction extends QCustomActionAbstract
+{
+	constructor(noteGrabber: QCache, storageFolder?: string) {
+		super('qnote@dqdp.net#qnote-action-add', 'Add QNote', noteGrabber, storageFolder);
 	}
 
 	applyAction(msgHdrs: Array<nsIMsgDBHdr>, actionValue: string, copyListener: nsIMsgCopyServiceListener, filterType: nsMsgFilterTypeType, msgWindow: nsIMsgWindow): void {
-		const notesRoot = this.API.getStorageFolder();
+		const notesRoot = this.storageFolder;
 
 		if(!actionValue || !notesRoot){
 			return;
@@ -232,20 +245,21 @@ class QCustomAddAction extends QCustomActionAbstract {
 
 			if(!QN.getExistingFile(notesRoot, keyId)){
 				QN.save(notesRoot, keyId, note);
-				this.API.noteGrabber.delete(keyId);
+				this.noteGrabber.delete(keyId);
 			}
 		});
-		this.API.updateView();
+		this.updateView();
 	}
 }
 
-class QCustomUpdateAction extends QCustomActionAbstract {
-	constructor() {
-		super('qnote@dqdp.net#qnote-action-update', 'Update QNote');
+class QCustomUpdateAction extends QCustomActionAbstract
+{
+	constructor(noteGrabber: QCache, storageFolder?: string) {
+		super('qnote@dqdp.net#qnote-action-update', 'Update QNote', noteGrabber, storageFolder);
 	}
 
 	applyAction(msgHdrs: Array<nsIMsgDBHdr>, actionValue: string, copyListener: nsIMsgCopyServiceListener, filterType: nsMsgFilterTypeType, msgWindow: nsIMsgWindow): void {
-		const notesRoot = this.API.getStorageFolder();
+		const notesRoot = this.storageFolder;
 
 		if(!actionValue || !notesRoot){
 			return;
@@ -261,15 +275,16 @@ class QCustomUpdateAction extends QCustomActionAbstract {
 			note.ts = ts;
 
 			QN.save(notesRoot, keyId, note);
-			this.API.noteGrabber.delete(keyId); // TODO: maybe update?
+			this.noteGrabber.delete(keyId); // TODO: maybe update?
 		});
-		this.API.updateView();
+		this.updateView();
 	}
 }
 
-class QCustomDeleteAction extends QCustomActionAbstract {
-	constructor() {
-		super('qnote@dqdp.net#qnote-action-delete', 'Delete QNote');
+class QCustomDeleteAction extends QCustomActionAbstract
+{
+	constructor(noteGrabber: QCache, storageFolder?: string) {
+		super('qnote@dqdp.net#qnote-action-delete', 'Delete QNote', noteGrabber, storageFolder);
 	}
 
 	validateActionValue() {
@@ -277,7 +292,7 @@ class QCustomDeleteAction extends QCustomActionAbstract {
 	}
 
 	applyAction(msgHdrs: Array<nsIMsgDBHdr>, actionValue: string, copyListener: nsIMsgCopyServiceListener, filterType: nsMsgFilterTypeType, msgWindow: nsIMsgWindow): void {
-		const notesRoot = this.API.getStorageFolder();
+		const notesRoot = this.storageFolder;
 
 		if(!notesRoot){
 			return;
@@ -286,8 +301,8 @@ class QCustomDeleteAction extends QCustomActionAbstract {
 		const QN = new QNoteFile;
 		msgHdrs.forEach(m => {
 			QN.delete(notesRoot, m.messageId);
-			this.API.noteGrabber.delete(m.messageId);
+			this.noteGrabber.delete(m.messageId);
 		});
-		this.API.updateView();
+		this.updateView();
 	}
 }
