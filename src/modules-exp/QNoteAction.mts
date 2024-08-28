@@ -1,62 +1,49 @@
-const Services = globalThis.Services || ChromeUtils.import(
-  "resource://gre/modules/Services.jsm"
-).Services;
+// TODO: localize
+// const Services = globalThis.Services || ChromeUtils.import(
+//   "resource://gre/modules/Services.jsm"
+// ).Services;
+
+var { NoteData } = ChromeUtils.importESModule("resource://qnote/modules/Note.mjs");
+var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
-var { QCustomActionAdd } = ChromeUtils.import("resource://qnote/modules-exp/QCustomActionAdd.js");
-var { QCustomActionUpdate } = ChromeUtils.import("resource://qnote/modules-exp/QCustomActionUpdate.js");
-var { QCustomActionDelete } = ChromeUtils.import("resource://qnote/modules-exp/QCustomActionDelete.js");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
-var EXPORTED_SYMBOLS = ["QNoteAction"];
+export interface QNoteActionOptions {
+	API: QApp
+	QDEB: boolean
+}
 
-class QNoteAction {
-	constructor(options) {
-		this.ruleMap = {};
+export class QNoteAction {
+	API
+	ruleMap: Map<string, string>;
+	Services
+
+	constructor(options: QNoteActionOptions) {
+		this.ruleMap = new Map;
 		this.Services = Services;
 		this.API = options.API;
 
 		// Add
-		let caAdd = new QCustomActionAdd({
-			name: 'Add QNote',
-			API: options.API
-		})
-
-		try {
-			MailServices.filters.getCustomAction(caAdd.id);
-		} catch (e) {
-			MailServices.filters.addCustomAction(caAdd);
+		var caAdd = new QCustomAddAction();
+		if(caAdd.install()){
+			this.ruleMap.set(caAdd.id, "qnote-ruleactiontarget-add");
 		}
-		this.ruleMap[caAdd.id] = caAdd.xulName;
 
 		// Update
-		let caUpdate = new QCustomActionUpdate({
-			name: 'Update QNote',
-			API: options.API
-		})
-
-		try {
-			MailServices.filters.getCustomAction(caUpdate.id);
-		} catch (e) {
-			MailServices.filters.addCustomAction(caUpdate);
+		var caUpdate = new QCustomUpdateAction();
+		if(caUpdate.install()){
+			this.ruleMap.set(caUpdate.id, "qnote-ruleactiontarget-update");
 		}
-		this.ruleMap[caUpdate.id] = caUpdate.xulName;
 
 		// Delete
-		let caDelete = new QCustomActionDelete({
-			name: 'Delete QNote',
-			API: options.API
-		})
-
-		try {
-			MailServices.filters.getCustomAction(caDelete.id);
-		} catch (e) {
-			MailServices.filters.addCustomAction(caDelete);
+		let caDelete = new QCustomDeleteAction()
+		if(caDelete.install()){
+			this.ruleMap.set(caDelete.id, "qnote-ruleactiontarget-delete");
 		}
-		this.ruleMap[caDelete.id] = caDelete.xulName;
 	}
 
-	filterEditorHandler(aSubject, document){
+	filterEditorHandler(aSubject: MozWindow, document: XULDocument){
 		let Action = this;
 
 		(function(){
@@ -67,9 +54,10 @@ class QNoteAction {
 				return;
 			}
 
-			wrapper.prototype._getChildNode = function(type) {
-				if(Action.ruleMap[type]){
-					return document.createXULElement(Action.ruleMap[type]);
+			wrapper.prototype._getChildNode = function(type: string) {
+				let name = Action.ruleMap.get(type);
+				if(name){
+					return document.createXULElement(name);
 				} else {
 					return _getChildNode(type);
 				}
@@ -81,7 +69,7 @@ class QNoteAction {
 			wrapper.prototype._QNoteAddAction = true;
 		})();
 
-		const updateParentNode = parentNode => {
+		const updateParentNode = (parentNode: HTMLElement) => {
 			if (parentNode.hasAttribute("initialActionIndex")) {
 				let actionIndex = parentNode.getAttribute("initialActionIndex");
 				let filterAction = aSubject.gFilter.getActionAt(actionIndex);
@@ -155,5 +143,151 @@ class QNoteAction {
 		// 	listener();
 		// }
 		// this.QuickFilterManager.killFilter("qnote");
+	}
+}
+
+abstract class QCustomActionAbstract implements nsIMsgFilterCustomAction {
+	id: string
+	name: string
+	allowDuplicates = false
+	isAsync = false
+	needsBody = false
+
+	private QN
+	private Services
+
+	constructor(id: string, name: string) {
+		this.id = id;
+		this.name = name;
+		this.QN = new QNoteFile;
+		// this.API = options.API;
+		this.Services = Services;
+	}
+
+	isValidForType(type: nsMsgFilterTypeType, scope: nsMsgSearchScopeValue): boolean {
+		return true;
+	}
+
+	validateActionValue(actionValue: string, actionFolder: nsIMsgFolder, filterType: nsMsgFilterTypeType): string {
+		if (actionValue) {
+			return "";
+		}
+
+		return "QNote text required";
+	}
+
+	abstract applyAction(msgHdrs: Array<nsIMsgDBHdr>, actionValue: string, copyListener: nsIMsgCopyServiceListener, filterType: nsMsgFilterTypeType, msgWindow: nsIMsgWindow): void;
+
+	install(): boolean {
+		try {
+			MailServices.filters.getCustomAction(this.id);
+		} catch (e) {
+			MailServices.filters.addCustomAction(this);
+		}
+		return true;
+	}
+	// applyAction(msgHdrs: Array<nsIMsgDBHdr>, actionValue: string){
+	// 	this.apply(msgHdrs.map(m => {
+	// 		return m.messageId;
+	// 	}), actionValue);
+	// }
+
+	// abstract apply(m: nsIMsgDBHdr);
+
+	// Compatibility with older TB
+	// apply(msgHdrs, actionValue, copyListener, filterType, msgWindow){
+	// 	let en = msgHdrs.enumerate();
+	// 	let keyIds = [];
+	// 	while (en.hasMoreElements()) {
+	// 		keyIds.push((en.getNext().QueryInterface(Ci.nsIMsgDBHdr)).messageId);
+	// 	};
+	// 	this._apply(keyIds, actionValue);
+	// }
+
+	// _apply(msgHdrs, actionValue){
+	// 	throw new Error('Must be implemented by subclass!');
+	// }
+};
+
+class QCustomAddAction extends QCustomActionAbstract {
+	constructor() {
+		super('qnote@dqdp.net#qnote-action-add', 'Add QNote');
+	}
+
+	applyAction(msgHdrs: Array<nsIMsgDBHdr>, actionValue: string, copyListener: nsIMsgCopyServiceListener, filterType: nsMsgFilterTypeType, msgWindow: nsIMsgWindow): void {
+		const notesRoot = this.API.getStorageFolder();
+
+		if(!actionValue || !notesRoot){
+			return;
+		}
+
+		const QN = new QNoteFile;
+		const ts = Date.now();
+		msgHdrs.forEach(m => {
+			const keyId = m.messageId;
+			const note = new NoteData(keyId);
+
+			note.text = actionValue;
+			note.ts = ts;
+
+			if(!QN.getExistingFile(notesRoot, keyId)){
+				QN.save(notesRoot, keyId, note);
+				this.API.noteGrabber.delete(keyId);
+			}
+		});
+		this.API.updateView();
+	}
+}
+
+class QCustomUpdateAction extends QCustomActionAbstract {
+	constructor() {
+		super('qnote@dqdp.net#qnote-action-update', 'Update QNote');
+	}
+
+	applyAction(msgHdrs: Array<nsIMsgDBHdr>, actionValue: string, copyListener: nsIMsgCopyServiceListener, filterType: nsMsgFilterTypeType, msgWindow: nsIMsgWindow): void {
+		const notesRoot = this.API.getStorageFolder();
+
+		if(!actionValue || !notesRoot){
+			return;
+		}
+
+		const QN = new QNoteFile;
+		let ts = Date.now();
+		msgHdrs.forEach(m => {
+			const keyId = m.messageId;
+			const note = new NoteData(keyId);
+
+			note.text = actionValue;
+			note.ts = ts;
+
+			QN.save(notesRoot, keyId, note);
+			this.API.noteGrabber.delete(keyId); // TODO: maybe update?
+		});
+		this.API.updateView();
+	}
+}
+
+class QCustomDeleteAction extends QCustomActionAbstract {
+	constructor() {
+		super('qnote@dqdp.net#qnote-action-delete', 'Delete QNote');
+	}
+
+	validateActionValue() {
+		return "";
+	}
+
+	applyAction(msgHdrs: Array<nsIMsgDBHdr>, actionValue: string, copyListener: nsIMsgCopyServiceListener, filterType: nsMsgFilterTypeType, msgWindow: nsIMsgWindow): void {
+		const notesRoot = this.API.getStorageFolder();
+
+		if(!notesRoot){
+			return;
+		}
+
+		const QN = new QNoteFile;
+		msgHdrs.forEach(m => {
+			QN.delete(notesRoot, m.messageId);
+			this.API.noteGrabber.delete(m.messageId);
+		});
+		this.API.updateView();
 	}
 }
