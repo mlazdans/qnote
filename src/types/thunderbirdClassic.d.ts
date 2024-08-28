@@ -449,14 +449,14 @@ declare namespace Components
 		}
 
 		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIMsgSearchSession
-		class nsIMsgSearchSession
-		{
-			public addScopeTerm(scope: nsMsgSearchScope, folder: nsIMsgFolder): void;
-			public createTerm(): nsMsgSearchTerm;
-			public appendTerm(term: nsMsgSearchTerm): void;
-			public registerListener(listener: nsIMsgSearchNotify): void;
-			public search(window: nsIMsgWindow | null): void;
-		}
+		// class nsIMsgSearchSession
+		// {
+		// 	public addScopeTerm(scope: nsMsgSearchScope, folder: nsIMsgFolder): void;
+		// 	public createTerm(): nsMsgSearchTerm;
+		// 	public appendTerm(term: nsMsgSearchTerm): void;
+		// 	public registerListener(listener: nsIMsgSearchNotify): void;
+		// 	public search(window: nsIMsgWindow | null): void;
+		// }
 
 		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIMsgWindow
 		class nsIMsgWindow
@@ -464,13 +464,13 @@ declare namespace Components
 		}
 
 		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIMsgSearchTerm
-		class nsMsgSearchTerm
-		{
-			public attrib: nsMsgSearchAttrib;
-			public value: nsIMsgSearchValue;
-			public op: nsMsgSearchOp;
-			public booleanAnd: boolean;
-		}
+		// class nsMsgSearchTerm
+		// {
+		// 	public attrib: nsMsgSearchAttrib;
+		// 	public value: nsIMsgSearchValue;
+		// 	public op: nsMsgSearchOp;
+		// 	public booleanAnd: boolean;
+		// }
 
 		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIMsgSearchValue
 		class nsIMsgSearchValue
@@ -544,17 +544,111 @@ declare namespace Components
 			public static readonly offlineMail: nsMsgSearchScope;
 		}
 
-		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsMsgSearchOp
-		class nsMsgSearchOp
-		{
-			public static readonly IsGreaterThan: nsMsgSearchOp;
-			public static readonly Isnt: nsMsgSearchOp;
-			public static readonly Contains: nsMsgSearchOp;
-			public static readonly DoesntContain: nsMsgSearchOp;
-			public static readonly Is: nsMsgSearchOp;
-			public static readonly BeginsWith: nsMsgSearchOp;
-			public static readonly EndsWith: nsMsgSearchOp;
+		class nsMsgSearchOp {
+			static readonly Contains = 0; /* for text attributes      */
+			static readonly DoesntContain = 1;
+			static readonly Is = 2; /* is and isn't also apply to some non-text attrs */
+			static readonly Isnt = 3;
+			static readonly IsEmpty = 4;
+
+			static readonly IsBefore = 5; /* for date attributes              */
+			static readonly IsAfter = 6;
+
+			static readonly IsHigherThan = 7; /* for priority. Is also applies  */
+			static readonly IsLowerThan = 8;
+
+			static readonly BeginsWith = 9;
+			static readonly EndsWith = 10;
+
+			static readonly SoundsLike = 11; /* for LDAP phoenetic matching      */
+			static readonly LdapDwim = 12; /* Do What I Mean for simple search */
+
+			static readonly IsGreaterThan = 13;
+			static readonly IsLessThan = 14;
+
+			static readonly NameCompletion = 15; /* Name Completion operator...as the name implies =) */
+			static readonly IsInAB = 16;
+			static readonly IsntInAB = 17;
+			static readonly IsntEmpty = 18; /* primarily for tags */
+			static readonly Matches = 19; /* generic term for use by custom terms */
+			static readonly DoesntMatch = 20; /* generic term for use by custom terms */
+			static readonly kNumMsgSearchOperators  = 21;     /* must be last operator */
 		}
+
+		type nsMsgSearchOpValue = number;
+
+		interface nsIMsgSearchCustomTerm {
+			/**
+			 * globally unique string to identify this search term.
+			 * recommended form: ExtensionName@example.com#TermName
+			 * Commas and quotes are not allowed, the id must not
+			 * parse to an integer, and names of standard search
+			 * attributes in SearchAttribEntryTable in nsMsgSearchTerm.cpp
+			 * are not allowed.
+			 */
+			readonly id: string
+
+			/// name to display in term list. This should be localized. */
+			readonly name: string
+
+			/// Does this term need the message body?
+			readonly needsBody: boolean
+
+			/**
+			 * Is this custom term enabled?
+			 *
+			 * @param scope          search scope (nsMsgSearchScope)
+			 * @param op             search operator (nsMsgSearchOp). If null, determine
+			 *                       if term is available for any operator.
+			 *
+			 * @return               true if enabled
+			 */
+			getEnabled(scope: nsMsgSearchScopeValue, op: nsMsgSearchOpValue): boolean
+
+			/**
+			 * Is this custom term available?
+			 *
+			 * @param scope          search scope (nsMsgSearchScope)
+			 * @param op             search operator (nsMsgSearchOp). If null, determine
+			 *                       if term is available for any operator.
+			 *
+			 * @return               true if available
+			 */
+			getAvailable(scope: nsMsgSearchScopeValue, op: nsMsgSearchOpValue): boolean
+
+			/**
+			 * List the valid operators for this term.
+			 *
+			 * @param scope          search scope (nsMsgSearchScope)
+			 *
+			 * @return               array of operators
+			 */
+			getAvailableOperators(scope: nsMsgSearchScopeValue): Array<nsMsgSearchOpValue>
+
+			/**
+			 * Apply the custom search term to a message
+			 *
+			 * @param msgHdr       header database reference representing the message
+			 * @param searchValue  user-set value to use in the search
+			 * @param searchOp     search operator (Contains, IsHigherThan, etc.)
+			 *
+			 * @return             true if the term matches the message, else false
+			 */
+
+			match(msgHdr: nsIMsgDBHdr, searchValue: string, searchOp: nsMsgSearchOpValue): boolean
+		}
+
+		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsMsgSearchOp
+		// class nsMsgSearchOp
+		// {
+		// 	public static readonly IsGreaterThan: nsMsgSearchOp;
+		// 	public static readonly Isnt: nsMsgSearchOp;
+		// 	public static readonly Contains: nsMsgSearchOp;
+		// 	public static readonly DoesntContain: nsMsgSearchOp;
+		// 	public static readonly Is: nsMsgSearchOp;
+		// 	public static readonly BeginsWith: nsMsgSearchOp;
+		// 	public static readonly EndsWith: nsMsgSearchOp;
+		// }
 
 		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsMsgSearchAttrib
 		class nsMsgSearchAttrib
@@ -610,13 +704,13 @@ declare namespace Components
 		}
 
 		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIMsgDBHdr
-		class nsIMsgDBHdr
-		{
-			public readonly isRead: boolean;
-			public readonly isFlagged: boolean;
-			public readonly dateInSeconds: number;
-			public readonly folder: nsIMsgFolder;
-		}
+		// class nsIMsgDBHdr
+		// {
+		// 	public readonly isRead: boolean;
+		// 	public readonly isFlagged: boolean;
+		// 	public readonly dateInSeconds: number;
+		// 	public readonly folder: nsIMsgFolder;
+		// }
 
 		class nsIMsgTag
 		{
@@ -828,8 +922,10 @@ declare interface nsIMsgFilterCustomAction {
 }
 
 declare class nsIMsgFilterService extends nsISupports {
-	getCustomAction(id: string): nsIMsgFilterCustomAction;
-	addCustomAction(aAction: nsIMsgFilterCustomAction): void;
+	getCustomAction(id: string): nsIMsgFilterCustomAction
+	addCustomAction(aAction: nsIMsgFilterCustomAction): void
+	getCustomTerm(id: string): Ci.nsIMsgSearchCustomTerm
+	addCustomTerm(aTerm: Ci.nsIMsgSearchCustomTerm): void
 }
 
 declare interface MailServices
@@ -902,7 +998,7 @@ declare class Mail3Pane extends Ci.nsIDOMWindow
 	public BatchMessageMover: new() => Ci.BatchMessageMover; //tricky, this is an inner class
 	public navigator: ThunderbirdNavigator;
 
-	public getIdentityForHeader(msg: Ci.nsIMsgDBHdr): MessageIdentity;
+	public getIdentityForHeader(msg: nsIMsgDBHdr): MessageIdentity;
 }
 
 declare class ThunderbirdError
@@ -999,18 +1095,92 @@ declare class WindowManager
 	get(windowId: number): any
 }
 
-// //https://thunderbird-webextensions.readthedocs.io/en/latest/how-to/experiments.html
-// interface ExtensionContextExtension
-// {
-// 	folderManager: FolderManager;
-// 	messageManager: MessageManager;
+// Grabbed from lib.gecko.dom.d.ts
+interface TouchEventHandlersEventMap {
+    touchcancel: TouchEvent;
+    touchend: TouchEvent;
+    touchmove: TouchEvent;
+    touchstart: TouchEvent;
+}
 
-// 	experimentAPIManager: ExperimentAPIManager;
-// 	windowManager: WindowManager;
-// 	parentMessageManager: ParentMessageManager;
-// }
+interface TouchEventHandlers {
+    ontouchcancel: ((this: TouchEventHandlers, ev: Event) => any) | null;
+    ontouchend: ((this: TouchEventHandlers, ev: Event) => any) | null;
+    ontouchmove: ((this: TouchEventHandlers, ev: Event) => any) | null;
+    ontouchstart: ((this: TouchEventHandlers, ev: Event) => any) | null;
+    addEventListener<K extends keyof TouchEventHandlersEventMap>(type: K, listener: (this: TouchEventHandlers, ev: TouchEventHandlersEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+    removeEventListener<K extends keyof TouchEventHandlersEventMap>(type: K, listener: (this: TouchEventHandlers, ev: TouchEventHandlersEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+}
 
-// interface ExtensionContext
-// {
-// 	extension: ExtensionContextExtension;
-// }
+
+interface OnErrorEventHandlerForNodesEventMap {
+    "error": ErrorEvent;
+}
+
+interface OnErrorEventHandlerForNodes {
+    onerror: OnErrorEventHandler;
+    addEventListener<K extends keyof OnErrorEventHandlerForNodesEventMap>(type: K, listener: (this: OnErrorEventHandlerForNodes, ev: OnErrorEventHandlerForNodesEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+    removeEventListener<K extends keyof OnErrorEventHandlerForNodesEventMap>(type: K, listener: (this: OnErrorEventHandlerForNodes, ev: OnErrorEventHandlerForNodesEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+}
+
+interface HTMLOrForeignElement {
+    autofocus: boolean;
+    readonly dataset: DOMStringMap;
+    tabIndex: number;
+    blur(): void;
+    focus(options?: FocusOptions): void;
+}
+
+interface XULElementEventMap extends ElementEventMap, GlobalEventHandlersEventMap, OnErrorEventHandlerForNodesEventMap, TouchEventHandlersEventMap {
+}
+
+interface nsIController extends nsISupports {
+	isCommandEnabled(command: string): boolean;
+	supportsCommand(command: string): boolean;
+	doCommand(command: string): void;
+	onEvent(eventName: string): void;
+}
+
+interface nsIControllers extends nsISupports {
+	getControllerForCommand(command: string): nsIController;
+	insertControllerAt(index: u32, controller: nsIController): void;
+	removeControllerAt(index: u32): nsIController;
+	getControllerAt(index: u32): nsIController;
+	appendController(controller: nsIController): void;
+	removeController(controller: nsIController): void;
+	getControllerId(controller: nsIController): u32;
+	getControllerById(controllerID: u32): nsIController;
+	getControllerCount(): u32;
+}
+
+type XULControllers = nsIControllers;
+
+interface XULElement extends Element, ElementCSSInlineStyle, GlobalEventHandlers, HTMLOrForeignElement, OnErrorEventHandlerForNodes {
+    collapsed: boolean;
+    contextMenu: string;
+    readonly controllers: XULControllers;
+    hidden: boolean;
+    menu: string;
+    observes: string;
+    src: string;
+    tooltip: string;
+    tooltipText: string;
+    click(): void;
+    doCommand(): void;
+    hasMenu(): boolean;
+    openMenu(open: boolean): void;
+    addEventListener<K extends keyof XULElementEventMap>(type: K, listener: (this: XULElement, ev: XULElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+    removeEventListener<K extends keyof XULElementEventMap>(type: K, listener: (this: XULElement, ev: XULElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+}
+
+declare var XULElement: {
+    prototype: XULElement;
+    new(): XULElement;
+    isInstance(obj: any): obj is XULElement;
+};

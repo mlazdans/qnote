@@ -6,6 +6,17 @@ import { QPopupOptions, QPopupOptionsPartial } from '../modules/XULNoteWindow.mt
 export {}
 
 declare global {
+	// Numeric typedefs, useful as a quick reference in method signatures.
+	type double = number;
+	type float = number;
+	type i16 = number;
+	type i32 = number;
+	type i64 = number;
+	type u16 = number;
+	type u32 = number;
+	type u64 = number;
+	type u8 = number;
+
 	class AString {
 		length?: number | null
 		value?: string | null
@@ -15,11 +26,15 @@ declare global {
 		createXULElement(name: string): Element
 	}
 
+	class MozXULElement extends XULElement{
+	}
+
 	class MozWindow extends Window {
 		gFilter: any
 		gTabmail: any
 		gFolderDisplay: any
 		document: XULDocument
+		MozXULElement: typeof MozXULElement
 		MutationObserver: typeof MutationObserver
 	}
 
