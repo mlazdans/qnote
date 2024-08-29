@@ -2,6 +2,8 @@
 	"compilerOptions": {
 		"module": "Preserve",
 		"target": "es2018",
+		// "baseUrl": "./src",
+		// "skipLibCheck": true,
 		// "module": "Preserve",
 		// "target": "es2016",
 
@@ -20,6 +22,18 @@
 		"removeComments": true,
 		// "declaration": true,
 
-		"forceConsistentCasingInFileNames": true
+		"forceConsistentCasingInFileNames": true,
+		"paths": {
+			// "resource://gre/modules/ExtensionCommon.sys.mjs": ["./ExtensionCommon.sys.mjs"],
+			// "gecko": [
+			// 	"../s/thunderbird-128.1.0/toolkit/components/extensions/types/gecko.ts"
+			// ],
+			// "resource://gre/modules/*": [
+			// 	"D:/thunderbird/s/thunderbird-128.1.0/toolkit/modules/",
+			// 	"D:/thunderbird/s/thunderbird-128.1.0/toolkit/components/extensions/"
+			// 	// "../s/thunderbird-128.1.0/toolkit/modules/",
+			// 	// "../s/thunderbird-128.1.0/toolkit/components/extensions/",
+			// ],
+		},
 	}
 }

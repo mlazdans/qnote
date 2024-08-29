@@ -4,22 +4,188 @@
 // TODO: save create and update time
 // TODO: attach keyb/col handler to all windows at the start
 
-import * as luxon from 'luxon';
+// Interesting links
+//
+//      Background scripts
+// https://developer.mozilla.org/en-US/docs/Mozilla/Add-ons/WebExtensions/Background_scripts
+//
+//     ESMification: Out-of-tree Migration
+// https://docs.google.com/document/d/14FqYX749nJkCSL_GknCDZyQnuqkXNc9KoTuXSV3HtMg/edit
+//
+//     ESMification: In-tree Migration Phase 1
+// https://docs.google.com/document/d/1cpzIK-BdP7u6RJSar-Z955GV--2Rj8V4x2vl34m36Go/edit#heading=h.jpld4f8xni91
+//
+//     XPCOM String Guide
+// https://firefox-source-docs.mozilla.org/xpcom/stringguide.html
+//
+
+//    Types for MozXULElement and others
+// https://github.com/dothq/browser-desktop/blob/nightly/types.d.ts
+
+// import * as luxon from 'luxon';
+import { QPopupDOMContentLoadedMessage, UpdateQPoppupMessage } from "./modules/Messages.mjs";
+import { INote, NoteData, QNote, QNoteFolder } from "./modules/Note.mjs";
+import { QNotePopup, NotePopup } from "./modules/NotePopups.mjs";
 import { Preferences } from "./modules/Preferences.mjs";
-import { QNote } from "./modules/QNote.mjs";
-import { QNoteFolder } from "./modules/QNoteFolder.mjs";
-import { dateFormat, focusMessagePane, getCurrentTabId, getCurrentWindowIdAnd, loadPrefsWithDefaults, MessageId, mpUpdateForNote, POP_EXISTING, POP_FOCUS, POP_NONE, silentCatcher, ts2jsdate, updateIcons } from "./modules/utils.mjs";
-import { XULNoteWindow } from "./modules/XULNoteWindow.mjs";
+import {
+	dateFormat,
+	focusMessagePane,
+	getCurrentTabId,
+	getCurrentTabIdAnd,
+	getCurrentWindowIdAnd,
+	getPrefs,
+	getXNoteStoragePath,
+	isFolderWritable,
+	isPrefsEmpty,
+	loadAllFolderNotes,
+	MessageId,
+	mpUpdateForNote,
+	POP_EXISTING,
+	POP_FOCUS,
+	POP_NONE,
+	silentCatcher,
+	ts2jsdate,
+	updateIcons
+} from "./modules/utils.mjs";
 
 // TODO: getting dead object: open msg in tab, drag out in new window, reload extension when tread view activated in new window
 var QDEB = true;
 var Prefs: Preferences;
+let BrowserAction = browser.action ? browser.action : browser.browserAction;
+
 // var CurrentPopup: DefaultNoteWindow;
 // var CurrentTabId;
 // var CurrentWindowId; // MAYBE: should get rid of and replace with CurrentNote.windowId
 // var CurrentLang;
 // var TBInfo;
 // var i18n = new DOMLocalizator(browser.i18n.getMessage);
+var _ = browser.i18n.getMessage;
+
+// TODO: promise interface
+var PopupManager = {
+	counter: 0,
+	popups: new Map<number, QNotePopup>,
+	allocId(): number {
+		return ++this.counter;
+	},
+	add(popup: QNotePopup): void {
+		console.log(`Adding new windows with id ${popup.id}`);
+		if(this.has(popup.id)){
+			throw new Error(`PopupManager: id ${popup.id} already exists`);
+		} else {
+			this.popups.set(popup.id, popup);
+		}
+	},
+	remove(id: number): boolean {
+		return this.get(id) ? this.popups.delete(id) : false;
+	},
+	get(id: number): QNotePopup {
+		let p = this.popups.get(id);
+		if(p){
+			return p;
+		}
+		throw new Error(`PopupManager: id ${id} not found`);
+	},
+	has(id: number): boolean {
+		return this.popups.has(id);
+	}
+}
+
+async function confirmDelete(shouldConfirm: boolean): Promise<boolean> {
+	return shouldConfirm ? await browser.legacy.confirm(_("delete.note"), _("are.you.sure")) : true;
+}
+
+async function importQNotes(notes: Array<NoteData>, overwrite = false){
+	let stats = {
+		err: 0,
+		exist: 0,
+		imported: 0,
+		overwritten: 0
+	};
+
+	for (const note of notes) {
+		let yn = new QNote(note.keyId);
+
+		await yn.load();
+
+		let exists = yn.data.exists;
+
+		if(exists && !overwrite){
+			stats.exist++;
+		} else {
+			yn.data = note;
+			await yn.save().then(() => {
+				stats[exists ? "overwritten" : "imported"]++;
+			}).catch(e => {
+				console.error(_("error.saving.note"), e.message, yn.data.keyId);
+				stats.err++;
+			});
+		}
+	}
+
+	return stats;
+}
+
+async function importFolderNotes(root: string, overwrite = false){
+	return loadAllFolderNotes(root).then(notes => importQNotes(notes, overwrite));
+}
+
+export async function loadPrefsWithDefaults() {
+	let p = await getPrefs();
+	let isEmpty = await isPrefsEmpty();
+	// let defaultPrefs = getDefaultPrefs();
+	// let isEmptyPrefs = Object.keys(p).length === 0;
+
+	// Check for xnote settings if no settings at all
+	// if(isEmptyPrefs){
+	// 	let l = xnotePrefsMapper(await browser.xnote.getPrefs());
+	// 	for(let k in defaultPrefs){
+	// 		if(l[k] === undefined){
+	// 			p[k] = defaultPrefs[k];
+	// 		} else {
+	// 			p[k] = l[k];
+	// 		}
+	// 	}
+	// }
+
+	// Apply defaults
+	// for(let k in defaultPrefs){
+	// 	if(p[k] === undefined){
+	// 		p[k] = defaultPrefs[k];
+	// 	}
+	// }
+
+	if(p.tagName){
+		p.tagName = p.tagName.toLowerCase();
+	}
+
+	if(isEmpty){
+		// If XNote++ storage_path is set and readable, then use it
+		// else check if XNote folder exists inside profile directory
+		let path = await getXNoteStoragePath();
+
+		if(await isFolderWritable(path)){
+			p.storageOption = 'folder';
+			p.storageFolder = path;
+		} else {
+			path = await browser.qapp.createStoragePath();
+			if(await isFolderWritable(path)){
+				p.storageOption = 'folder';
+				p.storageFolder = path;
+			} else {
+				browser.legacy.alert(_("could.not.initialize.storage.folder"));
+				p.storageOption = 'ext';
+			}
+		}
+	}
+
+	// Override old default "yyyy-mm-dd - HH:MM"
+	if(p.dateFormat === "yyyy-mm-dd - HH:MM"){
+		p.dateFormat = 'Y-m-d H:i';
+	}
+
+	return p;
+}
 
 async function resetTbState(){
 	browser.menus.removeAll();
@@ -35,7 +201,9 @@ async function loadNote(keyId: string) {
 }
 
 function dateFormatPredefined(locale: string, format: string, ts: Date) {
-	return luxon.DateTime.fromJSDate(ts2jsdate(ts)).setLocale(locale).toFormat(format);
+	console.error("TODO: dateFormatPredefined");
+	return "";
+	// return luxon.DateTime.fromJSDate(ts2jsdate(ts)).setLocale(locale).toFormat(format);
 }
 
 function _qDateFormat(locale: string, ts: number){
@@ -54,7 +222,7 @@ async function getMessageKeyId(id: MessageId) {
 	return browser.messages.get(id).then(parts => parts.headerMessageId);
 }
 
-async function loadNoteForMessage(id: MessageId) {
+async function loadNoteForMessageAnd(id: MessageId) {
 	return createNoteForMessage(id).then(async note => {
 		return note.load().then(() => note);
 	});
@@ -125,29 +293,34 @@ async function loadNoteForMessage(id: MessageId) {
 // 	});
 // }
 
-async function mpUpdateForMessage(messageId: MessageId){
-	return loadNoteForMessage(messageId).then(note => {
-		mpUpdateForNote(note.data);
-	}).catch(silentCatcher());
-}
+// async function mpUpdateForMessage(messageId: MessageId){
+// 	return loadNoteForMessage(messageId).then(note => {
+// 		mpUpdateForNote(note.data);
+// 	}).catch(silentCatcher());
+// }
 
 async function createNoteForMessage(id: MessageId) {
-	return getMessageKeyId(id).then(keyId => {
-		let note = createNote(keyId);
-
-		note.addListener("afterupdate", (n: any, action: string) => {
-			QDEB&&console.debug("afterupdate", action);
-			if(Prefs.useTag){
-				console.error("TODO: tagMessage");
-				// tagMessage(id, Prefs.tagName, action === "save");
-			}
-
-			mpUpdateForMessage(id);
-		});
-
-		return note;
-	});
+	return getMessageKeyId(id).then(keyId => createNote(keyId));
 }
+
+// TODO
+// async function createNoteForMessage(id: MessageId) {
+// 	return getMessageKeyId(id).then(keyId => {
+// 		let note = createNote(keyId);
+
+// 		note.addListener("afterupdate", (n: any, action: string) => {
+// 			QDEB&&console.debug("afterupdate", action);
+// 			if(Prefs.useTag){
+// 				console.error("TODO: tagMessage");
+// 				// tagMessage(id, Prefs.tagName, action === "save");
+// 			}
+
+// 			mpUpdateForMessage(id);
+// 		});
+
+// 		return note;
+// 	});
+// }
 
 function qDateFormat(ts: number){
 	if(Prefs.dateLocale){
@@ -172,7 +345,7 @@ function qDateFormatPredefined(format: string, ts: Date){
 }
 
 function createNote(keyId: string) {
-	QDEB&&console.debug(`createNote(${keyId})`);
+	QDEB&&console.debug(`createNote(${keyId})`, Prefs.storageOption);
 	if(Prefs.storageOption === 'ext'){
 		return new QNote(keyId);
 	} else if(Prefs.storageOption === 'folder'){
@@ -311,28 +484,31 @@ async function QNotePopForMessage(id: MessageId, flags = POP_NONE) {
 // 		}).catch(silentCatcher());
 // 	}
 // }
+async function createPopupWindow(note: INote): Promise<QNotePopup> {
+	return new Promise(async resolve => {
+		return getCurrentWindowIdAnd().then(async windowId => {
+			var popup: QNotePopup | undefined;
+			if(Prefs.windowOption === 'xul'){
+				popup = new QNotePopup(PopupManager.allocId(), windowId, note, Prefs);
+			} else if(Prefs.windowOption == 'webext'){
+				console.error("TODO: new WebExtensionNoteWindow");
+				// CurrentNote = new WebExtensionNoteWindow(CurrentWindowId);
+			} else {
+				throw new TypeError("Prefs.windowOption");
+			}
 
-async function pop() {
-	return getCurrentWindowIdAnd().then(windowId => {
-		var popup: XULNoteWindow | undefined;
-		if(Prefs.windowOption === 'xul'){
-			popup = new XULNoteWindow(windowId, Prefs);
-		} else if(Prefs.windowOption == 'webext'){
-			console.error("TODO: new WebExtensionNoteWindow");
-			// CurrentNote = new WebExtensionNoteWindow(CurrentWindowId);
-		} else {
-			throw new TypeError("Prefs.windowOption");
-		}
-
-		if(popup){
-			popup.addListener("afterclose", () => {
-				QDEB&&console.debug("afterclose");
-				focusMessagePane(windowId);
-			});
-		}
-
-		return popup;
+			if(popup){
+				PopupManager.add(popup);
+				// const l = (w: NoteWindow) => {
+				// 	QDEB&&console.debug("afterclose", w);
+				// 	focusMessagePane(windowId);
+				// };
+				// popup.addListener("afterclose", l);
+				resolve(popup);
+			}
+		});
 	});
+
 }
 
 // async function initCurrentNote(): Promise<boolean> {
@@ -350,7 +526,7 @@ async function pop() {
 // 	var popup: NoteWindow;
 
 // 	if(Prefs.windowOption === 'xul'){
-// 		popup = new XULNoteWindow(windowId);
+// 		popup = new QNotePopup(windowId);
 // 	} else if(Prefs.windowOption == 'webext'){
 // 		console.error("TODO: new WebExtensionNoteWindow");
 // 		// CurrentNote = new WebExtensionNoteWindow(CurrentWindowId);
@@ -402,8 +578,8 @@ async function setUpExtension(){
 	Prefs = await loadPrefsWithDefaults();
 
 	// QDEB = !!Prefs.enableDebug;
-	browser.qapp.setDebug(QDEB);
-	browser.qpopup.setDebug(QDEB);
+	await browser.qapp.setDebug(QDEB);
+	await browser.qpopup.setDebug(QDEB);
 
 	sendPrefs();
 }
@@ -518,13 +694,12 @@ async function initExtension(){
 	// await browser.ResourceUrl.register("qnote", "scripts/");
 
 	await setUpExtension();
+	console.log("setUpExtension() - OK");
 	// TBInfo = await browser.runtime.getBrowserInfo();
 
 	// Return notes to qapp on request
 	// browser.qapp.onNoteRequest.addListener(getQAppNoteData);
-	browser.qapp.onNoteRequest.addListener(function(keyId: string){
-		console.error("TODO: onNoteRequest()");
-	});
+	browser.qapp.onNoteRequest.addListener(async (keyId: string) => loadNote(keyId).then(note => note.data));
 
 	// window.addEventListener("unhandledrejection", event => {
 	// 	console.warn(`Unhandle: ${event.reason}`, event);
@@ -614,8 +789,7 @@ async function initExtension(){
 		// await CurrentNote.silentlyPersistAndClose();
 	});
 
-	// Change message
-	async function onMessageDisplayed(Tab: browser.tabs.Tab, Message: browser.messages.MessageHeader){
+	async function changeMessage(Tab: browser.tabs.Tab, Message: browser.messages.MessageHeader){
 		QDEB&&console.debug("onMessageDisplayed(), messageId:", Message.id);
 
 		let flags = POP_EXISTING;
@@ -623,31 +797,40 @@ async function initExtension(){
 			flags |= POP_FOCUS;
 		}
 
-		const p = await pop();
-		if(p){
-			loadNoteForMessage(Message.id).then(note => {
-				p.pop(note);
-			});
-		}
+		return loadNoteForMessageAnd(Message.id).then(async note => {
+			console.log("loadNoteForMessageAnd", note);
+			if(note.data.exists){
+				mpUpdateForNote(note.data);
+				createPopupWindow(note).then(async w => w.pop());
+			}
+			// createPopupWindow(note).then(async w => w.pop())
+		});
+		// .catch(() => console.error("loadNoteForMessageAnd.catch", arguments));
 
-		return;
+		// const p = await pop();
+		// if(p){
+		// 	loadNoteForMessage(Message.id).then(note => {
+		// 		p.pop(note);
+		// 	});
+		// }
+
 		//updateCurrentMessage(CurrentTab);
 
 		// await CurrentPopup.silentlyPersistAndClose();
 
 		// CurrentTabId = getTabId(Tab);
 
-		if(Prefs.showOnSelect){
-			QNotePopForMessage(Message.id, flags).then(isPopped =>{
-				// Focus message pane in case popped
-				console.error("TODO: focusMessagePane()");
-				// if(isPopped && !Prefs.focusOnDisplay){
-				// 	focusMessagePane(CurrentNote.windowId);
-				// }
-			});
-		} else {
-			mpUpdateForMessage(Message.id);
-		}
+		// if(Prefs.showOnSelect){
+		// 	QNotePopForMessage(Message.id, flags).then(isPopped =>{
+		// 		// Focus message pane in case popped
+		// 		console.error("TODO: focusMessagePane()");
+		// 		// if(isPopped && !Prefs.focusOnDisplay){
+		// 		// 	focusMessagePane(CurrentNote.windowId);
+		// 		// }
+		// 	});
+		// } else {
+		// 	mpUpdateForMessage(Message.id);
+		// }
 	}
 
 	const toggler = async (Tab?: browser.tabs.Tab) => {
@@ -667,7 +850,7 @@ async function initExtension(){
 	};
 
 	// Click on main toolbar
-	browser.action.onClicked.addListener(Tab => {
+	BrowserAction.onClicked.addListener(Tab => {
 		QDEB&&console.debug("action.onClicked()");
 
 		// QNotePopToggle(Tab || CurrentTabId);
@@ -725,10 +908,17 @@ async function initExtension(){
 	// 	}
 	// });
 
-	browser.messageDisplay.onMessagesDisplayed.addListener(async (Tab: browser.tabs.Tab, Messages: browser.messages.MessageHeader[]) => {
+	browser.messageDisplay.onMessagesDisplayed.addListener(async (Tab: browser.tabs.Tab, Messages: browser.messages.MessageHeader[] | browser.messages.MessageList) => {
+		let m;
+		if("messages" in Messages){
+			m = Messages.messages;
+		} else {
+			m = Messages;
+		}
+
 		// let m = Messages.messages ? Messages.messages : Messages;
-		if(Messages.length == 1){
-			await onMessageDisplayed(Tab, Messages[0]);
+		if(m.length == 1){
+			changeMessage(Tab, m[0]);
 		} else {
 			console.error("TODO: multi message");
 			// await CurrentNote.silentlyPersistAndClose();
@@ -775,60 +965,64 @@ async function initExtension(){
 	// browser.scripting.messageDisplay.registerScripts([{
 	// 	id: "qnote-message-display",
 	// 	js: ["scripts/message-display.js"],
-	// 	css: ["html/xulpopup.css"],
+	// 	css: ["html/qpopup.css"],
 	// }]);
 
 	// browser.messageDisplayScripts.register({ js: [{ file: "scripts/message-display.js" }] });
 
-	async function getSelectedMessageReply(keyId: string){
-		let note = await loadNote(keyId);
-		// note.tsFormatted = qDateFormat(note.ts);
-		return {
-			command: "selectedMessage",
-			note: note,
-			prefs: Prefs
-		};
-	}
+	// async function getSelectedMessageReply(keyId: string): Promise<SelectedMessageReply> {
+	// 	return loadNote(keyId).then(note => new SelectedMessageReply(note.data, Prefs));
+	// }
 
-	// TODO: bring back
 	// browser.runtime.onMessage.addListener(async (data: any, sender: browser.runtime.MessageSender): Promise<void> => {
+	// 	QDEB&&console.log("Received message: ", data, sender);
 	// 	if(data.command === "getSelectedMessage"){
-	// 		QDEB&&console.log("Received message: ", data, sender);
-	// 		browser.messageDisplay.getDisplayedMessages(CurrentTabId).then(async messages => {
-	// 			// const m = messages.messages ? messages.messages : messages;
-	// 			if(messages.length === 1){
-	// 				const reply = await getSelectedMessageReply(messages[0].headerMessageId);
-	// 				QDEB&&console.log("Sending selectedMessage reply: ", reply);
-	// 				browser.tabs.sendMessage(CurrentTabId, reply);
-	// 			} else {
-	// 				console.error("Unexpected getDisplayedMessages() count: ", messages.length);
-	// 			}
+	// 		getCurrentTabIdAnd().then(tabId => {
+	// 			browser.messageDisplay.getDisplayedMessages(tabId).then(async List => {
+	// 				if(List.messages.length === 1){
+	// 					const reply = await getSelectedMessageReply(List.messages[0].headerMessageId);
+	// 					QDEB&&console.log("Sending selectedMessage reply: ", reply);
+	// 					browser.tabs.sendMessage(tabId, reply);
+	// 				} else {
+	// 					console.error("Unexpected getDisplayedMessages() count: ", List.messages.length);
+	// 				}
+	// 			});
 	// 		});
 	// 	} else {
 	// 		console.error("Unknown message: ", data);
 	// 	}
 	// });
 
-	// TODO: bring back
-	// browser.runtime.onConnect.addListener(function(connection){
-	// 	console.log("New connection: ", connection);
-	// 	connection.onMessage.addListener((data: any) => {
-	// 		// TODO: code duplication
-	// 		if(data.command === "getSelectedMessage"){
-	// 			browser.messageDisplay.getDisplayedMessages(CurrentTabId).then(async messages => {
-	// 				if(messages.length === 1){
-	// 					const reply = await getSelectedMessageReply(messages[0].headerMessageId);
-	// 					QDEB&&console.log("Posting selectedMessage reply: ", reply);
-	// 					connection.postMessage(reply);
-	// 				} else {
-	// 					console.error("Unexpected getDisplayedMessages() count: ", messages.length);
-	// 				}
-	// 			});
-	// 		} else {
-	// 			console.error("Unknown message: ", data);
-	// 		}
-	// 	});
-	// });
+	browser.runtime.onConnect.addListener(function(connection){
+		QDEB&&console.log("New connection: ", connection);
+		connection.onMessage.addListener((data: any) => {
+			// if(data.command === "getSelectedMessage"){
+			// 	getCurrentTabIdAnd().then(tabId => {
+			// 		browser.messageDisplay.getDisplayedMessages(tabId).then(async List => {
+			// 			if(List.messages.length === 1){
+			// 				const reply = await getSelectedMessageReply(List.messages[0].headerMessageId);
+			// 				QDEB&&console.log("Posting selectedMessage reply: ", reply);
+			// 				connection.postMessage(reply);
+			// 			} else {
+			// 				console.error("Unexpected getDisplayedMessages() count: ", List.messages.length);
+			// 			}
+			// 		});
+			// 	});
+
+			let message;
+
+			if(message = (new QPopupDOMContentLoadedMessage).parse(data)){
+				QDEB&&console.log(`Received ${data.command} message: `, data);
+				const p = PopupManager.get(message.id);
+				(new UpdateQPoppupMessage).post(connection, {
+					id: p.id,
+					opts: p.note2QPopupOptions()
+				});
+			} else {
+				console.error("Unknown or incorrect message: ", data);
+			}
+		});
+	});
 
 	// TODO: bring back
 	// browser.menus.onClicked.addListener(menuHandler);
@@ -853,7 +1047,6 @@ async function waitForLoad() {
 	});
 }
 
-console.log("try loading");
 waitForLoad().then(isAppStartup => initExtension());
 
 // await browser.ResourceUrl.register("exampleapi", "modules");

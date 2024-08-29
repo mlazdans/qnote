@@ -48,28 +48,28 @@ module.exports = [
 	// 		// modules: ['.', 'node_modules']
 	// 	},
 	// },
-	{
-		name: "scripts",
-		mode: theMode,
-		entry: {
-			qpopup: "./src/scripts/qpopup.ts",
-		},
-		output: {
-			path: outputPath+ '/scripts/',
-		},
-		module: {
-			rules: tsLoaderRules,
-		},
-		resolve: {
-			extensions: extensions,
-			extensionAlias: {
-				".js": [".js", ".ts"],
-				".cjs": [".cjs", ".cts"],
-				".mjs": [".mjs", ".mts"]
-			}
-			// modules: ['.', 'node_modules']
-		},
-	},
+	// {
+	// 	name: "scripts",
+	// 	mode: theMode,
+	// 	entry: {
+	// 		qpopup: "./src/scripts/qpopup.ts",
+	// 	},
+	// 	output: {
+	// 		path: outputPath+ '/scripts/',
+	// 	},
+	// 	module: {
+	// 		rules: tsLoaderRules,
+	// 	},
+	// 	resolve: {
+	// 		extensions: extensions,
+	// 		extensionAlias: {
+	// 			".js": [".js", ".ts"],
+	// 			".cjs": [".cjs", ".cts"],
+	// 			".mjs": [".mjs", ".mts"]
+	// 		}
+	// 		// modules: ['.', 'node_modules']
+	// 	},
+	// },
 	// {
 	// 	name: "api",
 	// 	mode: theMode,

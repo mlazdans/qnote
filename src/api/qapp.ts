@@ -1,43 +1,58 @@
-var Services = globalThis.Services || ChromeUtils.import(
-  "resource://gre/modules/Services.jsm"
-).Services;
-var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
-var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { QNoteFilter } = ChromeUtils.import("resource://qnote/modules-exp/QNoteFilter.js");
-var { QNoteAction } = ChromeUtils.import("resource://qnote/modules-exp/QNoteAction.js");
-var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
-var { QCache } = ChromeUtils.import("resource://qnote/modules-exp/QCache.js");
+import { NoteData } from "../modules/Note.mjs";
+import { Preferences } from "../modules/Preferences.mjs";
 
-var ThreadPaneColumns;
-try {
-	({ ThreadPaneColumns } = ChromeUtils.importESModule("chrome://messenger/content/thread-pane-columns.mjs"));
-} catch (err) {
-	try {
-		({ ThreadPaneColumns } = ChromeUtils.importESModule("chrome://messenger/content/ThreadPaneColumns.mjs"));
-	} catch (err) {
-	}
-}
+// var Services = globalThis.Services || ChromeUtils.import("resource://gre/modules/Services.jsm").Services;
+var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
+var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
+var { QNoteFilter, QNoteAction, QCustomTerm } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFilters.mjs");
+var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
+var { QCache } = ChromeUtils.importESModule("resource://qnote/modules/QCache.mjs");
+var { ThreadPaneColumns } = ChromeUtils.importESModule("chrome://messenger/content/ThreadPaneColumns.mjs");
+
+var QDEB = true;
+var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
 Services.scriptloader.loadSubScript(extension.rootURI.resolve("scripts/notifyTools.js"), null, "UTF-8");
 
-var QDEB = true;
-var qapp = class extends ExtensionCommon.ExtensionAPI {
-	constructor(...args){
-		let fName = "new qapp()";
+class QApp extends ExtensionCommon.ExtensionAPI {
+	noteGrabber
+	EventDispatcher
+	KeyboardHandler
+	WindowObserver
+	Prefs: Preferences | null
+
+	customTermId = 'qnote@dqdp.net#qnoteText'
+	customTerm
+	customAction
+	customFilter
+
+	constructor(...args: ConstructorParameters<typeof ExtensionCommon.ExtensionAPI>){
+		const fName = "new qapp()";
 		QDEB&&console.debug(`${fName}`);
 		super(...args);
 
-		var API = this;
-
 		// We'll update cache and call listener once item arrives
 		// init() caller must install onNoteRequest listener
+		QDEB&&console.debug("Installing noteGrabber");
 		this.noteGrabber = new QCache();
-		this.Prefs = {};
+
+		QDEB&&console.debug("Installing custom term");
+		this.customTerm = new QCustomTerm();
+
+		QDEB&&console.debug("Installing custom action");
+		this.customAction = new QNoteAction(this.noteGrabber);
+
+		QDEB&&console.debug("Installing filters");
+		this.customFilter = new QNoteFilter();
+
+		var API = this;
+
+		this.Prefs = null;
 
 		this.EventDispatcher = new QEventDispatcher(["domwindowopened", "domwindowclosed", "keydown", "onShutdown", "domcomplete"]);
 		this.KeyboardHandler = {
 			windows: new WeakSet(),
-			addTo: w => {
+			addTo: (w: Window) => {
 				let fName = "KeyboardHandler.addTo()";
 				QDEB&&console.debug(`${fName} - attaching...`);
 
@@ -67,7 +82,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 				return false;
 			},
-			removeFrom: w => {
+			removeFrom: (w: Window) => {
 				let fName = "KeyboardHandler.removeFrom()";
 				QDEB&&console.debug(`${fName} - removing...`);
 
@@ -86,14 +101,14 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 				return false;
 			},
-			handler: e => {
+			handler: (e: KeyboardEvent) => {
 				// QDEB&&console.debug("KeyboardHandler.handler()", e.code);
 				API.EventDispatcher.fireListeners("keydown", e);
 			}
 		}
 
 		this.WindowObserver = {
-			observe: function(aSubject, aTopic, aData) {
+			observe: function(aSubject: MozWindow, aTopic: string, aData: any) {
 				let fName = "qapp.WindowObserver.observe()";
 				QDEB&&console.debug(`${fName} ${aTopic}`, aSubject.document.URL);
 
@@ -111,29 +126,34 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 				if(aTopic === 'domwindowopened'){
 					aSubject.addEventListener("DOMContentLoaded", e => {
-						let document = e.target;
+						let document = e.target as XULDocument;
+
+						if(document === null){
+							return;
+						}
 
 						QDEB&&console.debug(`${fName} [DOMContentLoaded]`, document.URL);
 
+						// TODO: broken with TB > 115, disabling for now
 						// Attach to QuickFilter
-						if(document.URL.includes('chrome://messenger/content/messenger')){
-							if(API.QNoteFilter && document.getElementById('tabmail')){
-								API.QNoteFilter.attachToWindow(aSubject, document);
-							}
-						}
+						// if(document.URL.includes('chrome://messenger/content/messenger')){
+						// 	if(API.QNoteFilter && document.getElementById('tabmail')){
+						// 		API.QNoteFilter.attachToWindow(aSubject, document);
+						// 	}
+						// }
 
-						// Attach to SearchDialog
-						if(API.QNoteFilter && (
+						// // Attach to SearchDialog
+						if(API.customFilter && (
 							document.URL.includes('chrome://messenger/content/SearchDialog') ||
 							document.URL.includes('chrome://messenger/content/virtualFolderProperties')
 						)){
-							API.QNoteFilter.searchDialogHandler(aSubject, document);
+							API.customFilter.searchDialogHandler(aSubject, document);
 						}
 
 						// Attach to FilterEditor
-						if(API.QNoteFilter && API.QNoteAction && document.URL.includes('chrome://messenger/content/FilterEditor')){
-							API.QNoteFilter.searchDialogHandler(aSubject, document);
-							API.QNoteAction.filterEditorHandler(aSubject, document);
+						if(API.customFilter && API.customAction && document.URL.includes('chrome://messenger/content/FilterEditor')){
+							API.customFilter.searchDialogHandler(aSubject, document);
+							API.customAction.filterEditorHandler(aSubject, document);
 						}
 
 						// Multi message view
@@ -146,7 +166,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		};
 	}
 
-	uninstallCSS(cssUri) {
+	uninstallCSS(cssUri: string) {
 		try {
 			let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
 			let uri = Services.io.newURI(extension.getURL(cssUri), null, null);
@@ -159,7 +179,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		}
 	}
 
-	installCSS(cssUri) {
+	installCSS(cssUri: string) {
 		try {
 			let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
 			let uri = Services.io.newURI(extension.getURL(cssUri), null, null);
@@ -172,19 +192,19 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		}
 	}
 
-	installKeyboardHandler(w){
+	installKeyboardHandler(w: Window){
 		let kf = this.KeyboardHandler;
 
 		kf.addTo(w);
 
-		this.EventDispatcher.addListener('domcomplete', aWindow => kf.addTo(aWindow));
+		this.EventDispatcher.addListener('domcomplete', (aWindow: Window) => kf.addTo(aWindow));
 	}
 
-	uninstallKeyboardHandler(w){
+	uninstallKeyboardHandler(w: Window){
 		this.KeyboardHandler.removeFrom(w);
 	}
 
-	onShutdown(isAppShutdown) {
+	onShutdown(isAppShutdown: boolean) {
 		console.debug("QNote.shutdown()");
 
 		if (isAppShutdown) {
@@ -195,85 +215,95 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 
 		this.EventDispatcher.fireListeners("onShutdown");
 		this.uninstallCSS("html/background.css");
-		if(this.QNoteFilter){
-			this.QNoteFilter.uninstall();
-		}
+		// if(this.QNoteFilter){
+		// 	this.QNoteFilter.uninstall();
+		// }
 
-		if(this.QNoteAction){
-			this.QNoteAction.uninstall();
+		if(this.customAction){
+			this.customAction.uninstall();
 		}
 	}
 
-	id2RealWindow(w){
+	// id2RealWindow(w){
+	// 	try {
+	// 		return Number.isInteger(w) ? extension.windowManager.get(w).window : w;
+	// 	} catch {
+	// 	}
+	// }
+	id2RealWindow(windowId: number): MozWindow {
 		try {
-			return Number.isInteger(w) ? extension.windowManager.get(w).window : w;
+			return extension.windowManager.get(windowId).window;
 		} catch {
+			// QDEB&&console.debug("windowManager fail");
+			throw new Error("windowManager fail");
 		}
+		// return undefined;
+		// Get a window ID from a real window:
+		// context.extension.windowManager.getWrapper(realWindow).id;
+
+		// // Get all windows: (note this returns a Generator, not an array like the API)
+		// context.extension.windowManager.getAll();
 	}
 
-	updateView(w, keyId){
-		if(ThreadPaneColumns){
-			ThreadPaneColumns.refreshCustomColumn("qnote");
-			return;
-		}
+	// Legacy column
+	// updateView(w, keyId){
+	// 	let fName = `qapp.updateView(w, ${keyId})`;
 
-		let fName = `qapp.updateView(w, ${keyId})`;
+	// 	if(!w || !w.document){
+	// 		w = Services.wm.getMostRecentWindow("mail:3pane")
+	// 	}
 
-		if(!w || !w.document){
-			w = Services.wm.getMostRecentWindow("mail:3pane")
-		}
+	// 	if(!w || !w.document){
+	// 		QDEB&&console.debug(`${fName} - no window`);
+	// 		return;
+	// 	}
 
-		if(!w || !w.document){
-			QDEB&&console.debug(`${fName} - no window`);
-			return;
-		}
+	// 	let mainPopupSet = w.document.getElementById('mainPopupSet');
+	// 	if(!mainPopupSet){
+	// 		QDEB&&console.debug(`${fName} - no mainPopupSet`);
+	// 		return;
+	// 	}
 
-		let mainPopupSet = w.document.getElementById('mainPopupSet');
-		if(!mainPopupSet){
-			QDEB&&console.debug(`${fName} - no mainPopupSet`);
-			return;
-		}
+	// 	let aFolderDisplay = w.gFolderDisplay;
+	// 	if(!(aFolderDisplay && aFolderDisplay.view && aFolderDisplay.view.dbView)){
+	// 		QDEB&&console.debug(`${fName} - no dbView`);
+	// 		return;
+	// 	}
 
-		let aFolderDisplay = w.gFolderDisplay;
-		if(!(aFolderDisplay && aFolderDisplay.view && aFolderDisplay.view.dbView)){
-			QDEB&&console.debug(`${fName} - no dbView`);
-			return;
-		}
+	// 	let view = aFolderDisplay.view.dbView;
+	// 	let row;
 
-		let view = aFolderDisplay.view.dbView;
-		let row;
+	// 	if(keyId && view.db){
+	// 		let msgHdr = view.db.getMsgHdrForMessageID(keyId);
+	// 		if(msgHdr){
+	// 			row = view.findIndexOfMsgHdr(msgHdr, false);
+	// 		}
+	// 	} else {
+	// 		row = view.currentlyDisplayedMessage;
+	// 	}
 
-		if(keyId && view.db){
-			let msgHdr = view.db.getMsgHdrForMessageID(keyId);
-			if(msgHdr){
-				row = view.findIndexOfMsgHdr(msgHdr, false);
-			}
-		} else {
-			row = view.currentlyDisplayedMessage;
-		}
+	// 	//let rangeCount = treeSelection.getRangeCount();
+	// 	// nsIMsgDBView.idl
+	// 	// NoteChange(nsMsgViewIndex, PRInt32, nsMsgViewNotificationCodeValue)
+	// 	// const nsMsgViewNotificationCodeValue changed = 2;
+	// 	/**
+	// 	 * Notify tree that rows have changed.
+	// 	 *
+	// 	 * @param aFirstLineChanged   first view index for changed rows.
+	// 	 * @param aNumRows            number of rows changed; < 0 means removed.
+	// 	 * @param aChangeType         changeType.
+	// 	 */
+	// 	// void NoteChange(in nsMsgViewIndex aFirstLineChanged, in long aNumRows,
+	// 	// 	in nsMsgViewNotificationCodeValue aChangeType);
 
-		//let rangeCount = treeSelection.getRangeCount();
-		// nsIMsgDBView.idl
-		// NoteChange(nsMsgViewIndex, PRInt32, nsMsgViewNotificationCodeValue)
-		// const nsMsgViewNotificationCodeValue changed = 2;
-		/**
-		 * Notify tree that rows have changed.
-		 *
-		 * @param aFirstLineChanged   first view index for changed rows.
-		 * @param aNumRows            number of rows changed; < 0 means removed.
-		 * @param aChangeType         changeType.
-		 */
-		// void NoteChange(in nsMsgViewIndex aFirstLineChanged, in long aNumRows,
-		// 	in nsMsgViewNotificationCodeValue aChangeType);
+	// 	// MAYBE: probably a good idea to change all rows in a view or at least add func parameter
+	// 	// https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsITreeBoxObject#invalidateCell
+	// 	view.NoteChange(row, 1, 2);
+	// }
 
-		// MAYBE: probably a good idea to change all rows in a view or at least add func parameter
-		// https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsITreeBoxObject#invalidateCell
-		view.NoteChange(row, 1, 2);
-	}
-
-	getStorageFolder(){
-		return this.Prefs.storageOption == "folder" ? this.Prefs.storageFolder : "";
-	}
+	// getStorageFolder(): string {
+	// 	return this.Prefs?.storageOption == "folder" ? this.Prefs.storageFolder : "";
+	// }
 
 	// Not used currently
 	// realWindowWrap(realWindow){
@@ -283,8 +313,8 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 	// 	}
 	// }
 
-	getAPI(context) {
-		var API = this;
+	getAPI(context: any) {
+		var API: QApp = this;
 		context.callOnClose(API);
 
 		return {
@@ -292,7 +322,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				onNoteRequest: new ExtensionCommon.EventManager({
 					context,
 					name: "qapp.onNoteRequest",
-					register: fire => {
+					register: (fire: ExtensionCommon.Fire) => {
 						// It makes sense to allow only one note requester
 						API.noteGrabber.setProvider(keyId => {
 							return fire.async(keyId);
@@ -305,13 +335,13 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 				onKeyDown: new ExtensionCommon.EventManager({
 					context,
 					name: "qapp.onKeyDown",
-					register: fire => {
+					register: (fire: ExtensionCommon.Fire) => {
 						let interested = ["altKey", "code", "ctrlKey", "isComposing", "key", "location", "metaKey", "repeat", "shiftKey"];
-						const l = e => {
-							let e1 = {};
+						const l = (e: KeyboardEvent) => {
+							let e1: any = {};
 							for(let k of interested){
 								// e1[k] = e[k] !== undefined ? e[k] : undefined;
-								e1[k] = e[k];
+								e1[k] = k in e ? e[k as keyof KeyboardEvent] : undefined;
 							}
 
 							let e2 = fire.sync(e1);
@@ -332,7 +362,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 				}).api(),
 				// TODO: pass windowId
-				async init(options){
+				async init(){
 					QDEB&&console.debug("qapp.init()");
 
 					// Remove old style sheet in case it still lay around, for example, after update
@@ -361,49 +391,62 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 							icon: true,
 							resizable: true,
 							sortable: true,
-							textCallback: function(msgHdr){
+							textCallback: function(msgHdr: any){
+								// TODO: batch multiple note requests
 								let note = API.noteGrabber.get(msgHdr.messageId, () => {
 									ThreadPaneColumns.refreshCustomColumn("qnote");
 								});
 
-								return note.exists ? note.text : null;
+								return note?.exists ? note.text : null;
 							},
 							iconCellDefinitions: iconCellDefinitions,
 							iconHeaderUrl: extension.baseURI.resolve("resource://qnote/images/icon-column.png"),
-							iconCallback: function(msgHdr){
+							iconCallback: function(msgHdr: any){
 								let note = API.noteGrabber.get(msgHdr.messageId, () => {
 									ThreadPaneColumns.refreshCustomColumn("qnote");
 								});
 
-								return note.exists ? "qnote_exists" : "qnote_off";
+								return note?.exists ? "qnote_exists" : "qnote_off";
 							}
 						});
 					}
 
 					API.installKeyboardHandler(w);
 
-					// TODO: probably window not needed. Should scan suitable windows instead
-					QDEB&&console.debug("Installing custom filter");
-					API.QNoteFilter = new QNoteFilter({
-						API: API,
-						QDEB: QDEB,
-						w: w
-					});
+					QDEB&&console.debug("Installing custom term");
 
-					QDEB&&console.debug("Installing custom action");
-					API.QNoteAction = new QNoteAction({
-						API: API,
-					});
+					if(MailServices.filters.getCustomTerm(API.customTermId)){
+						QDEB&&console.log(`CustomTerm ${API.customTermId} already defined`);
+					} else {
+						QDEB&&console.log(`Defining CustomTerm ${API.customTermId}`);
+						MailServices.filters.addCustomTerm(API.customTerm);
+					}
 
-					API.EventDispatcher.addListener('domwindowopened', aSubject => {
+					// TODO: broken with TB > 115, disabling for now
+					// API.QNoteFilter = new QNoteFilter({
+					// 	API: API,
+					// 	QDEB: QDEB,
+					// 	w: w
+					// });
+
+					// QDEB&&console.debug("Installing custom action");
+					// API.QNoteAction = new QNoteAction({
+					// 	API: API,
+					// });
+
+					API.EventDispatcher.addListener('domwindowopened', (aSubject: MozWindow) => {
 						this.printerAttacher(aSubject);
 					});
 				},
-				async setDebug(on){
+				async setDebug(on: boolean){
 					QDEB = on;
 				},
-				async setPrefs(Prefs){
+				async setPrefs(Prefs: Preferences){
 					API.Prefs = Prefs;
+
+					API.customAction.storageFolder = Prefs.storageFolder;
+					API.customFilter.storageFolder = Prefs.storageFolder;
+					API.customTerm.storageFolder = Prefs.storageFolder;
 
 					// TODO: currently it is not possible to have text and icon simultaneously
 					// if(ThreadPaneColumns){
@@ -411,34 +454,37 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					// 	API.ColumnHandler.columnHandler.limit = Prefs.showFirstChars;
 					// }
 				},
-				async attachNoteToPrinter(windowId, data){
-					let fName = "qapp.attachNoteToPrinter()";
+				async attachNoteToPrinter(w: MozWindow, note?: NoteData){
+					const fName = "qapp.attachNoteToPrinter()";
 
-					if(!API.Prefs.printAttachTop && !API.Prefs.printAttachBottom){
+					if(!API.Prefs || !(API.Prefs.printAttachTop || API.Prefs.printAttachBottom)){
 						QDEB&&console.debug(`${fName} - no prefs`);
 						return;
 					}
 
-					if(!(data && data.exists)){
+					if(!(note && note.exists)){
 						QDEB&&console.debug(`${fName} - no note`);
 						return;
 					}
 
-					let w = API.id2RealWindow(windowId);
+					// let w = API.id2RealWindow(windowId);
 					if(!w || !w.document){
 						QDEB&&console.debug(`${fName} - no window`);
 						return;
 					}
 
-					let body = w.document.getElementsByTagName('body');
-					if(body.length){
-						body = body[0];
+					let body: HTMLBodyElement;
+
+					const bodyCollection = w.document.getElementsByTagName('body');
+
+					if(bodyCollection.length){
+						body = bodyCollection[0];
 					} else {
 						QDEB&&console.debug(`${fName} - no BODY`);
 						return;
 					}
 
-					QDEB&&console.debug(`${fName}`, data);
+					QDEB&&console.debug(`${fName}`, note);
 
 					// Cleanup attached notes
 					let domNodes = w.document.getElementsByClassName('qnote-insidenote');
@@ -450,16 +496,16 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						body.insertAdjacentHTML(
 							'afterbegin',
 							'<div class="qnote-insidenote qnote-insidenote-top" style="margin: 0; padding: 0; border: 1px solid black;">' +
-								this.applyTemplate(API.Prefs.attachTemplate, data) +
+								this.applyTemplate(API.Prefs.attachTemplate, note) +
 							'</div>'
 						);
 
 						const el = document.querySelector('.qnote-insidenote-top .qnote-text-span');
 						if(el){
 							if(API.Prefs.treatTextAsHtml){
-								el.innerHTML = data.text;
+								el.innerHTML = note.text ?? "";
 							} else {
-								el.textContent = data.text;
+								el.textContent = note.text;
 							}
 						}
 					}
@@ -468,28 +514,33 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						body.insertAdjacentHTML(
 							'beforeend',
 							'<div class="qnote-insidenote qnote-insidenote-bottom" style="margin: 0; padding: 0; border: 1px solid black;">' +
-								this.applyTemplate(API.Prefs.attachTemplate, data) +
+								this.applyTemplate(API.Prefs.attachTemplate, note) +
 							'</div>'
 						);
 
-						const el = document.querySelector('.qnote-insidenote-bottom .qnote-text-span');
-						if(el){
+						const qnoteTextSpan = document.querySelector('.qnote-insidenote-bottom .qnote-text-span');
+						if(qnoteTextSpan){
+							const el = qnoteTextSpan as HTMLSpanElement;
 							if(API.Prefs.treatTextAsHtml){
-								el.innerHTML = data.text;
+								el.innerHTML = note.text ?? "";
 							} else {
-								el.textContent = data.text;
+								el.textContent = note.text ?? "";
 							}
 						}
 					}
 				},
 				// We need this step to grab messageUrisToPrint list
-				printerAttacher(aSubject) {
+				printerAttacher(aSubject: MozWindow) {
 					// Save list of printing urls
-					var messageUrisToPrint;
+					var messageUrisToPrint: Array<string>;
 					var self = this;
 
-					let printerWindowDOMListener = e => {
-						let document = e.target;
+					let printerWindowDOMListener = (e: Event) => {
+						if(!e.target){
+							return;
+						}
+
+						let document = e.target as Document;
 
 						// Not interested
 						if(
@@ -510,14 +561,20 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						// let msg = messenger.msgHdrFromURI(messageUrisToPrint.shift());
 						let msg = messenger.msgHdrFromURI(messageUrisToPrint[0]);
 
-						self.attachNoteToPrinter(document.defaultView, API.noteGrabber.get(msg.messageId));
+						// TODO: test
+						// self.attachNoteToPrinter(document.defaultView, API.noteGrabber.get(msg.messageId));
+						self.attachNoteToPrinter(aSubject, API.noteGrabber.get(msg.messageId));
 					};
 
-					let domLoadedListener = e => {
-						let document = e.target;
+					let domLoadedListener = (e: Event) => {
+						let document = e.target as Document;
+
+						if(!document){
+							return;
+						}
 
 						// Level 1 filter - check if this print or print-preview window
-						if(!(document && document.URL.includes('chrome://messenger/content/msgPrintEngine'))){
+						if(!(document.URL.includes('chrome://messenger/content/msgPrintEngine'))){
 							return;
 						}
 
@@ -526,14 +583,17 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 							return;
 						}
 
-						messageUrisToPrint = document.defaultView.arguments[1];
+						if(document.defaultView){
+							// @ts-ignore
+							messageUrisToPrint = document.defaultView.arguments[1];
+						}
 
 						pDocument.addEventListener("DOMContentLoaded", printerWindowDOMListener);
 					};
 
 					aSubject.addEventListener("DOMContentLoaded", domLoadedListener);
 				},
-				async messagePaneFocus(windowId){
+				async messagePaneFocus(windowId: number){
 					// https://developer.thunderbird.net/add-ons/updating/tb115/adapt-to-changes-in-thunderbird-103-115
 					let w = API.id2RealWindow(windowId);
 					if(w && w.gFolderDisplay && w.gFolderDisplay.tree){
@@ -546,24 +606,27 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						QDEB&&console.debug("focusMessagePane() - w.gFolderDisplay.tree not found", w);
 					}
 				},
-				async updateView(windowId, keyId){
-					let w = null;
-					if(windowId) {
-						w = API.id2RealWindow(windowId);
-					}
-
-					API.updateView(w, keyId);
+				async updateColumsView() {
+					ThreadPaneColumns?.refreshCustomColumn("qnote");
 				},
-				applyTemplate(t, data) {
+				// async updateView(windowId: number, keyId: string){
+				// 	let w = null;
+				// 	if(windowId) {
+				// 		w = API.id2RealWindow(windowId);
+				// 	}
+
+				// 	API.updateView(w, keyId);
+				// },
+				applyTemplate(t: string, data: NoteData) {
 					return t
-						.replace("{{ qnote_date }}", data.tsFormatted)
+						.replace("{{ qnote_date }}", data.tsFormatted ?? "")
 						.replace("{{ qnote_text }}", '<span class="qnote-text-span"></span>')
 					;
 				},
-				async attachToMessagePane(messagepane, aMessageDisplay, data){
+				async attachToMessagePane(messagepane: any, aMessageDisplay: any, data: NoteData){
 					let fName = `qapp.attachToMessagePane()`;
 
-					if(!API.Prefs.messageAttachTop && !API.Prefs.messageAttachBottom){
+					if(!API.Prefs || !(API.Prefs.messageAttachTop || API.Prefs.messageAttachBottom)){
 						QDEB&&console.debug(`${fName} - no prefs`);
 						return;
 					}
@@ -645,8 +708,9 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					}
 
 					// Double click on embedded message
-					document.querySelectorAll('.qnote-insidenote').forEach(function(e, i){
+					document.querySelectorAll('.qnote-insidenote').forEach((e: HTMLElement) => {
 						e.addEventListener("dblclick", function(){
+							// @ts-ignore
 							notifyTools.notifyBackground({
 								command: "pop",
 								messageId: data.keyId
@@ -655,78 +719,74 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						});
 					});
 				},
-				async attachNoteToMessage(windowId, data){
-					return;
-					let fName = `qapp.attachNoteToMessage(${windowId})`;
+				// TODO: currently experimenting with content script
+				async attachNoteToMessage(windowId: number, data: NoteData){
+					// let fName = `qapp.attachNoteToMessage(${windowId})`;
 
-					if(!API.Prefs.messageAttachTop && !API.Prefs.messageAttachBottom){
-						QDEB&&console.debug(`${fName} - no prefs`);
-						return;
-					}
+					// if(!API.Prefs.messageAttachTop && !API.Prefs.messageAttachBottom){
+					// 	QDEB&&console.debug(`${fName} - no prefs`);
+					// 	return;
+					// }
 
-					if(!data){
-						QDEB&&console.debug(`${fName} - no note data`);
-						return;
-					}
+					// if(!data){
+					// 	QDEB&&console.debug(`${fName} - no note data`);
+					// 	return;
+					// }
 
-					let w = API.id2RealWindow(windowId);
-					if(!w || !w.document){
-						QDEB&&console.debug(`${fName} - no window`);
-						return;
-					}
+					// let w = API.id2RealWindow(windowId);
+					// if(!w || !w.document){
+					// 	QDEB&&console.debug(`${fName} - no window`);
+					// 	return;
+					// }
 
-					let messagepane;
-					let aMessageDisplay;
+					// let messagepane;
+					// let aMessageDisplay;
 
-					// about:message, new window
-					if(w.messageBrowser && w.messageBrowser.contentWindow){
-						let mailMessageWindow = w.messageBrowser.contentWindow;
+					// // about:message, new window
+					// if(w.messageBrowser && w.messageBrowser.contentWindow){
+					// 	let mailMessageWindow = w.messageBrowser.contentWindow;
 
-						messagepane = mailMessageWindow.document.getElementById('messagepane');
-						aMessageDisplay = mailMessageWindow.gMessage;
-						this.attachToMessagePane(messagepane, aMessageDisplay, data);
-					} else if(w.gTabmail){
-						// TODO: Update only changed tab. Now we iterate through all mail tabs.
-						w.gTabmail.tabInfo.filter(
-							t => t.mode.name == "mailMessageTab"
-						).map(t => {
-							let mailMessageWindow = t.chromeBrowser.contentWindow;
+					// 	messagepane = mailMessageWindow.document.getElementById('messagepane');
+					// 	aMessageDisplay = mailMessageWindow.gMessage;
+					// 	this.attachToMessagePane(messagepane, aMessageDisplay, data);
+					// } else if(w.gTabmail){
+					// 	// TODO: Update only changed tab. Now we iterate through all mail tabs.
+					// 	w.gTabmail.tabInfo.filter(
+					// 		t => t.mode.name == "mailMessageTab"
+					// 	).map(t => {
+					// 		let mailMessageWindow = t.chromeBrowser.contentWindow;
 
-							messagepane = mailMessageWindow.document.getElementById('messagepane');
-							aMessageDisplay = mailMessageWindow.gMessage;
+					// 		messagepane = mailMessageWindow.document.getElementById('messagepane');
+					// 		aMessageDisplay = mailMessageWindow.gMessage;
 
-							this.attachToMessagePane(messagepane, aMessageDisplay, data);
-						});
+					// 		this.attachToMessagePane(messagepane, aMessageDisplay, data);
+					// 	});
 
-						// Current pane
-						if(w.gTabmail.currentAbout3Pane){
-							let mail3PaneWindow = w.gTabmail.currentAbout3Pane;
-							let mailMessageWindow = mail3PaneWindow.messageBrowser.contentWindow
+					// 	// Current pane
+					// 	if(w.gTabmail.currentAbout3Pane){
+					// 		let mail3PaneWindow = w.gTabmail.currentAbout3Pane;
+					// 		let mailMessageWindow = mail3PaneWindow.messageBrowser.contentWindow
 
-							messagepane = mailMessageWindow.document.getElementById('messagepane');
-							aMessageDisplay = mailMessageWindow.gMessage;
+					// 		messagepane = mailMessageWindow.document.getElementById('messagepane');
+					// 		aMessageDisplay = mailMessageWindow.gMessage;
 
-							this.attachToMessagePane(messagepane, aMessageDisplay, data);
-						}
-					} else if(w.gMessageDisplay && w.gMessageDisplay.displayedMessage) {
-						// Legacy
-						messagepane = w.document.getElementById('messagepane');
-						aMessageDisplay = w.gMessageDisplay.displayedMessage;
-						this.attachToMessagePane(messagepane, aMessageDisplay, data);
-					}
+					// 		this.attachToMessagePane(messagepane, aMessageDisplay, data);
+					// 	}
+					// } else if(w.gMessageDisplay && w.gMessageDisplay.displayedMessage) {
+					// 	// Legacy
+					// 	messagepane = w.document.getElementById('messagepane');
+					// 	aMessageDisplay = w.gMessageDisplay.displayedMessage;
+					// 	this.attachToMessagePane(messagepane, aMessageDisplay, data);
+					// }
 				},
-				/**
-				 * @param {number} windowId
-				 * @param {Array} NoteArray
-				 */
-				async attachNotesToMultiMessage(windowId, NoteArray){
+				async attachNotesToMultiMessage(windowId: number, notes: Array<NoteData>){
 					// TODO: does not work with TB128
 					let fName = `qapp.attachNotesToMultiMessage(${windowId})`;
 
-					if(!NoteArray){
-						QDEB&&console.debug(`${fName} - no note data`);
-						return;
-					}
+					// if(!notes){
+					// 	QDEB&&console.debug(`${fName} - no note data`);
+					// 	return;
+					// }
 
 					let w = API.id2RealWindow(windowId);
 					if(!w || !w.document){
@@ -734,7 +794,7 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						return;
 					}
 
-					let messagepane = w.document.getElementById('multimessage');
+					let messagepane = w.document.getElementById('multimessage') as any;
 					if(!messagepane || !messagepane.contentDocument){
 						QDEB&&console.debug(`${fName} - no multimessage`);
 						return;
@@ -760,12 +820,12 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 					let view = aFolderDisplay.view.dbView;
 					let summaryNodes = cw.gMessageSummary._msgNodes;
 
-					document.querySelectorAll(".qnote-mm").forEach(e => {
+					document.querySelectorAll(".qnote-mm").forEach((e: HTMLElement) => {
 						e.remove();
 					});
 
 					if(summaryNodes){
-						NoteArray.forEach(note => {
+						notes.forEach(note => {
 							let msgHdr = view.db.getMsgHdrForMessageID(note.keyId);
 							if(msgHdr){
 								// summaryKey based on mail\base\content\multimessageview.js
@@ -783,24 +843,24 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 						});
 					}
 				},
-				async saveNoteCache(note){
-					API.noteGrabber.set(note.keyId, note);
+				async saveNoteCache(note: NoteData){
+					API.noteGrabber.set(note);
 				},
 				async clearNoteCache(){
 					API.noteGrabber.clear();
 				},
-				async deleteNoteCache(keyId){
+				async deleteNoteCache(keyId: string){
 					API.noteGrabber.delete(keyId);
 				},
 				async getProfilePath() {
-					return Cc['@mozilla.org/file/directory_service;1']
+					return Cc["@mozilla.org/file/directory_service;1"]
 						.getService(Ci.nsIProperties)
 						.get('ProfD', Ci.nsIFile)
 						.path
 					;
 				},
 				async createStoragePath() {
-					let path = Cc['@mozilla.org/file/directory_service;1']
+					let path = Cc["@mozilla.org/file/directory_service;1"]
 						.getService(Ci.nsIProperties)
 						.get('ProfD', Ci.nsIFile)
 					;
@@ -821,3 +881,5 @@ var qapp = class extends ExtensionCommon.ExtensionAPI {
 		ThreadPaneColumns.removeCustomColumn('qnote');
 	}
 }
+
+var qapp = QApp;
