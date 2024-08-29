@@ -49,33 +49,33 @@ declare class nsISupports {
 	QueryInterface<T>(type: Type<T>): T;
 }
 
-type IteratorUtilsPath = "resource:///modules/iteratorUtils.jsm";
-type MailServicesPath = "resource:///modules/MailServices.jsm";
-type ExtensionPopupsPath = "resource:///modules/ExtensionPopups.jsm";
-// type ExtensionPopupsSysPath = "resource:///modules/ExtensionPopups.sys.mjs";
-type ExtensionParentPath = "resource://gre/modules/ExtensionParent.jsm";
-type ExtensionCommonPath = "resource://gre/modules/ExtensionCommon.jsm";
-type QEventDispatcherPath = "resource://qnote/modules/QEventDispatcher.mjs";
-type XULNoteWindowPath = "resource://qnote/modules/XULNoteWindow.mjs";
-type DOMLocalizatorPath = "resource://qnote/modules/DOMLocalizator.mjs"
-type QCachePath = "resource://qnote/modules/QCache.mjs"
-type ThreadPaneColumnsPath = "chrome://messenger/content/ThreadPaneColumns.mjs";
-type ThreadPaneColumnsOldPath = "chrome://messenger/content/thread-pane-columns.mjs"
-type QNoteFilePath = "resource://qnote/modules-exp/QNoteFile.mjs";
-type XNoteFilePath = "resource://qnote/modules-exp/XNoteFile.mjs";
-type FileUtilsPath = "resource://gre/modules/FileUtils.jsm";
-type ServicesPath = "resource://gre/modules/Services.jsm";
-type ExtensionUtilsPath = "resource://gre/modules/ExtensionUtils.jsm";
-type QNoteFiltersPath = "resource://qnote/modules-exp/QNoteFilters.mjs";
-type NoteDataPath = "resource://qnote/modules/Note.mjs";
-type ApiPath = "resource://qnote/modules/api.mjs";
+type ThreadPaneColumnsPath     = "chrome://messenger/content/ThreadPaneColumns.mjs";
+type ThreadPaneColumnsOldPath  = "chrome://messenger/content/thread-pane-columns.mjs"
+type ExtensionParentPath       = "resource://gre/modules/ExtensionParent.jsm";
+type ExtensionCommonPath       = "resource://gre/modules/ExtensionCommon.jsm";
+type FileUtilsPath             = "resource://gre/modules/FileUtils.jsm";
+type ServicesPath              = "resource://gre/modules/Services.jsm";
+type ExtensionUtilsPath        = "resource://gre/modules/ExtensionUtils.jsm";
+type IteratorUtilsPath         = "resource:///modules/iteratorUtils.jsm";
+type MailServicesPath          = "resource:///modules/MailServices.jsm";
+type ExtensionPopupsPath       = "resource:///modules/ExtensionPopups.jsm";
+
+type QNoteFilePath             = "resource://qnote/modules-exp/QNoteFile.mjs";
+type XNoteFilePath             = "resource://qnote/modules-exp/XNoteFile.mjs";
+type QNoteFiltersPath          = "resource://qnote/modules-exp/QNoteFilters.mjs";
+type QEventDispatcherPath      = "resource://qnote/modules/QEventDispatcher.mjs";
+type DOMLocalizatorPath        = "resource://qnote/modules/DOMLocalizator.mjs"
+type QCachePath                = "resource://qnote/modules/QCache.mjs"
+type NoteDataPath              = "resource://qnote/modules/Note.mjs";
+type ApiPath                   = "resource://qnote/modules/api.mjs";
+type NotePopupsPath            = "resource://qnote/modules/NotePopups.mjs"
 
 interface QEventDispatcherExport {
 	QEventDispatcher: typeof import("../modules/QEventDispatcher.mjs").QEventDispatcher;
 }
 
-interface XULNoteWindowExport {
-	QPopupOptions: import("../modules/XULNoteWindow.mjs").QPopupOptions;
+interface NotePopupsExport {
+	QPopupOptions: import("../modules/NotePopups.mjs").QPopupOptions;
 }
 
 interface DOMLocalizatorExport {
@@ -227,7 +227,6 @@ declare namespace Components
 		public static import(path: FileUtilsPath): any;
 		public static import(path: ExtensionUtilsPath): any;
 		public static importESModule(path: QEventDispatcherPath): QEventDispatcherExport;
-		public static importESModule(path: XULNoteWindowPath): XULNoteWindowExport;
 		public static importESModule(path: DOMLocalizatorPath): DOMLocalizatorExport;
 		public static importESModule(path: ExtensionPopupsPath): BasePopupExport;
 		public static importESModule(path: QCachePath): QCacheExport;
@@ -240,6 +239,7 @@ declare namespace Components
 		public static importESModule(path: QNoteFiltersPath): QNoteFiltersExports;
 		public static importESModule(path: NoteDataPath): NoteDataExports;
 		public static importESModule(path: ApiPath): ApiExports;
+		public static importESModule(path: NotePopupsPath): NotePopupsExport;
 
 		// public static importESModule(path: ExtensionPopupsSysPath): BasePopupExport;
 		// public static importESModule(path: string): any;

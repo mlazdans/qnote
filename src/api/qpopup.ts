@@ -3,7 +3,7 @@ var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var { BasePopup } = ChromeUtils.import("resource:///modules/ExtensionPopups.jsm");
 // var { BasePopup } = ChromeUtils.importESModule("resource:///modules/ExtensionPopups.sys.mjs");
 var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
-var { QPopupOptions } = ChromeUtils.importESModule("resource://qnote/modules/XULNoteWindow.mjs");
+var { QPopupOptions } = ChromeUtils.importESModule("resource://qnote/modules/NotePopups.mjs");
 // var { DOMLocalizator } = ChromeUtils.importESModule("resource://qnote/modules/DOMLocalizator.mjs");
 
 interface Box {

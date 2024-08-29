@@ -1,6 +1,4 @@
-import { NoteData } from "./Note.mjs";
-import { Preferences } from "./Preferences.mjs";
-import { QPopupOptions } from "./XULNoteWindow.mjs";
+import { QPopupOptions } from "./NotePopups.mjs";
 
 // Declarations
 interface MessageData {

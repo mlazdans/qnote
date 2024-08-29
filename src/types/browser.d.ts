@@ -1,7 +1,7 @@
 import 'thunderbird-webext-browser';
 import { NoteData } from '../modules/Note.mjs';
 import { QAppPreferences } from '../modules/Preferences.mjs';
-import { QPopupOptions, QPopupOptionsPartial } from '../modules/XULNoteWindow.mts';
+import { QPopupOptions, QPopupOptionsPartial } from '../modules/NotePopups.mts';
 import { QNoteFileAPI, XNoteFileAPI } from '../modules/api.mts';
 
 export {}

@@ -1,32 +1,33 @@
 import { INote, NoteData } from './Note.mjs';
-import { QEventDispatcher, QEventListener } from './QEventDispatcher.mjs';
+import { Preferences } from './Preferences.mjs';
+import { PopupAnchor } from './utils.mjs';
+// import { QEventDispatcher, QEventListener } from './QEventDispatcher.mjs';
 
 export class DirtyStateError extends Error {};
 
-var QDEB = true;
 // var _ = browser.i18n.getMessage;
 
-type DefaultNoteWindowListener = QEventListener & "afterclose";
+// type DefaultNoteWindowListener = QEventListener & "afterclose";
 
-export interface NoteWindow extends QEventDispatcher {
+export interface NotePopup {
 	id: number;
 	windowId: number;
 	note: INote;
-	loadedNoteData: NoteData | undefined;
+	flags: number | undefined;
+	// loadedNoteData: NoteData | undefined;
 	// messageId: string | undefined;
 	// needSaveOnClose: boolean;
 	// shown: boolean;
 	// dirty: boolean;
-	flags: number | undefined;
 	// constructor(windowId: number);
 	// update(note: NoteData): Promise<void>
 	focus(): Promise<void>
 	isFocused(): Promise<boolean>
 	pop(): Promise<void>
-	close(): Promise<void>
+	// close(): Promise<void>
 }
 
-export abstract class DefaultNoteWindow extends QEventDispatcher implements NoteWindow {
+export abstract class DefaultNotePopup implements NotePopup {
 	id: number;
 	windowId: number;
 	note: INote;
@@ -38,15 +39,15 @@ export abstract class DefaultNoteWindow extends QEventDispatcher implements Note
 	flags: number | undefined;
 
 	constructor(id: number, windowId: number, note: INote) {
-		super(["afterclose"]);
+		// super(["afterclose"]);
 		this.id = id;
 		this.note = note;
 		this.windowId = windowId;
 	}
 
-	addListener(name: DefaultNoteWindowListener, listener: (w: NoteWindow) => void): void {
-		super.addListener(name, listener);
-	}
+	// addListener(name: DefaultNoteWindowListener, listener: (w: NoteWindow) => void): void {
+	// 	super.addListener(name, listener);
+	// }
 
 	// async loadNoteForMessage(id: MessageId) {
 	// 	return loadNoteForMessage(id).then(note => {
@@ -62,14 +63,14 @@ export abstract class DefaultNoteWindow extends QEventDispatcher implements Note
 	abstract isFocused(): Promise<boolean>
 	// abstract update(note: NoteData): Promise<void>
 
-	async close(){
-		this.fireListeners("afterclose", this);
-		this.removeAllListeners();
-		// this.popupId = undefined;
-		// this.messageId = undefined;
-		// this.needSaveOnClose = true;
-		// this.shown = false;
-	}
+	// async close(){
+	// 	this.fireListeners("afterclose", this);
+	// 	this.removeAllListeners();
+	// 	// this.popupId = undefined;
+	// 	// this.messageId = undefined;
+	// 	// this.needSaveOnClose = true;
+	// 	// this.shown = false;
+	// }
 
 	get isModified(): boolean {
 		if(this.note){
@@ -261,4 +262,131 @@ export abstract class DefaultNoteWindow extends QEventDispatcher implements Note
 	// 	});
 	// }
 
+}
+
+/**
+ * These are handled by qpopup API:
+ *      focused?: boolean | null;
+ *      top?: number | null;
+ *      left?: number | null;
+ *      offsetTop?: number | null;
+ *      offsetLeft?: number | null;
+ *      anchor?: PopupAnchor | null;
+ *      anchorPlacement?: string | null;
+ * These are handled by qpopup content script
+ *     width?: number | null;
+ *     height?: number | null;
+ *     title?: string | null;
+ *     text?: string | null;
+ *     placeholder?: string | null;
+ *     focusOnDisplay?: boolean | null;
+ *     enableSpellChecker?: boolean | null;
+ */
+
+// All fields will be sent to qpopup API, optional fields set to null
+export class QPopupOptions {
+	id: number
+	focused: boolean | null = null
+	top: number | null = null
+	left: number | null = null
+	offsetTop: number | null = null
+	offsetLeft: number | null = null
+	width: number | null = null
+	height: number | null = null
+	anchor: PopupAnchor | null = null
+	anchorPlacement: string | null = null
+	title: string | null = null
+	text: string | null = null
+	placeholder: string | null = null
+	focusOnDisplay: boolean | null = null
+	enableSpellChecker: boolean | null = null
+	constructor(id: number) {
+		this.id = id;
+	}
+}
+
+type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>
+
+export type QPopupOptionsPartial = AtLeast<QPopupOptions, 'id'>
+
+export class QNotePopup extends DefaultNotePopup {
+	prefs: Preferences;
+
+	constructor(id: number, windowId: number, note: INote, prefs: Preferences) {
+		super(id, windowId, note);
+		this.prefs = prefs;
+
+		browser.qpopup.create(windowId, this.note2QPopupOptions()).then(() => {
+			console.log(`created popup ${id}`);
+		});
+	}
+
+	note2QPopupOptions(): QPopupOptionsPartial {
+		const opt: QPopupOptionsPartial = { id: this.id };
+
+		opt.width = this.note.data.width || this.prefs.width;
+		opt.height = this.note.data.height || this.prefs.height;
+		opt.left = this.note.data.left;
+		opt.top = this.note.data.top;
+
+		if(this.prefs.alwaysDefaultPlacement){
+			opt.width = this.prefs.width;
+			opt.height = this.prefs.height;
+			opt.left = null;
+			opt.top = null;
+		}
+
+		opt.text = this.note.data.text;
+		opt.title = "QNote: " + this.note.data.ts; // TODO: format
+
+		return opt;
+	}
+
+	// async update(){
+	// 	return browser.qpopup.update(this.note2QPopupOptions());
+	// }
+
+	// TODO: fix
+	async isFocused() {
+		console.error("TODO QNotePopup.isFocused()");
+		return true;
+		// return browser.qpopup.get(this.popupId).then(popupInfo => popupInfo ? popupInfo.focused : false);
+	}
+
+	// TODO: fix
+	async focus() {
+		console.error("TODO QNotePopup.focus()");
+		// return this.update({
+		// 	focused: true
+		// });
+	}
+
+	// async close() {
+	// 	browser.qpopup.remove(this.id).then(super.close);
+	// }
+
+	async pop() {
+		browser.qpopup.pop(this.id).then(() => {
+			let l = (id: number) => {
+				console.log(`popped onRemoved ${this.id}:${id}`);
+				// super.close();
+				browser.qpopup.onRemoved.removeListener(l);
+			};
+			browser.qpopup.onRemoved.addListener(l);
+			console.log(`popped popup ${this.id}`);
+		});
+
+		// return super.pop(async opt => {
+		// 	opt = Object.assign(opt, {
+		// 		windowId: this.windowId,
+		// 		anchor: Prefs.anchor,
+		// 		anchorPlacement: Prefs.anchorPlacement
+		// 	});
+
+		// 	return browser.qpopup.create(opt).then(popupInfo => {
+		// 		this.popupId = popupInfo.id;
+		// 		return popupInfo;
+		// 	});
+		// });
+	}
 }

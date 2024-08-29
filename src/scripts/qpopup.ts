@@ -1,6 +1,6 @@
 import { DOMLocalizator } from "../modules/DOMLocalizator.mjs";
 import { QPopupDOMContentLoadedMessage, UpdateQPoppupMessage } from "../modules/Messages.mjs";
-import { QPopupOptions, QPopupOptionsPartial } from "../modules/XULNoteWindow.mjs";
+import { QPopupOptions, QPopupOptionsPartial } from "../modules/NotePopups.mjs";
 
 var QDEB = true;
 
