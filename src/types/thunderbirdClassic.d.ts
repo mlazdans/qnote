@@ -66,9 +66,7 @@ type XNoteFilePath = "resource://qnote/modules-exp/XNoteFile.mjs";
 type FileUtilsPath = "resource://gre/modules/FileUtils.jsm";
 type ServicesPath = "resource://gre/modules/Services.jsm";
 type ExtensionUtilsPath = "resource://gre/modules/ExtensionUtils.jsm";
-type QCustomTermPath = "resource://qnote/modules-exp/QCustomTerm.mjs";
-type QNoteActionPath = "resource://qnote/modules-exp/QNoteAction.mjs";
-type QNoteFilterPath = "resource://qnote/modules-exp/QNoteFilter.mjs";
+type QNoteFiltersPath = "resource://qnote/modules-exp/QNoteFilters.mjs";
 type NoteDataPath = "resource://qnote/modules/Note.mjs";
 type ApiPath = "resource://qnote/modules/api.mjs";
 
@@ -96,16 +94,10 @@ interface XNoteFileExports {
 	XNoteFile: typeof import("../modules-exp/XNoteFile.mts").XNoteFile;
 }
 
-interface QCustomTermExports {
-	QCustomTerm: typeof import("../modules-exp/QCustomTerm.mts").QCustomTerm;
-}
-
-interface QNoteActionExports {
-	QNoteAction: typeof import("../modules-exp/QNoteAction.mts").QNoteAction;
-}
-
-interface QNoteFilterExports {
-	QNoteFilter: typeof import("../modules-exp/QNoteFilter.mts").QNoteFilter;
+interface QNoteFiltersExports {
+	QCustomTerm: typeof import("../modules-exp/QNoteFilters.mts").QCustomTerm;
+	QNoteAction: typeof import("../modules-exp/QNoteFilters.mts").QNoteAction;
+	QNoteFilter: typeof import("../modules-exp/QNoteFilters.mts").QNoteFilter;
 }
 
 interface NoteDataExports {
@@ -245,9 +237,7 @@ declare namespace Components
 		public static importESModule(path: XNoteFilePath): XNoteFileExports;
 		public static importESModule(path: FileUtilsPath): any;
 		public static importESModule(path: ServicesPath): any;
-		public static importESModule(path: QCustomTermPath): QCustomTermExports;
-		public static importESModule(path: QNoteActionPath): QNoteActionExports;
-		public static importESModule(path: QNoteFilterPath): QNoteFilterExports;
+		public static importESModule(path: QNoteFiltersPath): QNoteFiltersExports;
 		public static importESModule(path: NoteDataPath): NoteDataExports;
 		public static importESModule(path: ApiPath): ApiExports;
 
