@@ -182,7 +182,7 @@ export class XNoteFile {
 	fileExists(file: any){
 		return file && file.exists();
 	}
-	getExistingNoteFile(root: string, keyId: string){
+	getExistingFile(root: string, keyId: string){
 		let file;
 
 		if(this.fileExists(file = this.noteFile(root, keyId, NF_DO_ENCODE))){
@@ -226,14 +226,16 @@ export class XNoteFile {
 		tempFile.moveTo(null, file.leafName);
 	}
 	delete(root: string, keyId: string){
-		var file = this.getExistingNoteFile(root, keyId);
+		const file = this.getExistingFile(root, keyId);
 		if(file){
 			file.remove(false);
+			return true;
 		}
+		return false;
 	}
 	load(root: string, keyId: string): NoteData {
 		var note = new NoteData(keyId);
-		var file = this.getExistingNoteFile(root, keyId);
+		var file = this.getExistingFile(root, keyId);
 
 		if(!file){
 			return note;

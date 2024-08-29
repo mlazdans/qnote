@@ -69,10 +69,12 @@ export class QNoteFile {
 	}
 
 	delete(root: string, keyId: string){
-		var file = this.getExistingFile(root, keyId);
+		const file = this.getExistingFile(root, keyId);
 		if(file){
 			file.remove(false);
+			return true;
 		}
+		return false;
 	}
 
 	save(root: string, keyId: string, note: NoteData){
