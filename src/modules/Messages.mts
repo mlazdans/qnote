@@ -1,4 +1,4 @@
-import { QPopupOptions } from "./NotePopups.mjs";
+import { IQPopupOptions } from "./NotePopups.mjs";
 
 // Declarations
 interface MessageData {
@@ -39,7 +39,7 @@ interface QPopupDOMContentLoadedData extends MessageData {
 
 interface UpdateQPoppupData {
 	id: number,
-	opts: QPopupOptions
+	opts: IQPopupOptions
 }
 
 // Messages

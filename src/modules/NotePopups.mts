@@ -1,13 +1,10 @@
 import { INote, NoteData } from './Note.mjs';
 import { Preferences } from './Preferences.mjs';
 import { PopupAnchor } from './utils.mjs';
-// import { QEventDispatcher, QEventListener } from './QEventDispatcher.mjs';
+
+type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>
 
 export class DirtyStateError extends Error {};
-
-// var _ = browser.i18n.getMessage;
-
-// type DefaultNoteWindowListener = QEventListener & "afterclose";
 
 export interface NotePopup {
 	id: number;
@@ -26,6 +23,43 @@ export interface NotePopup {
 	pop(): Promise<void>
 	// close(): Promise<void>
 }
+
+// All fields will be sent to qpopup API, optional fields set to null
+// These are handled by qpopup API:
+//      focused?: boolean | null;
+//      top?: number | null;
+//      left?: number | null;
+//      offsetTop?: number | null;
+//      offsetLeft?: number | null;
+//      anchor?: PopupAnchor | null;
+//      anchorPlacement?: string | null;
+// These are handled by qpopup content script
+//     width?: number | null;
+//     height?: number | null;
+//     title?: string | null;
+//     text?: string | null;
+//     placeholder?: string | null;
+//     focusOnDisplay?: boolean | null;
+//     enableSpellChecker?: boolean | null;
+export interface IQPopupOptions {
+	id: number
+	focused: boolean | null
+	top: number | null
+	left: number | null
+	offsetTop: number | null
+	offsetLeft: number | null
+	width: number | null
+	height: number | null
+	anchor: PopupAnchor | null
+	anchorPlacement: string | null
+	title: string | null
+	text: string | null
+	placeholder: string | null
+	focusOnDisplay: boolean | null
+	enableSpellChecker: boolean | null
+}
+
+export type IQPopupOptionsPartial = AtLeast<IQPopupOptions, 'id'>
 
 export abstract class DefaultNotePopup implements NotePopup {
 	id: number;
@@ -264,51 +298,6 @@ export abstract class DefaultNotePopup implements NotePopup {
 
 }
 
-/**
- * These are handled by qpopup API:
- *      focused?: boolean | null;
- *      top?: number | null;
- *      left?: number | null;
- *      offsetTop?: number | null;
- *      offsetLeft?: number | null;
- *      anchor?: PopupAnchor | null;
- *      anchorPlacement?: string | null;
- * These are handled by qpopup content script
- *     width?: number | null;
- *     height?: number | null;
- *     title?: string | null;
- *     text?: string | null;
- *     placeholder?: string | null;
- *     focusOnDisplay?: boolean | null;
- *     enableSpellChecker?: boolean | null;
- */
-
-// All fields will be sent to qpopup API, optional fields set to null
-export class QPopupOptions {
-	id: number
-	focused: boolean | null = null
-	top: number | null = null
-	left: number | null = null
-	offsetTop: number | null = null
-	offsetLeft: number | null = null
-	width: number | null = null
-	height: number | null = null
-	anchor: PopupAnchor | null = null
-	anchorPlacement: string | null = null
-	title: string | null = null
-	text: string | null = null
-	placeholder: string | null = null
-	focusOnDisplay: boolean | null = null
-	enableSpellChecker: boolean | null = null
-	constructor(id: number) {
-		this.id = id;
-	}
-}
-
-type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>
-
-export type QPopupOptionsPartial = AtLeast<QPopupOptions, 'id'>
-
 export class QNotePopup extends DefaultNotePopup {
 	prefs: Preferences;
 
@@ -321,8 +310,8 @@ export class QNotePopup extends DefaultNotePopup {
 		});
 	}
 
-	note2QPopupOptions(): QPopupOptionsPartial {
-		const opt: QPopupOptionsPartial = { id: this.id };
+	note2QPopupOptions(): IQPopupOptionsPartial {
+		const opt: IQPopupOptionsPartial = { id: this.id };
 
 		opt.width = this.note.data.width || this.prefs.width;
 		opt.height = this.note.data.height || this.prefs.height;

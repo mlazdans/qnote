@@ -1,6 +1,7 @@
 import { QNoteFile } from "../modules-exp/QNoteFile.mjs";
 import { XNoteFile } from "../modules-exp/XNoteFile.mjs";
 import { NoteData } from "../modules/Note.mjs";
+import { IQPopupOptions, IQPopupOptionsPartial } from "./NotePopups.mjs";
 import { XNotePreferences } from "./Preferences.mjs";
 
 var { ExtensionUtils } = ChromeUtils.import("resource://gre/modules/ExtensionUtils.jsm");
@@ -21,14 +22,24 @@ interface INoteFileAPI<T extends INoteFileProvider> {
 	getAllKeys(root: string): Promise<Array<string>>
 }
 
-interface IQNoteFileAPI extends INoteFileAPI<QNoteFile> {
+export interface IQNoteFileAPI extends INoteFileAPI<QNoteFile> {
 	copyToClipboard(note: NoteData): Promise<boolean>
 	getFromClipboard(): Promise<NoteData | null>
 }
 
-interface IXNoteFileAPI extends INoteFileAPI<XNoteFile> {
+export interface IXNoteFileAPI extends INoteFileAPI<XNoteFile> {
 	getPrefs(): Promise<XNotePreferences> // TODO sync with getDefaultPrefs(): XNotePrefs {
 	getStoragePath(path?: string | null): Promise<string>
+}
+
+export interface IQPopupAPI {
+	setDebug(on: boolean): Promise<void>
+	remove(id: number): Promise<void>
+	get(id: number): Promise<IQPopupOptions>
+	pop(id: number): Promise<void>
+	create(windowsId: number, options: IQPopupOptions | IQPopupOptionsPartial): Promise<void>
+	update(options: IQPopupOptions | IQPopupOptionsPartial): Promise<IQPopupOptions>
+	onRemoved: WebExtEvent<(id: number) => void>
 }
 
 // TODO: test

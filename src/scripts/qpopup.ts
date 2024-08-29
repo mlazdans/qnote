@@ -1,6 +1,6 @@
 import { DOMLocalizator } from "../modules/DOMLocalizator.mjs";
 import { QPopupDOMContentLoadedMessage, UpdateQPoppupMessage } from "../modules/Messages.mjs";
-import { QPopupOptions, QPopupOptionsPartial } from "../modules/NotePopups.mjs";
+import { IQPopupOptions, IQPopupOptionsPartial } from "../modules/NotePopups.mjs";
 
 var QDEB = true;
 
@@ -20,7 +20,7 @@ if (isNaN(id)) {
 	throw new Error(`Incorrect query parameter: id ${id}`);
 }
 
-const Opts: QPopupOptionsPartial = { id };
+const Opts: IQPopupOptionsPartial = { id };
 
 QDEB&&console.debug("qpopup(content) new QPopup: ", id);
 
@@ -41,7 +41,7 @@ if(!resizeEl) throw new Error("resizeEl not found");
 if(!closeEl) throw new Error("closeEl not found");
 if(!delEl) throw new Error("delEl not found");
 
-function updateOptions(o: QPopupOptions | QPopupOptionsPartial){
+function updateOptions(o: IQPopupOptions | IQPopupOptionsPartial){
 	console.log("updateOptions");
 	if(Opts.enableSpellChecker !== o.enableSpellChecker)
 		Opts.enableSpellChecker = o.enableSpellChecker;

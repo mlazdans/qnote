@@ -1,9 +1,10 @@
+import { IQPopupOptions } from "../modules/NotePopups.mjs";
+
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 var { BasePopup } = ChromeUtils.import("resource:///modules/ExtensionPopups.jsm");
 // var { BasePopup } = ChromeUtils.importESModule("resource:///modules/ExtensionPopups.sys.mjs");
 var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
-var { QPopupOptions } = ChromeUtils.importESModule("resource://qnote/modules/NotePopups.mjs");
 // var { DOMLocalizator } = ChromeUtils.importESModule("resource://qnote/modules/DOMLocalizator.mjs");
 
 interface Box {
@@ -23,8 +24,6 @@ function coalesce(...args: any): any {
 
 var PopupEventDispatcher = new QEventDispatcher(["oncreated", "onremoved", "onmove", "onresize"]);
 
-// Hack around
-type QPopupOptions = typeof QPopupOptions;
 var QDEB = true;
 
 var popupManager = {
@@ -153,7 +152,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					return popupManager.get(id).options;
 					// popup.popupInfo.focused = popup.isFocused;
 				},
-				async update(options: QPopupOptions){
+				async update(options: IQPopupOptions){
 					let popup = popupManager.get(options.id);
 
 					let pi = popup.options;
@@ -201,7 +200,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					// 	return popup.id;
 					// });
 				},
-				async create(windowId: number, options: QPopupOptions){
+				async create(windowId: number, options: IQPopupOptions){
 					QDEB&&console.debug("qpopup.create()");
 
 					var popup = new QNotePopup(id2RealWindow(windowId), extension, options);
@@ -227,9 +226,9 @@ class QNotePopup extends BasePopup {
 	id: number;
 	onClose: Function | undefined;
 	isShown = false;
-	options: QPopupOptions;
+	options: IQPopupOptions;
 
-	constructor(window: MozWindow, extension: any, options: QPopupOptions) {
+	constructor(window: MozWindow, extension: any, options: IQPopupOptions) {
 		// const extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
 		let document = window.document;

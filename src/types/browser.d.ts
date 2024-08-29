@@ -1,8 +1,7 @@
 import 'thunderbird-webext-browser';
 import { NoteData } from '../modules/Note.mjs';
 import { QAppPreferences } from '../modules/Preferences.mjs';
-import { QPopupOptions, QPopupOptionsPartial } from '../modules/NotePopups.mts';
-import { QNoteFileAPI, XNoteFileAPI } from '../modules/api.mts';
+import { IQNoteFileAPI, IQPopupAPI, IXNoteFileAPI } from '../modules/api.mts';
 
 export {}
 
@@ -40,8 +39,10 @@ declare global {
 	}
 
 	namespace browser {
-		export var qnote: typeof QNoteFileAPI;
-		export var xnote: typeof XNoteFileAPI;
+		export const qnote: IQNoteFileAPI;
+		export const xnote: IXNoteFileAPI;
+		export const qpopup: IQPopupAPI;
+
 		export namespace legacy {
 			function isReadable(path: string): Promise<boolean>;
 			function isFolderReadable(path: string): Promise<boolean>;
@@ -60,15 +61,6 @@ declare global {
 			function setPrefs(prefs: QAppPreferences): Promise<void>;
 			function attachNoteToMessage(windowId: number, note: NoteData): Promise<void>;
 			function saveNoteCache(note: NoteData): Promise<void>;
-		}
-		export namespace qpopup {
-			function setDebug(on: boolean): Promise<void>;
-			function remove(id: number): Promise<void>;
-			function get(id: number): Promise<QPopupOptions>;
-			function pop(id: number): Promise<void>;
-			function create(windowsId: number, options: QPopupOptions | QPopupOptionsPartial): Promise<void>;
-			function update(options: QPopupOptions | QPopupOptionsPartial): Promise<QPopupOptions>;
-			export const onRemoved: WebExtEvent<(id: number) => void>;
 		}
 		export namespace ResourceUrl {
 			function register(name: string): Promise<void>;

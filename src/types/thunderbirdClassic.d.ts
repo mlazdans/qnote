@@ -1,3 +1,8 @@
+import Cu = Components.utils;
+import ChromeUtils = Components.utils;
+import Cc = Components.classes;
+import Ci = Components.interfaces;
+
 /*!
 Copyright 2019 Brummolix (AutoarchiveReloaded, https://github.com/Brummolix/AutoarchiveReloaded )
 
@@ -72,10 +77,6 @@ type NotePopupsPath            = "resource://qnote/modules/NotePopups.mjs"
 
 interface QEventDispatcherExport {
 	QEventDispatcher: typeof import("../modules/QEventDispatcher.mjs").QEventDispatcher;
-}
-
-interface NotePopupsExport {
-	QPopupOptions: import("../modules/NotePopups.mjs").QPopupOptions;
 }
 
 interface DOMLocalizatorExport {
@@ -239,10 +240,6 @@ declare namespace Components
 		public static importESModule(path: QNoteFiltersPath): QNoteFiltersExports;
 		public static importESModule(path: NoteDataPath): NoteDataExports;
 		public static importESModule(path: ApiPath): ApiExports;
-		public static importESModule(path: NotePopupsPath): NotePopupsExport;
-
-		// public static importESModule(path: ExtensionPopupsSysPath): BasePopupExport;
-		// public static importESModule(path: string): any;
 		public static unload(path: string): void;
 		public static defineModuleGetter(param1: any, param2: any, param3: any): void;
 	}
@@ -727,11 +724,6 @@ declare namespace Components
 	//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Language_Bindings/Components.classes
 	let classes: { [key: string]: nsIJSCID };
 }
-
-import Cu = Components.utils;
-import ChromeUtils = Components.utils;
-import Cc = Components.classes;
-import Ci = Components.interfaces;
 
 //https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/FileUtils.jsm
 declare class FileUtils
