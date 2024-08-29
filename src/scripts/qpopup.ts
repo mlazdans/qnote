@@ -1,5 +1,5 @@
 import { DOMLocalizator } from "../modules/DOMLocalizator.mjs";
-import { QPopupDOMContentLoadedMessage, UpdateQPoppupMessage } from "../modules/Messages.mjs";
+import { QPopupDataReply, QPopupDataRequest } from "../modules/Messages.mjs";
 import { IQPopupOptions, IQPopupOptionsPartial } from "../modules/NotePopups.mjs";
 import { getElementByIdOrDie, querySelectorOrDie } from "../modules/utils.mjs";
 
@@ -233,8 +233,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
 	xulPort.onMessage.addListener(data => {
 		let reply;
-		if(reply = (new UpdateQPoppupMessage).parse(data)){
-			if(reply.id === id){
+		if(reply = (new QPopupDataReply).parse(data)){
+			if(reply.id === id){ // TODO: do we need check id?
 				updateOptions(reply.opts);
 				popup();
 			}
@@ -243,5 +243,5 @@ window.addEventListener("DOMContentLoaded", () => {
 		}
 	});
 
-	(new QPopupDOMContentLoadedMessage).post(xulPort, { id });
+	(new QPopupDataRequest).post(xulPort, { id });
 });

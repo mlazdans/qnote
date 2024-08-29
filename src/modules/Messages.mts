@@ -1,51 +1,45 @@
-import { IQPopupOptions } from "./NotePopups.mjs";
+import { IQPopupOptionsPartial } from "./NotePopups.mjs";
 
 // Declarations
-interface MessageData {
+interface IMessageData {
 }
 
-interface Message {
+interface IMessage<T extends IMessageData> {
 	command: string
-	parse(data: any): MessageData | undefined
-	post(port: browser.runtime.Port, data: MessageData): void
-	send(tabId: number, data: MessageData): void
+	parse(data: any): T | undefined
+	post(port: browser.runtime.Port, data: T): void
+	send(tabId: number, data: T): void
 }
 
-abstract class DefaultMessage implements Message {
+abstract class DefaultMessage<T extends IMessageData> implements IMessage<T> {
 	abstract command: string;
-	parse(data: any): MessageData | undefined {
+	parse(data: any): T | undefined {
 		if(!("command" in data) || (data.command !== this.command)){
 			return undefined;
 		}
-		return {};
+		return {} as T;
 	}
-	send(tabId: number, data: MessageData): Promise<any> {
+	send(tabId: number, data: T): Promise<any> {
 		return browser.tabs.sendMessage(tabId, { ...data, command: this.command });
 	}
-	post(port: browser.runtime.Port, data: MessageData): void {
+	post(port: browser.runtime.Port, data: T): void {
 		port.postMessage({ ...data, command: this.command });
 	}
 }
 
-// Data
-interface QPopupDOMContentLoadedData extends MessageData {
+// Messages
+interface QPopupDataRequestData extends IMessageData {
 	id: number
 }
 
-// interface PushNoteData extends MessageData {
-// 	note: NoteData
-// 	prefs: Preferences
-// }
-
-interface UpdateQPoppupData {
+interface QPopupDataReplyData {
 	id: number,
-	opts: IQPopupOptions
+	opts: IQPopupOptionsPartial
 }
 
-// Messages
-export class QPopupDOMContentLoadedMessage extends DefaultMessage {
-	command = "QPopupDOMContentLoaded";
-	parse(data: any): QPopupDOMContentLoadedData | undefined {
+export class QPopupDataRequest extends DefaultMessage<QPopupDataRequestData> {
+	command = "QPopupDataRequest";
+	parse(data: any): QPopupDataRequestData | undefined {
 		if(!super.parse(data) || !("id" in data)){
 			return undefined;
 		}
@@ -55,6 +49,22 @@ export class QPopupDOMContentLoadedMessage extends DefaultMessage {
 		};
 	}
 }
+
+export class QPopupDataReply extends DefaultMessage<QPopupDataReplyData> {
+	command = "QPopupDataReply";
+	parse(data: any): QPopupDataReplyData | undefined {
+		if(!super.parse(data) || !("opts" in data) || !("id" in data)){
+			return undefined;
+		}
+
+		return data
+	}
+}
+
+// interface PushNoteData extends MessageData {
+// 	note: NoteData
+// 	prefs: Preferences
+// }
 
 // export class PushNoteMessage extends DefaultMessage {
 // 	command = "pushNote";
@@ -69,14 +79,3 @@ export class QPopupDOMContentLoadedMessage extends DefaultMessage {
 // 		};
 // 	}
 // }
-
-export class UpdateQPoppupMessage extends DefaultMessage {
-	command = "UpdateQPoppup";
-	parse(data: any): UpdateQPoppupData | undefined {
-		if(!super.parse(data) || !("opts" in data) || !("id" in data)){
-			return undefined;
-		}
-
-		return data
-	}
-}

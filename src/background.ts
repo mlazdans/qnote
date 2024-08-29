@@ -993,7 +993,7 @@ async function initExtension(){
 	// 	}
 	// });
 
-	browser.runtime.onConnect.addListener(function(connection){
+	browser.runtime.onConnect.addListener(connection => {
 		QDEB&&console.log("New connection: ", connection);
 		connection.onMessage.addListener((data: any) => {
 			// if(data.command === "getSelectedMessage"){
@@ -1011,10 +1011,10 @@ async function initExtension(){
 
 			let message;
 
-			if(message = (new QPopupDOMContentLoadedMessage).parse(data)){
+			if(message = (new QPopupDataRequest).parse(data)){
 				QDEB&&console.log(`Received ${data.command} message: `, data);
 				const p = PopupManager.get(message.id);
-				(new UpdateQPoppupMessage).post(connection, {
+				(new QPopupDataReply).post(connection, {
 					id: p.id,
 					opts: p.note2QPopupOptions()
 				});
