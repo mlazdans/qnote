@@ -35,7 +35,7 @@ interface IXNoteFileAPI extends INoteFileAPI<XNoteFile> {
 function Transferable(source: any) {
 	// const nsTransferable = Components.Constructor("@mozilla.org/widget/transferable;1","nsITransferable");
 	// let res = nsTransferable();
-	const res = Cc['@mozilla.org/widget/transferable;1'].createInstance(Ci.nsITransferable);
+	const res = Cc["@mozilla.org/widget/transferable;1"].createInstance(Ci.nsITransferable);
 
 	if ("init" in res) {
 		// When passed a Window object, find a suitable privacy context for it.

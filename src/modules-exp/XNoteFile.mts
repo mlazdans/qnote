@@ -202,7 +202,7 @@ export class XNoteFile implements INoteFileProvider {
 		// within the same group is possible on Linux.
 		tempFile.createUnique(tempFile.NORMAL_FILE_TYPE, parseInt("0660",8));
 
-		let fileOutStream = Cc['@mozilla.org/network/file-output-stream;1'].createInstance(Ci.nsIFileOutputStream);
+		let fileOutStream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
 
 		// fileOutStream.init(tempFile, 2, 0x200, false); // Opens for writing only
 		fileOutStream.init(tempFile, 2, 0x200, 0); // false can't be used as number? TODO: test
@@ -239,8 +239,8 @@ export class XNoteFile implements INoteFileProvider {
 			return note;
 		}
 
-		var fileInStream = Cc['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream);
-		var fileScriptableIO = Cc['@mozilla.org/scriptableinputstream;1'].createInstance(Ci.nsIScriptableInputStream);
+		var fileInStream = Cc["@mozilla.org/network/file-input-stream;1"].createInstance(Ci.nsIFileInputStream);
+		var fileScriptableIO = Cc["@mozilla.org/scriptableinputstream;1"].createInstance(Ci.nsIScriptableInputStream);
 		fileInStream.init(file, 0x01, parseInt("0444", 8), null);
 		fileScriptableIO.init(fileInStream);
 
@@ -284,7 +284,7 @@ export class XNoteFile implements INoteFileProvider {
 		return notes;
 	}
 	getProfilePath() {
-		return Cc['@mozilla.org/file/directory_service;1'].getService(Ci.nsIProperties).get('ProfD', Ci.nsIFile);
+		return Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get('ProfD', Ci.nsIFile);
 	}
 	getStoragePath(path: string | null) {
 		let prof = this.getProfilePath();

@@ -47,7 +47,7 @@ export class QNoteFile implements INoteFileProvider {
 			return note;
 		}
 
-		var fileInStream = Cc['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream);
+		var fileInStream = Cc["@mozilla.org/network/file-input-stream;1"].createInstance(Ci.nsIFileInputStream);
 		fileInStream.init(file, 0x01, parseInt("0444", 8), null);
 
 		var con = Cc["@mozilla.org/intl/converter-input-stream;1"].createInstance(Ci.nsIConverterInputStream);
@@ -84,7 +84,7 @@ export class QNoteFile implements INoteFileProvider {
 		tempFile.append("~" + file.leafName + ".tmp");
 		tempFile.createUnique(tempFile.NORMAL_FILE_TYPE, parseInt("0660",8));
 
-		let fileOutStream = Cc['@mozilla.org/network/file-output-stream;1'].createInstance(Ci.nsIFileOutputStream);
+		let fileOutStream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
 		fileOutStream.init(tempFile, 2, 0x200, 0); // Opens for writing only
 
 		var con = Cc["@mozilla.org/intl/converter-output-stream;1"].createInstance(Ci.nsIConverterOutputStream);
