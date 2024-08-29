@@ -1,7 +1,6 @@
 import 'thunderbird-webext-browser';
-import { NoteData } from '../modules/Note.mjs';
-import { QAppPreferences } from '../modules/Preferences.mjs';
-import { IQNoteFileAPI, IQPopupAPI, IXNoteFileAPI } from '../modules/api.mts';
+import { IQAppAPI, IQPopupAPI } from '../modules/api.mts';
+import { IQNoteFileAPI, IXNoteFileAPI } from '../modules-exp/api.mts';
 
 export {}
 
@@ -42,6 +41,7 @@ declare global {
 		export const qnote: IQNoteFileAPI;
 		export const xnote: IXNoteFileAPI;
 		export const qpopup: IQPopupAPI;
+		export const qapp: IQAppAPI;
 
 		export namespace legacy {
 			function isReadable(path: string): Promise<boolean>;
@@ -49,18 +49,6 @@ declare global {
 			function isFolderWritable(path: string): Promise<boolean>;
 			function alert(title: string, msg?: string): Promise<void>;
 			function confirm(title: string, msg?: string): Promise<boolean>;
-		}
-		export namespace qapp {
-			export const onNoteRequest: WebExtEvent<(keyId: string) => void>;
-			export const onKeyDown: WebExtEvent<(e: KeyboardEvent) => void>;
-			function createStoragePath(): Promise<string>;
-			function updateColumsView(): Promise<void>;
-			function init(): Promise<void>;
-			function setDebug(on: boolean): Promise<void>;
-			function messagePaneFocus(windowId: number): Promise<void>;
-			function setPrefs(prefs: QAppPreferences): Promise<void>;
-			function attachNoteToMessage(windowId: number, note: NoteData): Promise<void>;
-			function saveNoteCache(note: NoteData): Promise<void>;
 		}
 		export namespace ResourceUrl {
 			function register(name: string): Promise<void>;

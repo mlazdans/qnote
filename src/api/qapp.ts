@@ -1,5 +1,5 @@
+import { IPreferences } from "../modules/api.mjs";
 import { NoteData } from "../modules/Note.mjs";
-import { Preferences } from "../modules/Preferences.mjs";
 
 // var Services = globalThis.Services || ChromeUtils.import("resource://gre/modules/Services.jsm").Services;
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
@@ -19,7 +19,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 	EventDispatcher
 	KeyboardHandler
 	WindowObserver
-	Prefs: Preferences | null
+	Prefs: IPreferences | null
 
 	customTermId = 'qnote@dqdp.net#qnoteText'
 	customTerm
@@ -441,7 +441,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 				async setDebug(on: boolean){
 					QDEB = on;
 				},
-				async setPrefs(Prefs: Preferences){
+				async setPrefs(Prefs: IPreferences){
 					API.Prefs = Prefs;
 
 					API.customAction.storageFolder = Prefs.storageFolder;

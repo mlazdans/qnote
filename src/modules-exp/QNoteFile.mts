@@ -1,6 +1,6 @@
-import { INoteFileProvider } from "../modules/api.mjs";
 import { NoteData } from "../modules/Note.mjs";
-var FileUtils = ChromeUtils.import("resource://gre/modules/FileUtils.jsm").FileUtils;
+import { INoteFileProvider } from "./api.mjs";
+var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 
 export class QNoteFile implements INoteFileProvider {
 	exists(file: any){

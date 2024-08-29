@@ -1,36 +1,8 @@
-import { QNoteFile } from "../modules-exp/QNoteFile.mjs";
-import { XNoteFile } from "../modules-exp/XNoteFile.mjs";
 import { NoteData } from "../modules/Note.mjs";
 import { IQPopupOptions, IQPopupOptionsPartial } from "./NotePopups.mjs";
-import { XNotePreferences } from "./Preferences.mjs";
 
-var { ExtensionUtils } = ChromeUtils.import("resource://gre/modules/ExtensionUtils.jsm");
-var { ExtensionError } = ExtensionUtils;
-
-export interface INoteFileProvider {
-	load(root: string, keyId: string): NoteData
-	save(root: string, keyId: string, note: NoteData): void
-	delete(root: string, keyId: string): void
-	getAllKeys(root: string): Array<string>
-}
-
-interface INoteFileAPI<T extends INoteFileProvider> {
-	provider: T
-	load(root: string, keyId: string): Promise<NoteData>
-	save(root: string, keyId: string, note: NoteData): Promise<void>
-	delete(root: string, keyId: string): Promise<void>
-	getAllKeys(root: string): Promise<Array<string>>
-}
-
-export interface IQNoteFileAPI extends INoteFileAPI<QNoteFile> {
-	copyToClipboard(note: NoteData): Promise<boolean>
-	getFromClipboard(): Promise<NoteData | null>
-}
-
-export interface IXNoteFileAPI extends INoteFileAPI<XNoteFile> {
-	getPrefs(): Promise<XNotePreferences> // TODO sync with getDefaultPrefs(): XNotePrefs {
-	getStoragePath(path?: string | null): Promise<string>
-}
+// var { ExtensionUtils } = ChromeUtils.import("resource://gre/modules/ExtensionUtils.jsm");
+// var { ExtensionError } = ExtensionUtils;
 
 export interface IQPopupAPI {
 	setDebug(on: boolean): Promise<void>
@@ -42,136 +14,94 @@ export interface IQPopupAPI {
 	onRemoved: WebExtEvent<(id: number) => void>
 }
 
-// TODO: test
-function Transferable(source: any) {
-	// const nsTransferable = Components.Constructor("@mozilla.org/widget/transferable;1","nsITransferable");
-	// let res = nsTransferable();
-	const res = Cc["@mozilla.org/widget/transferable;1"].createInstance(Ci.nsITransferable);
+export type PopupAnchor   = "window" | "threadpane" | "message";
+export type StorageOption = "folder" | "ext";
+export type WindowOption  = "xul" | "webext";
 
-	if ("init" in res) {
-		// When passed a Window object, find a suitable privacy context for it.
-		if (source instanceof Ci.nsIDOMWindow) {
-			source = source.docShell
-				.QueryInterface(Ci.nsIInterfaceRequestor)
-				.getInterface(Ci.nsIWebNavigation);
-		}
-
-		res.init(source);
-	}
-	return res;
+export interface IXNotePreferences {
+	usetag: boolean,
+	dateformat: string;
+	width: number,
+	height: number,
+	show_on_select: boolean,
+	show_first_x_chars_in_col: number,
+	storage_path: string,
+	version: string,
 }
 
-function gen<T1 extends INoteFileProvider>(provider: T1): INoteFileAPI<T1> {
-	const api: INoteFileAPI<T1> = {
-		provider: provider,
-		async save(root: string, keyId: string, note: NoteData){
-			try {
-				provider.save(root, keyId, note);
-			} catch(e: any) {
-				throw new ExtensionError(e.message);
-			}
-		},
-		async delete(root: string, keyId: string){
-			try {
-				provider.delete(root, keyId);
-			} catch(e: any) {
-				throw new ExtensionError(e.message);
-			}
-		},
-		async load(root: string, keyId: string){
-			try {
-				return provider.load(root, keyId);
-			} catch(e: any) {
-				throw new ExtensionError(e.message);
-			}
-		},
-		async getAllKeys(root: string) {
-			try {
-				return provider.getAllKeys(root);
-			} catch(e: any) {
-				throw new ExtensionError(e.message);
-			}
-		}
-	}
-
-	return api;
+export interface IQAppPreferences {
+	storageOption      : StorageOption
+	storageFolder      : string
+	showFirstChars     : number
+	printAttachTop     : boolean
+	printAttachBottom  : boolean
+	messageAttachTop   : boolean
+	messageAttachBottom: boolean
+	attachTemplate     : string
+	treatTextAsHtml    : boolean
 }
 
-export const QNoteFileAPI: IQNoteFileAPI = {
-	...gen(new QNoteFile()),
-	async copyToClipboard(note: NoteData): Promise<boolean> {
-		let txtWrapper = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
-		txtWrapper.data = note.text;
-
-		let noteWrapper = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
-		try {
-			noteWrapper.data = JSON.stringify(note);
-		} catch {
-			noteWrapper.data = JSON.stringify({});
-		}
-
-		let w = Services.wm.getMostRecentWindow("mail:3pane");
-		let clipBoard = Services.clipboard;
-		let transferable = Transferable(w);
-
-		transferable.addDataFlavor("text/qnote");
-		transferable.addDataFlavor("text/unicode");
-
-		transferable.setTransferData("text/qnote", noteWrapper);
-		transferable.setTransferData("text/unicode", txtWrapper);
-
-		clipBoard.setData(transferable, null, Ci.nsIClipboard.kGlobalClipboard);
-
-		return true;
-	},
-
-	async getFromClipboard(): Promise<NoteData | null> {
-		let w = Services.wm.getMostRecentWindow("mail:3pane");
-		let clipBoard = Services.clipboard;
-		let transferable = Transferable(w);
-		let flavour: AString = {};
-		let data: AString = {};
-
-		transferable.addDataFlavor("text/qnote");
-		transferable.addDataFlavor("text/unicode");
-		clipBoard.getData(transferable, Ci.nsIClipboard.kGlobalClipboard)
-
-		try {
-			transferable.getAnyTransferData(flavour, data);
-		} catch {
-			return null;
-		}
-
-		if(data.value){
-			const intf = data.value as unknown as nsISupports;
-			const contentIntf = intf.QueryInterface(Ci.nsISupportsString);
-			if(contentIntf){
-				let content = contentIntf.data;
-				if(flavour.value == "text/qnote"){
-					try {
-						return JSON.parse(content);
-					} catch {
-						return null;
-					}
-				// TODO: test
-				// } else if(flavour.value == "text/unicode"){
-				// 	return {
-				// 		text: content
-				// 	}
-				}
-			}
-		}
-
-		return null;
-	}
-};
-
-export const XNoteFileAPI: IXNoteFileAPI = {
-	...gen(new XNoteFile()),
-	async getPrefs(){
-		return XNoteFileAPI.provider.getPrefs();
-	},
-	async getStoragePath(path: string | null) {
-		return XNoteFileAPI.provider.getStoragePath(path);
-	}
+export interface IPreferences extends IQAppPreferences {
+	windowOption          : WindowOption
+	focusOnDisplay        : boolean
+	showOnSelect          : boolean
+	useTag                : boolean
+	tagName               : string
+	dateFormat            : string
+	dateFormatPredefined  : string
+	dateLocale            : string
+	width                 : number
+	height                : number
+	enableDebug           : boolean
+	anchor                : PopupAnchor
+	anchorPlacement       : string
+	alwaysDefaultPlacement: boolean
+	confirmDelete         : boolean
+	enableSpellChecker    : boolean
 }
+
+export class QAppPreferences implements IQAppPreferences {
+	storageOption: StorageOption = "folder"
+	storageFolder                = ""
+	showFirstChars               = 3
+	printAttachTop               = true
+	printAttachBottom            = false
+	messageAttachTop             = true
+	messageAttachBottom          = false
+	attachTemplate               = ''
+	treatTextAsHtml              = false
+}
+
+export class Preferences extends QAppPreferences {
+	windowOption: WindowOption = "xul"
+	focusOnDisplay             = true
+	showOnSelect               = true
+	useTag                     = false
+	tagName                    = "xnote"
+	dateFormat                 = "Y-m-d H:i" // See https://www.php.net/manual/en/datetime.format.php
+	dateFormatPredefined       = ""
+	dateLocale                 = ""
+	width                      = 320
+	height                     = 200
+	enableDebug                = false
+	anchor: PopupAnchor        = "window"; // window; threadpane; messag
+	anchorPlacement            = "center"; // see options.js generatePosGrid() for option
+	alwaysDefaultPlacement     = false
+	confirmDelete              = false
+	enableSpellChecker         = true
+}
+
+export interface IQAppAPI {
+	createStoragePath(): Promise<string>
+	updateColumsView(): Promise<void>
+	init(): Promise<void>
+	setDebug(on: boolean): Promise<void>
+	messagePaneFocus(windowId: number): Promise<void>
+	setPrefs(prefs: IQAppPreferences): Promise<void>
+	attachNoteToMessage(windowId: number, note: NoteData): Promise<void>
+	saveNoteCache(note: NoteData): Promise<void>
+
+	onNoteRequest: WebExtEvent<(keyId: string) => void>
+	onKeyDown: WebExtEvent<(e: KeyboardEvent) => void>
+}
+

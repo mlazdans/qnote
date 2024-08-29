@@ -1,27 +1,15 @@
-import { INoteFileProvider } from "../modules/api.mjs";
+import { IXNotePreferences } from "../modules/api.mjs";
 import { NoteData } from "../modules/Note.mjs";
 import { setProperty } from "../modules/utils.mjs";
+import { INoteFileProvider } from "./api.mjs";
 
-var FileUtils = ChromeUtils.import("resource://gre/modules/FileUtils.jsm").FileUtils;
-var Services = globalThis.Services || ChromeUtils.importESModule("resource://gre/modules/Services.jsm").Services;
+var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 
 const NF_DO_ENCODE = 1;
 const NF_DO_NOT_ENCODE = 0;
 
-// TODO: sync with XNotePreferences
-interface XNotePrefs {
-	usetag: boolean,
-	dateformat: string,
-	width: number,
-	height: number,
-	show_on_select: boolean,
-	show_first_x_chars_in_col: number,
-	storage_path: string,
-	version: string
-}
-
 export class XNoteFile implements INoteFileProvider {
-	getDefaultPrefs(): XNotePrefs {
+	getDefaultPrefs(): IXNotePreferences {
 		return {
 			usetag: false,
 			dateformat: "yyyy-mm-dd - HH:MM",
@@ -155,7 +143,7 @@ export class XNoteFile implements INoteFileProvider {
 
 		for(const _k of Object.keys(defaultPrefs)){
 			let f;
-			let k = _k as keyof XNotePrefs;
+			let k = _k as keyof IXNotePreferences;
 			let t = typeof defaultPrefs[k];
 
 			if(t === 'boolean'){

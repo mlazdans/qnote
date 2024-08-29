@@ -1,6 +1,5 @@
+import { IPreferences, PopupAnchor } from './api.mjs';
 import { INote, NoteData } from './Note.mjs';
-import { Preferences } from './Preferences.mjs';
-import { PopupAnchor } from './utils.mjs';
 
 type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>
 
@@ -299,9 +298,9 @@ export abstract class DefaultNotePopup implements NotePopup {
 }
 
 export class QNotePopup extends DefaultNotePopup {
-	prefs: Preferences;
+	prefs: IPreferences;
 
-	constructor(id: number, windowId: number, note: INote, prefs: Preferences) {
+	constructor(id: number, windowId: number, note: INote, prefs: IPreferences) {
 		super(id, windowId, note);
 		this.prefs = prefs;
 

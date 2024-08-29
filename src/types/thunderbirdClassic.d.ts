@@ -1,8 +1,3 @@
-import Cu = Components.utils;
-import ChromeUtils = Components.utils;
-import Cc = Components.classes;
-import Ci = Components.interfaces;
-
 /*!
 Copyright 2019 Brummolix (AutoarchiveReloaded, https://github.com/Brummolix/AutoarchiveReloaded )
 
@@ -56,24 +51,28 @@ declare class nsISupports {
 
 type ThreadPaneColumnsPath     = "chrome://messenger/content/ThreadPaneColumns.mjs";
 type ThreadPaneColumnsOldPath  = "chrome://messenger/content/thread-pane-columns.mjs"
+
 type ExtensionParentPath       = "resource://gre/modules/ExtensionParent.jsm";
 type ExtensionCommonPath       = "resource://gre/modules/ExtensionCommon.jsm";
 type FileUtilsPath             = "resource://gre/modules/FileUtils.jsm";
 type ServicesPath              = "resource://gre/modules/Services.jsm";
 type ExtensionUtilsPath        = "resource://gre/modules/ExtensionUtils.jsm";
+
 type IteratorUtilsPath         = "resource:///modules/iteratorUtils.jsm";
 type MailServicesPath          = "resource:///modules/MailServices.jsm";
 type ExtensionPopupsPath       = "resource:///modules/ExtensionPopups.jsm";
 
-type QNoteFilePath             = "resource://qnote/modules-exp/QNoteFile.mjs";
-type XNoteFilePath             = "resource://qnote/modules-exp/XNoteFile.mjs";
-type QNoteFiltersPath          = "resource://qnote/modules-exp/QNoteFilters.mjs";
 type QEventDispatcherPath      = "resource://qnote/modules/QEventDispatcher.mjs";
 type DOMLocalizatorPath        = "resource://qnote/modules/DOMLocalizator.mjs"
 type QCachePath                = "resource://qnote/modules/QCache.mjs"
 type NoteDataPath              = "resource://qnote/modules/Note.mjs";
-type ApiPath                   = "resource://qnote/modules/api.mjs";
+// type ApiPath                   = "resource://qnote/modules/api.mjs";
 type NotePopupsPath            = "resource://qnote/modules/NotePopups.mjs"
+
+type QNoteFilePath             = "resource://qnote/modules-exp/QNoteFile.mjs";
+type XNoteFilePath             = "resource://qnote/modules-exp/XNoteFile.mjs";
+type QNoteFiltersPath          = "resource://qnote/modules-exp/QNoteFilters.mjs";
+type ExpApiPath                = "resource://qnote/modules-exp/api.mjs";
 
 interface QEventDispatcherExport {
 	QEventDispatcher: typeof import("../modules/QEventDispatcher.mjs").QEventDispatcher;
@@ -105,9 +104,9 @@ interface NoteDataExports {
 	NoteData: typeof import("../modules/Note.mts").NoteData;
 }
 
-interface ApiExports {
-	QNoteFileAPI: typeof import("../modules/api.mts").QNoteFileAPI;
-	XNoteFileAPI: typeof import("../modules/api.mts").XNoteFileAPI;
+interface ExpApiExports {
+	QNoteFileAPI: typeof import("../modules-exp/api.mts").QNoteFileAPI;
+	XNoteFileAPI: typeof import("../modules-exp/api.mts").XNoteFileAPI;
 }
 
 // interface FileUtilsExport {
@@ -239,7 +238,8 @@ declare namespace Components
 		public static importESModule(path: ServicesPath): any;
 		public static importESModule(path: QNoteFiltersPath): QNoteFiltersExports;
 		public static importESModule(path: NoteDataPath): NoteDataExports;
-		public static importESModule(path: ApiPath): ApiExports;
+		// public static importESModule(path: ApiPath): ApiExports;
+		public static importESModule(path: ExpApiPath): ExpApiExports;
 		public static unload(path: string): void;
 		public static defineModuleGetter(param1: any, param2: any, param3: any): void;
 	}
@@ -1173,3 +1173,8 @@ declare var XULElement: {
     new(): XULElement;
     isInstance(obj: any): obj is XULElement;
 };
+
+import Cu = Components.utils;
+import ChromeUtils = Components.utils;
+import Cc = Components.classes;
+import Ci = Components.interfaces;

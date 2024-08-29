@@ -1,5 +1,5 @@
 // import * as luxon from 'luxon';
-import { Preferences } from './Preferences.mjs';
+import { Preferences } from './api.mjs';
 import { NoteData, QNote, QNoteFolder } from './Note.mjs';
 
 export class NoKeyIdError extends Error {};
@@ -8,9 +8,6 @@ export class NoMessageError extends Error {};
 export type MessageId = browser.messages.MessageId;
 export type MessageHeader = browser.messages.MessageHeader;
 export type MessagePart = browser.messages.MessagePart;
-export type PopupAnchor = "window" | "threadpane" | "message";
-export type StorageOption = "folder" | "ext";
-export type WindowOption = "xul" | "webext";
 
 // Bitmask
 export const POP_NONE     = 0;

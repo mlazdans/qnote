@@ -1,4 +1,4 @@
-var api = ChromeUtils.importESModule("resource://qnote/modules/api.mjs");
+var api = ChromeUtils.importESModule("resource://qnote/modules-exp/api.mjs");
 
 var qnote = class extends ExtensionCommon.ExtensionAPI {
 	getAPI() {
