@@ -23,10 +23,10 @@
 // https://github.com/dothq/browser-desktop/blob/nightly/types.d.ts
 
 // import * as luxon from 'luxon';
+import { IPreferences } from "./modules/api.mjs";
 import { QPopupDOMContentLoadedMessage, UpdateQPoppupMessage } from "./modules/Messages.mjs";
 import { INote, NoteData, QNote, QNoteFolder } from "./modules/Note.mjs";
-import { QNotePopup, NotePopup } from "./modules/NotePopups.mjs";
-import { Preferences } from "./modules/Preferences.mjs";
+import { QNotePopup } from "./modules/NotePopups.mjs";
 import {
 	dateFormat,
 	focusMessagePane,

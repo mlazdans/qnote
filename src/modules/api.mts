@@ -1,9 +1,6 @@
 import { NoteData } from "../modules/Note.mjs";
 import { IQPopupOptions, IQPopupOptionsPartial } from "./NotePopups.mjs";
 
-// var { ExtensionUtils } = ChromeUtils.import("resource://gre/modules/ExtensionUtils.jsm");
-// var { ExtensionError } = ExtensionUtils;
-
 export interface IQPopupAPI {
 	setDebug(on: boolean): Promise<void>
 	remove(id: number): Promise<void>
@@ -90,18 +87,3 @@ export class Preferences extends QAppPreferences {
 	confirmDelete              = false
 	enableSpellChecker         = true
 }
-
-export interface IQAppAPI {
-	createStoragePath(): Promise<string>
-	updateColumsView(): Promise<void>
-	init(): Promise<void>
-	setDebug(on: boolean): Promise<void>
-	messagePaneFocus(windowId: number): Promise<void>
-	setPrefs(prefs: IQAppPreferences): Promise<void>
-	attachNoteToMessage(windowId: number, note: NoteData): Promise<void>
-	saveNoteCache(note: NoteData): Promise<void>
-
-	onNoteRequest: WebExtEvent<(keyId: string) => void>
-	onKeyDown: WebExtEvent<(e: KeyboardEvent) => void>
-}
-

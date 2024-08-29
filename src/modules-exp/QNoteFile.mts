@@ -1,6 +1,11 @@
 import { NoteData } from "../modules/Note.mjs";
-import { INoteFileProvider } from "./api.mjs";
+import { INoteFileAPI, INoteFileProvider } from "./api.mjs";
 var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
+
+export interface IQNoteFileAPI extends INoteFileAPI<QNoteFile> {
+	copyToClipboard(note: NoteData): Promise<boolean>
+	getFromClipboard(): Promise<NoteData | null>
+}
 
 export class QNoteFile implements INoteFileProvider {
 	exists(file: any){

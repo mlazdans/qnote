@@ -1,12 +1,17 @@
 import { IXNotePreferences } from "../modules/api.mjs";
 import { NoteData } from "../modules/Note.mjs";
 import { setProperty } from "../modules/utils.mjs";
-import { INoteFileProvider } from "./api.mjs";
+import { INoteFileAPI, INoteFileProvider } from "./api.mjs";
 
 var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 
 const NF_DO_ENCODE = 1;
 const NF_DO_NOT_ENCODE = 0;
+
+export interface IXNoteFileAPI extends INoteFileAPI<XNoteFile> {
+	getPrefs(): Promise<IXNotePreferences> // TODO sync with getDefaultPrefs(): XNotePrefs {
+	getStoragePath(path?: string | null): Promise<string>
+}
 
 export class XNoteFile implements INoteFileProvider {
 	getDefaultPrefs(): IXNotePreferences {

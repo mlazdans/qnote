@@ -1,5 +1,7 @@
-import { IXNotePreferences } from "../modules/api.mjs"
+import { IQAppPreferences } from "../modules/api.mjs";
 import { NoteData } from "../modules/Note.mjs"
+import { IQNoteFileAPI } from "./QNoteFile.mjs";
+import { IXNoteFileAPI } from "./XNoteFile.mjs";
 
 var { ExtensionUtils } = ChromeUtils.import("resource://gre/modules/ExtensionUtils.jsm");
 var { ExtensionError } = ExtensionUtils;
@@ -13,7 +15,7 @@ export interface INoteFileProvider {
 	getAllKeys(root: string): Array<string>
 }
 
-interface INoteFileAPI<T extends INoteFileProvider> {
+export interface INoteFileAPI<T extends INoteFileProvider> {
 	provider: T
 	load(root: string, keyId: string): Promise<NoteData>
 	save(root: string, keyId: string, note: NoteData): Promise<void>
@@ -21,14 +23,18 @@ interface INoteFileAPI<T extends INoteFileProvider> {
 	getAllKeys(root: string): Promise<Array<string>>
 }
 
-export interface IQNoteFileAPI extends INoteFileAPI<QNoteFile> {
-	copyToClipboard(note: NoteData): Promise<boolean>
-	getFromClipboard(): Promise<NoteData | null>
-}
+export interface IQAppAPI {
+	createStoragePath(): Promise<string>
+	updateColumsView(): Promise<void>
+	init(): Promise<void>
+	setDebug(on: boolean): Promise<void>
+	messagePaneFocus(windowId: number): Promise<void>
+	setPrefs(prefs: IQAppPreferences): Promise<void>
+	attachNoteToMessage(windowId: number, note: NoteData): Promise<void>
+	saveNoteCache(note: NoteData): Promise<void>
 
-export interface IXNoteFileAPI extends INoteFileAPI<XNoteFile> {
-	getPrefs(): Promise<IXNotePreferences> // TODO sync with getDefaultPrefs(): XNotePrefs {
-	getStoragePath(path?: string | null): Promise<string>
+	onNoteRequest: WebExtEvent<(keyId: string) => void>
+	onKeyDown: WebExtEvent<(e: KeyboardEvent) => void>
 }
 
 // TODO: test
