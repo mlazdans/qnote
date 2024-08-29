@@ -1,8 +1,6 @@
 // import * as luxon from 'luxon';
-import { NoteData } from './Note.mjs';
-import { QNote } from './QNote.mjs';
-import { QNoteFolder } from './QNoteFolder.mjs';
 import { Preferences } from './Preferences.mjs';
+import { NoteData, QNote, QNoteFolder } from './Note.mjs';
 
 export class NoKeyIdError extends Error {};
 export class NoMessageError extends Error {};
