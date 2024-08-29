@@ -106,6 +106,12 @@ export class XULNoteWindow extends DefaultNoteWindow {
 
 	async pop() {
 		browser.qpopup.pop(this.id).then(() => {
+			let l = (id: number) => {
+				console.log(`popped onRemoved ${this.id}:${id}`);
+				// super.close();
+				browser.qpopup.onRemoved.removeListener(l);
+			};
+			browser.qpopup.onRemoved.addListener(l);
 			console.log(`popped popup ${this.id}`);
 		});
 
