@@ -70,6 +70,7 @@ type QCustomTermPath = "resource://qnote/modules-exp/QCustomTerm.mjs";
 type QNoteActionPath = "resource://qnote/modules-exp/QNoteAction.mjs";
 type QNoteFilterPath = "resource://qnote/modules-exp/QNoteFilter.mjs";
 type NoteDataPath = "resource://qnote/modules/Note.mjs";
+type ApiPath = "resource://qnote/modules/api.mjs";
 
 interface QEventDispatcherExport {
 	QEventDispatcher: typeof import("../modules/QEventDispatcher.mjs").QEventDispatcher;
@@ -109,6 +110,11 @@ interface QNoteFilterExports {
 
 interface NoteDataExports {
 	NoteData: typeof import("../modules/Note.mts").NoteData;
+}
+
+interface ApiExports {
+	QNoteFileAPI: typeof import("../modules/api.mts").QNoteFileAPI;
+	XNoteFileAPI: typeof import("../modules/api.mts").XNoteFileAPI;
 }
 
 // interface FileUtilsExport {
@@ -243,6 +249,7 @@ declare namespace Components
 		public static importESModule(path: QNoteActionPath): QNoteActionExports;
 		public static importESModule(path: QNoteFilterPath): QNoteFilterExports;
 		public static importESModule(path: NoteDataPath): NoteDataExports;
+		public static importESModule(path: ApiPath): ApiExports;
 
 		// public static importESModule(path: ExtensionPopupsSysPath): BasePopupExport;
 		// public static importESModule(path: string): any;

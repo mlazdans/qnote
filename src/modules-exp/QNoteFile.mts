@@ -1,7 +1,8 @@
+import { INoteFileProvider } from "../modules/api.mjs";
 import { NoteData } from "../modules/Note.mjs";
 var FileUtils = ChromeUtils.import("resource://gre/modules/FileUtils.jsm").FileUtils;
 
-export class QNoteFile {
+export class QNoteFile implements INoteFileProvider {
 	exists(file: any){
 		return file && file.exists();
 	}
@@ -72,12 +73,10 @@ export class QNoteFile {
 		const file = this.getExistingFile(root, keyId);
 		if(file){
 			file.remove(false);
-			return true;
 		}
-		return false;
 	}
 
-	save(root: string, keyId: string, note: NoteData){
+	save(root: string, keyId: string, note: NoteData) {
 		var file = this.getFile(root, keyId);
 		let data = JSON.stringify(note);
 

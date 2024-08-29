@@ -28,9 +28,20 @@
 			"description": "Path to XNote folder"
 		}]
 	},{
-		"name": "loadNote",
+		"name": "load",
 		"type": "function",
-		"description": "Loads XNote from file",
+		"async": true,
+		"parameters": [{
+			"name": "root",
+			"type": "string",
+			"description": "Path to XNote folder"
+		},{
+			"name": "keyId",
+			"type": "string"
+		}]
+	},{
+		"name": "delete",
+		"type": "function",
 		"async": true,
 		"parameters": [{
 			"name": "root",
@@ -42,23 +53,8 @@
 			"description": "XNote key"
 		}]
 	},{
-		"name": "deleteNote",
+		"name": "save",
 		"type": "function",
-		"description": "Delete XNote",
-		"async": true,
-		"parameters": [{
-			"name": "root",
-			"type": "string",
-			"description": "Path to XNote folder"
-		},{
-			"name": "keyId",
-			"type": "string",
-			"description": "XNote key"
-		}]
-	},{
-		"name": "saveNote",
-		"type": "function",
-		"description": "Saves xnote into file",
 		"async": true,
 		"parameters": [{
 			"name": "root",

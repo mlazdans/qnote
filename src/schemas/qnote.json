@@ -57,9 +57,8 @@
 			"description": "Path to QNote storage root"
 		}]
 	},{
-		"name": "loadNote",
+		"name": "load",
 		"type": "function",
-		"description": "Loads QNote from file",
 		"async": true,
 		"parameters": [{
 			"name": "root",
@@ -71,9 +70,8 @@
 			"description": "QNote key"
 		}]
 	},{
-		"name": "deleteNote",
+		"name": "delete",
 		"type": "function",
-		"description": "Delete QNote",
 		"async": true,
 		"parameters": [{
 			"name": "root",
@@ -85,7 +83,7 @@
 			"description": "QNote key"
 		}]
 	},{
-		"name": "saveNote",
+		"name": "save",
 		"type": "function",
 		"description": "Saves QNote into file",
 		"async": true,

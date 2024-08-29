@@ -1,3 +1,4 @@
+import { INoteFileProvider } from "../modules/api.mjs";
 import { NoteData } from "../modules/Note.mjs";
 import { setProperty } from "../modules/utils.mjs";
 
@@ -7,6 +8,7 @@ var Services = globalThis.Services || ChromeUtils.importESModule("resource://gre
 const NF_DO_ENCODE = 1;
 const NF_DO_NOT_ENCODE = 0;
 
+// TODO: sync with XNotePreferences
 interface XNotePrefs {
 	usetag: boolean,
 	dateformat: string,
@@ -18,11 +20,7 @@ interface XNotePrefs {
 	version: string
 }
 
-export class XNoteFile {
-	FU;
-	constructor(){
-		this.FU = FileUtils;
-	}
+export class XNoteFile implements INoteFileProvider {
 	getDefaultPrefs(): XNotePrefs {
 		return {
 			usetag: false,
@@ -288,7 +286,7 @@ export class XNoteFile {
 	getProfilePath() {
 		return Cc['@mozilla.org/file/directory_service;1'].getService(Ci.nsIProperties).get('ProfD', Ci.nsIFile);
 	}
-	getStoragePath(path: string) {
+	getStoragePath(path: string | null) {
 		let prof = this.getProfilePath();
 
 		if(path){

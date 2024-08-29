@@ -10,16 +10,16 @@ export class XNote extends DefaultNote {
 
 	async load(): Promise<NoteData> {
 		this.data = new NoteData(this.keyId);
-		return browser.xnote.loadNote(this.root, this.data.keyId).then(data => this.data = data);
+		return browser.xnote.load(this.root, this.data.keyId).then(data => this.data = data);
 	}
 
 	async save(){
-		return browser.xnote.saveNote(this.root, this.data.keyId, this.data).then(() => true).catch(() => false);
+		browser.xnote.save(this.root, this.data.keyId, this.data).then(() => true).catch(() => false);
 		// return super.saver(() => browser.xnote.saveNote(this.root, this.data.keyId, this.data).then(() => true).catch(() => false));
 	}
 
 	async delete() {
-		return browser.xnote.deleteNote(this.root, this.data.keyId).then(() => true).catch(() => false);
+		browser.xnote.delete(this.root, this.data.keyId).then(() => true).catch(() => false);
 		// return super.deleter(() => browser.xnote.deleteNote(this.root, this.data.keyId).then(() => true).catch(() => false));
 	}
 }

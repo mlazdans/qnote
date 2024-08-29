@@ -11,11 +11,11 @@ export class QNoteFolder extends DefaultNote {
 	async load(): Promise<NoteData> {
 		this.data = new NoteData(this.keyId);
 
-		let data = await browser.qnote.loadNote(this.root, this.data.keyId);
+		let data = await browser.qnote.load(this.root, this.data.keyId);
 
 		// Check maybe XNote exists
 		if(!data.exists){
-			data = await browser.xnote.loadNote(this.root, this.data.keyId);
+			data = await browser.xnote.load(this.root, this.data.keyId);
 		}
 
 		if(data.exists){
@@ -26,13 +26,13 @@ export class QNoteFolder extends DefaultNote {
 	}
 
 	async save(){
-		return browser.qnote.saveNote(this.root, this.data.keyId, this.data).then(() => true).catch(() => false);
+		browser.qnote.save(this.root, this.data.keyId, this.data).then(() => true).catch(() => false);
 		// return super.saver(() => browser.qnote.saveNote(this.root, this.data.keyId, this.data).then(() => true).catch(() => false));
 	}
 
 	async delete() {
-		await browser.xnote.deleteNote(this.root, this.data.keyId);
-		return browser.qnote.deleteNote(this.root, this.data.keyId);
+		await browser.xnote.delete(this.root, this.data.keyId);
+		await browser.qnote.delete(this.root, this.data.keyId);
 		// return super.deleter(async () => {
 		// 	// Remove XNote, if exists
 		// 	await browser.xnote.deleteNote(this.root, this.data.keyId);

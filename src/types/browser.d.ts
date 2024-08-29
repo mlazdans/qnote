@@ -1,7 +1,8 @@
 import 'thunderbird-webext-browser';
 import { NoteData } from '../modules/Note.mjs';
-import { QAppPreferences, XNotePreferences } from '../modules/Preferences.mjs';
+import { QAppPreferences } from '../modules/Preferences.mjs';
 import { QPopupOptions, QPopupOptionsPartial } from '../modules/XULNoteWindow.mts';
+import { QNoteFileAPI, XNoteFileAPI } from '../modules/api.mts';
 
 export {}
 
@@ -39,22 +40,8 @@ declare global {
 	}
 
 	namespace browser {
-		export namespace qnote {
-			function loadNote(root: string, keyId: string): Promise<NoteData>;
-			function saveNote(root: string, keyId: string, data: NoteData): Promise<boolean>;
-			function deleteNote(root: string, keyId: string): Promise<boolean>;
-			function getAllKeys(root: string): Promise<Array<string>>;
-			function copyToClipboard(note: NoteData): Promise<void>;
-			function getFromClipboard(): Promise<NoteData>;
-		}
-		export namespace xnote {
-			function getPrefs(): Promise<XNotePreferences>;
-			function getStoragePath(path?: string): Promise<string>;
-			function loadNote(root: string, keyId: string): Promise<NoteData>;
-			function saveNote(root: string, keyId: string, data: NoteData): Promise<boolean>;
-			function deleteNote(root: string, keyId: string): Promise<boolean>;
-			function getAllKeys(root: string): Promise<Array<string>>;
-		}
+		export var qnote: typeof QNoteFileAPI;
+		export var xnote: typeof XNoteFileAPI;
 		export namespace legacy {
 			function isReadable(path: string): Promise<boolean>;
 			function isFolderReadable(path: string): Promise<boolean>;

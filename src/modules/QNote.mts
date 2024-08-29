@@ -11,7 +11,7 @@ export class QNote extends DefaultNote {
 	}
 
 	async save() {
-		return browser.storage.local.set({
+		browser.storage.local.set({
 			[this.data.keyId]: this.data
 		}).then(() => true).catch(() => false);
 		// return super.saver(() => browser.storage.local.set({
@@ -20,7 +20,7 @@ export class QNote extends DefaultNote {
 	}
 
 	async delete() {
-		return browser.storage.local.remove(this.data.keyId).then(() => true).catch(() => false);
+		browser.storage.local.remove(this.data.keyId).then(() => true).catch(() => false);
 		// return super.deleter(() => browser.storage.local.remove(this.data.keyId).then(() => true).catch(() => false));
 	}
 }

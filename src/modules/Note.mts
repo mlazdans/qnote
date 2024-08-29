@@ -1,5 +1,3 @@
-import { QEventDispatcher } from './QEventDispatcher.mjs';
-
 export class NoteData {
 	keyId: string; // message-id header or another unique id
 	exists: boolean = false;
@@ -17,10 +15,11 @@ export class NoteData {
 
 export interface INote {
 	data: NoteData;
+	// get(): NoteData;
+	// set(data: NoteData): void;
 	load(): Promise<NoteData>;
-	get(): NoteData;
-	set(data: NoteData): NoteData;
-	save(): Promise<boolean>;
+	save(): Promise<void>;
+	delete(): Promise<void>;
 }
 
 // type NoteSaver = () => Promise<boolean>;
@@ -54,17 +53,9 @@ export abstract class DefaultNote implements INote {
 	// 	});
 	// }
 
-	get(): NoteData {
-		return this.data;
-	}
-
-	set(data: NoteData): NoteData {
-		return this.data = data;
-	}
-
 	abstract load(): Promise<NoteData>
-	abstract save(): Promise<boolean>
-	abstract delete(): Promise<boolean>
+	abstract save(): Promise<void>
+	abstract delete(): Promise<void>
 
 	// protected async saver(saver: NoteSaver): Promise<boolean> {
 	// 	return saver().then(saved => {

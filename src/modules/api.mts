@@ -1,9 +1,35 @@
-import { INoteFileAPIWClipboard } from "../modules-exp/INoteFileAPI.mjs";
 import { QNoteFile } from "../modules-exp/QNoteFile.mjs";
+import { XNoteFile } from "../modules-exp/XNoteFile.mjs";
 import { NoteData } from "../modules/Note.mjs";
+import { XNotePreferences } from "./Preferences.mjs";
 
 var { ExtensionUtils } = ChromeUtils.import("resource://gre/modules/ExtensionUtils.jsm");
 var { ExtensionError } = ExtensionUtils;
+
+export interface INoteFileProvider {
+	load(root: string, keyId: string): NoteData
+	save(root: string, keyId: string, note: NoteData): void
+	delete(root: string, keyId: string): void
+	getAllKeys(root: string): Array<string>
+}
+
+interface INoteFileAPI<T extends INoteFileProvider> {
+	provider: T
+	load(root: string, keyId: string): Promise<NoteData>
+	save(root: string, keyId: string, note: NoteData): Promise<void>
+	delete(root: string, keyId: string): Promise<void>
+	getAllKeys(root: string): Promise<Array<string>>
+}
+
+interface IQNoteFileAPI extends INoteFileAPI<QNoteFile> {
+	copyToClipboard(note: NoteData): Promise<boolean>
+	getFromClipboard(): Promise<NoteData | null>
+}
+
+interface IXNoteFileAPI extends INoteFileAPI<XNoteFile> {
+	getPrefs(): Promise<XNotePreferences> // TODO sync with getDefaultPrefs(): XNotePrefs {
+	getStoragePath(path?: string | null): Promise<string>
+}
 
 // TODO: test
 function Transferable(source: any) {
@@ -24,43 +50,44 @@ function Transferable(source: any) {
 	return res;
 }
 
-export var QNoteFileAPI: INoteFileAPIWClipboard = {
-	provider: new QNoteFile(),
-
-	async save(root: string, keyId: string, note: NoteData){
-		try {
-			QNoteFileAPI.provider.save(root, keyId, note);
-		} catch(e: any) {
-			throw new ExtensionError(e.message);
+function gen<T1 extends INoteFileProvider>(provider: T1): INoteFileAPI<T1> {
+	const api: INoteFileAPI<T1> = {
+		provider: provider,
+		async save(root: string, keyId: string, note: NoteData){
+			try {
+				provider.save(root, keyId, note);
+			} catch(e: any) {
+				throw new ExtensionError(e.message);
+			}
+		},
+		async delete(root: string, keyId: string){
+			try {
+				provider.delete(root, keyId);
+			} catch(e: any) {
+				throw new ExtensionError(e.message);
+			}
+		},
+		async load(root: string, keyId: string){
+			try {
+				return provider.load(root, keyId);
+			} catch(e: any) {
+				throw new ExtensionError(e.message);
+			}
+		},
+		async getAllKeys(root: string) {
+			try {
+				return provider.getAllKeys(root);
+			} catch(e: any) {
+				throw new ExtensionError(e.message);
+			}
 		}
-		return true;
-	},
+	}
 
-	async delete(root: string, keyId: string){
-		try {
-			QNoteFileAPI.provider.delete(root, keyId);
-		} catch(e: any) {
-			throw new ExtensionError(e.message);
-		}
-		return true;
-	},
+	return api;
+}
 
-	async load(root: string, keyId: string){
-		try {
-			return QNoteFileAPI.provider.load(root, keyId);
-		} catch(e: any) {
-			throw new ExtensionError(e.message);
-		}
-	},
-
-	async getAllKeys(root: string) {
-		try {
-			return QNoteFileAPI.provider.getAllKeys(root);
-		} catch(e: any) {
-			throw new ExtensionError(e.message);
-		}
-	},
-
+export const QNoteFileAPI: IQNoteFileAPI = {
+	...gen(new QNoteFile()),
 	async copyToClipboard(note: NoteData): Promise<boolean> {
 		let txtWrapper = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
 		txtWrapper.data = note.text;
@@ -125,5 +152,15 @@ export var QNoteFileAPI: INoteFileAPIWClipboard = {
 		}
 
 		return null;
+	}
+};
+
+export const XNoteFileAPI: IXNoteFileAPI = {
+	...gen(new XNoteFile()),
+	async getPrefs(){
+		return XNoteFileAPI.provider.getPrefs();
+	},
+	async getStoragePath(path: string | null) {
+		return XNoteFileAPI.provider.getStoragePath(path);
 	}
 }

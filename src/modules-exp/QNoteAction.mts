@@ -3,7 +3,7 @@
 //   "resource://gre/modules/Services.jsm"
 // ).Services;
 
-import { QCache } from "modules/QCache.mjs";
+import { QCache } from "../modules/QCache.mjs";
 
 var { NoteData } = ChromeUtils.importESModule("resource://qnote/modules/Note.mjs");
 var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs");
