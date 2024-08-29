@@ -660,3 +660,15 @@ export function dateFormat(locale: string, format: string, ts?: Date) {
 
 // 	return null;
 // }
+
+export function getElementByIdOrDie(id: string): HTMLElement {
+	const el = document.getElementById(id);
+	if(el)return el;
+	throw new Error(`Required HTML element with id ${id} not found`);
+}
+
+export function querySelectorOrDie(selector: string): Element {
+	const el = document.querySelector(selector);
+	if(el)return el;
+	throw new Error(`Required HTML element with selector ${selector} not found`);
+}

@@ -1,4 +1,3 @@
-import { NoteData } from "../modules/Note.mjs";
 import { IQPopupOptions, IQPopupOptionsPartial } from "./NotePopups.mjs";
 
 export interface IQPopupAPI {
