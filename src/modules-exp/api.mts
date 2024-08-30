@@ -33,6 +33,8 @@ export interface IQAppAPI {
 	setPrefs(prefs: IQAppPreferences): Promise<void>
 	attachNoteToMessage(windowId: number, note: NoteData): Promise<void>
 	saveNoteCache(note: NoteData): Promise<void>
+	clearNoteCache(): Promise<void>
+	getProfilePath(): Promise<string>
 
 	onNoteRequest: WebExtEvent<(keyId: string) => void>
 	onKeyDown: WebExtEvent<(e: KeyboardEvent) => void>
