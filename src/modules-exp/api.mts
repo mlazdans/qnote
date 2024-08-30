@@ -191,6 +191,14 @@ export const LegacyAPI: ILegacyAPI = {
 	async confirm(title: string, text?: string | null): Promise<boolean> {
 		return Services.prompt.confirm(null, text ? title : null, text ? text : title);
 	},
+	/**
+	 * Compare two version strings
+	 * @param   A   The first version
+	 * @param   B   The second version
+	 * @returns < 0 if A < B
+	 *          = 0 if A == B
+	 *          > 0 if A > B
+	 */
 	async compareVersions(a: string, b: string): Promise<number> {
 		return Services.vc.compare(a, b);
 	},
