@@ -671,7 +671,7 @@ export function isInputElement(node: Element): node is HTMLInputElement {
 }
 
 export function isTypeButton(node: Element): node is (HTMLInputElement & TypeButton) {
-	return isButtonElement(node) || (isInputElement(node) && (node.type.toUpperCase() == "BUTTON"));
+	return isInputElement(node) && (node.type.toUpperCase() == "BUTTON");
 }
 
 export function isTypeCheckbox(node: Element): node is (HTMLInputElement & TypeCheckbox) {
