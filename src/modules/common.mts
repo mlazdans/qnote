@@ -1,6 +1,10 @@
+// This code should run everywhere: background, content, experiments
 // import * as luxon from 'luxon';
 import { Preferences } from './api.mjs';
 import { NoteData, QNote, QNoteFolder } from './Note.mjs';
+
+// TODO: remove
+var QDEB = true;
 
 export class NoKeyIdError extends Error {};
 export class NoMessageError extends Error {};
@@ -14,10 +18,17 @@ export const POP_NONE     = 0;
 export const POP_FOCUS    = 1;
 export const POP_EXISTING = 2;
 
-// TODO: remove
-var QDEB = true;
-// var Prefs = new Preferences;
-//
+interface TypeCheckbox {
+	type: "checkbox"
+}
+
+interface TypeRadio {
+	type: "radio"
+}
+
+interface TypeButton {
+	type: "button"
+}
 
 // export interface Preferences {
 // 	useTag: boolean,
@@ -190,36 +201,6 @@ async function saveSinglePref(k: keyof Preferences, v: any) {
 	return browser.storage.local.set({
 		['pref.' + k]: v
 	});
-}
-
-async function isReadable(path: string){
-	return await browser.legacy.isReadable(path);
-}
-
-async function isFolderReadable(path: string){
-	return await browser.legacy.isFolderReadable(path);
-}
-
-export async function isFolderWritable(path: string){
-	return await browser.legacy.isFolderWritable(path);
-}
-
-export async function getXNoteStoragePath(): Promise<string> {
-	let xnotePrefs = await browser.xnote.getPrefs();
-
-	if(xnotePrefs.storage_path){
-		QDEB&&console.debug("XNote++ storage folder setting found:", xnotePrefs.storage_path);
-
-		let path = await browser.xnote.getStoragePath(xnotePrefs.storage_path);
-
-		if(await isFolderWritable(path)){
-			return path;
-		} else {
-			QDEB&&console.debug("XNote++ storage folder not writable: ", path);
-		}
-	}
-
-	return await browser.xnote.getStoragePath();
 }
 
 // async function reloadExtension(){
@@ -671,4 +652,32 @@ export function querySelectorOrDie(selector: string): Element {
 	const el = document.querySelector(selector);
 	if(el)return el;
 	throw new Error(`Required HTML element with selector ${selector} not found`);
+}
+
+export function isTextAreaElement(node: Element): node is HTMLTextAreaElement {
+	return node.nodeName == "SELECT";
+}
+
+export function isSelectElement(node: Element): node is HTMLSelectElement {
+	return node.nodeName == "SELECT";
+}
+
+export function isButtonElement(node: Element): node is HTMLButtonElement {
+	return node.nodeName == "BUTTON";
+}
+
+export function isInputElement(node: Element): node is HTMLInputElement {
+	return node.nodeName == "INPUT";
+}
+
+export function isTypeButton(node: Element): node is (HTMLInputElement & TypeButton) {
+	return isButtonElement(node) || (isInputElement(node) && (node.type.toUpperCase() == "BUTTON"));
+}
+
+export function isTypeCheckbox(node: Element): node is (HTMLInputElement & TypeCheckbox) {
+	return isInputElement(node) && (node.type.toUpperCase() == "CHECKBOX");
+}
+
+export function isTypeRadio(node: Element): node is (HTMLInputElement & TypeRadio) {
+	return isInputElement(node) && (node.type.toUpperCase() == "RADIO");
 }

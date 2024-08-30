@@ -1,6 +1,6 @@
 import { IXNotePreferences } from "../modules/api.mjs";
 import { NoteData } from "../modules/Note.mjs";
-import { setProperty } from "../modules/utils.mjs";
+import { setProperty } from "../modules/common.mjs";
 import { INoteFileAPI, INoteFileProvider } from "./api.mjs";
 
 var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");

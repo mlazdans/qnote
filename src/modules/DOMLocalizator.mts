@@ -1,3 +1,5 @@
+import { isInputElement, isSelectElement, isTextAreaElement, isTypeCheckbox, isTypeRadio } from "./common.mjs";
+
 export class DOMLocalizator {
 	_: typeof browser.i18n.getMessage
 	constructor(localizator: typeof browser.i18n.getMessage){
@@ -46,51 +48,43 @@ export class DOMLocalizator {
 		}
 	}
 
-	// setData(document, data){
-	// 	for (const node of document.querySelectorAll('[data-preference]')) {
-	// 		this.setNode(node, data);
-	// 	}
-	// }
+	setData(document: Document, data: any){
+		for (const node of document.querySelectorAll('[data-preference]')) {
+			this.setNode(node, data);
+		}
+	}
 
-	// setNode(node, data){
-	// 	let value = data[node.dataset.preference];
+	setNode(node: Element, data: any): void {
+		if(!(isSelectElement(node) || isInputElement(node) || isTextAreaElement(node))){
+			return;
+		}
 
-	// 	switch(node.nodeName) {
-	// 		case "SELECT":
-	// 			for(let option of node.querySelectorAll("option")){
-	// 				if(option.value == value){
-	// 					option.selected = true;
-	// 					break;
-	// 				}
-	// 			}
-	// 			break;
-	// 		case "INPUT":
-	// 			if(this.isCheckbox(node)){
-	// 				node.checked = value;
-	// 			} else if(this.isRadio(node)){
-	// 				node.checked = (value === node.value);
-	// 			} else {
-	// 				node.value = value;
-	// 			}
-	// 			break;
-	// 		case "TEXTAREA":
-	// 			node.value = value;
-	// 			break;
-	// 		default:
-	// 			console.error("Unknown node type " + node.nodeName);
-	// 			console.error(node);
-	// 	}
-	// }
+		if(node.dataset.preference === undefined) {
+			return;
+		}
 
-	// isButton(node){
-	// 	return node.nodeName == "INPUT" && node.type.toLocaleUpperCase() === "BUTTON";
-	// }
+		const nodeName = node.nodeName;
+		const value = data[node.dataset.preference];
 
-	// isCheckbox(node){
-	// 	return node.nodeName == "INPUT" && node.type.toLocaleUpperCase() === "CHECKBOX";
-	// }
-
-	// isRadio(node){
-	// 	return node.nodeName == "INPUT" && node.type.toLocaleUpperCase() === "RADIO";
-	// }
+		if(isSelectElement(node)){
+			for(let option of node.querySelectorAll("option")){
+				if(option.value == value){
+					option.selected = true;
+					return;
+				}
+			}
+		} else if(isInputElement(node)){
+			if(isTypeCheckbox(node)){
+				node.checked = value;
+			} else if(isTypeRadio(node)){
+				node.checked = (value === node.value);
+			} else {
+				node.value = value;
+			}
+		} else if(isTextAreaElement(node)){
+			node.value = value;
+		} else {
+			console.warn(`Unsupported input element type: ${nodeName}`);
+		}
+	}
 };

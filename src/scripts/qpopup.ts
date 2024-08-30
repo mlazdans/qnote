@@ -1,7 +1,7 @@
 import { DOMLocalizator } from "../modules/DOMLocalizator.mjs";
 import { QPopupDataReply, QPopupDataRequest } from "../modules/Messages.mjs";
 import { IQPopupOptions, IQPopupOptionsPartial } from "../modules/NotePopups.mjs";
-import { getElementByIdOrDie, querySelectorOrDie } from "../modules/utils.mjs";
+import { getElementByIdOrDie, querySelectorOrDie } from "../modules/common.mjs";
 
 let QDEB = true;
 

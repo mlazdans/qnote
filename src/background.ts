@@ -24,33 +24,25 @@
 
 // import * as luxon from 'luxon';
 import { IPreferences } from "./modules/api.mjs";
-import { QPopupDOMContentLoadedMessage, UpdateQPoppupMessage } from "./modules/Messages.mjs";
+import { PreferencesReply, PreferencesRequest, QPopupDataReply, QPopupDataRequest } from "./modules/Messages.mjs";
 import { INote, NoteData, QNote, QNoteFolder } from "./modules/Note.mjs";
 import { QNotePopup } from "./modules/NotePopups.mjs";
 import {
-	dateFormat,
-	focusMessagePane,
 	getCurrentTabId,
-	getCurrentTabIdAnd,
 	getCurrentWindowIdAnd,
-	getPrefs,
-	getXNoteStoragePath,
-	isFolderWritable,
-	isPrefsEmpty,
 	loadAllFolderNotes,
 	MessageId,
 	mpUpdateForNote,
 	POP_EXISTING,
 	POP_FOCUS,
 	POP_NONE,
-	silentCatcher,
-	ts2jsdate,
 	updateIcons
-} from "./modules/utils.mjs";
+} from "./modules/common.mjs";
+import { getXNoteStoragePath, loadPrefsWithDefaults } from "./modules/common-background.mjs";
 
 // TODO: getting dead object: open msg in tab, drag out in new window, reload extension when tread view activated in new window
 var QDEB = true;
-var Prefs: Preferences;
+var Prefs: IPreferences;
 let BrowserAction = browser.action ? browser.action : browser.browserAction;
 
 // var CurrentPopup: DefaultNoteWindow;
@@ -130,63 +122,6 @@ async function importFolderNotes(root: string, overwrite = false){
 	return loadAllFolderNotes(root).then(notes => importQNotes(notes, overwrite));
 }
 
-export async function loadPrefsWithDefaults() {
-	let p = await getPrefs();
-	let isEmpty = await isPrefsEmpty();
-	// let defaultPrefs = getDefaultPrefs();
-	// let isEmptyPrefs = Object.keys(p).length === 0;
-
-	// Check for xnote settings if no settings at all
-	// if(isEmptyPrefs){
-	// 	let l = xnotePrefsMapper(await browser.xnote.getPrefs());
-	// 	for(let k in defaultPrefs){
-	// 		if(l[k] === undefined){
-	// 			p[k] = defaultPrefs[k];
-	// 		} else {
-	// 			p[k] = l[k];
-	// 		}
-	// 	}
-	// }
-
-	// Apply defaults
-	// for(let k in defaultPrefs){
-	// 	if(p[k] === undefined){
-	// 		p[k] = defaultPrefs[k];
-	// 	}
-	// }
-
-	if(p.tagName){
-		p.tagName = p.tagName.toLowerCase();
-	}
-
-	if(isEmpty){
-		// If XNote++ storage_path is set and readable, then use it
-		// else check if XNote folder exists inside profile directory
-		let path = await getXNoteStoragePath();
-
-		if(await isFolderWritable(path)){
-			p.storageOption = 'folder';
-			p.storageFolder = path;
-		} else {
-			path = await browser.qapp.createStoragePath();
-			if(await isFolderWritable(path)){
-				p.storageOption = 'folder';
-				p.storageFolder = path;
-			} else {
-				browser.legacy.alert(_("could.not.initialize.storage.folder"));
-				p.storageOption = 'ext';
-			}
-		}
-	}
-
-	// Override old default "yyyy-mm-dd - HH:MM"
-	if(p.dateFormat === "yyyy-mm-dd - HH:MM"){
-		p.dateFormat = 'Y-m-d H:i';
-	}
-
-	return p;
-}
-
 async function resetTbState(){
 	browser.menus.removeAll();
 	const tabId = await getCurrentTabId();
@@ -198,24 +133,6 @@ async function resetTbState(){
 async function loadNote(keyId: string) {
 	let note = createNote(keyId);
 	return note.load().then(() => note);
-}
-
-function dateFormatPredefined(locale: string, format: string, ts: Date) {
-	console.error("TODO: dateFormatPredefined");
-	return "";
-	// return luxon.DateTime.fromJSDate(ts2jsdate(ts)).setLocale(locale).toFormat(format);
-}
-
-function _qDateFormat(locale: string, ts: number){
-	if(Prefs.dateFormatPredefined){
-		return dateFormatPredefined(locale, Prefs.dateFormatPredefined, new Date(ts));
-	} else {
-		if(Prefs.dateFormat){
-			return dateFormat(locale, Prefs.dateFormat, new Date(ts));
-		} else {
-			return dateFormatPredefined(locale, 'DATETIME_FULL_WITH_SECONDS', new Date(ts));
-		}
-	}
 }
 
 async function getMessageKeyId(id: MessageId) {
@@ -321,28 +238,6 @@ async function createNoteForMessage(id: MessageId) {
 // 		return note;
 // 	});
 // }
-
-function qDateFormat(ts: number){
-	if(Prefs.dateLocale){
-		try {
-			return _qDateFormat(Prefs.dateLocale, ts);
-		} catch {
-		}
-	}
-
-	return _qDateFormat(browser.i18n.getUILanguage(), ts);
-}
-
-function qDateFormatPredefined(format: string, ts: Date){
-	if(Prefs.dateLocale){
-		try {
-			return dateFormatPredefined(Prefs.dateLocale, format, ts);
-		} catch {
-		}
-	}
-
-	return dateFormatPredefined(browser.i18n.getUILanguage(), format, ts);
-}
 
 function createNote(keyId: string) {
 	QDEB&&console.debug(`createNote(${keyId})`, Prefs.storageOption);
@@ -567,23 +462,6 @@ async function sendPrefs(){
 	});
 }
 
-async function setUpExtension(){
-	// CurrentWindowId = await getCurrentWindowId();
-	// CurrentTabId = await getCurrentTabId();
-
-	// CurrentNote = null;
-	// CurrentLang = browser.i18n.getUILanguage();
-
-	resetTbState();
-	Prefs = await loadPrefsWithDefaults();
-
-	// QDEB = !!Prefs.enableDebug;
-	await browser.qapp.setDebug(QDEB);
-	await browser.qpopup.setDebug(QDEB);
-
-	sendPrefs();
-}
-
 // async function menuHandler(info){
 // 	if(!info.selectedMessages){
 // 		console.error("No info.selectedMessages found");
@@ -693,7 +571,21 @@ async function initExtension(){
 	// await browser.ResourceUrl.register("qnote", "api/");
 	// await browser.ResourceUrl.register("qnote", "scripts/");
 
-	await setUpExtension();
+	// CurrentWindowId = await getCurrentWindowId();
+	// CurrentTabId = await getCurrentTabId();
+
+	// CurrentNote = null;
+	// CurrentLang = browser.i18n.getUILanguage();
+
+	resetTbState();
+	Prefs = await loadPrefsWithDefaults();
+
+	// QDEB = !!Prefs.enableDebug;
+	await browser.qapp.setDebug(QDEB);
+	await browser.qpopup.setDebug(QDEB);
+
+	sendPrefs();
+
 	console.log("setUpExtension() - OK");
 	// TBInfo = await browser.runtime.getBrowserInfo();
 
@@ -736,7 +628,7 @@ async function initExtension(){
 		QDEB&&console.debug("tabs.onCreated(), tabId:", Tab.id, Tab);
 
 		// await CurrentNote.silentlyPersistAndClose();
-		console.error("TODO: CurrentNote.silentlyPersistAndClose()");
+		console.error("TODO: browser.tabs.onCreated");
 	});
 
 	// Change tabs
@@ -745,7 +637,7 @@ async function initExtension(){
 
 		// await CurrentNote.silentlyPersistAndClose();
 		// CurrentTabId = activeInfo.tabId;
-		console.error("TODO: CurrentNote.silentlyPersistAndClose()");
+		console.error("TODO: browser.tabs.onActivated");
 	});
 
 	// Create window
@@ -758,7 +650,7 @@ async function initExtension(){
 		}
 
 		// await CurrentNote.silentlyPersistAndClose();
-		console.error("TODO: CurrentNote.silentlyPersistAndClose()");
+		console.error("TODO: browser.windows.onCreated");
 	});
 
 	browser.windows.onRemoved.addListener(async windowId => {
@@ -771,6 +663,7 @@ async function initExtension(){
 	// Change focus
 	browser.windows.onFocusChanged.addListener(async windowId => {
 		// QDEB&&console.debug("windows.onFocusChanged(), windowId:", windowId, CurrentNote);
+		console.error("browser.windows.onFocusChanged");
 
 		// if(
 		// 	true
