@@ -4,9 +4,10 @@ import { IQNoteFileAPI } from "./QNoteFile.mjs";
 import { IXNoteFileAPI } from "./XNoteFile.mjs";
 
 var { ExtensionUtils } = ChromeUtils.import("resource://gre/modules/ExtensionUtils.jsm");
-var { ExtensionError } = ExtensionUtils;
+var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs");
 var { XNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/XNoteFile.mjs");
+var { ExtensionError } = ExtensionUtils;
 
 export interface INoteFileProvider {
 	load(root: string, keyId: string): NoteData
@@ -35,6 +36,20 @@ export interface IQAppAPI {
 
 	onNoteRequest: WebExtEvent<(keyId: string) => void>
 	onKeyDown: WebExtEvent<(e: KeyboardEvent) => void>
+}
+
+export interface IFolderPickerOptions {
+	directory: string
+}
+
+export interface ILegacyAPI {
+	alert(title: string, text?: string | null): Promise<void>
+	confirm(title: string, text?: string | null): Promise<boolean>
+	compareVersions(a: string, b: string): Promise<number>
+	folderPicker(options: IFolderPickerOptions | null): Promise<string>
+	isReadable(path: string): Promise<boolean>
+	isFolderReadable(path: string): Promise<boolean>
+	isFolderWritable(path: string): Promise<boolean>
 }
 
 // TODO: test
@@ -168,5 +183,56 @@ export const XNoteFileAPI: IXNoteFileAPI = {
 	},
 	async getStoragePath(path: string | null) {
 		return XNoteFileAPI.provider.getStoragePath(path);
+	}
+}
+
+export const LegacyAPI: ILegacyAPI = {
+	async alert(title: string, text?: string | null): Promise<void> {
+		return Services.prompt.alert(null, text ? title : null, text ? text : title);
+	},
+	async confirm(title: string, text?: string | null): Promise<boolean> {
+		return Services.prompt.confirm(null, text ? title : null, text ? text : title);
+	},
+	async compareVersions(a: string, b: string): Promise<number> {
+		return Services.vc.compare(a, b);
+	},
+	async folderPicker(options: IFolderPickerOptions | null): Promise<string> {
+		let fp = Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
+
+		fp.init(Services.wm.getMostRecentWindow(null), "Select storage folder", fp.modeGetFolder);
+		if(options && options.directory){
+			fp.displayDirectory = new FileUtils.File(options.directory);
+		}
+
+		return new Promise(resolve => {
+			fp.open((rv: Ci.nsIFilePicker_ResultCode) => {
+				if(rv === fp.returnOK){
+					resolve(fp.file.path);
+				}
+			});
+		});
+	},
+	async isReadable(path: string): Promise<boolean> {
+		try {
+			return (new FileUtils.File(path)).isReadable();
+		} catch {
+			return false;
+		}
+	},
+	async isFolderReadable(path: string): Promise<boolean> {
+		try {
+			let f = new FileUtils.File(path);
+			return f.isReadable() && f.isDirectory();
+		} catch {
+			return false;
+		}
+	},
+	async isFolderWritable(path: string): Promise<boolean> {
+		try {
+			let f = new FileUtils.File(path);
+			return f.isWritable() && f.isDirectory();
+		} catch {
+			return false;
+		}
 	}
 }

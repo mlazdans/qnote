@@ -55,9 +55,8 @@
 			"type": "object",
 			"optional": true,
 			"properties": {
-				"displayDirectory": {
+				"directory": {
 					"type": "string",
-					"optional": true,
 					"default": "",
 					"description": "Initial directory"
 				}
