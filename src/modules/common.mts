@@ -203,11 +203,6 @@ async function saveSinglePref(k: keyof Preferences, v: any) {
 	});
 }
 
-// async function reloadExtension(){
-// 	await CurrentNote.silentlyPersistAndClose();
-// 	return browser.runtime.reload();
-// }
-
 async function clearPrefs() {
 	let p = [];
 	for(let k in new Preferences){
@@ -219,18 +214,6 @@ async function clearPrefs() {
 
 async function clearStorage(){
 	return browser.storage.local.clear();
-}
-
-async function exportStorage(){
-	let storage = await browser.storage.local.get();
-	let blob = new Blob([JSON.stringify(storage)], {type : 'application/json'});
-	let url = window.URL.createObjectURL(blob);
-
-	return browser.downloads.download({
-		url: url,
-		saveAs: true,
-		filename: 'qnote-storage.json'
-	});
 }
 
 export async function updateIcons(on: boolean, tabId?: number){
