@@ -212,10 +212,6 @@ async function clearPrefs() {
 	return Promise.all(p);
 }
 
-async function clearStorage(){
-	return browser.storage.local.clear();
-}
-
 export async function updateIcons(on: boolean, tabId?: number){
 	let icon = on ? "images/icon.svg" : "images/icon-disabled.svg";
 
@@ -366,66 +362,6 @@ export async function focusMessagePane(windowId: number){
 	return browser.qapp.messagePaneFocus(windowId);
 }
 
-// /**
-//  * @param {string} root
-//  * @param {"xnote"|"qnote"} type
-//  * @param {boolean} overwrite
-//  */
-// async function exportQAppNotesToFolder(root, type, overwrite){
-// 	if(Prefs.storageOption == 'folder'){
-// 		return loadAllFolderNotes(Prefs.storageFolder).then(notes => exportNotesToFolder(root, type, notes, overwrite));
-// 	} else {
-// 		return loadAllExtNotes().then(notes => exportNotesToFolder(root, type, notes, overwrite));
-// 	}
-// }
-
-// Load all note keys from local storage
-async function loadAllExtKeys() {
-	return browser.storage.local.get().then(storage => {
-		let keys = [];
-		for(let keyId in storage){
-			if(keyId.substr(0, 5) !== 'pref.') {
-				keys.push(keyId);
-			}
-		}
-		return keys;
-	});
-}
-
-async function loadAllExtNotes(): Promise<Array<NoteData>> {
-	return loadAllExtKeys().then(async keys => {
-		let Notes = [];
-		for(let keyId of keys){
-			let note = new QNote(keyId);
-			await note.load();
-			Notes.push(note.data);
-		}
-		return Notes;
-	});
-}
-
-// Load all note keys from folder, prioritizing qnote if both qnote and xnote exists
-async function loadAllFolderKeys(folder: string) {
-	return Promise.all([
-		browser.xnote.getAllKeys(folder),
-		browser.qnote.getAllKeys(folder)
-	]).then(values => {
-		return Object.assign(values[0], values[1]);
-	});
-}
-
-export async function loadAllFolderNotes(folder: string): Promise<Array<NoteData>> {
-	return loadAllFolderKeys(folder).then(async keys => {
-		let Notes = [];
-		for(let keyId of keys){
-			let note = new QNoteFolder(keyId, folder);
-			await note.load();
-			Notes.push(note.data);
-		}
-		return Notes;
-	});
-}
-
 // async function loadAllNotes() {
 // 	let p;
 // 	if(Prefs.storageOption === 'ext'){
@@ -477,49 +413,6 @@ export async function loadAllFolderNotes(folder: string): Promise<Array<NoteData
 // 			sendNoteToQApp(note);
 // 		}
 // 	});
-// }
-
-// TODO:
-// /**
-//  * @param {string} root
-//  * @param {"xnote"|"qnote"} type
-//  * @param {Note[]} notes
-//  * @param {boolean} overwrite
-//  */
-//  async function exportNotesToFolder(root, type, notes, overwrite){
-// 	let stats = {
-// 		err: 0,
-// 		exist: 0,
-// 		imported: 0,
-// 		overwritten: 0
-// 	};
-
-// 	for (const note of notes) {
-// 		let yn;
-// 		if(type == "xnote"){
-// 			yn = new XNote(note.keyId, root);
-// 		} else {
-// 			yn = new QNoteFolder(note.keyId, root);
-// 		}
-
-// 		await yn.load();
-
-// 		let exists = yn.exists;
-
-// 		if(exists && !overwrite){
-// 			stats.exist++;
-// 		} else {
-// 			yn.set(note.get());
-// 			await yn.save().then(() => {
-// 				stats[exists ? "overwritten" : "imported"]++;
-// 			}).catch(e => {
-// 				console.error(_("error.saving.note"), e.message, yn.keyId);
-// 				stats.err++;
-// 			});
-// 		}
-// 	}
-
-// 	return stats;
 // }
 
 async function addToClipboard(note: NoteData){

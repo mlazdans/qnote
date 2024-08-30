@@ -30,7 +30,6 @@ import { QNotePopup } from "./modules/NotePopups.mjs";
 import {
 	getCurrentTabId,
 	getCurrentWindowIdAnd,
-	loadAllFolderNotes,
 	MessageId,
 	mpUpdateForNote,
 	POP_EXISTING,
@@ -85,41 +84,6 @@ var PopupManager = {
 
 async function confirmDelete(shouldConfirm: boolean): Promise<boolean> {
 	return shouldConfirm ? await browser.legacy.confirm(_("delete.note"), _("are.you.sure")) : true;
-}
-
-async function importQNotes(notes: Array<NoteData>, overwrite = false){
-	let stats = {
-		err: 0,
-		exist: 0,
-		imported: 0,
-		overwritten: 0
-	};
-
-	for (const note of notes) {
-		let yn = new QNote(note.keyId);
-
-		await yn.load();
-
-		let exists = yn.data.exists;
-
-		if(exists && !overwrite){
-			stats.exist++;
-		} else {
-			yn.data = note;
-			await yn.save().then(() => {
-				stats[exists ? "overwritten" : "imported"]++;
-			}).catch(e => {
-				console.error(_("error.saving.note"), e.message, yn.data.keyId);
-				stats.err++;
-			});
-		}
-	}
-
-	return stats;
-}
-
-async function importFolderNotes(root: string, overwrite = false){
-	return loadAllFolderNotes(root).then(notes => importQNotes(notes, overwrite));
 }
 
 async function resetTbState(){

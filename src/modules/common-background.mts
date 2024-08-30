@@ -1,5 +1,13 @@
 import { Preferences } from "./api.mjs";
 import { dateFormat, getPrefs, isPrefsEmpty } from "./common.mjs";
+import { NoteData, NoteType, QNote, QNoteFolder, XNote } from "./Note.mjs";
+
+export interface ExportStats {
+	err: number
+	exist: number
+	imported: number
+	overwritten: number
+}
 
 var QDEB = true;
 var _ = browser.i18n.getMessage;
@@ -131,4 +139,128 @@ function qDateFormat(ts: number, prefs: Preferences){
 	}
 
 	return _qDateFormat(browser.i18n.getUILanguage(), ts, prefs);
+}
+
+// Load all note keys from folder, prioritizing qnote if both qnote and xnote exists
+async function loadAllFolderKeys(folder: string) {
+	return Promise.all([
+		browser.xnote.getAllKeys(folder),
+		browser.qnote.getAllKeys(folder)
+	]).then(values => {
+		return Object.assign(values[0], values[1]);
+	});
+}
+
+export async function loadAllFolderNotes(folder: string): Promise<Array<NoteData>> {
+	return loadAllFolderKeys(folder).then(async keys => {
+		let Notes = [];
+		for(let keyId of keys){
+			let note = new QNoteFolder(keyId, folder);
+			await note.load();
+			Notes.push(note.data);
+		}
+		return Notes;
+	});
+}
+
+async function importQNotes(notes: Array<NoteData>, overwrite = false){
+	let stats = {
+		err: 0,
+		exist: 0,
+		imported: 0,
+		overwritten: 0
+	};
+
+	for (const note of notes) {
+		let yn = new QNote(note.keyId);
+
+		await yn.load();
+
+		let exists = yn.data.exists;
+
+		if(exists && !overwrite){
+			stats.exist++;
+		} else {
+			yn.data = note;
+			await yn.save().then(() => {
+				stats[exists ? "overwritten" : "imported"]++;
+			}).catch(e => {
+				console.error(_("error.saving.note"), e.message, yn.data.keyId);
+				stats.err++;
+			});
+		}
+	}
+
+	return stats;
+}
+
+export async function importFolderNotes(root: string, overwrite = false){
+	return loadAllFolderNotes(root).then(notes => importQNotes(notes, overwrite));
+}
+
+async function exportNotesToFolder(root: string, type: NoteType, notes: Array<NoteData>, overwrite: boolean) {
+	let stats: ExportStats = {
+		err: 0,
+		exist: 0,
+		imported: 0,
+		overwritten: 0
+	};
+
+	for (const note of notes) {
+		let yn;
+		if(type == "xnote"){
+			yn = new XNote(note.keyId, root);
+		} else {
+			yn = new QNoteFolder(note.keyId, root);
+		}
+
+		await yn.load();
+
+		if(yn.data.exists && !overwrite){
+			stats.exist++;
+		} else {
+			yn.data =  note;
+			await yn.save().then(() => {
+				stats[yn.data.exists ? "overwritten" : "imported"]++;
+			}).catch(e => {
+				console.error(_("error.saving.note"), e.message, yn.keyId);
+				stats.err++;
+			});
+		}
+	}
+
+	return stats;
+}
+
+// Load all note keys from local storage
+async function loadAllExtKeys() {
+	return browser.storage.local.get().then(storage => {
+		let keys = [];
+		for(let keyId in storage){
+			if(keyId.substr(0, 5) !== 'pref.') {
+				keys.push(keyId);
+			}
+		}
+		return keys;
+	});
+}
+
+async function loadAllExtNotes(): Promise<Array<NoteData>> {
+	return loadAllExtKeys().then(async keys => {
+		let Notes = [];
+		for(let keyId of keys){
+			let note = new QNote(keyId);
+			await note.load();
+			Notes.push(note.data);
+		}
+		return Notes;
+	});
+}
+
+export async function exportQAppNotesToFolder(root: string, type: NoteType, overwrite: boolean, prefs: Preferences) {
+	if(prefs.storageOption == 'folder'){
+		return loadAllFolderNotes(prefs.storageFolder).then(notes => exportNotesToFolder(root, type, notes, overwrite));
+	} else {
+		return loadAllExtNotes().then(notes => exportNotesToFolder(root, type, notes, overwrite));
+	}
 }
