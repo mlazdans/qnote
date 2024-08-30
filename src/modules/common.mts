@@ -655,19 +655,19 @@ export function querySelectorOrDie(selector: string): Element {
 }
 
 export function isTextAreaElement(node: Element): node is HTMLTextAreaElement {
-	return node.nodeName == "SELECT";
+	return node instanceof HTMLTextAreaElement
 }
 
 export function isSelectElement(node: Element): node is HTMLSelectElement {
-	return node.nodeName == "SELECT";
+	return node instanceof HTMLSelectElement
 }
 
 export function isButtonElement(node: Element): node is HTMLButtonElement {
-	return node.nodeName == "BUTTON";
+	return node instanceof HTMLButtonElement
 }
 
 export function isInputElement(node: Element): node is HTMLInputElement {
-	return node.nodeName == "INPUT";
+	return node instanceof HTMLInputElement
 }
 
 export function isTypeButton(node: Element): node is (HTMLInputElement & TypeButton) {
