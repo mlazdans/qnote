@@ -16,7 +16,7 @@ export class DOMLocalizator {
 
 	setTexts(document: Document) {
 		for (const node of document.querySelectorAll("[data-i18n]")) {
-			if (!(node instanceof HTMLElement && node.dataset.i18n)) {
+			if (!(isHTMLElement(node) && node.dataset.i18n)) {
 				continue;
 			}
 

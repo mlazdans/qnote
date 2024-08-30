@@ -1,10 +1,8 @@
 // This code should run everywhere: background, content, experiments
+
 // import * as luxon from 'luxon';
 import { Preferences } from './api.mjs';
-import { NoteData, QNote, QNoteFolder } from './Note.mjs';
-
-// TODO: remove
-var QDEB = true;
+import { NoteData } from './Note.mjs';
 
 export class NoKeyIdError extends Error {};
 export class NoMessageError extends Error {};
@@ -18,17 +16,21 @@ export const POP_NONE     = 0;
 export const POP_FOCUS    = 1;
 export const POP_EXISTING = 2;
 
-interface TypeCheckbox {
+export interface TypeCheckbox {
 	type: "checkbox"
 }
 
-interface TypeRadio {
+export interface TypeRadio {
 	type: "radio"
 }
 
-interface TypeButton {
+export interface TypeButton {
 	type: "button"
 }
+
+export type HTMLInputButtonElement   = HTMLInputElement & TypeButton
+export type HTMLInputCheckboxElement = HTMLInputElement & TypeCheckbox
+export type HTMLInputRadioElement    = HTMLInputElement & TypeRadio
 
 // export interface Preferences {
 // 	useTag: boolean,
@@ -550,14 +552,14 @@ export function isInputElement(node: Element): node is HTMLInputElement {
 	return node instanceof HTMLInputElement
 }
 
-export function isTypeButton(node: Element): node is (HTMLInputElement & TypeButton) {
+export function isTypeButton(node: Element): node is HTMLInputButtonElement {
 	return isInputElement(node) && (node.type.toUpperCase() == "BUTTON");
 }
 
-export function isTypeCheckbox(node: Element): node is (HTMLInputElement & TypeCheckbox) {
+export function isTypeCheckbox(node: Element): node is HTMLInputCheckboxElement {
 	return isInputElement(node) && (node.type.toUpperCase() == "CHECKBOX");
 }
 
-export function isTypeRadio(node: Element): node is (HTMLInputElement & TypeRadio) {
+export function isTypeRadio(node: Element): node is HTMLInputRadioElement {
 	return isInputElement(node) && (node.type.toUpperCase() == "RADIO");
 }
