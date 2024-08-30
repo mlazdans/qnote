@@ -654,6 +654,10 @@ export function querySelectorOrDie(selector: string): Element {
 	throw new Error(`Required HTML element with selector ${selector} not found`);
 }
 
+export function isHTMLElement(node: Element): node is HTMLElement {
+	return node instanceof HTMLElement
+}
+
 export function isTextAreaElement(node: Element): node is HTMLTextAreaElement {
 	return node instanceof HTMLTextAreaElement
 }
