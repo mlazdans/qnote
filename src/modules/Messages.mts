@@ -7,7 +7,7 @@ interface IMessageData {
 interface IMessage<T extends IMessageData> {
 	command: string
 	parse(data: any): T | undefined
-	post(port: browser.runtime.Port, data: T): void
+	post(port: browser.runtime.Port, data?: T): void
 	send(tabId: number, data: T): void
 }
 
@@ -19,10 +19,10 @@ abstract class DefaultMessage<T extends IMessageData> implements IMessage<T> {
 		}
 		return {} as T;
 	}
-	send(tabId: number, data: T): Promise<any> {
+	send(tabId: number, data?: T): Promise<any> {
 		return browser.tabs.sendMessage(tabId, { ...data, command: this.command });
 	}
-	post(port: browser.runtime.Port, data: T): void {
+	post(port: browser.runtime.Port, data?: T): void {
 		port.postMessage({ ...data, command: this.command });
 	}
 }
