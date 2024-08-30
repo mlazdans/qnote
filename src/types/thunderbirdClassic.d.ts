@@ -280,7 +280,7 @@ declare namespace Components
 		class nsIConverterInputStream extends nsIUnicharInputStream {
 			readonly DEFAULT_REPLACEMENT_CHARACTER = 0xFFFD;
 			readonly ERRORS_ARE_FATAL = 0;
-			init(nsIInputStream: nsIFile, aCharset: string, aBufferSize: number, aReplacementChar: number): void;
+			init(nsIInputStream: nsIInputStream, aCharset: string, aBufferSize: number, aReplacementChar: number): void;
 		}
 
 		class nsIFileInputStream extends nsIInputStream {
@@ -498,8 +498,9 @@ declare namespace Components
 		}
 
 		class nsIFile extends nsISupports {
-			static readonly NORMAL_FILE_TYPE = 0;
-			static readonly DIRECTORY_TYPE   = 1;
+			static readonly NORMAL_FILE_TYPE = 0
+			static readonly DIRECTORY_TYPE   = 1
+			readonly path: string
 		}
 
 		class nsIURI extends nsISupports {
@@ -718,6 +719,41 @@ declare namespace Components
 			public getCharPref(name: string, defaultValue: string | undefined): string;
 			public getChildList(startingAt: string, obj: object): string[];
 			public setBoolPref(name: string, value: boolean): void;
+		}
+
+		class BrowsingContext {}
+
+		enum nsIFilePicker_Mode {
+			modeOpen         = 0,                        // Load a file or directory
+			modeSave         = 1,                        // Save a file or directory
+			modeGetFolder    = 2,                        // Select a folder/directory
+			modeOpenMultiple = 3,                        // Load multiple files
+		}
+
+		enum nsIFilePicker_ResultCode {
+			returnOK        = 0,                        // User hit Ok, process selection
+			returnCancel    = 1,                        // User hit cancel, ignore selection
+			returnReplace   = 2,                        // User acknowledged file already exists so ok to replace, process selection
+		}
+
+		interface nsIFilePickerShownCallback {
+		}
+
+		class nsIFilePicker extends nsISupports {
+			modeOpen        : nsIFilePicker_Mode.modeOpen
+			modeSave        : nsIFilePicker_Mode.modeSave
+			modeGetFolder   : nsIFilePicker_Mode.modeGetFolder
+			modeOpenMultiple: nsIFilePicker_Mode.modeOpenMultiple
+
+			returnOK        : nsIFilePicker_ResultCode.returnOK
+			returnCancel    : nsIFilePicker_ResultCode.returnCancel
+			returnReplace   : nsIFilePicker_ResultCode.returnReplace
+
+			displayDirectory: nsIFile
+			readonly file   : nsIFile
+
+			init(browsingContext: BrowsingContext, title: string, mode: nsIFilePicker_Mode): void
+			open(aFilePickerShownCallback: nsIFilePickerShownCallback): void
 		}
 	}
 
@@ -1013,6 +1049,17 @@ declare interface nsIWindowWatcher {
 //https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/Services.jsm
 declare namespace Services
 {
+	interface mozIDOMWindowProxy extends nsISupports {}
+
+	namespace prompt {
+		function alert(aParent: mozIDOMWindowProxy | null, aDialogTitle: string | null, aText: string | null): void
+		function confirm(aParent: mozIDOMWindowProxy | null, aDialogTitle: string | null, aText: string | null): boolean
+	}
+
+	namespace vc {
+		function compare(A: string, B: string): number
+	}
+
 	let clipboard: Ci.nsIClipboard;
 	let ww: nsIWindowWatcher;
 	let wm: Ci.nsIWindowMediator;

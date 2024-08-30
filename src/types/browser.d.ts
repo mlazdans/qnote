@@ -2,7 +2,7 @@ import 'thunderbird-webext-browser';
 import { IQPopupAPI } from '../modules/api.mts';
 import { IQNoteFileAPI } from '../modules-exp/QNoteFile.mts';
 import { IXNoteFileAPI } from '../modules-exp/XNoteFile.mts';
-import { IQAppAPI } from '../modules-exp/api.mts';
+import { ILegacyAPI, IQAppAPI } from '../modules-exp/api.mts';
 
 export {}
 
@@ -44,17 +44,12 @@ declare global {
 		export const xnote: IXNoteFileAPI;
 		export const qpopup: IQPopupAPI;
 		export const qapp: IQAppAPI;
+		export const legacy: ILegacyAPI;
 
-		export namespace legacy {
-			function isReadable(path: string): Promise<boolean>;
-			function isFolderReadable(path: string): Promise<boolean>;
-			function isFolderWritable(path: string): Promise<boolean>;
-			function alert(title: string, msg?: string): Promise<void>;
-			function confirm(title: string, msg?: string): Promise<boolean>;
-		}
 		export namespace ResourceUrl {
 			function register(name: string): Promise<void>;
 		}
+
 		export namespace NotifyTools {
 			export const onNotifyBackground: WebExtEvent<(e: any) => void>;
 		}
