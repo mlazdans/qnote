@@ -105,8 +105,9 @@ interface NoteDataExports {
 }
 
 interface ExpApiExports {
-	QNoteFileAPI: typeof import("../modules-exp/api.mts").QNoteFileAPI;
-	XNoteFileAPI: typeof import("../modules-exp/api.mts").XNoteFileAPI;
+	QNoteFileAPI: typeof import("../modules-exp/api.mts").QNoteFileAPI
+	XNoteFileAPI: typeof import("../modules-exp/api.mts").XNoteFileAPI
+	LegacyAPI: typeof import("../modules-exp/api.mts").LegacyAPI
 }
 
 // interface FileUtilsExport {

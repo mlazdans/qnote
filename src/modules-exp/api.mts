@@ -38,15 +38,11 @@ export interface IQAppAPI {
 	onKeyDown: WebExtEvent<(e: KeyboardEvent) => void>
 }
 
-export interface IFolderPickerOptions {
-	directory: string
-}
-
 export interface ILegacyAPI {
 	alert(title: string, text?: string | null): Promise<void>
 	confirm(title: string, text?: string | null): Promise<boolean>
 	compareVersions(a: string, b: string): Promise<number>
-	folderPicker(options: IFolderPickerOptions | null): Promise<string>
+	folderPicker(initialPath: string | null): Promise<string>
 	isReadable(path: string): Promise<boolean>
 	isFolderReadable(path: string): Promise<boolean>
 	isFolderWritable(path: string): Promise<boolean>
@@ -196,12 +192,12 @@ export const LegacyAPI: ILegacyAPI = {
 	async compareVersions(a: string, b: string): Promise<number> {
 		return Services.vc.compare(a, b);
 	},
-	async folderPicker(options: IFolderPickerOptions | null): Promise<string> {
+	async folderPicker(initialPath: string | null): Promise<string> {
 		let fp = Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
 
 		fp.init(Services.wm.getMostRecentWindow(null), "Select storage folder", fp.modeGetFolder);
-		if(options && options.directory){
-			fp.displayDirectory = new FileUtils.File(options.directory);
+		if(initialPath){
+			fp.displayDirectory = new FileUtils.File(initialPath);
 		}
 
 		return new Promise(resolve => {

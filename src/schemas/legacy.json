@@ -51,18 +51,9 @@
 		"description": "Pick a folder",
 		"async": true,
 		"parameters": [{
-			"name": "options",
-			"type": "object",
-			"optional": true,
-			"properties": {
-				"directory": {
-					"type": "string",
-					"default": "",
-					"description": "Initial directory"
-				}
-			},
-			"default": {},
-			"description": "Options object"
+			"name": "initialPath",
+			"type": "string",
+			"optional": true
 		}]
 	},{
 		"name": "isReadable",
