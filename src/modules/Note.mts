@@ -1,3 +1,5 @@
+export type NoteType = "xnote" | "qnote";
+
 export class NoteData {
 	keyId: string; // message-id header or another unique id
 	exists: boolean = false;
