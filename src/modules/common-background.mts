@@ -1,5 +1,6 @@
-import { Preferences } from "./api.mjs";
-import { dateFormat, getPrefs, isPrefsEmpty } from "./common.mjs";
+// This code should run in background and content
+import { IPreferences, PrefsManager } from "./api.mjs";
+import { getPropertyType, setProperty } from "./common.mjs";
 import { NoteData, NoteType, QNote, QNoteFolder, XNote } from "./Note.mjs";
 
 export interface ExportStats {
@@ -99,47 +100,6 @@ async function isFolderReadable(path: string){
 
 export async function isFolderWritable(path: string){
 	return await browser.legacy.isFolderWritable(path);
-}
-
-// TODO: cleanup this mess with date functions
-export function qDateFormatPredefined(format: string, ts: Date, prefs: Preferences){
-	if(prefs.dateLocale){
-		try {
-			return dateFormatPredefined(prefs.dateLocale, format, ts);
-		} catch {
-		}
-	}
-
-	return dateFormatPredefined(browser.i18n.getUILanguage(), format, ts);
-}
-
-function dateFormatPredefined(locale: string, format: string, ts: Date) {
-	console.error("TODO: dateFormatPredefined");
-	return "";
-	// return luxon.DateTime.fromJSDate(ts2jsdate(ts)).setLocale(locale).toFormat(format);
-}
-
-function _qDateFormat(locale: string, ts: number, prefs: Preferences){
-	if(prefs.dateFormatPredefined){
-		return dateFormatPredefined(locale, prefs.dateFormatPredefined, new Date(ts));
-	} else {
-		if(prefs.dateFormat){
-			return dateFormat(locale, prefs.dateFormat, new Date(ts));
-		} else {
-			return dateFormatPredefined(locale, 'DATETIME_FULL_WITH_SECONDS', new Date(ts));
-		}
-	}
-}
-
-function qDateFormat(ts: number, prefs: Preferences){
-	if(prefs.dateLocale){
-		try {
-			return _qDateFormat(prefs.dateLocale, ts, prefs);
-		} catch {
-		}
-	}
-
-	return _qDateFormat(browser.i18n.getUILanguage(), ts, prefs);
 }
 
 // Load all note keys from folder, prioritizing qnote if both qnote and xnote exists

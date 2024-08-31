@@ -1,3 +1,4 @@
+import * as luxon from "../modules/luxon.mjs";
 import { IQPopupOptions, IQPopupOptionsPartial } from "./NotePopups.mjs";
 
 export interface IQPopupAPI {
@@ -10,9 +11,12 @@ export interface IQPopupAPI {
 	onRemoved: WebExtEvent<(id: number) => void>
 }
 
-export type PopupAnchor   = "window" | "threadpane" | "message";
-export type StorageOption = "folder" | "ext";
-export type WindowOption  = "xul" | "webext";
+export type PopupAnchor          = "window" | "threadpane" | "message";
+export type StorageOption        = "folder" | "ext";
+export type WindowOption         = "xul" | "webext";
+export type LuxonDateFormatGroup = "datetime_group" | "date_group" | "time_group"
+export type LuxonPredefined      = keyof typeof luxon.DateTime
+export type LuxonDateFormatsMap  = Map<LuxonDateFormatGroup, Array<LuxonPredefined>>
 
 export interface IXNotePreferences {
 	usetag: boolean,
@@ -44,7 +48,7 @@ export interface IPreferences extends IQAppPreferences {
 	useTag                : boolean
 	tagName               : string
 	dateFormat            : string
-	dateFormatPredefined  : string
+	dateFormatPredefined  : LuxonPredefined | undefined
 	dateLocale            : string
 	width                 : number
 	height                : number
