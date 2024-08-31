@@ -264,3 +264,178 @@ export async function exportQAppNotesToFolder(root: string, type: NoteType, over
 		return loadAllExtNotes().then(notes => exportNotesToFolder(root, type, notes, overwrite));
 	}
 }
+
+export async function clearPrefs() {
+	let p = [];
+	for(let k in PrefsManager.defaults){
+		p.push(browser.storage.local.remove('pref.' + k));
+	}
+
+	return Promise.all(p);
+}
+
+// function resetTbState(){
+export async function updateTabMenusAndIcons(){
+	browser.menus.removeAll();
+	getCurrentTabIdAnd().then(tabId => updateIcons(false, tabId));
+}
+
+export async function updateIcons(on: boolean, tabId?: number){
+	let icon = on ? "images/icon.svg" : "images/icon-disabled.svg";
+
+	let BrowserAction = browser.action ? browser.action : browser.browserAction;
+
+	BrowserAction.setIcon({
+		path: icon,
+		tabId: tabId
+	});
+
+	browser.messageDisplayAction.setIcon({
+		path: icon,
+		tabId: tabId
+	});
+}
+
+export async function mpUpdateForNote(note: NoteData){
+	// Marks icons active
+	updateIcons(note.exists);
+	browser.qapp.saveNoteCache(note);
+	browser.qapp.updateColumsView();
+	getCurrentWindowIdAnd().then(windowId => browser.qapp.attachNoteToMessage(windowId, note));
+}
+
+async function getCurrentWindow(){
+	return browser.windows.getCurrent();
+}
+
+export async function getCurrentWindowId(){
+	return getCurrentWindow().then(Window => {
+		return Window.id;
+	});
+}
+
+export async function getCurrentWindowIdAnd(): Promise<number> {
+	return new Promise(async resolve => {
+		return getCurrentWindowId().then(windowId => {
+			if(windowId)resolve(windowId);
+		});
+	});
+}
+
+export async function getCurrentTab(){
+	return browser.tabs.getCurrent();
+}
+
+export async function getCurrentTabId(){
+	return getCurrentTab().then(Tab => {
+		if(Tab?.id){
+			return Tab.id;
+		} else {
+			return getCurrentWindowIdAnd().then(windowId => getWindowActiveTab(windowId).then(Tab => Tab?.id));
+		}
+	});
+
+	// var Tab;
+	// if(Tab = await getCurrentTab()){
+	// 	return Tab.id;
+	// } else {
+	// 	const windowId = await getCurrentWindowId();
+	// 	if(windowId){
+	// 		if(Tab = await getWindowActiveTab(windowId)){
+	// 			return Tab.id;
+	// 		}
+	// 	}
+	// }
+
+	// return undefined;
+	// return .then(async Tab => Tab ? Tab.id : await getWindowActiveTab(CurrentWindowId)));
+}
+
+async function getWindowActiveTab(windowId: number){
+	return browser.windows.get(windowId, { populate: true }).then(Window => {
+		if(Window.tabs){
+			for(let t of Window.tabs){
+				if(t.active){
+					return t;
+				}
+			}
+		}
+		return undefined;
+	});
+}
+
+export async function getCurrentTabIdAnd(): Promise<number> {
+	return new Promise(async resolve => {
+		return getCurrentTabId().then(tabId => {
+			if(tabId)resolve(tabId);
+		});
+	});
+}
+
+// We call this after options has been changed
+export async function sendPrefsToQApp(prefs: IPreferences){
+	browser.qapp.setPrefs({
+		storageOption: prefs.storageOption,
+		storageFolder: prefs.storageFolder,
+		showFirstChars: prefs.showFirstChars,
+		printAttachTop: prefs.printAttachTop,
+		printAttachBottom: prefs.printAttachBottom,
+		messageAttachTop: prefs.messageAttachTop,
+		messageAttachBottom: prefs.messageAttachBottom,
+		attachTemplate: prefs.attachTemplate,
+		treatTextAsHtml: prefs.treatTextAsHtml,
+	});
+}
+
+export async function savePrefs(p: IPreferences) {
+	let k: keyof typeof p;
+
+	for(k in p){
+		await browser.storage.local.set({
+			['pref.' + k]: p[k]
+		});
+	}
+}
+
+async function saveSinglePref(k: keyof IPreferences, v: any) {
+	return browser.storage.local.set({
+		['pref.' + k]: v
+	});
+}
+
+export async function isPrefsEmpty(): Promise<boolean> {
+	let p = PrefsManager.defaults;
+	let k: keyof typeof p;
+
+	for(k in p){
+		const v = await browser.storage.local.get('pref.' + k);
+		if(v['pref.' + k] !== undefined){
+			return false;
+		}
+	}
+
+	return true;
+}
+
+export async function getSavedPrefs(){
+	let p = PrefsManager.defaults;
+	let k: keyof typeof p;
+
+	for(k in p){
+		const v = await browser.storage.local.get('pref.' + k);
+		if(v['pref.' + k] !== undefined){
+			const type = getPropertyType(p, k);
+			if(type === "number"){
+				setProperty(p, k, Number(v));
+			} else if(typeof v === "boolean"){
+				setProperty(p, k, Boolean(v));
+			} else if(typeof v === "string"){
+				setProperty(p, k, String(v));
+			} else {
+				console.error(`Unsupported preference type: ${type} for key ${k}`);
+			}
+		}
+	}
+
+	return p;
+}
