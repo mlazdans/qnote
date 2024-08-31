@@ -20,25 +20,22 @@ export class DOMLocalizator {
 				continue;
 			}
 
-			let args = [];
-			let params = new Map<string, string>;
-			if (node.dataset.i18n == "implemented.formatting.rules") {
-				for(const p in node.dataset){
-					let m = p.match(/^param(\d+)$/);
-					if(m !== null && typeof m[1] == "string"){
-						params.set(m[1], node.dataset[p] || "");
-					}
-				}
+			// Optional parameters that can be injected into localization string, for example:
+			// "implemented.formatting.rules": {
+			// 	"message": "(implemented: $1)"
+			// }
+			// <span data-i18n="implemented.formatting.rules" data-i18n.param1="dDjlNwzWFmMntLYyaAgGhHisve"></span>
+			const params = new Map<string, string>;
 
-				let keys = Object.keys(params);
-				keys.sort();
-
-				for(let k of keys){
-					args.push(params.get(k));
-				}
+			for(const k in node.dataset){
+				k.match(/^i18n\.param(\d+)$/)?.slice(1).map(v => params.set(v, node.dataset[k] || ""));
 			}
 
-			const text = this._(node.dataset.i18n, args);
+			const substitutions: Array<string> = [];
+
+			[...params.keys()].sort().map(v => substitutions.push(params.get(v) || ""));
+
+			const text = this._(node.dataset.i18n, substitutions);
 
 			if (isButtonElement(node)) {
 				node.textContent = text;
