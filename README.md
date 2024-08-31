@@ -97,4 +97,4 @@ _Floating panel_ has nicer looks but does not display well on MacOS. Fall back t
 
 # Donations
 
-I enjoy some [beer](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CCFL84AMQKV4S&source=url) now and then. Much appreciated! ;)
+I enjoy some [beer (EUR)](https://www.paypal.com/donate/?hosted_button_id=CCFL84AMQKV4S) or [beer (USD)](https://www.paypal.com/donate/?hosted_button_id=NKF22QJS87LWN) now and then. Much appreciated! ;)
