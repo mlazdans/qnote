@@ -101,7 +101,7 @@ export class XNoteFile implements INoteFileProvider {
 				case 'mm':	return zeroize(d.getMonth() + 1);
 				case 'mmm':	return ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][d.getMonth()];
 				case 'mmmm':	return ['January','February','March','April','May','June','July','August','September','October','November','December'][d.getMonth()];
-				case 'yy':	return String(d.getFullYear()).substr(2);
+				case 'yy':	return String(d.getFullYear()).substring(2);
 				case 'yyyy':	return d.getFullYear().toString();
 				case 'h':	return (d.getHours() % 12 || 12).toString();;
 				case 'hh':	return zeroize(d.getHours() % 12 || 12);
@@ -118,7 +118,7 @@ export class XNoteFile implements INoteFileProvider {
 				case 'tt':	return d.getHours() < 12 ? 'am' : 'pm';
 				case 'TT':	return d.getHours() < 12 ? 'AM' : 'PM';
 				// Return quoted strings with the surrounding quotes removed
-				default:	return $0.substr(1, $0.length - 2);
+				default:	return $0.substring(1, $0.length - 2);
 			}
 		});
 	}

@@ -198,7 +198,7 @@ async function loadAllExtKeys() {
 	return browser.storage.local.get().then(storage => {
 		let keys = [];
 		for(let keyId in storage){
-			if(keyId.substr(0, 5) !== 'pref.') {
+			if(keyId.substring(0, 5) !== 'pref.') {
 				keys.push(keyId);
 			}
 		}
