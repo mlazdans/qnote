@@ -1,4 +1,9 @@
 {
+	"include": [
+		"./src/"
+		// "./src/types/browser.d.ts",
+		// "./node_modules/@types/luxon/src/*.d.ts",
+	],
 	"compilerOptions": {
 		"module": "Preserve",
 		"target": "es2018",
@@ -11,11 +16,12 @@
 		"strict": true,
 
 		"sourceMap": false,
-		// "allowJs": false,
+		"allowJs": true,
 		"rootDir": "src",
-		"outDir": "dist/release",
+		"outDir": "./dist/release",
 		"typeRoots": [
-			"src/types"
+			// "./src/types/",
+			// "./node_modules/@types/luxon/src/"
 		],
 		"noImplicitReturns": true,
 		"noUnusedLocals": false,
