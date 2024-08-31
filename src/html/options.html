@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<meta charset="utf-8"/>
+	<meta charset="utf-8">
 	<link rel="stylesheet" href="../html/options.css" type="text/css">
-	<title></title>
+	<title>QNote options</title>
 </head>
 
 <body>
@@ -45,11 +45,11 @@
 					</tr>
 					<tr>
 						<td><label for="input_width" data-i18n="width.label"></label></td>
-						<td><input type="number" data-preference="width" id="input_width" min="100" max="99999" class="size3" /></td>
+						<td><input type="number" data-preference="width" id="input_width" min="100" max="99999" class="size3"></td>
 					</tr>
 					<tr>
 						<td><label for="input_height" data-i18n="height.label"></label></td>
-						<td><input type="number" data-preference="height" id="input_height" min="100" max="99999" class="size3" /></td>
+						<td><input type="number" data-preference="height" id="input_height" min="100" max="99999" class="size3"></td>
 					</tr>
 				</table>
 			</td>
@@ -95,7 +95,7 @@
 	<table>
 		<tr>
 			<td><label for="input_showFirstChars" data-i18n="show.first.chars.label"></label></td>
-			<td><input type="number" data-preference="showFirstChars" id="input_showFirstChars" min="0" max="999" class="size2" /></td>
+			<td><input type="number" data-preference="showFirstChars" id="input_showFirstChars" min="0" max="999" class="size2"></td>
 		</tr>
 	</table>
 	<div id="dateBlock">
@@ -114,7 +114,7 @@
 		<div class="customDateFormat"></div>
 		<div class="customDateFormat" style="padding: 0 8px 8px 8px;">
 			<a href="https://www.php.net/manual/en/datetime.format.php" class="text-link" data-i18n="formatting.rules"></a>
-			<span data-i18n="implemented.formatting.rules" data-param1="dDjlNwzWFmMntLYyaAgGhHisve"></span>
+			<span data-i18n="implemented.formatting.rules" data-i18n.param1="dDjlNwzWFmMntLYyaAgGhHisve"></span>
 		</div>
 
 		<div><label for="dateLocale" data-i18n="custom.date.locale"></label></div>
@@ -127,9 +127,9 @@
 
 <fieldset>
 	<legend data-i18n="additional.attach"></legend>
-	<table width="100%">
+	<table style="width: 100%;">
 		<tr>
-			<td nowrap data-i18n="enable.message_attach"></td>
+			<td style="white-space: nowrap;" data-i18n="enable.message_attach"></td>
 			<td><input type="checkbox" id="messageAttachTop" name="messageAttachTop" data-preference="messageAttachTop"></td>
 			<td><label for="messageAttachTop" data-i18n="attach.top"></label></td>
 			<td><input type="checkbox" id="messageAttachBottom" name="messageAttachBottom" data-preference="messageAttachBottom"></td>
@@ -137,7 +137,7 @@
 			<td style="width: 100%;"></td>
 		</tr>
 		<tr>
-			<td nowrap data-i18n="enable.print_attach"></td>
+			<td style="white-space: nowrap;" data-i18n="enable.print_attach"></td>
 			<td><input type="checkbox" id="printAttachTop" name="printAttachTop" data-preference="printAttachTop"></td>
 			<td><label for="printAttachTop" data-i18n="attach.top"></label></td>
 			<td><input type="checkbox" id="printAttachBottom" name="printAttachBottom" data-preference="printAttachBottom"></td>
@@ -181,7 +181,7 @@
 	<div id="storageFieldset_folder">
 		<table>
 			<tr>
-				<td style="width: 100%;"><input type="text" data-preference="storageFolder" id="input_storageFolder" style="width: 100%;" /></td>
+				<td style="width: 100%;"><input type="text" data-preference="storageFolder" id="input_storageFolder" style="width: 100%;"></td>
 				<td><button type="button" id="storageFolderBrowseButton" data-i18n="browse"></button></td>
 			</tr>
 			<tr>
@@ -205,17 +205,17 @@
 			<td><label for="overwriteExistingNotes" data-i18n="overwrite.existing.notes"></label></td>
 		</tr>
 	</table>
-	<table align="right">
+	<table style="text-align: right;">
 		<tr>
-			<td align="right"><strong data-i18n="import.folder.button"></strong></td>
+			<td style="text-align: right;"><strong data-i18n="import.folder.button"></strong></td>
 			<td data-i18n="import.folder.button.descr"></td>
 		</tr>
 		<tr>
-			<td align="right"><strong data-i18n="export.qnotes.button"></strong></td>
+			<td style="text-align: right;"><strong data-i18n="export.qnotes.button"></strong></td>
 			<td data-i18n="export.qnotes.button.descr"></td>
 		</tr>
 		<tr>
-			<td align="right"><strong data-i18n="export.xnotes.button"></strong></td>
+			<td style="text-align: right;"><strong data-i18n="export.xnotes.button"></strong></td>
 			<td data-i18n="export.xnotes.button.descr"></td>
 		</tr>
 	</table>
@@ -239,28 +239,28 @@
 	</table>
 	<table>
 		<tr>
-			<td nowrap data-i18n="storage.import"></td>
-			<td width="100%"><input type="file" accept="application/json" id="importFile"></td>
+			<td style="white-space: nowrap;" data-i18n="storage.import"></td>
+			<td style="width: 100%;"><input type="file" accept="application/json" id="importFile"></td>
 		</tr>
 		<tr>
 			<td colspan="2">
 			</td>
 		</tr>
 	</table>
-	<table align="right">
+	<table style="text-align: right;">
 		<tr>
-			<td align="right"><strong data-i18n="storage.export.button"></strong></td>
+			<td style="text-align: right;"><strong data-i18n="storage.export.button"></strong></td>
 			<td>
 				<div data-i18n="storage.export.button.descr"></div>
 				<div id="exportStorageLimitations" data-i18n="storage.export.limitation"></div>
 			</td>
 		</tr>
 		<tr>
-			<td align="right"><strong data-i18n="storage.import"></strong></td>
+			<td style="text-align: right;"><strong data-i18n="storage.import"></strong></td>
 			<td data-i18n="storage.import.descr"></td>
 		</tr>
 		<tr>
-			<td align="right"><strong data-i18n="storage.clear.button"></strong></td>
+			<td style="text-align: right;"><strong data-i18n="storage.clear.button"></strong></td>
 			<td data-i18n="storage.clear.button.descr"></td>
 		</tr>
 	</table>
@@ -268,7 +268,7 @@
 
 </form>
 
-<script src="../scripts/options.js"></script>
+<script type="module" src="../scripts/options.js"></script>
 </div>
 
 </body>
