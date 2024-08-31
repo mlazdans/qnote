@@ -12,10 +12,11 @@ export interface ExportStats {
 var QDEB = true;
 var _ = browser.i18n.getMessage;
 
-// This code should run in background and content
-export async function loadPrefsWithDefaults() {
-	let p = await getPrefs();
+// Prev loadPrefsWithDefaults
+export async function getPrefs() {
+	let p = await getSavedPrefs();
 	let isEmpty = await isPrefsEmpty();
+	// TODO: handle XNote prefs
 	// let defaultPrefs = getDefaultPrefs();
 	// let isEmptyPrefs = Object.keys(p).length === 0;
 
@@ -257,7 +258,7 @@ async function loadAllExtNotes(): Promise<Array<NoteData>> {
 	});
 }
 
-export async function exportQAppNotesToFolder(root: string, type: NoteType, overwrite: boolean, prefs: Preferences) {
+export async function exportQAppNotesToFolder(root: string, type: NoteType, overwrite: boolean, prefs: IPreferences) {
 	if(prefs.storageOption == 'folder'){
 		return loadAllFolderNotes(prefs.storageFolder).then(notes => exportNotesToFolder(root, type, notes, overwrite));
 	} else {

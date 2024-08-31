@@ -56,33 +56,63 @@ export interface IPreferences extends IQAppPreferences {
 	enableSpellChecker    : boolean
 }
 
-export class QAppPreferences implements IQAppPreferences {
-	storageOption: StorageOption = "folder"
-	storageFolder                = ""
-	showFirstChars               = 3
-	printAttachTop               = true
-	printAttachBottom            = false
-	messageAttachTop             = true
-	messageAttachBottom          = false
-	attachTemplate               = ''
-	treatTextAsHtml              = false
+interface IPreferencesManager<T> {
+	prefs: T
+	readonly defaults: T | undefined
+	setPartial(data: Partial<T>): void
 }
 
-export class Preferences extends QAppPreferences {
-	windowOption: WindowOption = "xul"
-	focusOnDisplay             = true
-	showOnSelect               = true
-	useTag                     = false
-	tagName                    = "xnote"
-	dateFormat                 = "Y-m-d H:i" // See https://www.php.net/manual/en/datetime.format.php
-	dateFormatPredefined       = ""
-	dateLocale                 = ""
-	width                      = 320
-	height                     = 200
-	enableDebug                = false
-	anchor: PopupAnchor        = "window"; // window; threadpane; messag
-	anchorPlacement            = "center"; // see options.js generatePosGrid() for option
-	alwaysDefaultPlacement     = false
-	confirmDelete              = false
-	enableSpellChecker         = true
+// TODO: remove Manager from name after refactor
+class PreferencesManager<T> implements IPreferencesManager<T> {
+	prefs: T
+	readonly defaults: T | undefined
+
+	constructor(prefs: T){
+		this.prefs = prefs
+	}
+
+	setPartial(data: Partial<T>){
+		if(this.prefs) {
+			throw new Error("Can't set partial data to undefined. Set prefs property first!");
+		} else {
+			Object.assign(this.prefs as object, data);
+		}
+	}
+}
+
+class QAppPrefsManager extends PreferencesManager<IQAppPreferences>
+{
+	static readonly defaults: IQAppPreferences = {
+		storageOption      : "folder",
+		storageFolder      : "",
+		showFirstChars     : 3,
+		printAttachTop     : true,
+		printAttachBottom  : false,
+		messageAttachTop   : true,
+		messageAttachBottom: false,
+		attachTemplate     : '',
+		treatTextAsHtml    : false,
+	}
+}
+
+export class PrefsManager extends PreferencesManager<IPreferences> {
+	static readonly defaults: IPreferences = {
+		...QAppPrefsManager.defaults,
+		windowOption          :"xul",
+		focusOnDisplay        : true,
+		showOnSelect          : true,
+		useTag                : false,
+		tagName               : "xnote",
+		dateFormat            : "Y-m-d H:i", // See https://www.php.net/manual/en/datetime.format.php
+		dateFormatPredefined  : undefined,
+		dateLocale            : "",
+		width                 : 320,
+		height                : 200,
+		enableDebug           : false,
+		anchor                : "window",
+		anchorPlacement       : "center", // see options.js generatePosGrid()
+		alwaysDefaultPlacement: false,
+		confirmDelete         : false,
+		enableSpellChecker    : true,
+	}
 }

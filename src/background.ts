@@ -22,26 +22,23 @@
 //    Types for MozXULElement and others
 // https://github.com/dothq/browser-desktop/blob/nightly/types.d.ts
 
-// import * as luxon from 'luxon';
-import { IPreferences } from "./modules/api.mjs";
 import { PreferencesReply, PreferencesRequest, QPopupDataReply, QPopupDataRequest } from "./modules/Messages.mjs";
-import { INote, NoteData, QNote, QNoteFolder } from "./modules/Note.mjs";
+import { INote, QNote, QNoteFolder } from "./modules/Note.mjs";
 import { QNotePopup } from "./modules/NotePopups.mjs";
 import {
-	getCurrentTabId,
-	getCurrentWindowIdAnd,
 	MessageId,
-	mpUpdateForNote,
 	POP_EXISTING,
 	POP_FOCUS,
 	POP_NONE,
-	updateIcons
 } from "./modules/common.mjs";
-import { getXNoteStoragePath, loadPrefsWithDefaults } from "./modules/common-background.mjs";
+import { getCurrentWindowIdAnd, getPrefs, getXNoteStoragePath, mpUpdateForNote, sendPrefsToQApp, updateTabMenusAndIcons } from "./modules/common-background.mjs";
+import { IPreferences, PrefsManager } from "./modules/api.mjs";
 
 // TODO: getting dead object: open msg in tab, drag out in new window, reload extension when tread view activated in new window
+// TODO: manage global state
 var QDEB = true;
-var Prefs: IPreferences;
+// var Prefs: PrefsManager | null = null;
+
 let BrowserAction = browser.action ? browser.action : browser.browserAction;
 
 // var CurrentPopup: DefaultNoteWindow;
