@@ -29,8 +29,8 @@ var ADDON_ID = "qnote@dqdp.net";
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-var Services = globalThis.Services || 
-  ChromeUtils.import("resource://gre/modules/Services.jsm").Services;
+// var Services = globalThis.Services ||
+//   ChromeUtils.import("resource://gre/modules/Services.jsm").Services;
 
 var notifyTools = {
   registeredCallbacks: {},
