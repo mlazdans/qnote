@@ -330,10 +330,10 @@ declare namespace Components
 			newURI(aSin: string, aOriginCharset?: string | null, aBaseURI?: nsIURI | null): nsIURI;
 		}
 
-		//https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsIDOMWindow
 		class nsIDOMWindow extends Window
 		{
 			docShell: nsIDocShell
+			browsingContext: BrowsingContext
 		}
 
 		class nsIClipboardOwner extends nsISupports {
@@ -741,14 +741,14 @@ declare namespace Components
 		}
 
 		class nsIFilePicker extends nsISupports {
-			modeOpen        : nsIFilePicker_Mode.modeOpen
-			modeSave        : nsIFilePicker_Mode.modeSave
-			modeGetFolder   : nsIFilePicker_Mode.modeGetFolder
-			modeOpenMultiple: nsIFilePicker_Mode.modeOpenMultiple
+			static modeOpen        : nsIFilePicker_Mode.modeOpen
+			static modeSave        : nsIFilePicker_Mode.modeSave
+			static modeGetFolder   : nsIFilePicker_Mode.modeGetFolder
+			static modeOpenMultiple: nsIFilePicker_Mode.modeOpenMultiple
 
-			returnOK        : nsIFilePicker_ResultCode.returnOK
-			returnCancel    : nsIFilePicker_ResultCode.returnCancel
-			returnReplace   : nsIFilePicker_ResultCode.returnReplace
+			static returnOK        : nsIFilePicker_ResultCode.returnOK
+			static returnCancel    : nsIFilePicker_ResultCode.returnCancel
+			static returnReplace   : nsIFilePicker_ResultCode.returnReplace
 
 			displayDirectory: nsIFile
 			readonly file   : nsIFile

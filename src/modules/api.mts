@@ -62,14 +62,14 @@ export interface IPreferences extends IQAppPreferences {
 
 interface IPreferencesManager<T> {
 	prefs: T
-	readonly defaults: T | undefined
+	readonly defaults: Readonly<T> | undefined
 	setPartial(data: Partial<T>): void
 }
 
 // TODO: remove Manager from name after refactor
 class PreferencesManager<T> implements IPreferencesManager<T> {
 	prefs: T
-	readonly defaults: T | undefined
+	readonly defaults: Readonly<T> | undefined
 
 	constructor(prefs: T){
 		this.prefs = prefs
@@ -82,11 +82,15 @@ class PreferencesManager<T> implements IPreferencesManager<T> {
 			Object.assign(this.prefs as object, data);
 		}
 	}
+
+	static setPartial<T extends object>(target: T, data: Partial<T>){
+		Object.assign(target, data);
+	}
 }
 
 class QAppPrefsManager extends PreferencesManager<IQAppPreferences>
 {
-	static readonly defaults: IQAppPreferences = {
+	static readonly defaults: Readonly<IQAppPreferences> = {
 		storageOption      : "folder",
 		storageFolder      : "",
 		showFirstChars     : 3,
@@ -100,7 +104,7 @@ class QAppPrefsManager extends PreferencesManager<IQAppPreferences>
 }
 
 export class PrefsManager extends PreferencesManager<IPreferences> {
-	static readonly defaults: IPreferences = {
+	static readonly defaults: Readonly<IPreferences> = {
 		...QAppPrefsManager.defaults,
 		windowOption          :"xul",
 		focusOnDisplay        : true,
