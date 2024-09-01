@@ -74,18 +74,11 @@ td {
 	vertical-align: middle;
 }
 
-#errorBox {
-	background-image: url("chrome://global/skin/icons/error-16.png");
-	background-repeat: no-repeat;
-	background-position: 1em center;
-	/* border: 1px solid var(--in-content-warning-container); */
-	/* border: 1px solid var(--in-content-box-border-color); */
-	font-weight: bold;
-	padding: 1em;
-	padding-left: 3em;
-	margin: 0;
-	display: none;
-	/* margin-top: 1em; */
+#options-error-box {
+	position: relative;
+	padding: 0;
+	top: -33%;
+	min-width: 320px;
 }
 
 :root {
@@ -181,4 +174,8 @@ td {
 #dateBlock > div {
 	white-space: nowrap;
 	margin: auto 0;
+}
+
+::backdrop {
+	backdrop-filter: blur(4px);
 }

@@ -3,6 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<link rel="stylesheet" href="../html/options.css" type="text/css">
+	<link rel="stylesheet" href="../html/qpopup.css" type="text/css">
 	<title>QNote options</title>
 </head>
 
@@ -10,11 +11,13 @@
 
 <div id="qnotePreferences">
 
-<div id="errorBox" class="updateSettingCrossUserWarningContainer" data-i18n="error"></div>
+<dialog id="options-error-box">
+	<div class="qpopup-title unselectable"><div class="qpopup-title-text" data-i18n="error"></div><div class="qpopup-title-closebutton" data-i18ntitle="close.and.save"><img alt="" src="../images/1x1.gif" /></div></div>
+	<div class="qnote-text" style="padding: 1em;"></div>
+</dialog>
 
 <form>
-
-<input type="hidden" data-preference="anchorPlacement" id="anchorPlacement">
+	<input type="hidden" data-preference="anchorPlacement" id="anchorPlacement">
 
 <fieldset>
 	<legend data-i18n="default.dimensions.fieldset"></legend>
