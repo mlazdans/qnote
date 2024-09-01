@@ -53,12 +53,14 @@ export class DOMLocalizator {
 
 	setValues(document: Document, values: any) {
 		for (const node of document.querySelectorAll("[data-preference]")) {
-			if (isHTMLElement(node) && node.dataset.preference)
+			if (isHTMLElement(node) && node.dataset.preference){
+				node.setAttribute("name", node.dataset.preference);
 				this.setNodeValue(node, values[node.dataset.preference]);
+			}
 		}
 	}
 
-	setNodeValue(node: HTMLElement, value: any): void {
+	setNodeValue(node: Element, value: any): void {
 		if (isSelectElement(node)) {
 			for (let option of node.querySelectorAll("option")) {
 				if (option.value == value) {

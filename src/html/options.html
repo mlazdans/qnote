@@ -14,7 +14,7 @@
 
 <form>
 
-<input type="hidden" name="anchorPlacement" data-preference="anchorPlacement">
+<input type="hidden" data-preference="anchorPlacement" id="anchorPlacement">
 
 <fieldset>
 	<legend data-i18n="default.dimensions.fieldset"></legend>
@@ -24,11 +24,11 @@
 				<!-- <span data-i18n="window.fieldset"></span> -->
 				<div style="clear: both;">
 					<div class="radioBox">
-						<input type="radio" id="windowOptionExt" name="windowOption" value="xul" data-preference="windowOption">
+						<input type="radio" id="windowOptionExt" value="xul" data-preference="windowOption">
 						<label for="windowOptionExt" data-i18n="window.option.xul"></label>
 					</div>
 					<div class="radioBox">
-						<input type="radio" id="windowOptionWebExt" name="windowOption" value="webext" data-preference="windowOption">
+						<input type="radio" id="windowOptionWebExt" value="webext" data-preference="windowOption">
 						<label for="windowOptionWebExt" data-i18n="window.option.webext"></label>
 					</div>
 				</div>
@@ -36,7 +36,7 @@
 					<tr>
 						<td><label for="select_anchor" data-i18n="relative.to"></label></td>
 						<td>
-							<select data-preference="anchor" id="select_anchor" name="anchor">
+							<select data-preference="anchor" id="select_anchor">
 								<option value="window" data-i18n="anchor.window"></option>
 								<option value="threadpane" data-i18n="anchor.threadpane"></option>
 								<option value="message" data-i18n="anchor.message"></option>
@@ -108,7 +108,7 @@
 
 		<div class="customDateFormat"><label for="dateFormat" data-i18n="date.format"></label></div>
 		<div class="customDateFormat">
-			<input type="text" id="dateFormat" name="dateFormat" data-preference="dateFormat">
+			<input type="text" id="dateFormat" data-preference="dateFormat">
 		</div>
 
 		<div class="customDateFormat"></div>
@@ -119,7 +119,7 @@
 
 		<div><label for="dateLocale" data-i18n="custom.date.locale"></label></div>
 		<div>
-			<input type="text" id="dateLocale" name="dateLocale" data-preference="dateLocale" size="5">
+			<input type="text" id="dateLocale" data-preference="dateLocale" size="5">
 			<span><a href="https://www.techonthenet.com/js/language_tags.php" class="text-link" data-i18n="locale.rules"></a></span>
 		</div>
 	</div>
@@ -130,23 +130,23 @@
 	<table style="width: 100%;">
 		<tr>
 			<td style="white-space: nowrap;" data-i18n="enable.message_attach"></td>
-			<td><input type="checkbox" id="messageAttachTop" name="messageAttachTop" data-preference="messageAttachTop"></td>
+			<td><input type="checkbox" id="messageAttachTop" data-preference="messageAttachTop"></td>
 			<td><label for="messageAttachTop" data-i18n="attach.top"></label></td>
-			<td><input type="checkbox" id="messageAttachBottom" name="messageAttachBottom" data-preference="messageAttachBottom"></td>
+			<td><input type="checkbox" id="messageAttachBottom" data-preference="messageAttachBottom"></td>
 			<td><label for="messageAttachBottom" data-i18n="attach.bottom"></label></td>
 			<td style="width: 100%;"></td>
 		</tr>
 		<tr>
 			<td style="white-space: nowrap;" data-i18n="enable.print_attach"></td>
-			<td><input type="checkbox" id="printAttachTop" name="printAttachTop" data-preference="printAttachTop"></td>
+			<td><input type="checkbox" id="printAttachTop" data-preference="printAttachTop"></td>
 			<td><label for="printAttachTop" data-i18n="attach.top"></label></td>
-			<td><input type="checkbox" id="printAttachBottom" name="printAttachBottom" data-preference="printAttachBottom"></td>
+			<td><input type="checkbox" id="printAttachBottom" data-preference="printAttachBottom"></td>
 			<td><label for="printAttachBottom" data-i18n="attach.bottom"></label></td>
 			<td style="width: 100%;"></td>
 		</tr>
 		<tr>
 			<td><label for="treatTextAsHtml" data-i18n="attach.treat.text.as.html"></label></td>
-			<td colspan="5"><input type="checkbox" id="treatTextAsHtml" name="treatTextAsHtml" data-preference="treatTextAsHtml"></td>
+			<td colspan="5"><input type="checkbox" id="treatTextAsHtml" data-preference="treatTextAsHtml"></td>
 		</tr>
 		<tr>
 			<td colspan="6">
@@ -157,7 +157,7 @@
 					</tr>
 					<tr>
 						<td colspan="2">
-							<textarea id="attachTemplate" style="width: 100%; resize: vertical;" rows="4" data-preference="attachTemplate" spellcheck="false"></textarea>
+							<textarea data-preference="attachTemplate" id="attachTemplate" style="width: 100%; resize: vertical;" rows="4" spellcheck="false"></textarea>
 						</td>
 					</tr>
 				</table>
@@ -170,9 +170,9 @@
 	<legend data-i18n="storage.fieldset"></legend>
 	<table>
 		<tr>
-			<td><input type="radio" id="storageOptionExt" name="storageOption" value="ext" data-preference="storageOption"></td>
+			<td><input type="radio" id="storageOptionExt" value="ext" data-preference="storageOption"></td>
 			<td><label for="storageOptionExt" data-i18n="storage.option.ext"></label></td>
-			<td><input type="radio" id="storageOptionFolder" name="storageOption" value="folder" data-preference="storageOption"></td>
+			<td><input type="radio" id="storageOptionFolder" value="folder" data-preference="storageOption"></td>
 			<td><label for="storageOptionFolder" data-i18n="storage.option.folder"></label></td>
 			<td><label for="storageOptionFolder" data-i18n="can.use.xnote.folder"></label></td>
 		</tr>
@@ -225,7 +225,7 @@
 	<legend data-i18n="maintenance.fieldset"></legend>
 	<table>
 		<tr>
-			<td><input type="checkbox" id="enableDebug" name="enableDebug" data-preference="enableDebug"></td>
+			<td><input type="checkbox" id="enableDebug" data-preference="enableDebug"></td>
 			<td><label for="enableDebug" data-i18n="enable.debug.messages"></label></td>
 		</tr>
 	</table>
@@ -234,7 +234,6 @@
 			<td><button type="button" id="resetDefaultsButton" data-i18n="reset.defaults.button"></button></td>
 			<td><button type="button" id="exportStorageButton" data-i18n="storage.export.button"></button></td>
 			<td><button type="button" id="clearStorageButton" data-i18n="storage.clear.button"></button></td>
-			<td><button type="button" id="reloadExtensionButton" data-i18n="extension.reload.button"></button></td>
 		</tr>
 	</table>
 	<table>
