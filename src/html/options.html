@@ -106,6 +106,12 @@
 			<select data-preference="dateFormatPredefined" id="dateFormatPredefined"></select>
 		</div>
 
+		<div><label for="dateLocale" data-i18n="custom.date.locale"></label></div>
+		<div>
+			<input type="text" id="dateLocale" data-preference="dateLocale" size="5">
+			<span><a href="https://www.techonthenet.com/js/language_tags.php" class="text-link" data-i18n="locale.rules"></a></span>
+		</div>
+
 		<div class="customDateFormat"><label for="dateFormat" data-i18n="date.format"></label></div>
 		<div class="customDateFormat">
 			<input type="text" id="dateFormat" data-preference="dateFormat">
@@ -115,12 +121,6 @@
 		<div class="customDateFormat" style="padding: 0 8px 8px 8px;">
 			<a href="https://www.php.net/manual/en/datetime.format.php" class="text-link" data-i18n="formatting.rules"></a>
 			<span data-i18n="implemented.formatting.rules" data-i18n.param1="dDjlNwzWFmMntLYyaAgGhHisve"></span>
-		</div>
-
-		<div><label for="dateLocale" data-i18n="custom.date.locale"></label></div>
-		<div>
-			<input type="text" id="dateLocale" data-preference="dateLocale" size="5">
-			<span><a href="https://www.techonthenet.com/js/language_tags.php" class="text-link" data-i18n="locale.rules"></a></span>
 		</div>
 	</div>
 </fieldset>
@@ -148,19 +148,15 @@
 			<td><label for="treatTextAsHtml" data-i18n="attach.treat.text.as.html"></label></td>
 			<td colspan="5"><input type="checkbox" id="treatTextAsHtml" data-preference="treatTextAsHtml"></td>
 		</tr>
+	</table>
+	<table style="width: 100%;">
 		<tr>
-			<td colspan="6">
-				<table style="width: 100%;">
-					<tr>
-						<td data-i18n="attach.template"></td>
-						<td style="width: 100%; text-align: right;"><a data-i18n="attach.template.reset" id="resetTemplate" href="#"></a></td>
-					</tr>
-					<tr>
-						<td colspan="2">
-							<textarea data-preference="attachTemplate" id="attachTemplate" style="width: 100%; resize: vertical;" rows="4" spellcheck="false"></textarea>
-						</td>
-					</tr>
-				</table>
+			<td data-i18n="attach.template"></td>
+			<td style="width: 100%; text-align: right;"><a data-i18n="attach.template.reset" id="resetTemplate" href="#"></a></td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<textarea data-preference="attachTemplate" id="attachTemplate" style="width: 100%; resize: vertical;" rows="4" spellcheck="false"></textarea>
 			</td>
 		</tr>
 	</table>
@@ -192,31 +188,16 @@
 
 	<table>
 		<tr>
-			<td><button type="button" id="importFolderButton" data-i18n="import.folder.button"></button></td>
-			<td><button type="button" id="exportQNotesButton" data-i18n="export.qnotes.button"></button></td>
-			<td><button type="button" id="exportXNotesButton" data-i18n="export.xnotes.button"></button></td>
+			<td><button type="button" id="importFolderButton" data-i18n="import.folder.button" data-i18ntitle="import.folder.button.descr"></button></td>
+			<td><button type="button" id="exportQNotesButton" data-i18n="export.qnotes.button" data-i18ntitle="export.qnotes.button.descr"></button></td>
+			<td><button type="button" id="exportXNotesButton" data-i18n="export.xnotes.button" data-i18ntitle="export.xnotes.button.descr"></button></td>
 			<td><div id="importFolderLoader" style="display: none;"><img src="../images/loader.gif" alt="Loading..."></div></td>
 		</tr>
 	</table>
-
 	<table>
 		<tr>
 			<td><input type="checkbox" id="overwriteExistingNotes"></td>
 			<td><label for="overwriteExistingNotes" data-i18n="overwrite.existing.notes"></label></td>
-		</tr>
-	</table>
-	<table style="text-align: right;">
-		<tr>
-			<td style="text-align: right;"><strong data-i18n="import.folder.button"></strong></td>
-			<td data-i18n="import.folder.button.descr"></td>
-		</tr>
-		<tr>
-			<td style="text-align: right;"><strong data-i18n="export.qnotes.button"></strong></td>
-			<td data-i18n="export.qnotes.button.descr"></td>
-		</tr>
-		<tr>
-			<td style="text-align: right;"><strong data-i18n="export.xnotes.button"></strong></td>
-			<td data-i18n="export.xnotes.button.descr"></td>
 		</tr>
 	</table>
 </fieldset>
@@ -225,39 +206,21 @@
 	<legend data-i18n="maintenance.fieldset"></legend>
 	<table>
 		<tr>
-			<td><input type="checkbox" id="enableDebug" data-preference="enableDebug"></td>
-			<td><label for="enableDebug" data-i18n="enable.debug.messages"></label></td>
-		</tr>
-	</table>
-	<table>
-		<tr>
 			<td><button type="button" id="resetDefaultsButton" data-i18n="reset.defaults.button"></button></td>
-			<td><button type="button" id="exportStorageButton" data-i18n="storage.export.button"></button></td>
-			<td><button type="button" id="clearStorageButton" data-i18n="storage.clear.button"></button></td>
+			<td><button type="button" id="exportStorageButton" data-i18n="storage.export.button" data-i18ntitle="storage.export.button.descr"></button></td>
+			<td><button type="button" id="clearStorageButton" data-i18n="storage.clear.button" data-i18ntitle="storage.clear.button.descr"></button></td>
 		</tr>
 	</table>
 	<table>
 		<tr>
 			<td style="white-space: nowrap;" data-i18n="storage.import"></td>
-			<td style="width: 100%;"><input type="file" accept="application/json" id="importFile"></td>
-		</tr>
-		<tr>
-			<td colspan="2">
-			</td>
+			<td style="width: 100%;"><input type="file" accept="application/json" id="importFile" data-i18ntitle="storage.import.descr"></td>
 		</tr>
 	</table>
-	<table style="text-align: right;">
+	<table>
 		<tr>
-			<td style="text-align: right;"><strong data-i18n="storage.export.button"></strong></td>
-			<td data-i18n="storage.export.button.descr"></td>
-		</tr>
-		<tr>
-			<td style="text-align: right;"><strong data-i18n="storage.import"></strong></td>
-			<td data-i18n="storage.import.descr"></td>
-		</tr>
-		<tr>
-			<td style="text-align: right;"><strong data-i18n="storage.clear.button"></strong></td>
-			<td data-i18n="storage.clear.button.descr"></td>
+			<td><input type="checkbox" id="enableDebug" data-preference="enableDebug"></td>
+			<td><label for="enableDebug" data-i18n="enable.debug.messages"></label></td>
 		</tr>
 	</table>
 </fieldset>
