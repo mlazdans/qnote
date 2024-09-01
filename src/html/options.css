@@ -100,10 +100,6 @@ td {
 	/* padding-top: calc(var(--cell-h) / 2); */
 }
 
-#exportStorageLimitations {
-	color: crimson;
-}
-
 #posGrid {
 	margin: 0 auto;
 	width: calc(5 * var(--cell-w));
