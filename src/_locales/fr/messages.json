@@ -83,9 +83,6 @@
 	"xnote.folder.found": {
 		"message": "Dossier de XNote++ trouvé :<br>&nbsp;$1"
 	},
-	"storage.export.limitation": {
-		"message": "(possible uniquement sous Thunderbird 78 ou supérieur)"
-	},
 	"storage.fieldset": {
 		"message": "Stockage"
 	},

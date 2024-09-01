@@ -83,9 +83,6 @@
 	"xnote.folder.found": {
 		"message": "Cartella XNote++ non trovata:<br>&nbsp;$1"
 	},
-	"storage.export.limitation": {
-		"message": "(disponibile solo in TB>=78)"
-	},
 	"storage.fieldset": {
 		"message": "Archivio"
 	},

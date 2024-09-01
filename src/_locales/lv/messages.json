@@ -83,9 +83,6 @@
 	"xnote.folder.found": {
 		"message": "XNote++ mape atrasta:<br>&nbsp;$1"
 	},
-	"storage.export.limitation": {
-		"message": "(pieejams tikai TB>=78)"
-	},
 	"storage.fieldset": {
 		"message": "Glabātuve"
 	},
