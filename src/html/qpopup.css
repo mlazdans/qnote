@@ -124,19 +124,6 @@
 	display: block;
 } */
 
-textarea {
-	border: none;
-	outline: none;
-	height: 100vh;
-	display: block;
-
-	/* -webkit-box-shadow: none;
-	-moz-box-shadow: none;
-	box-shadow: none;
-
-	resize: none; */
-}
-
 .unselectable {
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
