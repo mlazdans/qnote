@@ -21,10 +21,10 @@ export class DOMLocalizator {
 			}
 
 			// Optional parameters that can be injected into localization string, for example:
-			// "implemented.formatting.rules": {
-			// 	"message": "(implemented: $1)"
-			// }
-			// <span data-i18n="implemented.formatting.rules" data-i18n.param1="dDjlNwzWFmMntLYyaAgGhHisve"></span>
+			//     "implemented.formatting.rules": {
+			//         "message": "(implemented: $1)"
+			//     }
+			//     <span data-i18n="implemented.formatting.rules" data-i18n.param1="dDjlNwzWFmMntLYyaAgGhHisve"></span>
 			const params = new Map<string, string>;
 
 			for(const k in node.dataset){
