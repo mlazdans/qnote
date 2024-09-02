@@ -93,34 +93,38 @@ export type HTMLInputRadioElement    = HTMLInputElement & TypeRadio
 // 	return ret;
 // }
 
-// export async function getPrefs(): Promise<Prefs> {
-// 	// TODO: salabot, pagaidām nevar izdomāt, kā labāk uzstādīt values loopā
-// 	// return getDefaultPrefs();
-// 	let p: Prefs = getDefaultPrefs();
-// 	let k: keyof Prefs;
-// 	let O: Prefs
-
-// 	for(k in p){
-// 		let v = await browser.storage.local.get('pref.' + k);
-// 		const val = v['pref.' + k];
-
-// 		p[k] = val;
-// 	}
-
-// 	return p;
-// }
-
-export function getProperty<T, K extends keyof T>(obj: T, key: K) {
+export function getProperty<O, K extends keyof O>(obj: O, key: K) {
 	return obj[key];
 }
 
-export function setProperty<T, K extends keyof T>(obj: T, key: K, value: T[K]) {
+export function setProperty<O, K extends keyof O>(obj: O, key: K, value: O[K]) {
 	obj[key] = value;
 }
 
-export function getPropertyType<T, K extends keyof T>(obj: T, key: K) {
+export function getPropertyType<O, K extends keyof O>(obj: O, key: K) {
 	return typeof obj[key];
 }
+
+// export function setPropertyAndType<T, K extends keyof T, V extends T[K] & number>(obj: T, key: K, value: V) {
+// }
+
+// export function setPropertyWithType<T, K extends keyof T, V extends typeof T[K]>(obj: T, key: K, value: V) {
+// 	obj[key] = value;
+// 	// const type = getPropertyType(obj, key);
+
+// 	// const type = typeof obj[key];
+// 	// if(type === "number"){
+// 	// 	obj[key] = "2";
+// 	// 	// Number(value);
+// 	// 	setProperty(obj, key, Number(value))
+// 	// } else if(type === "boolean"){
+// 	// 	setProperty(obj, key, Boolean(value))
+// 	// } else if(type === "string"){
+// 	// 	setProperty(obj, key, String(value))
+// 	// } else {
+// 	// 	console.error(`Unsupported preference type: ${type} for key ${k}`);
+// 	// }
+// }
 
 export function silentCatcher(){
 	return (...args: any) => {
@@ -393,10 +397,21 @@ export function getElementByIdOrDie(id: string): HTMLElement {
 	throw new Error(`Required HTML element with id ${id} not found`);
 }
 
-export function querySelectorOrDie(selector: string): Element {
-	const el = document.querySelector(selector);
+export function querySelectorOrDie(selector: string, ParentNode?: Element): Element {
+	const el = ParentNode ? ParentNode.querySelector(selector) : document.querySelector(selector);
 	if(el)return el;
 	throw new Error(`Required HTML element with selector ${selector} not found`);
+}
+
+export async function querySelectorAnd(selector: string): Promise<Element> {
+	return new Promise((resolve, reject) => {
+		const el = document.querySelector(selector);
+		if(el){
+			resolve(el);
+		} else {
+			reject();
+		}
+	});
 }
 
 export function isHTMLElement(node: Element): node is HTMLElement {

@@ -15,7 +15,7 @@ export type PopupAnchor          = "window" | "threadpane" | "message";
 export type StorageOption        = "folder" | "ext";
 export type WindowOption         = "xul" | "webext";
 export type LuxonDateFormatGroup = "datetime_group" | "date_group" | "time_group"
-export type LuxonPredefined      = keyof typeof luxon.DateTime | ""
+export type LuxonPredefined      = keyof typeof luxon.DateTime
 export type LuxonDateFormatsMap  = Map<LuxonDateFormatGroup, Array<LuxonPredefined>>
 
 export interface IXNotePreferences {
@@ -48,7 +48,7 @@ export interface IPreferences extends IQAppPreferences {
 	useTag                : boolean
 	tagName               : string
 	dateFormat            : string
-	dateFormatPredefined  : LuxonPredefined
+	dateFormatPredefined  : LuxonPredefined | ""
 	dateLocale            : string
 	width                 : number
 	height                : number
