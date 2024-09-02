@@ -46,7 +46,7 @@ export class QNoteFile implements INoteFileProvider {
 
 	load(root: string, keyId: string): NoteData {
 		var file = this.getExistingFile(root, keyId);
-		var note = new NoteData(keyId);
+		var note = new NoteData();
 
 		if(!file){
 			return note;
@@ -69,7 +69,6 @@ export class QNoteFile implements INoteFileProvider {
 
 		note = JSON.parse(data);
 		note.exists = true;
-		note.keyId = keyId;
 
 		return note;
 	}

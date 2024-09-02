@@ -1,12 +1,11 @@
 import { NoteData } from "./Note.mjs";
 
-type KeyId = NoteData["keyId"];
-type Listener = (id: KeyId, data: NoteData) => void;
-type Provider = (id: KeyId) => Promise<NoteData>;
+type Listener = (id: string, data: NoteData) => void;
+type Provider = (id: string) => Promise<NoteData>;
 
 export class QCache {
-	private cache: Map<KeyId, NoteData> = new Map();
-	private blocker: Set<KeyId>;
+	private cache: Map<string, NoteData> = new Map();
+	private blocker: Set<string>;
 	private provider: Provider | undefined;
 
 	constructor(provider?: Provider){
@@ -15,11 +14,11 @@ export class QCache {
 		this.provider = provider;
 	}
 
-	set(data: NoteData){
-		this.cache.set(data.keyId, data);
+	set(id: string, data: NoteData){
+		this.cache.set(id, data);
 	}
 
-	delete(id: KeyId){
+	delete(id: string){
 		this.cache.delete(id);
 	}
 
@@ -28,7 +27,7 @@ export class QCache {
 	}
 
 	// We will sync return if cache found or async and call provider
-	get(id: KeyId, listener?: Listener): NoteData | undefined {
+	get(id: string, listener?: Listener): NoteData | undefined {
 		if(this.cache.has(id)){
 			return this.cache.get(id);
 		}
@@ -39,7 +38,7 @@ export class QCache {
 			if(!this.blocker.has(id)){
 				this.blocker.add(id);
 				this.provider(id).then((data: NoteData) => {
-					this.set(data);
+					this.set(id, data);
 					if(listener){
 						console.log("call listener", id, data);
 						listener(id, data);

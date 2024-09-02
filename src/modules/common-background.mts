@@ -112,19 +112,19 @@ async function loadAllFolderKeys(folder: string) {
 	});
 }
 
-export async function loadAllFolderNotes(folder: string): Promise<Array<NoteData>> {
+export async function loadAllFolderNotes(folder: string): Promise<NoteDataMap> {
 	return loadAllFolderKeys(folder).then(async keys => {
-		let Notes = [];
-		for(let keyId of keys){
+		const Notes = new Map;
+		for(const keyId of keys){
 			let note = new QNoteFolder(keyId, folder);
 			await note.load();
-			Notes.push(note.data);
+			Notes.set(keyId, note.data);
 		}
 		return Notes;
 	});
 }
 
-async function importQNotes(notes: Array<NoteData>, overwrite = false){
+async function importQNotes(notes: NoteDataMap, overwrite = false){
 	let stats = {
 		err: 0,
 		exist: 0,
@@ -132,8 +132,8 @@ async function importQNotes(notes: Array<NoteData>, overwrite = false){
 		overwritten: 0
 	};
 
-	for (const note of notes) {
-		let yn = new QNote(note.keyId);
+	notes.forEach(async (note, keyId) => {
+		let yn = new QNote(keyId);
 
 		await yn.load();
 
@@ -146,11 +146,11 @@ async function importQNotes(notes: Array<NoteData>, overwrite = false){
 			await yn.save().then(() => {
 				stats[exists ? "overwritten" : "imported"]++;
 			}).catch(e => {
-				console.error(_("error.saving.note"), e.message, yn.data.keyId);
+				console.error(_("error.saving.note"), e.message, keyId);
 				stats.err++;
 			});
 		}
-	}
+	});
 
 	return stats;
 }
@@ -159,7 +159,7 @@ export async function importFolderNotes(root: string, overwrite = false){
 	return loadAllFolderNotes(root).then(notes => importQNotes(notes, overwrite));
 }
 
-async function exportNotesToFolder(root: string, type: NoteType, notes: Array<NoteData>, overwrite: boolean) {
+async function exportNotesToFolder(root: string, type: NoteType, notes: NoteDataMap, overwrite: boolean) {
 	let stats: ExportStats = {
 		err: 0,
 		exist: 0,
@@ -167,28 +167,26 @@ async function exportNotesToFolder(root: string, type: NoteType, notes: Array<No
 		overwritten: 0
 	};
 
-	for (const note of notes) {
-		let yn;
-		if(type == "xnote"){
-			yn = new XNote(note.keyId, root);
-		} else {
-			yn = new QNoteFolder(note.keyId, root);
-		}
+	const className = (type == "xnote") ? XNote : QNoteFolder;
+	console.log("className", className);
 
-		await yn.load();
+	notes.forEach(async (note, keyId) => {
+		const N = new className(keyId, root);
 
-		if(yn.data.exists && !overwrite){
+		await N.load();
+
+		if(N.data.exists && !overwrite){
 			stats.exist++;
 		} else {
-			yn.data =  note;
-			await yn.save().then(() => {
-				stats[yn.data.exists ? "overwritten" : "imported"]++;
+			N.data =  note;
+			await N.save().then(() => {
+				stats[N.data.exists ? "overwritten" : "imported"]++;
 			}).catch(e => {
-				console.error(_("error.saving.note"), e.message, yn.keyId);
+				console.error(_("error.saving.note"), e.message, keyId);
 				stats.err++;
 			});
 		}
-	}
+	});
 
 	return stats;
 }
@@ -206,13 +204,13 @@ async function loadAllExtKeys() {
 	});
 }
 
-async function loadAllExtNotes(): Promise<Array<NoteData>> {
+async function loadAllExtNotes(): Promise<NoteDataMap> {
 	return loadAllExtKeys().then(async keys => {
-		let Notes = [];
-		for(let keyId of keys){
+		const Notes = new Map;
+		for(const keyId of keys){
 			let note = new QNote(keyId);
 			await note.load();
-			Notes.push(note.data);
+			Notes.set(keyId, note.data);
 		}
 		return Notes;
 	});

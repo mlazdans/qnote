@@ -225,7 +225,7 @@ export class XNoteFile implements INoteFileProvider {
 		return false;
 	}
 	load(root: string, keyId: string): NoteData {
-		var note = new NoteData(keyId);
+		var note = new NoteData();
 		var file = this.getExistingFile(root, keyId);
 
 		if(!file){
@@ -256,7 +256,6 @@ export class XNoteFile implements INoteFileProvider {
 
 		note.text = note.text.replace(/<BR>/g,'\n');
 		note.exists = true;
-		note.keyId = keyId;
 
 		return note;
 	}

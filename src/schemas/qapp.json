@@ -6,10 +6,6 @@
 		"type": "object",
 		"description": "Note data (keep in sync with qnote.json)",
 		"properties": {
-			"keyId": {
-				"type": "string",
-				"description": "Unique id"
-			},
 			"exists": {
 				"type": "boolean",
 				"description": ""
@@ -176,6 +172,10 @@
 		"description": "",
 		"async": true,
 		"parameters": [{
+			"name": "keyId",
+			"type": "string",
+			"description": ""
+		},{
 			"name": "data",
 			"$ref": "qnote.NoteData"
 		}]

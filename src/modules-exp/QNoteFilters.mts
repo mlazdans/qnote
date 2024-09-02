@@ -783,7 +783,7 @@ class QCustomAddAction extends QCustomActionAbstract
 		const ts = Date.now();
 		msgHdrs.forEach(m => {
 			const keyId = m.messageId;
-			const note = new NoteData(keyId);
+			const note = new NoteData();
 
 			note.text = actionValue;
 			note.ts = ts;
@@ -814,7 +814,7 @@ class QCustomUpdateAction extends QCustomActionAbstract
 		let ts = Date.now();
 		msgHdrs.forEach(m => {
 			const keyId = m.messageId;
-			const note = new NoteData(keyId);
+			const note = new NoteData();
 
 			note.text = actionValue;
 			note.ts = ts;

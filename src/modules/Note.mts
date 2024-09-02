@@ -2,7 +2,6 @@ export type NoteType = "xnote" | "qnote";
 
 // Need nulls to send to experiment's API
 export class NoteData {
-	keyId: string; // message-id header or another unique id
 	exists: boolean = false;
 	text: string | null = "";
 	left: number | null = null;
@@ -10,10 +9,6 @@ export class NoteData {
 	width: number | null = null;
 	height: number | null = null;
 	ts: number | null = null;
-	tsFormatted: string | null = null;
-	constructor(keyId: string) {
-		this.keyId = keyId;
-	}
 }
 
 export interface INote {
@@ -34,13 +29,13 @@ export interface INote {
 // export type Note = (QNote | QNoteFolder) & QEventDispatcher;
 
 export abstract class DefaultNote implements INote {
-	keyId: string;
+	keyId: string; // message-id header or another unique id
 	data: NoteData;
 
 	constructor(keyId: string) {
 		this.keyId = keyId;
 		// super(["aftersave", "afterdelete", "afterupdate"]);
-		this.data = new NoteData(keyId);
+		this.data = new NoteData();
 	}
 
 	// addListener(name: NoteListener, listener: Function): void {
@@ -98,8 +93,8 @@ export class QNote extends DefaultNote {
 			.get(this.keyId)
 			.then((store) =>
 				store[this.keyId]
-					? (this.data = store[this.data.keyId])
-					: (this.data = new NoteData(this.keyId))
+					? (this.data = store[this.keyId])
+					: (this.data = new NoteData())
 			);
 	}
 

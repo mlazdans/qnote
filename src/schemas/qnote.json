@@ -6,10 +6,6 @@
 		"type": "object",
 		"description": "Note data (keep in sync with qapp.json)",
 		"properties": {
-			"keyId": {
-				"type": "string",
-				"description": "Unique id"
-			},
 			"exists": {
 				"type": "boolean",
 				"description": ""
