@@ -98,7 +98,7 @@ class QAppPrefsManager extends PreferencesManager<IQAppPreferences>
 		printAttachBottom  : false,
 		messageAttachTop   : true,
 		messageAttachBottom: false,
-		attachTemplate     : '',
+		attachTemplate     : '<div class="qnote-title">QNote: {{ qnote_date }}</div>\n<div class="qnote-text">{{ qnote_text }}</div>',
 		treatTextAsHtml    : false,
 	}
 }
