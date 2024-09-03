@@ -33,41 +33,6 @@ export type HTMLInputButtonElement   = HTMLInputElement & TypeButton
 export type HTMLInputCheckboxElement = HTMLInputElement & TypeCheckbox
 export type HTMLInputRadioElement    = HTMLInputElement & TypeRadio
 
-// export function getDefaultPrefs(): IPreferences {
-// 	var defaults: IPreferences = {
-// 		useTag: false,
-// 		tagName: "xnote",
-// 		dateFormat: "Y-m-d H:i", // See https://www.php.net/manual/en/datetime.format.php
-// 		dateFormatPredefined: "",
-// 		dateLocale: "",
-// 		width: 320,
-// 		height: 200,
-// 		showFirstChars: 3,
-// 		showOnSelect: true,
-// 		focusOnDisplay: true,
-// 		enableSpellChecker: true,
-// 		windowOption: "xul",
-// 		storageOption: "folder",
-// 		storageFolder: "",
-// 		printAttachTop: true,
-// 		printAttachBottom: false,
-// 		messageAttachTop: true,
-// 		messageAttachBottom: false,
-// 		attachTemplate: '',
-// 		enableDebug: false,
-// 		anchor: "window", // window, threadpane, message
-// 		anchorPlacement: "center", // see options.js generatePosGrid() for options
-// 		alwaysDefaultPlacement: false,
-// 		confirmDelete: false,
-// 		treatTextAsHtml: false,
-// 	};
-
-// 	defaults.attachTemplate += '<div class="qnote-title">QNote: {{ qnote_date }}</div>\n';
-// 	defaults.attachTemplate += '<div class="qnote-text">{{ qnote_text }}</div>';
-
-// 	return defaults;
-// }
-
 // TODO: remove
 // function getTabId(Tab: messenger.tabs.Tab | undefined){
 // 	return Tab ? Tab.id : undefined;
