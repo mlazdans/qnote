@@ -29,9 +29,14 @@ export interface TypeButton {
 	type: "button"
 }
 
+export interface TypeFile {
+	type: "file"
+}
+
 export type HTMLInputButtonElement   = HTMLInputElement & TypeButton
 export type HTMLInputCheckboxElement = HTMLInputElement & TypeCheckbox
 export type HTMLInputRadioElement    = HTMLInputElement & TypeRadio
+export type HTMLInputFileElement    = HTMLInputElement & TypeFile
 
 // TODO: remove
 // function getTabId(Tab: messenger.tabs.Tab | undefined){
