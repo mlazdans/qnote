@@ -63,7 +63,7 @@ export interface IWritablePreferences extends IWritableQAppPreferences {
 export type IPreferences = Readonly<IWritablePreferences>;
 export type IQAppPreferences = Readonly<IWritableQAppPreferences>;
 
-class QAppPrefs
+export class QAppPrefs
 {
 	static readonly defaults: IQAppPreferences = {
 		storageOption      : "folder",
@@ -99,3 +99,6 @@ export class Prefs {
 		enableSpellChecker    : true,
 	}
 }
+
+Object.freeze(Prefs.defaults);
+Object.freeze(QAppPrefs.defaults);
