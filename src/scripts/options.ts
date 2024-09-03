@@ -1,148 +1,210 @@
-var ext = chrome.extension.getBackgroundPage();
-var i18n = ext.i18n;
-var _ = ext.browser.i18n.getMessage;
-var QDEB;
+import { DOMLocalizator } from "../modules/DOMLocalizator.mjs";
+import { getElementByIdOrDie, HTMLInputCheckboxElement, HTMLInputFileElement, isInputElement, isSelectElement, isTextAreaElement, isTypeCheckbox, isTypeRadio, querySelectorOrDie } from "../modules/common.mjs";
+import { ExportStats, getPrefs, getXNoteStoragePath, loadAllExtNotes, loadAllFolderNotes, saveNotesAs, savePrefs } from "../modules/common-background.mjs";
+import { IPreferences, IWritablePreferences, LuxonDateFormatsMap, Prefs } from "../modules/api.mjs";
+import * as luxon from "../modules/luxon.mjs";
+import { QNoteFolder, QNoteLocalStorage, XNoteFolder } from "../modules/Note.mjs";
 
-var DefaultPrefs;
-var ErrMsg = [];
+let QDEB                        = true;
+const debugHandle               = "[qnote:options]";
+const i18n                      = new DOMLocalizator(browser.i18n.getMessage);
+const importFolderButton        = getElementByIdOrDie("importFolderButton") as HTMLButtonElement;
+const importFolderLoader        = getElementByIdOrDie("importFolderLoader");
+const resetDefaultsButton       = getElementByIdOrDie("resetDefaultsButton") as HTMLButtonElement;
+const clearStorageButton        = getElementByIdOrDie("clearStorageButton") as HTMLButtonElement;
+const exportStorageButton       = getElementByIdOrDie("exportStorageButton");
+const importFile                = getElementByIdOrDie("importFile") as HTMLInputFileElement;
+const storageFolderBrowseButton = getElementByIdOrDie("storageFolderBrowseButton");
+const input_storageFolder       = getElementByIdOrDie("input_storageFolder") as HTMLInputElement;
+const overwriteExistingNotes    = getElementByIdOrDie("overwriteExistingNotes") as HTMLInputCheckboxElement;
+const errorBox                  = getElementByIdOrDie("options-error-box") as HTMLDialogElement;
+const posGrid                   = getElementByIdOrDie("posGrid");
+const storageFieldset_folder    = getElementByIdOrDie("storageFieldset_folder");
+const exportQNotesButton        = getElementByIdOrDie("exportQNotesButton") as HTMLButtonElement;
+const exportXNotesButton        = getElementByIdOrDie("exportXNotesButton") as HTMLButtonElement;
+const attachTemplate            = getElementByIdOrDie("attachTemplate") as HTMLTextAreaElement;
+const resetTemplate             = getElementByIdOrDie("resetTemplate");
+const anchorPlacement           = getElementByIdOrDie("anchorPlacement") as HTMLInputElement;
 
-var importFolderButton = document.getElementById('importFolderButton');
-var importFolderLoader = document.getElementById("importFolderLoader");
-var resetDefaultsButton = document.getElementById('resetDefaultsButton');
-var clearStorageButton = document.getElementById('clearStorageButton');
-var exportStorageButton = document.getElementById('exportStorageButton');
-var exportStorageLimitations = document.getElementById('exportStorageLimitations');
-var importFile = document.getElementById("importFile");
-var reloadExtensionButton = document.getElementById("reloadExtensionButton");
-var storageFolderBrowseButton = document.getElementById("storageFolderBrowseButton");
-var input_storageFolder = document.getElementById("input_storageFolder");
-var overwriteExistingNotes = document.getElementById("overwriteExistingNotes");
-var errorBox = document.getElementById("errorBox");
-var posGrid = document.getElementById("posGrid");
-var anchorPlacement = document.querySelector("[name=anchorPlacement]");
-var storageFieldset_folder = document.getElementById("storageFieldset_folder");
-var exportQNotesButton = document.getElementById('exportQNotesButton');
-var exportXNotesButton = document.getElementById('exportXNotesButton');
-var attachTemplate = document.getElementById('attachTemplate');
-var resetTemplate = document.getElementById('resetTemplate');
+const dateFormats: LuxonDateFormatsMap = new Map;
 
-var dateFormats = {
-	datetime_group: [
-		'DATETIME_FULL',
-		'DATETIME_FULL_WITH_SECONDS',
-		// 'DATETIME_HUGE',
-		// 'DATETIME_HUGE_WITH_SECONDS',
-		'DATETIME_MED',
-		'DATETIME_MED_WITH_SECONDS',
-		'DATETIME_MED_WITH_WEEKDAY',
-		'DATETIME_SHORT',
-		'DATETIME_SHORT_WITH_SECONDS',
-	],
-	date_group: [
-		'DATE_FULL',
-		'DATE_HUGE',
-		'DATE_MED',
-		'DATE_MED_WITH_WEEKDAY',
-		'DATE_SHORT',
-	],
-	time_group: [
-		'TIME_24_SIMPLE',
-		// 'TIME_24_WITH_LONG_OFFSET',
-		'TIME_24_WITH_SECONDS',
-		'TIME_24_WITH_SHORT_OFFSET',
-		'TIME_SIMPLE',
-		// 'TIME_WITH_LONG_OFFSET',
-		'TIME_WITH_SECONDS',
-		'TIME_WITH_SHORT_OFFSET'
-	]
-};
+dateFormats.set('datetime_group', [
+	'DATETIME_FULL',
+	'DATETIME_FULL_WITH_SECONDS',
+	// 'DATETIME_HUGE',
+	// 'DATETIME_HUGE_WITH_SECONDS',
+	'DATETIME_MED',
+	'DATETIME_MED_WITH_SECONDS',
+	'DATETIME_MED_WITH_WEEKDAY',
+	'DATETIME_SHORT',
+	'DATETIME_SHORT_WITH_SECONDS',
+])
 
-function setLabelColor(forE, color){
-	let label = document.querySelectorAll('label[for=' + forE + ']')[0];
+dateFormats.set('date_group', [
+	'DATE_FULL',
+	'DATE_HUGE',
+	'DATE_MED',
+	'DATE_MED_WITH_WEEKDAY',
+	'DATE_SHORT',
+])
 
-	label.style.color = color;
+dateFormats.set('time_group', [
+	'TIME_24_SIMPLE',
+	// 'TIME_24_WITH_LONG_OFFSET',
+	'TIME_24_WITH_SECONDS',
+	'TIME_24_WITH_SHORT_OFFSET',
+	'TIME_SIMPLE',
+	// 'TIME_WITH_LONG_OFFSET',
+	'TIME_WITH_SECONDS',
+	'TIME_WITH_SHORT_OFFSET'
+])
 
-	return label;
+function setLabelColor(forE: string, color: string): void {
+	(querySelectorOrDie('label[for=' + forE + ']') as HTMLLabelElement).style.color = color;
 }
 
-async function saveOptionsDefaultHandler(prefs) {
-	ext.CurrentNote && await ext.CurrentNote.silentlyPersistAndClose();
+// async function saveOptionsDefaultHandler(prefs: IPreferences) {
+// 	ext.CurrentNote && await ext.CurrentNote.silentlyPersistAndClose();
 
-	let oldPrefs = Object.assign({}, ext.Prefs);
+// 	let oldPrefs = Object.assign({}, ext.Prefs);
 
-	ext.Prefs = await ext.loadPrefsWithDefaults();
+// 	ext.Prefs = await ext.loadPrefsWithDefaults();
 
-	// Storage option changed
-	if(prefs.storageOption !== oldPrefs.storageOption){
-		await ext.browser.qapp.clearNoteCache();
-	}
+// 	// Storage option changed
+// 	if(prefs.storageOption !== oldPrefs.storageOption){
+// 		await ext.browser.qapp.clearNoteCache();
+// 	}
 
-	// Folder changed
-	if(prefs.storageFolder !== oldPrefs.storageFolder){
-		await ext.browser.qapp.clearNoteCache();
-	}
+// 	// Folder changed
+// 	if(prefs.storageFolder !== oldPrefs.storageFolder){
+// 		await ext.browser.qapp.clearNoteCache();
+// 	}
 
-	await ext.setUpExtension();
-	initOptionsPageValues();
+// 	await ext.setUpExtension();
+// 	initOptionsPageValues();
 
-	return true;
-};
+// 	return true;
+// };
 
-function displayErrorBox(){
-	errorBox.innerHTML = ErrMsg.join("<br>");
-	errorBox.style.display = ErrMsg.length > 0 ? "block" : "none";
+function displayErrors(msgs: Array<string>){
+	displayMsg(msgs, i18n._('error'));
 }
 
-async function saveOptions(handler){
-	QDEB&&console.debug("Saving options...");
-	let prefs = await ext.loadPrefsWithDefaults();
+function displayMsg(msgs: Array<string>, title: string){
+	const closeButton = querySelectorOrDie(".qpopup-title-closebutton", errorBox);
+	const titleBox = querySelectorOrDie(".qpopup-title-text", errorBox);
+	const errorContent = querySelectorOrDie(".qnote-text", errorBox);
 
-	ErrMsg = [];
-	displayErrorBox();
-	setLabelColor('storageOptionFolder', '');
+	titleBox.innerHTML = title;
+	errorContent.innerHTML = msgs.join("<br>");
 
-	if(storageOptionValue() === 'folder'){
-		if(!await ext.isFolderWritable(input_storageFolder.value)){
-			setLabelColor('storageOptionFolder', 'red');
-			ErrMsg.push(_("folder.unaccesible", input_storageFolder.value));
+	closeButton.addEventListener("click", () => {
+		errorBox.close();
+	});
+
+	errorBox.showModal();
+}
+
+async function getPrefFromHtml<K extends keyof Partial<IPreferences>>(key: K): Promise<IPreferences[K]> {
+	return new Promise((resolve, reject) => {
+		for(const node of document.querySelectorAll(`[name=${key}]`)){
+			if(isTypeCheckbox(node)){
+				return resolve(node.checked as IPreferences[K]);
+			} else if(isInputElement(node) || isSelectElement(node) || isTextAreaElement(node)){
+				const readyToReturn = isTypeRadio(node) ? node.checked : true;
+				if(readyToReturn){
+					const type = typeof Prefs.defaults[key];
+					if(type == "string"){
+						return resolve(node.value as IPreferences[K]);
+					} else if(type == "number"){
+						return resolve(Number(node.value) as IPreferences[K]);
+					} else {
+						return reject(`Unsupported type: ${type} for preference: ${key} from element: ${node.nodeName}.`);
+					}
+				}
+			} else {
+				return reject(`Unsupported element: ${node.nodeName}`);
+			}
 		}
-	}
 
-	if(ext.CurrentNote && ext.CurrentNote.dirty){
-		ErrMsg.push(_("close.current.note"));
+		return reject(`Element(s) by name not found: ${key}`);
+	});
+}
+
+async function setPrefFromHtml<K extends keyof Partial<IPreferences>>(p: Partial<IPreferences>, key: K): Promise<IPreferences[K]> {
+	return getPrefFromHtml(key).then(v => {
+		return p[key] = v;
+	});
+}
+
+async function saveOption(name: keyof IPreferences){
+	QDEB&&console.debug(`${debugHandle} saving option ${name}`);
+
+	const newPrefs: Partial<IWritablePreferences> = {};
+	const ErrMsg: Array<string> = [];
+	await setPrefFromHtml(newPrefs, name);
+
+	// await Promise.all([
+	// 	setPrefFromHtml(prefs, "anchorPlacement"),
+	// 	setPrefFromHtml(prefs, "windowOption"),
+	// 	setPrefFromHtml(prefs, "anchor"),
+	// 	setPrefFromHtml(prefs, "width"),
+	// 	setPrefFromHtml(prefs, "height"),
+	// 	setPrefFromHtml(prefs, "alwaysDefaultPlacement"),
+	// 	setPrefFromHtml(prefs, "showOnSelect"),
+	// 	setPrefFromHtml(prefs, "confirmDelete"),
+	// 	setPrefFromHtml(prefs, "focusOnDisplay"),
+	// 	setPrefFromHtml(prefs, "enableSpellChecker"),
+	// 	setPrefFromHtml(prefs, "useTag"),
+	// 	setPrefFromHtml(prefs, "tagName"),
+	// 	setPrefFromHtml(prefs, "showFirstChars"),
+	// 	setPrefFromHtml(prefs, "dateFormatPredefined"),
+	// 	setPrefFromHtml(prefs, "dateFormat"),
+	// 	setPrefFromHtml(prefs, "dateLocale"),
+	// 	setPrefFromHtml(prefs, "messageAttachTop"),
+	// 	setPrefFromHtml(prefs, "messageAttachBottom"),
+	// 	setPrefFromHtml(prefs, "printAttachTop"),
+	// 	setPrefFromHtml(prefs, "printAttachBottom"),
+	// 	setPrefFromHtml(prefs, "treatTextAsHtml"),
+	// 	setPrefFromHtml(prefs, "attachTemplate"),
+	// 	setPrefFromHtml(prefs, "storageOption"),
+	// 	setPrefFromHtml(prefs, "storageFolder"),
+	// 	setPrefFromHtml(prefs, "enableDebug"),
+	// ]).catch(msg => {
+	// 	ErrMsg.push(msg);
+	// 	ErrMsg.push("");
+	// 	ErrMsg.push('This should never happen. Please <a href="https://github.com/mlazdans/qnote/issues">report</a>!');
+	// });
+
+	// Some validations. TODO: to validate or not to validate other values?
+	if((name == "storageOption") || (name == "storageFolder")) {
+		await setPrefFromHtml(newPrefs, "storageFolder");
+		await setPrefFromHtml(newPrefs, "storageOption");
+		if(newPrefs.storageOption == "folder"){
+			if(newPrefs.storageFolder && await browser.legacy.isFolderWritable(newPrefs.storageFolder)){
+				setLabelColor("storageOptionFolder", '');
+			} else {
+				setLabelColor('storageOptionFolder', 'red');
+				ErrMsg.push(i18n._("folder.unaccesible", newPrefs.storageFolder));
+			}
+		} else {
+			newPrefs.storageFolder = "";
+		}
 	}
 
 	if(ErrMsg.length){
-		displayErrorBox();
-		return false;
+		displayErrors(ErrMsg);
+		return;
 	}
 
-	var elements = document.forms[0].elements;
-	for (i = 0; i < elements.length; i++) {
-		var item = elements[i];
-		var key = item.dataset.preference;
-		var value = item.value;
-
-		if (!key || i18n.isButton(item) || (i18n.isRadio(item) && !item.checked) || (DefaultPrefs[key] === undefined)) {
-			continue;
-		}
-
-		if (i18n.isCheckbox(item)){
-			value = item.checked;
-		}
-
-		value = DefaultPrefs[key].constructor(value); // Type cast
-
-		prefs[key] = value;
-	}
-
-	return ext.savePrefs(prefs).then(() => (handler || saveOptionsDefaultHandler)(prefs));
+	savePrefs(newPrefs);
 }
 
-function initTags(tags){
-	var select = window.document.getElementById('select_tagName');
+function initTags(tags: Array<messenger.messages.tags.MessageTag>): void {
+	const select = window.document.getElementById('select_tagName') as HTMLSelectElement;
+
 	if(!select || !tags){
-		return false;
+		return;
 	}
 
 	while(select.length > 0 ){
@@ -158,224 +220,220 @@ function initTags(tags){
 	}
 }
 
-function initDateFormats(){
-	let select = window.document.getElementById('dateFormatPredefined');
+function initDateFormats(prefs: IPreferences): void {
+	const select = window.document.getElementById('dateFormatPredefined');
+
+	if(!select || !isSelectElement(select)){
+		return;
+	}
+
 	select.addEventListener("change", dateFormatChange);
 
-	if(!select){
-		return false;
-	}
-
 	while(select.children.length){
-		select.children.item(0).remove();
+		select.children.item(0)?.remove();
 	}
 
-	let opt = document.createElement('option');
-	opt.text = _("date.format.custom");
-	opt.value = "";
-	select.add(opt);
+	// First option - custom
+	const opts = document.createElement('option');
+	opts.text = i18n._("date.format.custom");
+	opts.value = "";
+	select.add(opts);
 
-	for (const group in dateFormats) {
-		let gr = document.createElement('optgroup');
-		gr.label = _(group);
-		for (const df of dateFormats[group]) {
-			let opt = document.createElement('option');
-			opt.text = ext.qDateFormatPredefined(df);
-			opt.value = df;
-			opt.selected = ext.Prefs.dateFormatPredefined == df;
+	const d = luxon.DateTime.fromJSDate(new Date).setLocale(prefs.dateLocale);
+
+	dateFormats.forEach((groups, groupKey) => {
+		const gr = document.createElement('optgroup');
+		gr.label = i18n._(groupKey);
+		groups.forEach(k => {
+			const opt = document.createElement('option');
+			opt.text = d.toLocaleString(luxon.DateTime[k]);
+			opt.value = k;
+			opt.selected = prefs.dateFormatPredefined == k;
 			gr.appendChild(opt);
-		}
-
+		});
 		select.add(gr);
-	}
+	});
 }
 
 function dateFormatChange(){
-	let select = window.document.getElementById('dateFormatPredefined');
-	document.querySelectorAll(".customDateFormat").forEach(e => e.style.display = select.value ? 'none' : '');
-}
-
-async function initExportStorageButton() {
-	let info = await ext.browser.runtime.getBrowserInfo();
-	let vers = await ext.browser.legacy.compareVersions("78", info.version);
-
-	if(vers<0){
-		exportStorageButton.disabled = false;
-		exportStorageLimitations.style.display = "none";
-	} else {
-		exportStorageButton.disabled = true;
-		exportStorageLimitations.style.display = "";
+	const select = window.document.getElementById('dateFormatPredefined') as HTMLSelectElement;
+	if(select) {
+		document.querySelectorAll(".customDateFormat").forEach(e => (e as HTMLDivElement).style.display = select.value ? 'none' : '');
 	}
 }
 
 async function initXNoteFolderInfo(){
-	var path = await ext.getXNoteStoragePath();
+	const path = await getXNoteStoragePath();
 
-	if(path){
-		QDEB&&console.debug("Trying XNote++ foder: ", path);
-		if(await ext.isFolderWritable(path)){
-			document.getElementById('xnoteFolderInfo').innerHTML = _("xnote.folder.found", path);
-		} else {
-			document.getElementById('xnoteFolderInfo').innerHTML = _("xnote.folder.inaccessible", path);
-			path = '';
-		}
-	}
-}
+	QDEB&&console.debug(`${debugHandle} trying XNote++ foder: `, path);
 
-function defaultStoragePickerOptions(){
-	let path;
-	let opt = {};
-
-	if(ext.Prefs.storageFolder){
-		path = ext.Prefs.storageFolder;
-	}
-
-	if(path){
-		opt.displayDirectory = path;
-	}
-
-	return opt;
-}
-
-function printImportStats(stats){
-	if(stats){
-		browser.legacy.alert(_("import.finished.stats", [stats.imported, stats.err, stats.exist, stats.overwritten]));
+	if(await browser.legacy.isFolderWritable(path)){
+		getElementByIdOrDie('xnoteFolderInfo').innerHTML = i18n._("xnote.folder.found", path);
 	} else {
-		browser.legacy.alert(_("import.fail"));
+		getElementByIdOrDie('xnoteFolderInfo').innerHTML = i18n._("xnote.folder.inaccessible", path);
 	}
 }
 
-function setExportImportConstrolsDisabled(yes){
-	exportQNotesButton.disabled = yes;
+function printImportStats(stats: ExportStats){
+	displayMsg(
+		[i18n._("import.finished.stats", [stats.imported, stats.errored, stats.existing, stats.overwritten]).replace(/\n/g, "<br>\n")],
+		"Info"
+	);
+	// displayErrors([i18n._("import.fail")]);
+}
+
+function disableExportImportConstrols(yes: boolean): void {
 	importFolderButton.disabled = yes;
+	exportQNotesButton.disabled = yes;
 	exportXNotesButton.disabled = yes;
 	importFolderLoader.style.display = yes ? '' : 'none';
 }
 
-async function initFolderImportButton(){
-	importFolderButton.addEventListener('click', () => {
-		ext.browser.legacy.folderPicker(defaultStoragePickerOptions()).then(selectedPath => {
-			setExportImportConstrolsDisabled(true);
+async function initExportButtons(prefs: IPreferences){
+	let listener = (type: typeof QNoteFolder | typeof XNoteFolder) => {
+		return async () => {
+			console.log(`${debugHandle} exportButton<${type}>::click()`);
 
-			return ext.importFolderNotes(selectedPath, !!overwriteExistingNotes.checked).then(printImportStats).finally(async () => {
-				// Reset cache since we might import some new data
-				await ext.browser.qapp.clearNoteCache();
-				setExportImportConstrolsDisabled(false);
-			});
-		});
-	});
-}
+			// Select path where to put QNotes or XNotes
+			browser.legacy.folderPicker(prefs.storageFolder ? prefs.storageFolder : null).then(async selectedPath => {
+				disableExportImportConstrols(true);
 
-async function initExportNotesButtons(){
-	let listener = (type, button) => {
-		return () => {
-			ext.browser.legacy.folderPicker(defaultStoragePickerOptions()).then(selectedPath => {
-				setExportImportConstrolsDisabled(true);
+				const notes =
+					prefs.storageOption == 'folder'
+					? await loadAllFolderNotes(prefs.storageFolder)
+					: await loadAllExtNotes();
 
-				return ext.exportQAppNotesToFolder(selectedPath, type, !!overwriteExistingNotes.checked).then(printImportStats).finally(async () => {
-					setExportImportConstrolsDisabled(false);
-				});
+				await saveNotesAs(type, notes, !!overwriteExistingNotes.checked, selectedPath).then(printImportStats);
+
+				disableExportImportConstrols(false);
 			});
 		}
 	};
 
-	exportQNotesButton.addEventListener('click', listener("qnote", exportQNotesButton));
-	exportXNotesButton.addEventListener('click', listener("xnote", exportXNotesButton));
-}
+	exportQNotesButton.addEventListener('click', listener(QNoteFolder));
+	exportXNotesButton.addEventListener('click', listener(XNoteFolder));
+	importFolderButton.addEventListener('click', async () => {
+		console.log(`${debugHandle} importFolderButton::click()`);
 
-function storageOptionValue(){
-	var e = document.querySelector('input[name="storageOption"]:checked');
+		// Select path from where import  QNotes or XNotes into local storate
+		browser.legacy.folderPicker(prefs.storageFolder ? prefs.storageFolder : null).then(async selectedPath => {
+			disableExportImportConstrols(true);
 
-	return e ? e.value : DefaultPrefs.storageFolder;
+			const notes = await loadAllFolderNotes(selectedPath);
+
+			await saveNotesAs(QNoteLocalStorage, notes, !!overwriteExistingNotes.checked).then(printImportStats);
+
+			if(prefs.storageOption == "ext"){
+				await browser.qapp.clearNoteCache();
+			}
+
+			disableExportImportConstrols(false);
+		});
+	});
+
 }
 
 async function storageOptionChange(){
-	let option = storageOptionValue();
+	const option = await getPrefFromHtml("storageOption");
+	// getStorageOptionValue();
 
 	if(!input_storageFolder.value){
-		input_storageFolder.value = await ext.getXNoteStoragePath();
+		input_storageFolder.value = await getXNoteStoragePath();
 	}
 
 	if(option == 'folder'){
 		storageFieldset_folder.style.display = '';
-		importFolderButton.disabled = true;
 	} else {
 		storageFieldset_folder.style.display = 'none';
-		importFolderButton.disabled = false;
 	}
 }
 
-async function storageFolderBrowse(){
-	var path = await ext.getXNoteStoragePath();
+async function storageFolderPicker(prefs: IPreferences){
+	var path = await getXNoteStoragePath();
 
-	if(!await ext.isFolderWritable(path)){
-		path = ext.Prefs.storageFolder;
+	if(!await browser.legacy.isFolderWritable(path)){
+		path = prefs.storageFolder;
 	}
 
-	if(!await ext.isFolderWritable(path)){
-		path = await ext.browser.qapp.getProfilePath();
+	if(!await browser.legacy.isFolderWritable(path)){
+		path = await browser.qapp.getProfilePath();
 	}
 
-	let opt = {};
-	if(await ext.isFolderWritable(path)){
-		opt.displayDirectory = path;
-	}
-
-	ext.browser.legacy.folderPicker(opt).then(selectedPath => {
+	browser.legacy.folderPicker(await browser.legacy.isFolderWritable(path) ? path : null).then(selectedPath => {
 		input_storageFolder.value = selectedPath;
-		saveOptions();
+		saveOption("storageFolder");
 	});
 }
 
-function importInternalStorage() {
-	const reader = new FileReader();
-	const file = this.files[0];
+function importInternalStorage(prefs: IPreferences) {
+	const file = importFile.files?.item(0);
 
-	reader.onload = e => {
-		try {
-			var storage = JSON.parse(e.target.result);
-		} catch(e){
-			browser.legacy.alert(_("json.parse.error", e.message));
-			return false;
+	if(!file){
+		return;
+	}
+
+	const reader = new FileReader();
+
+	reader.addEventListener("load", _e => {
+		const result = reader.result?.toString();
+
+		if(!result){
+			QDEB&&console.debug(`${debugHandle} got empty from FileReader`);
+			return;
 		}
 
-		ext.browser.storage.local.set(storage).then(async () => {
-			browser.legacy.alert(_("storage.imported"));
-			await ext.browser.qapp.clearNoteCache();
-			ext.setUpExtension();
-			initOptionsPageValues();
-		}).catch(e => {
-			browser.legacy.alert(_("storage.import.failed", e.message));
-		});
-	};
+		try {
+			var storage = JSON.parse(result.toString());
+
+			browser.storage.local.set(storage).then(async () => {
+				displayMsg([i18n._("storage.imported")], "Info");
+				const newPrefs = await getPrefs();
+				if(prefs.storageOption != newPrefs.storageOption){
+					await browser.qapp.clearNoteCache();
+				}
+				initOptionsPageValues(newPrefs);
+			}).catch((message: string) => {
+				displayErrors([i18n._("storage.import.failed", message)]);
+			});
+		} catch(e){
+			if(e instanceof SyntaxError) {
+				displayErrors([i18n._("json.parse.error", e.message)]);
+			} else if(e instanceof Error) {
+				displayErrors([i18n._("storage.import.failed", e.message)]);
+			} else {
+				displayErrors(["Unknown error - see error console for more"]);
+			}
+		}
+	});
 
 	reader.readAsText(file);
 }
 
-async function clearStorage(){
-	if(await ext.browser.legacy.confirm(_("are.you.sure"))){
-		return ext.clearStorage().then(async () => {
-			await ext.browser.qapp.clearNoteCache();
-			ext.setUpExtension();
-			initOptionsPageValues();
-			browser.legacy.alert(_("storage.cleared"));
-		}).catch(e => {
-			browser.legacy.alert(_("storage.clear.failed", e.message));
-		});
-	}
-}
+// async function clearStorage(){
+// 	if(confirm(i18n._("are.you.sure"))){
+// 		return browser.storage.local.clear().then(async () => {
+// 			await browser.qapp.clearNoteCache();
+// 			setUpExtension();
+// 			initOptionsPageValues();
+// 			displayMsg([i18n._("storage.cleared")], "Info");
+// 		}).catch((message: string) => {
+// 			displayErrors([i18n._("storage.clear.failed", message)]);
+// 		});
+// 	}
+// }
 
-async function resetDefaults(){
-	return ext.clearPrefs().then(async () => {
-		await ext.browser.qapp.clearNoteCache();
-		ext.setUpExtension();
-		initOptionsPageValues();
-		alert(_("options.reset"));
-	});
-}
+// async function resetDefaults(){
+// 	return clearPrefs().then(async () => {
+// 		await browser.qapp.clearNoteCache();
+// 		setUpExtension();
+// 		initOptionsPageValues();
+// 		alert(i18n._("options.reset"));
+// 	});
+// }
 
 function gridPosChange(){
-	document.querySelectorAll("#posGrid .cell").forEach(cell => {
+	document.querySelectorAll("#posGrid .cell").forEach(el => {
+		const cell = el as HTMLDivElement;
 		if(cell.dataset["value"] == anchorPlacement.value){
 			cell.classList.add("active");
 		} else {
@@ -384,13 +442,12 @@ function gridPosChange(){
 	});
 }
 
-async function initOptionsPageValues(){
-	i18n.setData(document, await ext.loadPrefsWithDefaults());
-	initDateFormats();
+async function initOptionsPageValues(prefs: IPreferences){
+	i18n.setValues(document, prefs);
+	initDateFormats(prefs);
 	storageOptionChange();
 	dateFormatChange();
 	gridPosChange();
-	QDEB = ext.QDEB;
 }
 
 // Anchor
@@ -415,53 +472,20 @@ async function initOptionsPageValues(){
 // the second species the popup corner
 
 function generatePosGrid(){
-	let values = {
-		0: {
-			0: "topleft bottomright",
-			1: "topleft topright",
-			2: "leftcenter topright",
-			3: "bottomleft bottomright",
-			4: "bottomleft topright"
-		},
-		1: {
-			0: "topleft bottomleft",
-			1: "topleft topleft",
-			2: "leftcenter topleft",
-			3: "bottomleft bottomleft",
-			4: "bottomleft topleft"
-		},
-		2: {
-			0: "topcenter bottomleft",
-			1: "topcenter topleft",
-			2: "center",
-			3: "bottomcenter bottomleft",
-			4: "bottomcenter topleft"
-		},
-		3: {
-			0: "topright bottomright",
-			1: "topright topright",
-			2: "rightcenter topright",
-			3: "bottomright bottomright",
-			4: "bottomright topright"
-		},
-		4: {
-			0: "topright bottomleft",
-			1: "topright topleft",
-			2: "rightcenter topleft",
-			3: "bottomright bottomleft",
-			4: "bottomright topleft"
-		}
-	};
-
-	let col;
-	let cell;
+	let values = [
+		["topleft bottomright" , "topleft topright" , "leftcenter topright" , "bottomleft bottomright" , "bottomleft topright"],
+		["topleft bottomleft"  , "topleft topleft"  , "leftcenter topleft"  , "bottomleft bottomleft"  , "bottomleft topleft"],
+		["topcenter bottomleft", "topcenter topleft", "center"              , "bottomcenter bottomleft", "bottomcenter topleft"],
+		["topright bottomright", "topright topright", "rightcenter topright", "bottomright bottomright", "bottomright topright"],
+		["topright bottomleft" , "topright topleft" , "rightcenter topleft" , "bottomright bottomleft" , "bottomright topleft"],
+	];
 
 	for(let i = 0; i < 5; i++){
-		col = document.createElement('div');
+		const col = document.createElement('div');
 		col.className = "col";
 
 		for(let j = 0; j < 5; j++){
-			cell = document.createElement('div');
+			const cell = document.createElement('div');
 			cell.className = "cell";
 			cell.dataset["value"] = values[i][j];
 
@@ -472,77 +496,129 @@ function generatePosGrid(){
 	}
 
 	document.querySelectorAll("#posGrid .cell").forEach(e => e.addEventListener("click", () => {
-		anchorPlacement.value = e.dataset["value"];
-		saveOptions();
+		const cell = e as HTMLDivElement;
+		if(cell.dataset["value"]){
+			anchorPlacement.value = cell.dataset["value"];
+		}
+		saveOption("anchorPlacement");
 	}));
 }
 
-async function initOptionsPage(){
-	// Force load our prefs if background has not yet initialized (for example options page already open and has been loaded first)
-	if(!ext.Prefs){
-		ext.Prefs = await ext.loadPrefsWithDefaults();
-	}
-	let tags;
-	if(ext.browser.messages.tags){
-		tags = await ext.browser.messages.tags.list();
-	} else {
-		tags = await ext.browser.messages.listTags();
-	}
-	DefaultPrefs = ext.getDefaultPrefs();
-
+// Called only once, after DOM loaded
+async function initOptionsPage(prefs: IPreferences){
 	i18n.setTexts(document);
 
-	// Add auto-save to the controls
-	// Also prevent if note dirty
-	// Also prevent too fast changing
-	let saving = 0;
-	let saveListener = (el, method, doSave = true) => el.addEventListener(method, e => {
-		if(ext.CurrentNote.dirty){
-			ErrMsg = [_("close.current.note")];
-			displayErrorBox();
-			e.preventDefault();
-			e.stopImmediatePropagation();
-		} else if(doSave) {
-			setTimeout(() => {
-				if(!--saving){
-					saveOptions();
-				}
-			}, 200);
-			saving++;
-		}
-	});
-	document.querySelectorAll("input[type=text],input[type=number],textarea,select").forEach(el => saveListener(el, "change"));
-	document.querySelectorAll("input[type=checkbox],input[type=radio]").forEach(el => saveListener(el, "click"));
-
-	// Prevent buttons when note dirty
-	document.querySelectorAll("button").forEach(el => saveListener(el, "click", false));
-	document.querySelectorAll("input[type=file]").forEach(el => saveListener(el, "change", false));
-
-	initTags(tags);
+	initTags(await browser.messages.tags.list());
 	generatePosGrid();
 	initXNoteFolderInfo();
-	initOptionsPageValues();
-	initFolderImportButton();
-	initExportStorageButton();
-	initExportNotesButtons();
+	initOptionsPageValues(prefs);
+	initExportButtons(prefs);
 
-	clearStorageButton.addEventListener('click', clearStorage);
-	exportStorageButton.addEventListener('click', ext.exportStorage);
-	importFile.addEventListener("change", importInternalStorage);
-	reloadExtensionButton.addEventListener("click", ext.reloadExtension);
-	storageFolderBrowseButton.addEventListener("click", storageFolderBrowse);
-	resetDefaultsButton.addEventListener("click", resetDefaults);
+	const unAccountedForListeners: Set<string> = new Set;
+	if(QDEB) {
+		for(const k in Prefs.defaults){
+			unAccountedForListeners.add(k);
+		}
+		unAccountedForListeners.delete("anchorPlacement"); // This is handled by grid, not input listeners
+	}
+
+	const createSaveListener = (el: Element, method: string) => {
+		if(!(isInputElement(el) || isSelectElement(el) || isTextAreaElement(el))){
+			return;
+		}
+
+		if(!(el.name in Prefs.defaults)){
+			return;
+		}
+
+		const prefKey = el.name as keyof IPreferences;
+
+		unAccountedForListeners.delete(prefKey);
+
+		return el.addEventListener(method, () => {
+			console.log(`Saving: ${prefKey}`);
+			saveOption(prefKey)
+		});
+
+		// return el.addEventListener(method, () => {
+		// if(ext.CurrentNote.dirty){
+		// 	ErrMsg = [i18n._("close.current.note")];
+		// 	displayErrorBox();
+		// 	e.preventDefault();
+		// 	e.stopImmediatePropagation();
+		// } else if(doSave) {
+			// setTimeout(() => {
+			// 	if(!--saving){
+			// 		saveOptions();
+			// 	}
+			// }, 200);
+			// saving++;
+		// }
+	};
+
+	document.querySelectorAll("textarea,select,input[type=text],input[type=number]").forEach(el => createSaveListener(el, "change"));
+	document.querySelectorAll("input[type=checkbox],input[type=radio]").forEach(el => createSaveListener(el, "click"));
+
+	QDEB&&console.assert(unAccountedForListeners.size === 0, `${debugHandle} no event listeners for preferences: `, [...unAccountedForListeners.values()].join(", "));
+
+	// Prevent buttons when note dirty
+	// document.querySelectorAll("button").forEach(el => saveListener(el, "click", false));
+	// document.querySelectorAll("input[type=file]").forEach(el => saveListener(el, "change", false));
+
+	// TODO:
+	// clearStorageButton.       addEventListener("click", clearStorage);
+	// resetDefaultsButton.      addEventListener("click", resetDefaults);
+	resetDefaultsButton.disabled = clearStorageButton.disabled = true;
+	resetDefaultsButton.title = clearStorageButton.title = "TODO";
+
+	exportStorageButton.      addEventListener("click", exportStorage);
+	importFile.               addEventListener("change", () => importInternalStorage(prefs));
+	storageFolderBrowseButton.addEventListener("click", () => storageFolderPicker(prefs));
 
 	// Handle storage option click
 	document.querySelectorAll("input[name=storageOption]").forEach(e => e.addEventListener("click", storageOptionChange));
 
-	resetTemplate.addEventListener('click', function(){
-		attachTemplate.value = DefaultPrefs.attachTemplate;
-		saveOptions();
+	resetTemplate.addEventListener('click', () => {
+		attachTemplate.value = Prefs.defaults.attachTemplate;
+		saveOption("attachTemplate");
 		return false;
 	});
 }
 
-window.addEventListener("load", ()=>{
-	initOptionsPage();
+async function exportStorage(){
+	const storage = await browser.storage.local.get();
+	const blob = new Blob([JSON.stringify(storage)], {type : 'application/json'});
+
+	return browser.downloads.download({
+		url: window.URL.createObjectURL(blob),
+		saveAs: true,
+		filename: 'qnote-storage.json'
+	});
+}
+
+window.addEventListener("DOMContentLoaded", async () => {
+	await initOptionsPage(await getPrefs());
+
+	// QDEB&&console.log(`${debugHandle} DOMContentLoaded`);
+	// const xulPort = browser.runtime.connect({
+	// 	name: "options"
+	// });
+
+	// xulPort.onMessage.addListener(data => {
+	// 	QDEB&&console.log(`${debugHandle} received message, will parse it...`, data);
+	// 	let reply;
+	// 	if(reply = (new PreferencesReply).parse(data)){
+	// 		QDEB&&console.log(`${debugHandle} message is PreferencesReply`);
+	// 		initOptionsPage(reply);
+
+	// 		// if(reply.id === id){ // TODO: do we need check id?
+	// 		// 	updateOptions(reply.opts);
+	// 		// 	popup();
+	// 		// }
+	// 	} else {
+	// 		console.error(`${debugHandle} unknown or incorrect message: `, data);
+	// 	}
+	// });
+
+	// (new PreferencesRequest).post(xulPort);
 });

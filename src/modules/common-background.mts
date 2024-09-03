@@ -1,22 +1,36 @@
 // This code should run in background and content
-import { IPreferences, PrefsManager } from "./api.mjs";
-import { getPropertyType, setProperty } from "./common.mjs";
-import { NoteData, NoteType, QNote, QNoteFolder, XNote } from "./Note.mjs";
+import { IPreferences, IWritablePreferences, Prefs } from "./api.mjs";
+import { getPropertyType, prefsToQAppPrefs, setProperty } from "./common.mjs";
+import { NoteData, QNoteFolder, QNoteLocalStorage, XNoteFolder } from "./Note.mjs";
 
+let QDEB = true;
+const debugHandle = "[qnote:common-background]";
+const _ = browser.i18n.getMessage;
+
+export type NoteDataMap = Map<string, NoteData>
 export interface ExportStats {
-	err: number
-	exist: number
+	errored: number
+	existing: number
 	imported: number
 	overwritten: number
 }
 
-var QDEB = true;
-var _ = browser.i18n.getMessage;
+type SaveNotesAsArgs =  typeof QNoteFolder | typeof XNoteFolder | typeof QNoteLocalStorage extends infer R ?
+	R extends typeof QNoteFolder | typeof XNoteFolder
+		? [instanceType: R, importNotes: NoteDataMap, overwrite: boolean, root: string]
+		: R extends typeof QNoteLocalStorage
+			? [instanceType: R, importNotes: NoteDataMap, overwrite: boolean]
+			: never
+		: never
+;
 
-// Prev loadPrefsWithDefaults
-export async function getPrefs() {
-	let p = await getSavedPrefs();
-	let isEmpty = await isPrefsEmpty();
+export async function getPrefs(): Promise<IPreferences> {
+	const fName = "getPrefs()";
+	const prefs = await getSavedPrefs();
+	const retPrefs: IWritablePreferences = structuredClone(Prefs.defaults);
+
+	const isEmpty = Object.keys(prefs).length === 0;
+
 	// TODO: handle XNote prefs
 	// let defaultPrefs = getDefaultPrefs();
 	// let isEmptyPrefs = Object.keys(p).length === 0;
@@ -33,57 +47,55 @@ export async function getPrefs() {
 	// 	}
 	// }
 
-	// Apply defaults
-	// for(let k in defaultPrefs){
-	// 	if(p[k] === undefined){
-	// 		p[k] = defaultPrefs[k];
-	// 	}
-	// }
-
-	if(p.tagName){
-		p.tagName = p.tagName.toLowerCase();
-	}
-
 	if(isEmpty){
+		QDEB&&console.debug(`${fName} - preferences is empty`);
 		// If XNote++ storage_path is set and readable, then use it
 		// else check if XNote folder exists inside profile directory
 		let path = await getXNoteStoragePath();
 
-		if(await isFolderWritable(path)){
-			p.storageOption = 'folder';
-			p.storageFolder = path;
+		if(await browser.legacy.isFolderWritable(path)){
+			retPrefs.storageOption = 'folder';
+			retPrefs.storageFolder = path;
 		} else {
 			path = await browser.qapp.createStoragePath();
-			if(await isFolderWritable(path)){
-				p.storageOption = 'folder';
-				p.storageFolder = path;
+			if(await browser.legacy.isFolderWritable(path)){
+				retPrefs.storageOption = 'folder';
+				retPrefs.storageFolder = path;
 			} else {
 				browser.legacy.alert(_("could.not.initialize.storage.folder"));
-				p.storageOption = 'ext';
+				retPrefs.storageOption = 'ext';
 			}
 		}
+	} else {
+		QDEB&&console.debug(`${fName} - loading preferences`);
+		// Apply to defaults
+		Object.assign(retPrefs, prefs);
 	}
 
-	// Override old default "yyyy-mm-dd - HH:MM"
-	if(p.dateFormat === "yyyy-mm-dd - HH:MM"){
-		p.dateFormat = 'Y-m-d H:i';
+	if(retPrefs.tagName){
+		retPrefs.tagName = retPrefs.tagName.toLowerCase();
 	}
 
-	return p;
+	// Override old XNote default "yyyy-mm-dd - HH:MM"
+	if(retPrefs.dateFormat === "yyyy-mm-dd - HH:MM"){
+		retPrefs.dateFormat = 'Y-m-d H:i';
+	}
+
+	return retPrefs;
 }
 
 export async function getXNoteStoragePath(): Promise<string> {
-	let xnotePrefs = await browser.xnote.getPrefs();
+	const xnotePrefs = await browser.xnote.getPrefs();
 
 	if(xnotePrefs.storage_path){
-		QDEB&&console.debug("XNote++ storage folder setting found:", xnotePrefs.storage_path);
+		QDEB&&console.debug(`${debugHandle} XNote++ storage folder setting found: ${xnotePrefs.storage_path}`);
 
-		let path = await browser.xnote.getStoragePath(xnotePrefs.storage_path);
+		const path = await browser.xnote.getStoragePath(xnotePrefs.storage_path);
 
-		if(await isFolderWritable(path)){
+		if(await browser.legacy.isFolderWritable(path)){
 			return path;
 		} else {
-			QDEB&&console.debug("XNote++ storage folder not writable: ", path);
+			QDEB&&console.debug(`${debugHandle} XNote++ storage folder not writable: ${path}`);
 		}
 	}
 
@@ -96,10 +108,6 @@ async function isReadable(path: string){
 
 async function isFolderReadable(path: string){
 	return await browser.legacy.isFolderReadable(path);
-}
-
-export async function isFolderWritable(path: string){
-	return await browser.legacy.isFolderWritable(path);
 }
 
 // Load all note keys from folder, prioritizing qnote if both qnote and xnote exists
@@ -124,69 +132,40 @@ export async function loadAllFolderNotes(folder: string): Promise<NoteDataMap> {
 	});
 }
 
-async function importQNotes(notes: NoteDataMap, overwrite = false){
-	let stats = {
-		err: 0,
-		exist: 0,
-		imported: 0,
-		overwritten: 0
-	};
-
-	notes.forEach(async (note, keyId) => {
-		let yn = new QNote(keyId);
-
-		await yn.load();
-
-		let exists = yn.data.exists;
-
-		if(exists && !overwrite){
-			stats.exist++;
-		} else {
-			yn.data = note;
-			await yn.save().then(() => {
-				stats[exists ? "overwritten" : "imported"]++;
-			}).catch(e => {
-				console.error(_("error.saving.note"), e.message, keyId);
-				stats.err++;
-			});
-		}
-	});
-
-	return stats;
-}
-
-export async function importFolderNotes(root: string, overwrite = false){
-	return loadAllFolderNotes(root).then(notes => importQNotes(notes, overwrite));
-}
-
-async function exportNotesToFolder(root: string, type: NoteType, notes: NoteDataMap, overwrite: boolean) {
+export async function saveNotesAs(...[instanceType, importNotes, overwrite, root]: SaveNotesAsArgs): Promise<ExportStats>{
 	let stats: ExportStats = {
-		err: 0,
-		exist: 0,
+		errored: 0,
+		existing: 0,
 		imported: 0,
 		overwritten: 0
 	};
 
-	const className = (type == "xnote") ? XNote : QNoteFolder;
-	console.log("className", className);
-
-	notes.forEach(async (note, keyId) => {
-		const N = new className(keyId, root);
-
-		await N.load();
-
-		if(N.data.exists && !overwrite){
-			stats.exist++;
+	function ctor(keyId: string){
+		if(root && (instanceType == QNoteFolder || instanceType == XNoteFolder)){
+			return new instanceType(keyId, root);
+		} else if(instanceType == QNoteLocalStorage) {
+			return new instanceType(keyId);
 		} else {
-			N.data =  note;
-			await N.save().then(() => {
-				stats[N.data.exists ? "overwritten" : "imported"]++;
-			}).catch(e => {
-				console.error(_("error.saving.note"), e.message, keyId);
-				stats.err++;
-			});
+			throw new Error(`${debugHandle} unreachable`);
 		}
-	});
+	}
+
+	for(const [keyId, note] of importNotes.entries()){
+		let N = ctor(keyId);
+		await N.load().then(async oldData => {
+			if(oldData && !overwrite){
+				stats.existing++;
+			} else {
+				N.data =  note;
+				return N.save().then(() => {
+					stats[oldData ? "overwritten" : "imported"]++;
+				}).catch(e => {
+					console.error(_("error.saving.note"), keyId, e.message);
+					stats.errored++;
+				});
+			}
+		});
+	}
 
 	return stats;
 }
@@ -204,11 +183,11 @@ async function loadAllExtKeys() {
 	});
 }
 
-async function loadAllExtNotes(): Promise<NoteDataMap> {
+export async function loadAllExtNotes(): Promise<NoteDataMap> {
 	return loadAllExtKeys().then(async keys => {
 		const Notes = new Map;
 		for(const keyId of keys){
-			let note = new QNote(keyId);
+			let note = new QNoteLocalStorage(keyId);
 			await note.load();
 			Notes.set(keyId, note.data);
 		}
@@ -216,17 +195,9 @@ async function loadAllExtNotes(): Promise<NoteDataMap> {
 	});
 }
 
-export async function exportQAppNotesToFolder(root: string, type: NoteType, overwrite: boolean, prefs: IPreferences) {
-	if(prefs.storageOption == 'folder'){
-		return loadAllFolderNotes(prefs.storageFolder).then(notes => exportNotesToFolder(root, type, notes, overwrite));
-	} else {
-		return loadAllExtNotes().then(notes => exportNotesToFolder(root, type, notes, overwrite));
-	}
-}
-
 export async function clearPrefs() {
 	let p = [];
-	for(let k in PrefsManager.defaults){
+	for(const k in Prefs.defaults){
 		p.push(browser.storage.local.remove('pref.' + k));
 	}
 
@@ -340,7 +311,7 @@ export async function sendPrefsToQApp(prefs: IPreferences){
 	browser.qapp.setPrefs(prefsToQAppPrefs(prefs));
 }
 
-export async function savePrefs(p: IPreferences) {
+export async function savePrefs(p: Partial<IPreferences>) {
 	let k: keyof typeof p;
 
 	for(k in p){
@@ -350,45 +321,26 @@ export async function savePrefs(p: IPreferences) {
 	}
 }
 
-async function saveSinglePref(k: keyof IPreferences, v: any) {
-	return browser.storage.local.set({
-		['pref.' + k]: v
-	});
-}
+async function getSavedPrefs(): Promise<Partial<IPreferences>> {
+	let ret: Partial<IWritablePreferences> = {}
+	let k: keyof typeof Prefs.defaults;
 
-export async function isPrefsEmpty(): Promise<boolean> {
-	let p = PrefsManager.defaults;
-	let k: keyof typeof p;
-
-	for(k in p){
+	for(k in Prefs.defaults){
 		const v = await browser.storage.local.get('pref.' + k);
 		if(v['pref.' + k] !== undefined){
-			return false;
-		}
-	}
-
-	return true;
-}
-
-export async function getSavedPrefs(){
-	let p = PrefsManager.defaults;
-	let k: keyof typeof p;
-
-	for(k in p){
-		const v = await browser.storage.local.get('pref.' + k);
-		if(v['pref.' + k] !== undefined){
-			const type = getPropertyType(p, k);
+			const val = v['pref.' + k];
+			const type = getPropertyType(Prefs.defaults, k);
 			if(type === "number"){
-				setProperty(p, k, Number(v));
-			} else if(typeof v === "boolean"){
-				setProperty(p, k, Boolean(v));
-			} else if(typeof v === "string"){
-				setProperty(p, k, String(v));
+				setProperty(ret, k, Number(val));
+			} else if(type === "boolean"){
+				setProperty(ret, k, Boolean(val));
+			} else if(type === "string"){
+				setProperty(ret, k, String(val));
 			} else {
 				console.error(`Unsupported preference type: ${type} for key ${k}`);
 			}
 		}
 	}
 
-	return p;
+	return ret;
 }
