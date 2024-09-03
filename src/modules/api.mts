@@ -29,7 +29,7 @@ export interface IXNotePreferences {
 	version: string,
 }
 
-export interface IQAppPreferences {
+export interface IWritableQAppPreferences {
 	storageOption      : StorageOption
 	storageFolder      : string
 	showFirstChars     : number
@@ -41,7 +41,7 @@ export interface IQAppPreferences {
 	treatTextAsHtml    : boolean
 }
 
-export interface IPreferences extends IQAppPreferences {
+export interface IWritablePreferences extends IWritableQAppPreferences {
 	windowOption          : WindowOption
 	focusOnDisplay        : boolean
 	showOnSelect          : boolean
@@ -60,37 +60,12 @@ export interface IPreferences extends IQAppPreferences {
 	enableSpellChecker    : boolean
 }
 
-interface IPreferencesManager<T> {
-	prefs: T
-	readonly defaults: Readonly<T> | undefined
-	setPartial(data: Partial<T>): void
-}
+export type IPreferences = Readonly<IWritablePreferences>;
+export type IQAppPreferences = Readonly<IWritableQAppPreferences>;
 
-// TODO: remove Manager from name after refactor
-class PreferencesManager<T> implements IPreferencesManager<T> {
-	prefs: T
-	readonly defaults: Readonly<T> | undefined
-
-	constructor(prefs: T){
-		this.prefs = prefs
-	}
-
-	setPartial(data: Partial<T>){
-		if(this.prefs) {
-			throw new Error("Can't set partial data to undefined. Set prefs property first!");
-		} else {
-			Object.assign(this.prefs as object, data);
-		}
-	}
-
-	static setPartial<T extends object>(target: T, data: Partial<T>){
-		Object.assign(target, data);
-	}
-}
-
-class QAppPrefsManager extends PreferencesManager<IQAppPreferences>
+class QAppPrefs
 {
-	static readonly defaults: Readonly<IQAppPreferences> = {
+	static readonly defaults: IQAppPreferences = {
 		storageOption      : "folder",
 		storageFolder      : "",
 		showFirstChars     : 3,
@@ -103,9 +78,9 @@ class QAppPrefsManager extends PreferencesManager<IQAppPreferences>
 	}
 }
 
-export class PrefsManager extends PreferencesManager<IPreferences> {
-	static readonly defaults: Readonly<IPreferences> = {
-		...QAppPrefsManager.defaults,
+export class Prefs {
+	static readonly defaults: IPreferences = {
+		...QAppPrefs.defaults,
 		windowOption          :"xul",
 		focusOnDisplay        : true,
 		showOnSelect          : true,

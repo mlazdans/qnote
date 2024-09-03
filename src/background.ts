@@ -22,8 +22,8 @@
 //    Types for MozXULElement and others
 // https://github.com/dothq/browser-desktop/blob/nightly/types.d.ts
 
-import { PreferencesReply, PreferencesRequest, QPopupDataReply, QPopupDataRequest } from "./modules/Messages.mjs";
-import { INote, QNote, QNoteFolder } from "./modules/Note.mjs";
+import { QPopupDataReply, QPopupDataRequest } from "./modules/Messages.mjs";
+import { INote, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
 import { QNotePopup } from "./modules/NotePopups.mjs";
 import {
 	MessageId,
@@ -31,13 +31,10 @@ import {
 	POP_FOCUS,
 	POP_NONE,
 } from "./modules/common.mjs";
-import { getCurrentWindowIdAnd, getPrefs, getXNoteStoragePath, mpUpdateForNote, sendPrefsToQApp, updateTabMenusAndIcons } from "./modules/common-background.mjs";
-import { IPreferences, PrefsManager } from "./modules/api.mjs";
+import { getCurrentWindowIdAnd, getPrefs, mpUpdateForNote, sendPrefsToQApp, updateTabMenusAndIcons } from "./modules/common-background.mjs";
+import { IPreferences } from "./modules/api.mjs";
 
-// TODO: getting dead object: open msg in tab, drag out in new window, reload extension when tread view activated in new window
-// TODO: manage global state
 var QDEB = true;
-// var Prefs: PrefsManager | null = null;
 
 let BrowserAction = browser.action ? browser.action : browser.browserAction;
 
@@ -865,13 +862,18 @@ async function initExtension(){
 
 			let message;
 
-			if(message = (new QPopupDataRequest).parse(data)){
 				QDEB&&console.log(`Received ${data.command} message: `, data);
+			if(message = (new QPopupDataRequest).parse(data)){
 				const p = PopupManager.get(message.id);
 				(new QPopupDataReply).post(connection, {
 					id: p.id,
 					opts: p.note2QPopupOptions()
 				});
+			// } else if(message = (new PreferencesRequest).parse(data)){
+			// 	(new PreferencesReply).post(connection, {
+			// 		prefs: App.prefs,
+			// 		XNoteStoragePath: await getXNoteStoragePath()
+			// 	});
 			} else {
 				console.error("Unknown or incorrect message: ", data);
 			}
@@ -901,6 +903,7 @@ async function waitForLoad() {
 	});
 }
 
-waitForLoad().then(isAppStartup => initExtension());
+QDEB&&console.debug("ResourceUrl.register(qnote)");
+await browser.ResourceUrl.register("qnote");
 
-// await browser.ResourceUrl.register("exampleapi", "modules");
+waitForLoad().then(async isAppStartup => new QNoteExtension(await getPrefs()));

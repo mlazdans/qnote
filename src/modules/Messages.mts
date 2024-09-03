@@ -61,6 +61,29 @@ export class QPopupDataReply extends DefaultMessage<QPopupDataReplyData> {
 	}
 }
 
+// interface PreferencesRequestData extends IMessageData {
+// }
+
+// export interface PreferencesReplyData extends IMessageData {
+// 	XNoteStoragePath: string,
+// 	prefs: IPreferences
+// }
+
+// export class PreferencesRequest extends DefaultMessage<PreferencesRequestData> {
+// 	command = "PreferencesRequest";
+// }
+
+// export class PreferencesReply extends DefaultMessage<PreferencesReplyData> {
+// 	command = "PreferencesReply";
+// 	parse(data: any): PreferencesReplyData | undefined {
+// 		if(!super.parse(data) || !("prefs" in data) || !("XNoteStoragePath" in data)){
+// 			return undefined;
+// 		}
+
+// 		return data
+// 	}
+// }
+
 // interface PushNoteData extends MessageData {
 // 	note: NoteData
 // 	prefs: Preferences
