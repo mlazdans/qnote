@@ -27,7 +27,7 @@ export interface INoteFileAPI<T extends INoteFileProvider> {
 export interface IQAppAPI {
 	createStoragePath(): Promise<string>
 	updateColumsView(): Promise<void>
-	init(): Promise<void>
+	init(Prefs: IQAppPreferences): Promise<void>
 	setDebug(on: boolean): Promise<void>
 	messagePaneFocus(windowId: number): Promise<void>
 	setPrefs(prefs: IQAppPreferences): Promise<void>

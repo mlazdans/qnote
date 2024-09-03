@@ -337,17 +337,7 @@ export async function getCurrentTabIdAnd(): Promise<number> {
 
 // We call this after options has been changed
 export async function sendPrefsToQApp(prefs: IPreferences){
-	browser.qapp.setPrefs({
-		storageOption: prefs.storageOption,
-		storageFolder: prefs.storageFolder,
-		showFirstChars: prefs.showFirstChars,
-		printAttachTop: prefs.printAttachTop,
-		printAttachBottom: prefs.printAttachBottom,
-		messageAttachTop: prefs.messageAttachTop,
-		messageAttachBottom: prefs.messageAttachBottom,
-		attachTemplate: prefs.attachTemplate,
-		treatTextAsHtml: prefs.treatTextAsHtml,
-	});
+	browser.qapp.setPrefs(prefsToQAppPrefs(prefs));
 }
 
 export async function savePrefs(p: IPreferences) {

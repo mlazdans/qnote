@@ -2,7 +2,7 @@
 // TODO: remove functions with side effects
 
 import { NoteData } from './Note.mjs';
-import { IPreferences } from './api.mjs';
+import { IPreferences, IQAppPreferences } from './api.mjs';
 import * as luxon from "../modules/luxon.mjs";
 
 export class NoKeyIdError extends Error {};
@@ -414,4 +414,18 @@ export function isTypeCheckbox(node: Element): node is HTMLInputCheckboxElement 
 
 export function isTypeRadio(node: Element): node is HTMLInputRadioElement {
 	return isInputElement(node) && (node.type.toUpperCase() == "RADIO");
+}
+
+export function prefsToQAppPrefs(prefs: IPreferences): IQAppPreferences {
+	return {
+		storageOption: prefs.storageOption,
+		storageFolder: prefs.storageFolder,
+		showFirstChars: prefs.showFirstChars,
+		printAttachTop: prefs.printAttachTop,
+		printAttachBottom: prefs.printAttachBottom,
+		messageAttachTop: prefs.messageAttachTop,
+		messageAttachBottom: prefs.messageAttachBottom,
+		attachTemplate: prefs.attachTemplate,
+		treatTextAsHtml: prefs.treatTextAsHtml,
+	}
 }

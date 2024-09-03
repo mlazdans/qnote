@@ -42,7 +42,7 @@
 	"namespace": "qapp",
 	"types": [{
 		"id": "Prefs",
-		"name": "data",
+		"name": "prefs",
 		"type": "object",
 		"description": "Preferences",
 		"properties": {
@@ -153,8 +153,7 @@
 		"description": "",
 		"async": true,
 		"parameters": [{
-			"$ref": "Prefs",
-			"optional": true
+			"$ref": "Prefs"
 		}]
 	},{
 		"name": "clearNoteCache",
@@ -201,18 +200,7 @@
 		"description": "Initialize extension",
 		"async": true,
 		"parameters": [{
-			"name": "options",
-			"type": "object",
-			"optional": true,
-			"properties": {
-				"storageFolder": {
-					"type": "string",
-					"optional": true,
-					"default": "",
-					"description": "QNote folder"
-				}
-			},
-			"default": {}
+			"$ref": "Prefs"
 		}]
 	},{
 		"name": "setDebug",

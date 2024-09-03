@@ -1,7 +1,6 @@
-import { IPreferences } from "../modules/api.mjs";
+import { IQAppPreferences } from "../modules/api.mjs";
 import { NoteData } from "../modules/Note.mjs";
 
-// var Services = globalThis.Services || ChromeUtils.import("resource://gre/modules/Services.jsm").Services;
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
 var { QNoteFilter, QNoteAction, QCustomTerm } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFilters.mjs");
@@ -19,7 +18,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 	EventDispatcher
 	KeyboardHandler
 	WindowObserver
-	Prefs: IPreferences | null
+	Prefs: IQAppPreferences | null
 
 	customTermId = 'qnote@dqdp.net#qnoteText'
 	customTerm
@@ -36,8 +35,10 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 		QDEB&&console.debug(`${fName}`);
 		super(...args);
 
+		var API = this;
+
 		// We'll update cache and call listener once item arrives
-		// init() caller must install onNoteRequest listener
+		// Caller must install onNoteRequest listener before init()
 		QDEB&&console.debug("Installing noteGrabber");
 		this.noteGrabber = new QCache();
 
@@ -49,8 +50,6 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 		QDEB&&console.debug("Installing filters");
 		this.customFilter = new QNoteFilter();
-
-		var API = this;
 
 		this.Prefs = null;
 
@@ -367,8 +366,9 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 					}
 				}).api(),
 				// TODO: pass windowId
-				async init(){
-					QDEB&&console.debug("qapp.init()");
+				async init(prefs: IQAppPreferences){
+					QDEB&&console.debug("qapp.init()", prefs);
+					this.setPrefs(prefs);
 
 					// Remove old style sheet in case it still lay around, for example, after update
 					API.uninstallCSS("html/background.css");
@@ -446,12 +446,12 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 				async setDebug(on: boolean){
 					QDEB = on;
 				},
-				async setPrefs(Prefs: IPreferences){
-					API.Prefs = Prefs;
+				async setPrefs(prefs: IQAppPreferences){
+					API.Prefs = prefs;
 
-					API.customAction.storageFolder = Prefs.storageFolder;
-					API.customFilter.storageFolder = Prefs.storageFolder;
-					API.customTerm.storageFolder = Prefs.storageFolder;
+					API.customAction.storageFolder = prefs.storageFolder;
+					API.customFilter.storageFolder = prefs.storageFolder;
+					API.customTerm.storageFolder = prefs.storageFolder;
 
 					// TODO: currently it is not possible to have text and icon simultaneously
 					// if(ThreadPaneColumns){
