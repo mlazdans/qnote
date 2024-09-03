@@ -5,7 +5,7 @@ type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>
 
 export class DirtyStateError extends Error {};
 
-export interface NotePopup {
+export interface INotePopup {
 	id: number;
 	windowId: number;
 	note: INote;
@@ -60,11 +60,11 @@ export interface IQPopupOptions {
 
 export type IQPopupOptionsPartial = AtLeast<IQPopupOptions, 'id'>
 
-export abstract class DefaultNotePopup implements NotePopup {
+export abstract class DefaultNotePopup implements INotePopup {
 	id: number;
 	windowId: number;
 	note: INote;
-	loadedNoteData: NoteData | undefined;
+	loadedNoteData: NoteData | null = null;
 	// messageId: string | undefined;
 	// needSaveOnClose = true;
 	// shown = false;
@@ -109,7 +109,7 @@ export abstract class DefaultNotePopup implements NotePopup {
 		if(this.note){
 			const n1 = this.loadedNoteData;
 			const n2 = this.note;
-			if(n1 && n2){
+			if(n1 && n2 && n2.data){
 				return !this.isEqual(n1, n2.data);
 			}
 		}
@@ -312,10 +312,10 @@ export class QNotePopup extends DefaultNotePopup {
 	note2QPopupOptions(): IQPopupOptionsPartial {
 		const opt: IQPopupOptionsPartial = { id: this.id };
 
-		opt.width = this.note.data.width || this.prefs.width;
-		opt.height = this.note.data.height || this.prefs.height;
-		opt.left = this.note.data.left;
-		opt.top = this.note.data.top;
+		opt.width = this.note.data?.width || this.prefs.width;
+		opt.height = this.note.data?.height || this.prefs.height;
+		opt.left = this.note.data?.left;
+		opt.top = this.note.data?.top;
 
 		if(this.prefs.alwaysDefaultPlacement){
 			opt.width = this.prefs.width;
@@ -324,8 +324,8 @@ export class QNotePopup extends DefaultNotePopup {
 			opt.top = null;
 		}
 
-		opt.text = this.note.data.text;
-		opt.title = "QNote: " + this.note.data.ts; // TODO: format
+		opt.text = this.note.data?.text;
+		opt.title = "QNote: " + this.note.data?.ts; // TODO: format
 
 		return opt;
 	}

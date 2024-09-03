@@ -1,8 +1,9 @@
-export type NoteType = "xnote" | "qnote";
+export type NoteType = QNoteFolder | XNoteFolder | QNoteLocalStorage;
+export type NoteClassType = typeof QNoteFolder | typeof XNoteFolder | typeof QNoteLocalStorage;
 
 // Need nulls to send to experiment's API
 export class NoteData {
-	exists: boolean = false;
+	// exists: boolean = false;
 	text: string | null = "";
 	left: number | null = null;
 	top: number | null = null;
@@ -12,30 +13,23 @@ export class NoteData {
 }
 
 export interface INote {
-	data: NoteData;
-	// get(): NoteData;
-	// set(data: NoteData): void;
-	load(): Promise<NoteData>;
+	data: NoteData  | null
+	load(): Promise<NoteData | null>;
 	save(): Promise<void>;
 	delete(): Promise<void>;
 }
 
-// type NoteSaver = () => Promise<boolean>;
-// type NoteDeleter = () => Promise<boolean>;
-
 // const l = ["aftersave", "afterdelete" , "afterupdate"];
 // type NoteListener = typeof l[number];
 
-// export type Note = (QNote | QNoteFolder) & QEventDispatcher;
-
 export abstract class DefaultNote implements INote {
 	keyId: string; // message-id header or another unique id
-	data: NoteData;
+	data: NoteData | null = null;
 
 	constructor(keyId: string) {
 		this.keyId = keyId;
 		// super(["aftersave", "afterdelete", "afterupdate"]);
-		this.data = new NoteData();
+		// this.noteData = new NoteData();
 	}
 
 	// addListener(name: NoteListener, listener: Function): void {
@@ -53,11 +47,10 @@ export abstract class DefaultNote implements INote {
 
 	abstract save(): Promise<void>;
 	abstract delete(): Promise<void>;
-	protected abstract subload(): Promise<NoteData>;
+	protected abstract subload(): Promise<NoteData | null>;
 
-	// Needed in case new fields will be added to NoteData struct
-	async load(): Promise<NoteData> {
-		return Object.assign(this.data, await this.subload());
+	async load(): Promise<NoteData | null> {
+		return this.data = await this.subload()
 	}
 
 	// protected async saver(saver: NoteSaver): Promise<boolean> {
@@ -83,23 +76,23 @@ export abstract class DefaultNote implements INote {
 	// }
 }
 
-export class QNote extends DefaultNote {
+export class QNoteLocalStorage extends DefaultNote {
 	constructor(keyId: string) {
 		super(keyId);
 	}
 
-	async subload(): Promise<NoteData> {
+	async subload(): Promise<NoteData | null> {
 		return browser.storage.local
 			.get(this.keyId)
 			.then((store) =>
 				store[this.keyId]
 					? (this.data = store[this.keyId])
-					: (this.data = new NoteData())
+					: null
 			);
 	}
 
 	async save() {
-		browser.storage.local
+		this.data && browser.storage.local
 			.set({
 				[this.keyId]: this.data,
 			})
@@ -123,19 +116,15 @@ export class QNoteFolder extends DefaultNote {
 		this.root = root;
 	}
 
-	async subload(): Promise<NoteData> {
+	async subload(): Promise<NoteData | null> {
 		return browser.qnote.load(this.root, this.keyId).then((data) => {
-			if (data.exists) {
-				return data;
-			} else {
-				// Check maybe XNote exists
-				return browser.xnote.load(this.root, this.keyId);
-			}
+			// Check maybe XNote exists
+			return data ?? browser.xnote.load(this.root, this.keyId);
 		});
 	}
 
 	async save() {
-		browser.qnote
+		this.data && browser.qnote
 			.save(this.root, this.keyId, this.data)
 			.then(() => true)
 			.catch(() => false);
@@ -147,7 +136,7 @@ export class QNoteFolder extends DefaultNote {
 	}
 }
 
-export class XNote extends DefaultNote {
+export class XNoteFolder extends DefaultNote {
 	root: string;
 
 	constructor(keyId: string, root: string) {
@@ -155,12 +144,12 @@ export class XNote extends DefaultNote {
 		this.root = root;
 	}
 
-	async subload(): Promise<NoteData> {
+	async subload(): Promise<NoteData | null> {
 		return browser.xnote.load(this.root, this.keyId);
 	}
 
 	async save() {
-		browser.xnote
+		this.data && browser.xnote
 			.save(this.root, this.keyId, this.data)
 			.then(() => true)
 			.catch(() => false);

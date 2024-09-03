@@ -44,12 +44,12 @@ export class QNoteFile implements INoteFileProvider {
 		return false;
 	}
 
-	load(root: string, keyId: string): NoteData {
+	// TODO: this actually could return garbage or missing fields or old structs or just fail on JSON.parse
+	load(root: string, keyId: string): NoteData | null {
 		var file = this.getExistingFile(root, keyId);
-		var note = new NoteData();
 
 		if(!file){
-			return note;
+			return null;
 		}
 
 		var fileInStream = Cc["@mozilla.org/network/file-input-stream;1"].createInstance(Ci.nsIFileInputStream);
@@ -67,10 +67,7 @@ export class QNoteFile implements INoteFileProvider {
 		con.close();
 		fileInStream.close();
 
-		note = JSON.parse(data);
-		note.exists = true;
-
-		return note;
+		return JSON.parse(data);
 	}
 
 	delete(root: string, keyId: string){

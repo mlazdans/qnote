@@ -6,10 +6,6 @@
 		"type": "object",
 		"description": "Note data (keep in sync with qapp.json)",
 		"properties": {
-			"exists": {
-				"type": "boolean",
-				"description": ""
-			},
 			"text": {
 				"type": "string",
 				"optional": true,

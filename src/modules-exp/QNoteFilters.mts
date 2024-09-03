@@ -523,7 +523,7 @@ export class QCustomTerm implements Ci.nsIMsgSearchCustomTerm {
 			return false;
 		}
 
-		if(!note || !note.exists){
+		if(!note){
 			return false;
 		}
 

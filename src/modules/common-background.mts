@@ -255,12 +255,16 @@ export async function updateIcons(on: boolean, tabId?: number){
 	});
 }
 
-export async function mpUpdateForNote(note: NoteData){
+export async function mpUpdateForNote(keyId: string, note: NoteData | null){
 	// Marks icons active
-	updateIcons(note.exists);
-	browser.qapp.saveNoteCache(note);
+	updateIcons(!!note);
+
+	if(note) {
+		browser.qapp.saveNoteCache(keyId, note);
+		// getCurrentWindowIdAnd().then(windowId => browser.qapp.attachNoteToMessage(windowId, note));
+	}
+
 	browser.qapp.updateColumsView();
-	getCurrentWindowIdAnd().then(windowId => browser.qapp.attachNoteToMessage(windowId, note));
 }
 
 async function getCurrentWindow(){

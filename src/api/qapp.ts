@@ -402,7 +402,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 									ThreadPaneColumns.refreshCustomColumn("qnote");
 								});
 
-								return note?.exists ? note.text : null;
+								return note ? note.text : null;
 							},
 							iconCellDefinitions: iconCellDefinitions,
 							iconHeaderUrl: extension.baseURI.resolve("resource://qnote/images/icon-column.png"),
@@ -411,7 +411,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 									ThreadPaneColumns.refreshCustomColumn("qnote");
 								});
 
-								return note?.exists ? "qnote_exists" : "qnote_off";
+								return note ? "qnote_exists" : "qnote_off";
 							}
 						});
 					}
@@ -467,7 +467,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 						return;
 					}
 
-					if(!(note && note.exists)){
+					if(!note){
 						QDEB&&console.debug(`${fName} - no note`);
 						return;
 					}

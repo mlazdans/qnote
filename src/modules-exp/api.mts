@@ -10,15 +10,15 @@ var { XNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/XNo
 var { ExtensionError } = ExtensionUtils;
 
 export interface INoteFileProvider {
-	load(root: string, keyId: string): NoteData
+	load(root: string, keyId: string): NoteData | null
 	save(root: string, keyId: string, note: NoteData): void
 	delete(root: string, keyId: string): void
-	getAllKeys(root: string): Array<string>
+	getAllKeys(root: string): Array<string> // TODO: maybe use Generator/yield?
 }
 
 export interface INoteFileAPI<T extends INoteFileProvider> {
 	provider: T
-	load(root: string, keyId: string): Promise<NoteData>
+	load(root: string, keyId: string): Promise<NoteData | null>
 	save(root: string, keyId: string, note: NoteData): Promise<void>
 	delete(root: string, keyId: string): Promise<void>
 	getAllKeys(root: string): Promise<Array<string>>
@@ -31,8 +31,8 @@ export interface IQAppAPI {
 	setDebug(on: boolean): Promise<void>
 	messagePaneFocus(windowId: number): Promise<void>
 	setPrefs(prefs: IQAppPreferences): Promise<void>
-	attachNoteToMessage(windowId: number, note: NoteData): Promise<void>
-	saveNoteCache(note: NoteData): Promise<void>
+	// attachNoteToMessage(windowId: number, note: NoteData): Promise<void>
+	saveNoteCache(keyId: string, note: NoteData): Promise<void>
 	clearNoteCache(): Promise<void>
 	getProfilePath(): Promise<string>
 
