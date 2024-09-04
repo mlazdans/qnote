@@ -53,8 +53,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 		this.Prefs = null;
 
-		// ["domwindowopened", "domwindowclosed", "keydown", "onShutdown", "domcomplete"]
-		this.EventDispatcher = new QEventDispatcher();
+		this.EventDispatcher = new QEventDispatcher("domwindowopened", "domwindowclosed", "keydown", "onShutdown", "domcomplete");
 		this.KeyboardHandler = {
 			windows: new WeakSet(),
 			addTo: (w: Window) => {

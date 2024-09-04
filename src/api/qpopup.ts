@@ -22,8 +22,7 @@ function coalesce(...args: any): any {
 	return null;
 }
 
-// ["oncreated", "onremoved", "onmove", "onresize"]
-var PopupEventDispatcher = new QEventDispatcher();
+var PopupEventDispatcher = new QEventDispatcher("oncreated", "onremoved", "onmove", "onresize");
 
 var QDEB = true;
 

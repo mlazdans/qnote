@@ -22,7 +22,7 @@ export class QNoteFilter
 
 	constructor(storageFolder?: string) {
 		this.storageFolder = storageFolder;
-		this.ed = new QEventDispatcher(); // ["uninstall"]
+		this.ed = new QEventDispatcher("uninstall");
 		// this.Services = globalThis.Services || ChromeUtils.import("resource://gre/modules/Services.jsm").Services;
 		// this.QuickFilterManager = QuickFilterManager;
 
