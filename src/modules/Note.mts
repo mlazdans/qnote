@@ -13,6 +13,7 @@ export class NoteData {
 }
 
 export interface INote {
+	readonly keyId: string; // message-id header or another unique id
 	data: NoteData  | null
 	load(): Promise<NoteData | null>;
 	save(): Promise<void>;
@@ -23,7 +24,7 @@ export interface INote {
 // type NoteListener = typeof l[number];
 
 export abstract class DefaultNote implements INote {
-	keyId: string; // message-id header or another unique id
+	readonly keyId: string;
 	data: NoteData | null = null;
 
 	constructor(keyId: string) {
