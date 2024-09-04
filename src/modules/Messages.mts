@@ -27,7 +27,7 @@ abstract class DefaultMessage<T extends IMessageData> implements IMessage<T> {
 	}
 }
 
-// Messages
+// Message: PopupDataRequest
 interface QPopupDataRequestData extends IMessageData {
 	id: number
 }
@@ -59,6 +59,13 @@ export class QPopupDataReply extends DefaultMessage<QPopupDataReplyData> {
 
 		return data
 	}
+}
+
+// Message: prefsUpdated
+interface PrefsUpdatedData extends IMessageData {}
+
+export class PrefsUpdated extends DefaultMessage<PrefsUpdatedData> {
+	command = "PrefsUpdated";
 }
 
 // interface PreferencesRequestData extends IMessageData {

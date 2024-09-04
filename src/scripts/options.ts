@@ -4,6 +4,11 @@ import { ExportStats, getPrefs, getXNoteStoragePath, loadAllExtNotes, loadAllFol
 import { IPreferences, IWritablePreferences, LuxonDateFormatsMap, Prefs } from "../modules/api.mjs";
 import * as luxon from "../modules/luxon.mjs";
 import { QNoteFolder, QNoteLocalStorage, XNoteFolder } from "../modules/Note.mjs";
+import { PrefsUpdated } from "../modules/Messages.mjs";
+
+let backgroundPort: browser.runtime.Port;
+let isConnected: boolean;
+connectToBackground();
 
 let QDEB                        = true;
 const debugHandle               = "[qnote:options]";
@@ -137,6 +142,15 @@ async function setPrefFromHtml<K extends keyof Partial<IPreferences>>(p: Partial
 	});
 }
 
+function connectToBackground() {
+	backgroundPort = browser.runtime.connect();
+	isConnected = true;
+	backgroundPort.onDisconnect.addListener(data => {
+		console.log(`${debugHandle} onDisconnect`, backgroundPort);
+		isConnected = false;
+	});
+}
+
 async function saveOption(name: keyof IPreferences){
 	QDEB&&console.debug(`${debugHandle} saving option ${name}`);
 
@@ -197,7 +211,11 @@ async function saveOption(name: keyof IPreferences){
 		return;
 	}
 
-	savePrefs(newPrefs);
+	if(!isConnected){
+		connectToBackground();
+	}
+
+	savePrefs(newPrefs).then(() => (new PrefsUpdated).post(backgroundPort));
 }
 
 function initTags(tags: Array<messenger.messages.tags.MessageTag>): void {
@@ -598,28 +616,7 @@ async function exportStorage(){
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
+	QDEB&&console.log(`${debugHandle} DOMContentLoaded`);
+
 	await initOptionsPage(await getPrefs());
-
-	// QDEB&&console.log(`${debugHandle} DOMContentLoaded`);
-	// const xulPort = browser.runtime.connect({
-	// 	name: "options"
-	// });
-
-	// xulPort.onMessage.addListener(data => {
-	// 	QDEB&&console.log(`${debugHandle} received message, will parse it...`, data);
-	// 	let reply;
-	// 	if(reply = (new PreferencesReply).parse(data)){
-	// 		QDEB&&console.log(`${debugHandle} message is PreferencesReply`);
-	// 		initOptionsPage(reply);
-
-	// 		// if(reply.id === id){ // TODO: do we need check id?
-	// 		// 	updateOptions(reply.opts);
-	// 		// 	popup();
-	// 		// }
-	// 	} else {
-	// 		console.error(`${debugHandle} unknown or incorrect message: `, data);
-	// 	}
-	// });
-
-	// (new PreferencesRequest).post(xulPort);
 });
