@@ -1,13 +1,14 @@
 import { IPreferences, PopupAnchor } from './api.mjs';
-import { INote, NoteData } from './Note.mjs';
+import { dateFormatWithPrefs } from './common.mjs';
+import { INote, INoteData } from './Note.mjs';
+import { QEventDispatcher } from './QEventDispatcher.mjs';
 
 type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>
 
-export class DirtyStateError extends Error {};
-
 export interface INotePopup {
-	id: number;
+	keyId: string;
 	windowId: number;
+	popupHandle: number;
 	note: INote;
 	flags: number | undefined;
 	// loadedNoteData: NoteData | undefined;
@@ -23,59 +24,41 @@ export interface INotePopup {
 	// close(): Promise<void>
 }
 
-// All fields will be sent to qpopup API, optional fields set to null
-// These are handled by qpopup API:
-//      focused?: boolean | null;
-//      top?: number | null;
-//      left?: number | null;
-//      offsetTop?: number | null;
-//      offsetLeft?: number | null;
-//      anchor?: PopupAnchor | null;
-//      anchorPlacement?: string | null;
-// These are handled by qpopup content script
-//     width?: number | null;
-//     height?: number | null;
-//     title?: string | null;
-//     text?: string | null;
-//     placeholder?: string | null;
-//     focusOnDisplay?: boolean | null;
-//     enableSpellChecker?: boolean | null;
-export interface IQPopupOptions {
-	id: number
-	focused: boolean | null
-	top: number | null
-	left: number | null
-	offsetTop: number | null
-	offsetLeft: number | null
-	width: number | null
-	height: number | null
-	anchor: PopupAnchor | null
-	anchorPlacement: string | null
-	title: string | null
-	text: string | null
-	placeholder: string | null
-	focusOnDisplay: boolean | null
-	enableSpellChecker: boolean | null
+export interface IPopupOptions {
+	focused?: boolean
+	top?: number
+	left?: number
+	offsetTop?: number
+	offsetLeft?: number
+	width?: number
+	height?: number
+	anchor?: PopupAnchor
+	anchorPlacement?: string
+	title?: string
+	text?: string
+	placeholder?: string
+	focusOnDisplay?: boolean
+	enableSpellChecker?: boolean
 }
 
-export type IQPopupOptionsPartial = AtLeast<IQPopupOptions, 'id'>
-
-export abstract class DefaultNotePopup implements INotePopup {
-	id: number;
-	windowId: number;
+export abstract class DefaultNotePopup extends QEventDispatcher<string> implements INotePopup {
+	keyId: string
+	windowId: number
+	popupHandle: number
 	note: INote;
-	loadedNoteData: NoteData | null = null;
+	loadedNoteData: INoteData | null = null;
 	// messageId: string | undefined;
 	// needSaveOnClose = true;
 	// shown = false;
 	// dirty = false;
 	flags: number | undefined;
 
-	constructor(id: number, windowId: number, note: INote) {
-		// super(["afterclose"]);
-		this.id = id;
+	constructor(keyId: string, windowId: number, popupHandle: number, note: INote) {
+		super("close", "escape", "delete")
+		this.keyId = keyId
+		this.windowId = windowId
+		this.popupHandle = popupHandle
 		this.note = note;
-		this.windowId = windowId;
 	}
 
 	// addListener(name: DefaultNoteWindowListener, listener: (w: NoteWindow) => void): void {
@@ -148,7 +131,7 @@ export abstract class DefaultNotePopup implements INotePopup {
 	// 	}
 	// }
 
-	isEqual(n1: NoteData, n2: NoteData): boolean {
+	isEqual(n1: INoteData, n2: INoteData): boolean {
 		let k1 = Object.keys(n1);
 		let k2 = Object.keys(n2);
 
@@ -157,7 +140,7 @@ export abstract class DefaultNotePopup implements INotePopup {
 		}
 
 		for(let k of k1){
-			var key = k as keyof NoteData;
+			var key = k as keyof INoteData;
 			if(n1[key] !== n2[key]){
 				return false;
 			}
@@ -165,7 +148,6 @@ export abstract class DefaultNotePopup implements INotePopup {
 
 		return true;
 	}
-
 
 	// async saveNote(){
 	// 	let fName = `${this.constructor.name}.saveNote()`;
@@ -297,37 +279,44 @@ export abstract class DefaultNotePopup implements INotePopup {
 
 }
 
-export class QNotePopup extends DefaultNotePopup {
-	prefs: IPreferences;
+export function note2QPopupOptions(note: INote, prefs: IPreferences): IPopupOptions {
+	const opt: IPopupOptions = {};
 
-	constructor(id: number, windowId: number, note: INote, prefs: IPreferences) {
-		super(id, windowId, note);
-		this.prefs = prefs;
+	opt.width = note.data?.width || prefs.width;
+	opt.height = note.data?.height || prefs.height;
+	opt.left = note.data?.left;
+	opt.top = note.data?.top;
 
-		browser.qpopup.create(windowId, this.note2QPopupOptions()).then(() => {
-			console.log(`created popup ${id}`);
-		});
+	if(prefs.alwaysDefaultPlacement){
+		opt.width = prefs.width;
+		opt.height = prefs.height;
+		opt.left = undefined;
+		opt.top = undefined;
 	}
 
-	note2QPopupOptions(): IQPopupOptionsPartial {
-		const opt: IQPopupOptionsPartial = { id: this.id };
+	opt.text = note.data?.text;
+	opt.title = "QNote: " + dateFormatWithPrefs(prefs, note.data?.ts);
 
-		opt.width = this.note.data?.width || this.prefs.width;
-		opt.height = this.note.data?.height || this.prefs.height;
-		opt.left = this.note.data?.left;
-		opt.top = this.note.data?.top;
+	return opt;
+}
 
-		if(this.prefs.alwaysDefaultPlacement){
-			opt.width = this.prefs.width;
-			opt.height = this.prefs.height;
-			opt.left = null;
-			opt.top = null;
-		}
+export class QNotePopup extends DefaultNotePopup {
+	prefs: IPreferences;
+	private qpopupHandle: number
 
-		opt.text = this.note.data?.text;
-		opt.title = "QNote: " + this.note.data?.ts; // TODO: format
+	// Use create()
+	private constructor(qpopupHandle: number, keyId: string, windowId: number, popupHandle: number, note: INote, prefs: IPreferences) {
+		super(keyId, windowId, popupHandle, note);
+		this.popupHandle = popupHandle
+		this.prefs = prefs
+		this.qpopupHandle = qpopupHandle
+	}
 
-		return opt;
+	static async create(keyId: string, windowId: number, popupHandle: number, note: INote, prefs: IPreferences): Promise<QNotePopup> {
+		return browser.qpopup.create(windowId, note2QPopupOptions(note, prefs)).then(qpopupHandle => {
+			console.log(`created qpopup ${qpopupHandle}`);
+			return new QNotePopup(qpopupHandle, keyId, windowId, popupHandle, note, prefs);
+		});
 	}
 
 	// async update(){
@@ -354,14 +343,14 @@ export class QNotePopup extends DefaultNotePopup {
 	// }
 
 	async pop() {
-		browser.qpopup.pop(this.id).then(() => {
+		browser.qpopup.pop(this.qpopupHandle).then(() => {
 			let l = (id: number) => {
-				console.log(`popped onRemoved ${this.id}:${id}`);
+				console.log(`popped onRemoved ${this.qpopupHandle}:${id}`);
 				// super.close();
 				browser.qpopup.onRemoved.removeListener(l);
 			};
 			browser.qpopup.onRemoved.addListener(l);
-			console.log(`popped popup ${this.id}`);
+			console.log(`popped popup ${this.qpopupHandle}`);
 		});
 
 		// return super.pop(async opt => {

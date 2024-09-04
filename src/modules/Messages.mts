@@ -1,5 +1,3 @@
-import { IQPopupOptionsPartial } from "./NotePopups.mjs";
-
 // Declarations
 interface IMessageData {
 }
@@ -28,38 +26,38 @@ abstract class DefaultMessage<T extends IMessageData> implements IMessage<T> {
 }
 
 // Message: PopupDataRequest
-interface QPopupDataRequestData extends IMessageData {
-	id: number
-}
+// interface PopupDataRequestData extends IMessageData {
+// 	handle: number
+// }
 
-interface QPopupDataReplyData {
-	id: number,
-	opts: IQPopupOptionsPartial
-}
+// interface PopupDataReplyData {
+// 	handle: number,
+// 	opts: IPopupOptions
+// }
 
-export class QPopupDataRequest extends DefaultMessage<QPopupDataRequestData> {
-	command = "QPopupDataRequest";
-	parse(data: any): QPopupDataRequestData | undefined {
-		if(!super.parse(data) || !("id" in data)){
-			return undefined;
-		}
+// export class PopupDataRequest extends DefaultMessage<PopupDataRequestData> {
+// 	command = "PopupDataRequest";
+// 	parse(data: any): PopupDataRequestData | undefined {
+// 		if(!super.parse(data) || !("handle" in data)){
+// 			return undefined;
+// 		}
 
-		return {
-			id: parseInt(data.id),
-		};
-	}
-}
+// 		return {
+// 			handle: parseInt(data.handle),
+// 		};
+// 	}
+// }
 
-export class QPopupDataReply extends DefaultMessage<QPopupDataReplyData> {
-	command = "QPopupDataReply";
-	parse(data: any): QPopupDataReplyData | undefined {
-		if(!super.parse(data) || !("opts" in data) || !("id" in data)){
-			return undefined;
-		}
+// export class PopupDataReply extends DefaultMessage<PopupDataReplyData> {
+// 	command = "PopupDataReply";
+// 	parse(data: any): PopupDataReplyData | undefined {
+// 		if(!super.parse(data) || !("opts" in data) || !("handle" in data)){
+// 			return undefined;
+// 		}
 
-		return data
-	}
-}
+// 		return data
+// 	}
+// }
 
 // Message: prefsUpdated
 interface PrefsUpdatedData extends IMessageData {}

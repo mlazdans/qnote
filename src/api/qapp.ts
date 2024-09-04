@@ -1,5 +1,5 @@
 import { IQAppPreferences } from "../modules/api.mjs";
-import { NoteData } from "../modules/Note.mjs";
+import { INoteData } from "../modules/Note.mjs";
 
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
@@ -459,7 +459,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 					// 	API.ColumnHandler.columnHandler.limit = Prefs.showFirstChars;
 					// }
 				},
-				async attachNoteToPrinter(w: MozWindow, note?: NoteData){
+				async attachNoteToPrinter(w: MozWindow, note?: INoteData){
 					const fName = "qapp.attachNoteToPrinter()";
 
 					if(!API.Prefs || !(API.Prefs.printAttachTop || API.Prefs.printAttachBottom)){
@@ -510,7 +510,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 							if(API.Prefs.treatTextAsHtml){
 								el.innerHTML = note.text ?? "";
 							} else {
-								el.textContent = note.text;
+								el.textContent = note.text ?? "";
 							}
 						}
 					}
@@ -622,9 +622,9 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 				// 	API.updateView(w, keyId);
 				// },
-				applyTemplate(t: string, data: NoteData) {
+				applyTemplate(t: string, note: INoteData) {
 					return t
-						.replace("{{ qnote_date }}", data.tsFormatted ?? "")
+						.replace("{{ qnote_date }}", note.tsFormatted ?? "")
 						.replace("{{ qnote_text }}", '<span class="qnote-text-span"></span>')
 					;
 				},
@@ -848,7 +848,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 				// 		});
 				// 	}
 				// },
-				async saveNoteCache(keyId: string, note: NoteData){
+				async saveNoteCache(keyId: string, note: INoteData){
 					API.noteGrabber.set(keyId, note);
 				},
 				async clearNoteCache(){

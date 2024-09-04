@@ -1,10 +1,10 @@
-import { NoteData } from "../modules/Note.mjs";
+import { INoteData } from "../modules/Note.mjs";
 import { INoteFileAPI, INoteFileProvider } from "./api.mjs";
 var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 
 export interface IQNoteFileAPI extends INoteFileAPI<QNoteFile> {
-	copyToClipboard(note: NoteData): Promise<boolean>
-	getFromClipboard(): Promise<NoteData | null>
+	copyToClipboard(note: INoteData): Promise<boolean>
+	getFromClipboard(): Promise<INoteData | null>
 }
 
 export class QNoteFile implements INoteFileProvider {
@@ -45,7 +45,7 @@ export class QNoteFile implements INoteFileProvider {
 	}
 
 	// TODO: this actually could return garbage or missing fields or old structs or just fail on JSON.parse
-	load(root: string, keyId: string): NoteData | null {
+	load(root: string, keyId: string): INoteData | null {
 		var file = this.getExistingFile(root, keyId);
 
 		if(!file){
@@ -77,7 +77,7 @@ export class QNoteFile implements INoteFileProvider {
 		}
 	}
 
-	save(root: string, keyId: string, note: NoteData) {
+	save(root: string, keyId: string, note: INoteData) {
 		var file = this.getFile(root, keyId);
 		let data = JSON.stringify(note);
 

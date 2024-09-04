@@ -1,21 +1,19 @@
 export type NoteType = QNoteFolder | XNoteFolder | QNoteLocalStorage;
 export type NoteClassType = typeof QNoteFolder | typeof XNoteFolder | typeof QNoteLocalStorage;
 
-// Need nulls to send to experiment's API
-export class NoteData {
-	// exists: boolean = false;
-	text: string | null = "";
-	left: number | null = null;
-	top: number | null = null;
-	width: number | null = null;
-	height: number | null = null;
-	ts: number | null = null;
+export interface INoteData {
+	text?: string
+	left?: number
+	top?: number
+	width?: number
+	height?: number
+	ts?: number
 }
 
 export interface INote {
 	readonly keyId: string; // message-id header or another unique id
-	data: NoteData  | null
-	load(): Promise<NoteData | null>;
+	data: INoteData | null
+	load(): Promise<INoteData | null>;
 	save(): Promise<void>;
 	delete(): Promise<void>;
 }
@@ -25,7 +23,7 @@ export interface INote {
 
 export abstract class DefaultNote implements INote {
 	readonly keyId: string;
-	data: NoteData | null = null;
+	data: INoteData | null = null;
 
 	constructor(keyId: string) {
 		this.keyId = keyId;
@@ -48,9 +46,9 @@ export abstract class DefaultNote implements INote {
 
 	abstract save(): Promise<void>;
 	abstract delete(): Promise<void>;
-	protected abstract subload(): Promise<NoteData | null>;
+	protected abstract subload(): Promise<INoteData | null>;
 
-	async load(): Promise<NoteData | null> {
+	async load(): Promise<INoteData | null> {
 		return this.data = await this.subload()
 	}
 
@@ -82,7 +80,7 @@ export class QNoteLocalStorage extends DefaultNote {
 		super(keyId);
 	}
 
-	async subload(): Promise<NoteData | null> {
+	async subload(): Promise<INoteData | null> {
 		return browser.storage.local
 			.get(this.keyId)
 			.then((store) =>
@@ -117,7 +115,7 @@ export class QNoteFolder extends DefaultNote {
 		this.root = root;
 	}
 
-	async subload(): Promise<NoteData | null> {
+	async subload(): Promise<INoteData | null> {
 		return browser.qnote.load(this.root, this.keyId).then((data) => {
 			// Check maybe XNote exists
 			return data ?? browser.xnote.load(this.root, this.keyId);
@@ -145,7 +143,7 @@ export class XNoteFolder extends DefaultNote {
 		this.root = root;
 	}
 
-	async subload(): Promise<NoteData | null> {
+	async subload(): Promise<INoteData | null> {
 		return browser.xnote.load(this.root, this.keyId);
 	}
 

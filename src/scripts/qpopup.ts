@@ -1,6 +1,5 @@
 import { DOMLocalizator } from "../modules/DOMLocalizator.mjs";
-import { QPopupDataReply, QPopupDataRequest } from "../modules/Messages.mjs";
-import { IQPopupOptions, IQPopupOptionsPartial } from "../modules/NotePopups.mjs";
+import { IPopupOptions } from "../modules/NotePopups.mjs";
 import { getElementByIdOrDie, querySelectorOrDie } from "../modules/common.mjs";
 
 let QDEB = true;
@@ -9,8 +8,8 @@ QDEB&&console.debug("qpopup(content) new QPopup: ");
 
 const urlParams = new URLSearchParams(window.location.search);
 const idParam = urlParams.get("id");
-const width = parseInt(urlParams.get("width") ?? "320");
-const height = parseInt(urlParams.get("height") ?? "200");
+// const width = parseInt(urlParams.get("width") ?? "320");
+// const height = parseInt(urlParams.get("height") ?? "200");
 // const placeholder = urlParams.get("placeholder") ?? ""; // TODO: for multi note
 
 if(!idParam){
@@ -23,8 +22,7 @@ if (isNaN(id)) {
 	throw new Error(`Incorrect value for query parameter id: ${id}`);
 }
 
-
-const Opts: IQPopupOptionsPartial = { id };
+const Opts: IPopupOptions = { };
 const i18n = new DOMLocalizator(browser.i18n.getMessage);
 
 const YTextE      = getElementByIdOrDie('note-text') as HTMLTextAreaElement;
@@ -35,7 +33,7 @@ const resizeEl    = querySelectorOrDie(".qpopup-controls-resize") as HTMLElement
 const closeEl     = querySelectorOrDie(".qpopup-title-closebutton") as HTMLElement;
 const delEl       = querySelectorOrDie("#note-delete") as HTMLElement;
 
-function updateOptions(o: IQPopupOptions | IQPopupOptionsPartial){
+function updateOptions(o: IPopupOptions){
 	console.log("updateOptions");
 	if(Opts.enableSpellChecker !== o.enableSpellChecker)
 		Opts.enableSpellChecker = o.enableSpellChecker;
@@ -106,8 +104,6 @@ function resizeNote(w: number, h: number){
 function popup(){
 	i18n.setTexts(document);
 
-	resizeNote(width, height);
-
 	// sfocus(() => window.focus());
 
 	// TODO: differentiate close/delete events
@@ -126,8 +122,7 @@ function popup(){
 	// 	sfocus(() => YTextE.focus());
 	// });
 
-	YTextE.addEventListener("keyup", () => browser.qpopup.update({
-		id: id,
+	YTextE.addEventListener("keyup", () => browser.qpopup.update(id, {
 		text: YTextE.value
 	}));
 
@@ -166,7 +161,7 @@ function popup(){
 			const offsetTop = e.clientY - mouse.clientY;
 			const offsetLeft = e.clientX - mouse.clientX;
 
-			browser.qpopup.update({ id, offsetTop, offsetLeft });
+			browser.qpopup.update(id, { offsetTop, offsetLeft });
 			// browser.qpopup.update(updateOpts).then(pi => {
 			// 	if(Note && pi.top)Note.top = pi.top;
 			// 	if(Note && pi.left)Note.left = pi.left;
@@ -227,21 +222,28 @@ function popup(){
 
 
 window.addEventListener("DOMContentLoaded", () => {
-	let xulPort = browser.runtime.connect({
-		name: "qpopup"
+	browser.qpopup.get(id).then(opts => {
+		updateOptions(opts);
+		popup();
 	});
-
-	xulPort.onMessage.addListener(data => {
-		let reply;
-		if(reply = (new QPopupDataReply).parse(data)){
-			if(reply.id === id){ // TODO: do we need check id?
-				updateOptions(reply.opts);
-				popup();
-			}
-		} else {
-			console.error("Unknown or incorrect message: ", data);
-		}
-	});
-
-	(new QPopupDataRequest).post(xulPort, { id });
 });
+
+// window.addEventListener("DOMContentLoaded", () => {
+// 	let xulPort = browser.runtime.connect({
+// 		name: "qpopup"
+// 	});
+
+// 	xulPort.onMessage.addListener(data => {
+// 		let reply;
+// 		if(reply = (new PopupDataReply).parse(data)){
+// 			if(reply.handle == id){ // TODO: do we need check id?
+// 				updateOptions(reply.opts);
+// 				popup();
+// 			}
+// 		} else {
+// 			console.error("Unknown or incorrect message: ", data);
+// 		}
+// 	});
+
+// 	(new PopupDataRequest).post(xulPort, { handle: id });
+// });

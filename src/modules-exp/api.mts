@@ -1,5 +1,5 @@
 import { IQAppPreferences } from "../modules/api.mjs";
-import { NoteData } from "../modules/Note.mjs"
+import { INoteData } from "../modules/Note.mjs";
 import { IQNoteFileAPI } from "./QNoteFile.mjs";
 import { IXNoteFileAPI } from "./XNoteFile.mjs";
 
@@ -10,16 +10,16 @@ var { XNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/XNo
 var { ExtensionError } = ExtensionUtils;
 
 export interface INoteFileProvider {
-	load(root: string, keyId: string): NoteData | null
-	save(root: string, keyId: string, note: NoteData): void
+	load(root: string, keyId: string): INoteData | null
+	save(root: string, keyId: string, note: INoteData): void
 	delete(root: string, keyId: string): void
 	getAllKeys(root: string): Array<string> // TODO: maybe use Generator/yield?
 }
 
 export interface INoteFileAPI<T extends INoteFileProvider> {
 	provider: T
-	load(root: string, keyId: string): Promise<NoteData | null>
-	save(root: string, keyId: string, note: NoteData): Promise<void>
+	load(root: string, keyId: string): Promise<INoteData | null>
+	save(root: string, keyId: string, note: INoteData): Promise<void>
 	delete(root: string, keyId: string): Promise<void>
 	getAllKeys(root: string): Promise<Array<string>>
 }
@@ -31,8 +31,8 @@ export interface IQAppAPI {
 	setDebug(on: boolean): Promise<void>
 	messagePaneFocus(windowId: number): Promise<void>
 	setPrefs(prefs: IQAppPreferences): Promise<void>
-	// attachNoteToMessage(windowId: number, note: NoteData): Promise<void>
-	saveNoteCache(keyId: string, note: NoteData): Promise<void>
+	// attachNoteToMessage(windowId: number, note: INoteData): Promise<void>
+	saveNoteCache(keyId: string, note: INoteData): Promise<void>
 	clearNoteCache(): Promise<void>
 	getProfilePath(): Promise<string>
 
@@ -70,7 +70,7 @@ function Transferable(source: any) {
 function gen<T1 extends INoteFileProvider>(provider: T1): INoteFileAPI<T1> {
 	const api: INoteFileAPI<T1> = {
 		provider: provider,
-		async save(root: string, keyId: string, note: NoteData){
+		async save(root: string, keyId: string, note: INoteData){
 			try {
 				provider.save(root, keyId, note);
 			} catch(e: any) {
@@ -105,7 +105,7 @@ function gen<T1 extends INoteFileProvider>(provider: T1): INoteFileAPI<T1> {
 
 export const QNoteFileAPI: IQNoteFileAPI = {
 	...gen(new QNoteFile()),
-	async copyToClipboard(note: NoteData): Promise<boolean> {
+	async copyToClipboard(note: INoteData): Promise<boolean> {
 		const txtWrapper = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
 		txtWrapper.data = note.text;
 
@@ -131,7 +131,7 @@ export const QNoteFileAPI: IQNoteFileAPI = {
 		return true;
 	},
 
-	async getFromClipboard(): Promise<NoteData | null> {
+	async getFromClipboard(): Promise<INoteData | null> {
 		const w = Services.wm.getMostRecentWindow("mail:3pane");
 		const clipBoard = Services.clipboard;
 		const transferable = Transferable(w);

@@ -1,10 +1,10 @@
 // var { QuickFilterManager, MessageTextFilter } = ChromeUtils.import("resource:///modules/QuickFilterManager.jsm");
+import { INoteData } from "../modules/Note.mjs";
 import { QCache } from "../modules/QCache.mjs";
 
 var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
 var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs");
 var { XNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/XNoteFile.mjs");
-var { NoteData } = ChromeUtils.importESModule("resource://qnote/modules/Note.mjs");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var { ThreadPaneColumns } = ChromeUtils.importESModule("chrome://messenger/content/ThreadPaneColumns.mjs");
@@ -783,7 +783,7 @@ class QCustomAddAction extends QCustomActionAbstract
 		const ts = Date.now();
 		msgHdrs.forEach(m => {
 			const keyId = m.messageId;
-			const note = new NoteData();
+			const note: INoteData = {}; // TODO: test
 
 			note.text = actionValue;
 			note.ts = ts;
@@ -814,7 +814,7 @@ class QCustomUpdateAction extends QCustomActionAbstract
 		let ts = Date.now();
 		msgHdrs.forEach(m => {
 			const keyId = m.messageId;
-			const note = new NoteData();
+			const note: INoteData = {}; // TODO: test
 
 			note.text = actionValue;
 			note.ts = ts;

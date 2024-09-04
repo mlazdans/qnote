@@ -1,5 +1,5 @@
 import { IXNotePreferences } from "../modules/api.mjs";
-import { NoteData } from "../modules/Note.mjs";
+import { INoteData } from "../modules/Note.mjs";
 import { setProperty } from "../modules/common.mjs";
 import { INoteFileAPI, INoteFileProvider } from "./api.mjs";
 
@@ -186,7 +186,7 @@ export class XNoteFile implements INoteFileProvider {
 
 		return false;
 	}
-	save(root: string, keyId: string, note: NoteData){
+	save(root: string, keyId: string, note: INoteData){
 		var file = this.noteFile(root, keyId);
 
 		let tempFile = file.parent.clone();
@@ -224,7 +224,7 @@ export class XNoteFile implements INoteFileProvider {
 		}
 		return false;
 	}
-	load(root: string, keyId: string): NoteData | null {
+	load(root: string, keyId: string): INoteData | null {
 		var file = this.getExistingFile(root, keyId);
 
 		if(!file){
@@ -237,7 +237,7 @@ export class XNoteFile implements INoteFileProvider {
 		fileScriptableIO.init(fileInStream);
 
 		//note.keyId = file.leafName.substring(0, file.leafName.length - 6);
-		const note = new NoteData();
+		const note: INoteData = {};
 		note.left = parseInt(fileScriptableIO.read(4));
 		note.top = parseInt(fileScriptableIO.read(4));
 		note.width = parseInt(fileScriptableIO.read(4));

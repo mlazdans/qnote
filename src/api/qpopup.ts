@@ -1,11 +1,10 @@
-import { IQPopupOptions } from "../modules/NotePopups.mjs";
+import { IPopupOptions } from "../modules/NotePopups.mjs";
 
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
-var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-var { BasePopup } = ChromeUtils.import("resource:///modules/ExtensionPopups.jsm");
-// var { BasePopup } = ChromeUtils.importESModule("resource:///modules/ExtensionPopups.sys.mjs");
+var { BasePopup } = ChromeUtils.importESModule("resource:///modules/ExtensionPopups.sys.mjs");
 var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
-// var { DOMLocalizator } = ChromeUtils.importESModule("resource://qnote/modules/DOMLocalizator.mjs");
+
+var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
 interface Box {
 	top: number,
@@ -152,13 +151,13 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					return popupManager.get(id).options;
 					// popup.popupInfo.focused = popup.isFocused;
 				},
-				async update(options: IQPopupOptions){
-					let popup = popupManager.get(options.id);
+				async update(id: number, options: IPopupOptions){
+					let popup = popupManager.get(id);
 
 					let pi = popup.options;
 
 					// options come in null-ed
-					let { top, left, title, focused, offsetTop, offsetLeft } = options;
+					let { top, left, focused, offsetTop, offsetLeft } = options;
 
 					if(top !== null || left !== null){
 						pi.top = coalesce(top, pi.top);
@@ -200,22 +199,14 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					// 	return popup.id;
 					// });
 				},
-				async create(windowId: number, options: IQPopupOptions){
+				async create(windowId: number, options: IPopupOptions) {
 					QDEB&&console.debug("qpopup.create()");
 
 					var popup = new QNotePopup(id2RealWindow(windowId), extension, options);
 
 					PopupEventDispatcher.fireListeners("oncreated", popup.options);
-					// browser.runtime.onConnect.addListener(function(connection){
-					// 	console.log("New qpopup connection: ", connection);
-					// });
 
-					// return popup.pop().then(status => {
-					// 	// popup.options.top = popup.panel.screenY;
-					// 	// popup.options.left = popup.panel.screenX;
-
-					// 	return popup.id;
-					// });
+					return popup.id;
 				}
 			}
 		}
@@ -226,9 +217,9 @@ class QNotePopup extends BasePopup {
 	id: number;
 	onClose: Function | undefined;
 	isShown = false;
-	options: IQPopupOptions;
+	options: IPopupOptions;
 
-	constructor(window: MozWindow, extension: any, options: IQPopupOptions) {
+	constructor(window: MozWindow, extension: any, options: IPopupOptions) {
 		// const extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
 		let document = window.document;
@@ -238,7 +229,7 @@ class QNotePopup extends BasePopup {
 			throw new Error("mainPopupSet not found");
 		}
 
-		let id = (++popupManager.counter);
+		const id = (++popupManager.counter);
 
 		const panel = document.createXULElement("panel");
 		panel.setAttribute("id", "qnote-window-panel-" + id);
@@ -262,14 +253,12 @@ class QNotePopup extends BasePopup {
 
 		mainPopupSet.appendChild(panel);
 
-		let url = "html/qpopup.html?id=" + id;
-		if(options.width)url += "&width=" + options.width;
-		if(options.height)url += "&height=" + options.height;
+		const url = "html/qpopup.html?id=" + id;
 
-		let popupURL = extension.getURL(url);
-		let browserStyle = false;
-		let fixedWidth = false;
-		let blockParser = false;
+		const popupURL = extension.getURL(url);
+		const browserStyle = false;
+		const fixedWidth = false;
+		const blockParser = false;
 
 		super(extension, panel, popupURL, browserStyle, fixedWidth, blockParser);
 
@@ -281,9 +270,7 @@ class QNotePopup extends BasePopup {
 		// });
 
 		this.id = id;
-		this.popupURL = popupURL;
 		this.options = options;
-		this.window = window;
 		popupManager.add(this);
 	}
 
@@ -326,17 +313,17 @@ class QNotePopup extends BasePopup {
 
 	// box = { top, left, width, height }
 	_center(innerBox: Box, outerBox: Box, absolute = true){
-		let retBox: Box = {
+		const retBox: Box = {
 			top: 0,
 			left: 0,
 			width: 0,
 			height: 0,
 		};
 
-		let iWidth = innerBox.width;
-		let iHeight = innerBox.height;
-		let oWidth = outerBox.width;
-		let oHeight = outerBox.height;
+		const iWidth = innerBox.width;
+		const iHeight = innerBox.height;
+		const oWidth = outerBox.width;
+		const oHeight = outerBox.height;
 
 		retBox.left = Math.round((oWidth - iWidth) / 2);
 		retBox.top = Math.round((oHeight - iHeight) / 2);
@@ -351,11 +338,11 @@ class QNotePopup extends BasePopup {
 
 	pop(){
 		QDEB&&console.debug("qpopup.pop()", this.options);
-		let { left, top, width, height, anchor, anchorPlacement } = this.options;
-		let window = this.window;
+		const { left, top, width, height, anchor, anchorPlacement } = this.options;
+		const window = this.window;
 
 		return new Promise(resolve => {
-			let elements = {
+			const elements = {
 				window: "",
 				threadpane: "threadContentArea",
 				message: "messagepane",

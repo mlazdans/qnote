@@ -4,11 +4,6 @@
 		"id": "QPopupOptions",
 		"type": "object",
 		"properties": {
-			"id": {
-				"type": "integer",
-				"description": "Unique popup id",
-				"minimum": 0
-			},
 			"focused": {
 				"type": "boolean",
 				"optional": true
@@ -92,6 +87,10 @@
 		"type": "function",
 		"async": "callback",
 		"parameters": [{
+			"name": "id",
+			"type": "integer",
+			"minimum": 1
+		},{
 			"name": "options",
 			"$ref": "QPopupOptions"
 		}]

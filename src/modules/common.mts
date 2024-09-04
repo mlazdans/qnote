@@ -1,9 +1,9 @@
 // This code should run everywhere: background, content, experiments
 // TODO: remove functions with side effects
 
-import { NoteData } from './Note.mjs';
 import { IPreferences, IQAppPreferences } from './api.mjs';
 import * as luxon from "../modules/luxon.mjs";
+import { INoteData } from './Note.mjs';
 
 export class NoKeyIdError extends Error {};
 export class NoMessageError extends Error {};
@@ -207,7 +207,7 @@ export async function focusMessagePane(windowId: number){
 // 	});
 // }
 
-async function addToClipboard(note: NoteData){
+async function addToClipboard(note: INoteData){
 	await browser.qnote.copyToClipboard(note);
 }
 
@@ -240,7 +240,7 @@ function ts2jsdate(ts?: Date | number): Date {
 	return ts === undefined ? new Date() : new Date(ts)
 }
 
-function dateFormatWithPrefs(prefs: IPreferences, ts?: Date | number): string {
+export function dateFormatWithPrefs(prefs: IPreferences, ts?: Date | number): string {
 	const dt = luxon.DateTime.fromJSDate(ts2jsdate(ts)).setLocale(prefs.dateLocale)
 	if(prefs.dateFormatPredefined){
 		return dt.toLocaleString(prefs.dateFormatPredefined);

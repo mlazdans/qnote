@@ -61,6 +61,7 @@ type ExtensionUtilsPath        = "resource://gre/modules/ExtensionUtils.jsm";
 type IteratorUtilsPath         = "resource:///modules/iteratorUtils.jsm";
 type MailServicesPath          = "resource:///modules/MailServices.jsm";
 type ExtensionPopupsPath       = "resource:///modules/ExtensionPopups.jsm";
+type ExtensionPopupsESPath     = "resource:///modules/ExtensionPopups.sys.mjs";
 
 type QEventDispatcherPath      = "resource://qnote/modules/QEventDispatcher.mjs";
 type DOMLocalizatorPath        = "resource://qnote/modules/DOMLocalizator.mjs"
@@ -101,7 +102,7 @@ interface QNoteFiltersExports {
 }
 
 interface NoteDataExports {
-	NoteData: typeof import("../modules/Note.mts").NoteData;
+	INoteData: import("../modules/Note.mts").INoteData;
 }
 
 interface ExpApiExports {
@@ -229,7 +230,7 @@ declare namespace Components
 		public static import(path: ExtensionUtilsPath): any;
 		public static importESModule(path: QEventDispatcherPath): QEventDispatcherExport;
 		public static importESModule(path: DOMLocalizatorPath): DOMLocalizatorExport;
-		public static importESModule(path: ExtensionPopupsPath): BasePopupExport;
+		public static importESModule(path: ExtensionPopupsESPath): BasePopupExport;
 		public static importESModule(path: QCachePath): QCacheExport;
 		public static importESModule(path: ThreadPaneColumnsPath): any;
 		public static importESModule(path: ThreadPaneColumnsOldPath): any;

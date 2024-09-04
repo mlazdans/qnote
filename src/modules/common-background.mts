@@ -1,13 +1,13 @@
 // This code should run in background and content
 import { IPreferences, IWritablePreferences, Prefs } from "./api.mjs";
 import { getPropertyType, convertPrefsToQAppPrefs, setProperty } from "./common.mjs";
-import { NoteData, QNoteFolder, QNoteLocalStorage, XNoteFolder } from "./Note.mjs";
+import { INoteData, QNoteFolder, QNoteLocalStorage, XNoteFolder } from "./Note.mjs";
 
 let QDEB = true;
 const debugHandle = "[qnote:common-background]";
 const _ = browser.i18n.getMessage;
 
-export type NoteDataMap = Map<string, NoteData>
+export type NoteDataMap = Map<string, INoteData>
 export interface ExportStats {
 	errored: number
 	existing: number
@@ -226,7 +226,7 @@ export async function updateIcons(on: boolean, tabId?: number){
 	});
 }
 
-export async function mpUpdateForNote(keyId: string, note: NoteData | null){
+export async function mpUpdateForNote(keyId: string, note: INoteData | null){
 	// Marks icons active
 	updateIcons(!!note);
 

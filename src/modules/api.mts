@@ -1,13 +1,13 @@
 import * as luxon from "../modules/luxon.mjs";
-import { IQPopupOptions, IQPopupOptionsPartial } from "./NotePopups.mjs";
+import { IPopupOptions } from "./NotePopups.mjs";
 
 export interface IQPopupAPI {
 	setDebug(on: boolean): Promise<void>
 	remove(id: number): Promise<void>
-	get(id: number): Promise<IQPopupOptions>
+	get(id: number): Promise<IPopupOptions>
 	pop(id: number): Promise<void>
-	create(windowsId: number, options: IQPopupOptions | IQPopupOptionsPartial): Promise<void>
-	update(options: IQPopupOptions | IQPopupOptionsPartial): Promise<IQPopupOptions>
+	create(windowsId: number, options: IPopupOptions): Promise<number>
+	update(id: number, options: IPopupOptions): Promise<IPopupOptions>
 	onRemoved: WebExtEvent<(id: number) => void>
 }
 
