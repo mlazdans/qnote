@@ -501,6 +501,7 @@ function generatePosGrid(){
 			anchorPlacement.value = cell.dataset["value"];
 		}
 		saveOption("anchorPlacement");
+		gridPosChange();
 	}));
 }
 
