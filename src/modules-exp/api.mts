@@ -52,8 +52,6 @@ export interface ILegacyAPI {
 
 // TODO: test
 function Transferable(source: any) {
-	// const nsTransferable = Components.Constructor("@mozilla.org/widget/transferable;1","nsITransferable");
-	// let res = nsTransferable();
 	const res = Cc["@mozilla.org/widget/transferable;1"].createInstance(Ci.nsITransferable);
 
 	if ("init" in res) {
@@ -108,19 +106,19 @@ function gen<T1 extends INoteFileProvider>(provider: T1): INoteFileAPI<T1> {
 export const QNoteFileAPI: IQNoteFileAPI = {
 	...gen(new QNoteFile()),
 	async copyToClipboard(note: NoteData): Promise<boolean> {
-		let txtWrapper = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
+		const txtWrapper = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
 		txtWrapper.data = note.text;
 
-		let noteWrapper = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
+		const noteWrapper = Cc["@mozilla.org/supports-string;1"].createInstance(Ci.nsISupportsString);
 		try {
 			noteWrapper.data = JSON.stringify(note);
 		} catch {
 			noteWrapper.data = JSON.stringify({});
 		}
 
-		let w = Services.wm.getMostRecentWindow("mail:3pane");
-		let clipBoard = Services.clipboard;
-		let transferable = Transferable(w);
+		const w = Services.wm.getMostRecentWindow("mail:3pane");
+		const clipBoard = Services.clipboard;
+		const transferable = Transferable(w);
 
 		transferable.addDataFlavor("text/qnote");
 		transferable.addDataFlavor("text/unicode");
@@ -134,11 +132,11 @@ export const QNoteFileAPI: IQNoteFileAPI = {
 	},
 
 	async getFromClipboard(): Promise<NoteData | null> {
-		let w = Services.wm.getMostRecentWindow("mail:3pane");
-		let clipBoard = Services.clipboard;
-		let transferable = Transferable(w);
-		let flavour: AString = {};
-		let data: AString = {};
+		const w = Services.wm.getMostRecentWindow("mail:3pane");
+		const clipBoard = Services.clipboard;
+		const transferable = Transferable(w);
+		const flavour: AString = {};
+		const data: AString = {};
 
 		transferable.addDataFlavor("text/qnote");
 		transferable.addDataFlavor("text/unicode");
@@ -154,7 +152,7 @@ export const QNoteFileAPI: IQNoteFileAPI = {
 			const intf = data.value as unknown as nsISupports;
 			const contentIntf = intf.QueryInterface(Ci.nsISupportsString);
 			if(contentIntf){
-				let content = contentIntf.data;
+				const content = contentIntf.data;
 				if(flavour.value == "text/qnote"){
 					try {
 						return JSON.parse(content);
@@ -203,16 +201,16 @@ export const LegacyAPI: ILegacyAPI = {
 		return Services.vc.compare(a, b);
 	},
 	async folderPicker(initialPath: string | null): Promise<string> {
-		let fp = Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
+		const fp = Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
 
-		fp.init(Services.wm.getMostRecentWindow(null), "Select storage folder", fp.modeGetFolder);
+		fp.init(Services.wm.getMostRecentWindow(null).browsingContext, "Select storage folder", Ci.nsIFilePicker.modeGetFolder);
 		if(initialPath){
 			fp.displayDirectory = new FileUtils.File(initialPath);
 		}
 
 		return new Promise(resolve => {
 			fp.open((rv: Ci.nsIFilePicker_ResultCode) => {
-				if(rv === fp.returnOK){
+				if(rv === Ci.nsIFilePicker.returnOK){
 					resolve(fp.file.path);
 				}
 			});
@@ -227,7 +225,7 @@ export const LegacyAPI: ILegacyAPI = {
 	},
 	async isFolderReadable(path: string): Promise<boolean> {
 		try {
-			let f = new FileUtils.File(path);
+			const f = new FileUtils.File(path);
 			return f.isReadable() && f.isDirectory();
 		} catch {
 			return false;
@@ -235,7 +233,7 @@ export const LegacyAPI: ILegacyAPI = {
 	},
 	async isFolderWritable(path: string): Promise<boolean> {
 		try {
-			let f = new FileUtils.File(path);
+			const f = new FileUtils.File(path);
 			return f.isWritable() && f.isDirectory();
 		} catch {
 			return false;
