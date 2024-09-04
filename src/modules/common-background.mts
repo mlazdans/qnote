@@ -1,6 +1,6 @@
 // This code should run in background and content
 import { IPreferences, IWritablePreferences, Prefs } from "./api.mjs";
-import { getPropertyType, prefsToQAppPrefs, setProperty } from "./common.mjs";
+import { getPropertyType, convertPrefsToQAppPrefs, setProperty } from "./common.mjs";
 import { NoteData, QNoteFolder, QNoteLocalStorage, XNoteFolder } from "./Note.mjs";
 
 let QDEB = true;
@@ -308,7 +308,7 @@ export async function getCurrentTabIdAnd(): Promise<number> {
 
 // We call this after options has been changed
 export async function sendPrefsToQApp(prefs: IPreferences){
-	browser.qapp.setPrefs(prefsToQAppPrefs(prefs));
+	browser.qapp.setPrefs(convertPrefsToQAppPrefs(prefs));
 }
 
 export async function savePrefs(p: Partial<IPreferences>) {

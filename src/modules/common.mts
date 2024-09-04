@@ -416,7 +416,7 @@ export function isTypeRadio(node: Element): node is HTMLInputRadioElement {
 	return isInputElement(node) && (node.type.toUpperCase() == "RADIO");
 }
 
-export function prefsToQAppPrefs(prefs: IPreferences): IQAppPreferences {
+export function convertPrefsToQAppPrefs(prefs: IPreferences): IQAppPreferences {
 	return {
 		storageOption: prefs.storageOption,
 		storageFolder: prefs.storageFolder,
