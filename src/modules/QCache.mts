@@ -40,7 +40,6 @@ export class QCache {
 				this.provider(id).then((data: NoteData) => {
 					this.set(id, data);
 					if(listener){
-						console.log("call listener", id, data);
 						listener(id, data);
 					}
 				}).finally(() => this.blocker.delete(id));

@@ -368,7 +368,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 				}).api(),
 				// TODO: pass windowId
 				async init(prefs: IQAppPreferences){
-					QDEB&&console.debug("qapp.init()", prefs);
+					QDEB&&console.debug("qapp.init()");
 					this.setPrefs(prefs);
 
 					// Remove old style sheet in case it still lay around, for example, after update
