@@ -245,7 +245,7 @@ export function dateFormatWithPrefs(prefs: IPreferences, ts?: Date | number): st
 	if(prefs.dateFormatPredefined){
 		return dt.toLocaleString(prefs.dateFormatPredefined);
 	} else if(prefs.dateFormat) {
-		return dt.toFormat(php2luxonFortmat(prefs.dateFormat, dt));
+		return php2luxon(prefs.dateFormat, dt);
 	} else {
 		return dt.toLocaleString(luxon.DateTime.DATETIME_FULL_WITH_SECONDS);
 	}
@@ -294,12 +294,12 @@ export function dateFormatWithPrefs(prefs: IPreferences, ts?: Date | number): st
 // (s)	Seconds with leading zeros	00 through 59
 // u	Microseconds (added in PHP 5.2.2). Note that date() will always generate 000000 since it takes an int parameter, whereas DateTime::format() does support microseconds if DateTime was created with microseconds.	Example: 654321
 // (v)	Milliseconds (added in PHP 7.0.0). Same note applies as for u.	Example: 654
-export function php2luxonFortmat(format: string, dt: luxon.DateTime): string {
+export function php2luxon(format: string, dt: luxon.DateTime): string {
 	function pad(o: any, l: number, c: string){
 		return o.toString().padStart(l, c);
 	}
 
-	type ConvertMap = Map<string, string | Function>
+	type ConvertMap = Map<string, string>
 
 	const Con: ConvertMap = new Map(Object.entries({
 		d: pad(dt.day, 2, "0"),
@@ -337,18 +337,14 @@ export function php2luxonFortmat(format: string, dt: luxon.DateTime): string {
 	}));
 
 	let conStr = '';
-	format.split('').forEach(c => {
+	for(const c of format.split('')){
 		const entry = Con.get(c);
 		if(entry){
-			if(typeof entry === "function"){
-				conStr += entry()
-			} else {
-				conStr += entry
-			}
+			conStr += entry
 		} else {
 			conStr += c;
 		}
-	});
+	}
 
 	return conStr;
 }
