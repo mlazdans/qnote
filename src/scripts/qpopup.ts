@@ -6,6 +6,34 @@ let QDEB = true;
 
 QDEB&&console.debug("qpopup(content) new QPopup: ");
 
+// NOTE: keep this code around for now
+// let queuedUpdates: IPopupOptions = {};
+// let updateActivityTs = Date.now();
+// let timerId: number | undefined;
+
+// async function qpopupUpdate(): Promise<void> {
+// 	const diffTs = Date.now() - updateActivityTs;
+
+// 	console.log("updateActivityTs", diffTs);
+
+// 	if(diffTs > 500){
+// 		console.log("finally sending updates!");
+// 		await browser.qpopup.update(id, queuedUpdates);
+// 		timerId = undefined;
+// 	} else {
+// 		timerId = setTimeout(qpopupUpdate, 200);
+// 	}
+// }
+
+// function qpopupUpdateLazy(updates?: IPopupOptions): void {
+// 	updateActivityTs = Date.now();
+// 	Object.assign(queuedUpdates, updates);
+
+// 	if(!timerId){
+// 		timerId = setTimeout(qpopupUpdate, 500);
+// 	}
+// }
+
 const urlParams = new URLSearchParams(window.location.search);
 const idParam = urlParams.get("id");
 // const width = parseInt(urlParams.get("width") ?? "320");
@@ -87,13 +115,16 @@ function resizeNote(w: number, h: number){
 		maxHeight: 500
 	};
 
-	w = w > rectLimit.maxWidth ? rectLimit.maxWidth : w;
-	w = w < rectLimit.minWidth ? rectLimit.minWidth : w;
+	let width, height;
 
-	h = h > rectLimit.maxHeight ? rectLimit.maxHeight : h;
-	h = h < rectLimit.minHeight ? rectLimit.minHeight : h;
+	width = w > rectLimit.maxWidth ? rectLimit.maxWidth : w;
+	width = w < rectLimit.minWidth ? rectLimit.minWidth : w;
+
+	height = h > rectLimit.maxHeight ? rectLimit.maxHeight : h;
+	height = h < rectLimit.minHeight ? rectLimit.minHeight : h;
 
 	if(popupEl){
+		browser.qpopup.update(id, { width, height });
 		popupEl.style.width = w + 'px';
 		popupEl.style.height = h + 'px';
 	} else {
@@ -122,9 +153,9 @@ function popup(){
 	// 	sfocus(() => YTextE.focus());
 	// });
 
-	YTextE.addEventListener("keyup", () => browser.qpopup.update(id, {
-		text: YTextE.value
-	}));
+	YTextE.addEventListener("keyup", () => {
+		browser.qpopup.update(id, { text: YTextE.value });
+	});
 
 	let tDrag = (mouse: MouseEvent) => {
 		if(mouse.target === null){
@@ -162,10 +193,6 @@ function popup(){
 			const offsetLeft = e.clientX - mouse.clientX;
 
 			browser.qpopup.update(id, { offsetTop, offsetLeft });
-			// browser.qpopup.update(updateOpts).then(pi => {
-			// 	if(Note && pi.top)Note.top = pi.top;
-			// 	if(Note && pi.left)Note.left = pi.left;
-			// });
 		};
 
 		let handleDragEnd = () => {
