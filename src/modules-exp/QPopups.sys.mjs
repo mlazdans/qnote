@@ -21,7 +21,7 @@ const POPUP_LOAD_TIMEOUT_MS = 200;
 
 const REMOTE_PANEL_ID = "webextension-remote-preload-panel";
 
-export class QBasePopup {
+export class BasePopup {
   constructor(
     extension,
     viewNode,
@@ -58,11 +58,11 @@ export class QBasePopup {
     });
     this.browserReady = this.createBrowser(viewNode, popupURL);
 
-    QBasePopup.instances.get(this.window).set(extension, this);
+    BasePopup.instances.get(this.window).set(extension, this);
   }
 
   static for(extension, window) {
-    return QBasePopup.instances.get(window).get(extension);
+    return BasePopup.instances.get(window).get(extension);
   }
 
   close() {
@@ -79,7 +79,7 @@ export class QBasePopup {
     // Ignore unhandled rejections if the "attach" method is not called.
     this.browserLoaded.catch(() => {});
 
-    QBasePopup.instances.get(this.window).delete(this.extension);
+    BasePopup.instances.get(this.window).delete(this.extension);
 
     return this.browserReady.then(() => {
       if (this.browser) {
@@ -234,7 +234,7 @@ export class QBasePopup {
     browser.setAttribute("selectmenulist", "ContentSelectDropdown");
     browser.setAttribute("constrainpopups", "false");
     browser.setAttribute("datetimepicker", "DateTimePickerPanel");
-    // browser.setAttribute("autoscroll", "false");
+    // browser.setAttribute("autoscroll", "true");
     // browser.setAttribute("disablesecurity", "true");
 
     // Ensure the browser will initially load in the same group as other
@@ -399,4 +399,4 @@ export class QBasePopup {
  *
  * WeakMap[window -> WeakMap[Extension -> BasePopup]]
  */
-QBasePopup.instances = new DefaultWeakMap(() => new WeakMap());
+BasePopup.instances = new DefaultWeakMap(() => new WeakMap());

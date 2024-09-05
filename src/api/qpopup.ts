@@ -2,7 +2,7 @@ import { IPopupOptions } from "../modules/NotePopups.mjs";
 
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var { BasePopup } = ChromeUtils.importESModule("resource:///modules/ExtensionPopups.sys.mjs");
-// var { QBasePopup } = ChromeUtils.importESModule("resource://qnote/modules-exp/QPopups.sys.mjs");
+// var { BasePopup } = ChromeUtils.importESModule("resource://qnote/modules-exp/QPopups.sys.mjs");
 var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
 
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
@@ -238,7 +238,7 @@ class QNotePopup extends BasePopup {
 		panel.setAttribute("noautofocus", "true");
 		panel.setAttribute("class", "mail-extension-panel panel-no-padding browser-extension-panel");
 		panel.setAttribute("type", "arrow");
-		panel.setAttribute("role", "group");
+		// panel.setAttribute("role", "group");
 
 		// window.addEventListener("click", () => {
 		// 	console.error("click from api");
