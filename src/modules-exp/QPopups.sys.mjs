@@ -234,6 +234,8 @@ export class QBasePopup {
     browser.setAttribute("selectmenulist", "ContentSelectDropdown");
     browser.setAttribute("constrainpopups", "false");
     browser.setAttribute("datetimepicker", "DateTimePickerPanel");
+    // browser.setAttribute("autoscroll", "false");
+    // browser.setAttribute("disablesecurity", "true");
 
     // Ensure the browser will initially load in the same group as other
     // browsers from the same extension.
@@ -258,6 +260,8 @@ export class QBasePopup {
     // height attributes to the panel, breaking our resize code, if the browser
     // starts out smaller than 30px by 10px. This isn't an issue now, but it
     // will be if and when we popup debugging.
+
+    // Object.freeze(browser);
 
     this.browser = browser;
     this.stack = stack;
