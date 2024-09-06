@@ -136,6 +136,9 @@
 			"name": "id",
 			"type": "integer"
 		},{
+			"name": "reason",
+			"type": "string"
+		},{
 			"name": "options",
 			"$ref": "QPopupOptions",
 			"description": "Details of the popup that was removed."

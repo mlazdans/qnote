@@ -6,7 +6,7 @@ import { QEventDispatcher } from './QEventDispatcher.mjs';
 export interface INotePopup {
 	keyId: string;
 	windowId: number;
-	popupHandle: number;
+	handle: number;
 	note: INote;
 	flags: number | undefined;
 	focus(): Promise<void>
@@ -32,7 +32,7 @@ export interface IPopupOptions {
 }
 
 interface NoteListenerArgs {
-	close: (id: number, reason: string) => void
+	close: (handle: number, reason: string, note: INoteData) => void
 }
 
 class NoteEventDispatcher extends QEventDispatcher<NoteListenerArgs> {
@@ -44,15 +44,15 @@ class NoteEventDispatcher extends QEventDispatcher<NoteListenerArgs> {
 export abstract class DefaultNotePopup extends NoteEventDispatcher implements INotePopup {
 	keyId: string
 	windowId: number
-	popupHandle: number
+	handle: number
 	note: INote;
 	flags: number | undefined;
 
-	constructor(keyId: string, windowId: number, popupHandle: number, note: INote) {
+	constructor(keyId: string, windowId: number, handle: number, note: INote) {
 		super()
 		this.keyId = keyId
 		this.windowId = windowId
-		this.popupHandle = popupHandle
+		this.handle = handle
 		this.note = note;
 
 		// this.ed.addListener("close", (id: number)=>{});
@@ -297,23 +297,45 @@ export function note2QPopupOptions(note: INote, prefs: IPreferences): IPopupOpti
 	return opt;
 }
 
+export function QPopupOptions2note(state: IPopupOptions): INoteData {
+	return {
+		text: state.text,
+		left: state.left,
+		top: state.top,
+		width: state.width,
+		height: state.width,
+	}
+}
+
 // Wrapper around qpopup API
 export class QNotePopup extends DefaultNotePopup {
 	prefs: IPreferences;
-	private id: number; // if from qpopup API
 
-	// Use create()
-	private constructor(id: number, keyId: string, windowId: number, popupHandle: number, note: INote, prefs: IPreferences) {
-		super(keyId, windowId, popupHandle, note);
-		this.popupHandle = popupHandle
+	private id: number; // id from qpopup.api
+
+	// Use create() to instantiate object
+	private constructor(id: number, keyId: string, windowId: number, handle: number, note: INote, prefs: IPreferences) {
+		super(keyId, windowId, handle, note);
+		this.handle = handle
 		this.prefs = prefs
 		this.id = id
+		browser.qpopup.onClosed.addListener((id: number, reason: string, state: IPopupOptions) => {
+			if(id == this.id){
+				console.log("browser.qpopup.onClosed", id, reason, state);
+				this.fireListeners("close", this.handle, reason, QPopupOptions2note(state));
+			}
+		});
 	}
 
-	static async create(keyId: string, windowId: number, popupHandle: number, note: INote, prefs: IPreferences): Promise<QNotePopup> {
+	static init(debugOn: boolean){
+		browser.qpopup.setDebug(debugOn);
+	}
+
+	static async create(keyId: string, windowId: number, handle: number, note: INote, prefs: IPreferences): Promise<QNotePopup> {
 		return browser.qpopup.create(windowId, note2QPopupOptions(note, prefs)).then(id => {
 			console.log(`created qpopup ${id}`);
-			return new QNotePopup(id, keyId, windowId, popupHandle, note, prefs);
+
+			return new QNotePopup(id, keyId, windowId, handle, note, prefs);
 		});
 	}
 

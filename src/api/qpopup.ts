@@ -16,7 +16,7 @@ interface Box {
 }
 
 interface IQPopupListeners {
-	onclose: (id: number, reason: string) => void;
+	onclose: (id: number, reason: string, state: IPopupOptions) => void;
 }
 
 // TODO: merge with IQPopupListener
@@ -90,8 +90,8 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					context,
 					name: "qpopup.onRemoved",
 					register: (fire: ExtensionParentFire) => {
-						const l = (id: number, reason: string) => {
-							fire.async(id, reason);
+						const l = (id: number, reason: string, state: IPopupOptions) => {
+							fire.async(id, reason, state);
 						};
 
 						PopupEventDispatcher.addListener("onclose", l);
@@ -229,7 +229,7 @@ class QPopup extends BasePopup {
 	destroy(reason?: string) {
 		super.destroy();
 		popupManager.remove(this.id);
-		PopupEventDispatcher.fireListeners("onclose", this.id, reason ?? "");
+		PopupEventDispatcher.fireListeners("onclose", this.id, reason ?? "", this.state);
 	}
 
 	moveTo(x: number, y: number) {

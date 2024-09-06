@@ -8,7 +8,7 @@ export interface IQPopupAPI {
 	pop(id: number): Promise<void>
 	create(windowsId: number, options: IPopupOptions): Promise<number>
 	update(id: number, options: IPopupOptions): Promise<IPopupOptions>
-	onClosed: WebExtEvent<(id: number, state: IPopupOptions) => void>
+	onClosed: WebExtEvent<(id: number, reason: string, state: IPopupOptions) => void>
 }
 
 export type PopupAnchor          = "window" | "threadpane" | "message";
