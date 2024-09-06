@@ -13,6 +13,20 @@ var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
 Services.scriptloader.loadSubScript(extension.rootURI.resolve("scripts/notifyTools.js"), null, "UTF-8");
 
+interface IQAppListeners {
+	domwindowopened: (aSubject: MozWindow, aTopic: string, aData: any) => void,
+	domwindowclosed: (aSubject: MozWindow, aTopic: string, aData: any) => void,
+	keydown: (e: KeyboardEvent) => void,
+	onShutdown: () => void,
+	domcomplete: (aSubject: MozWindow, aTopic: string, aData: any, e: Event) => void,
+}
+
+class QAppEventDispatcher extends QEventDispatcher<IQAppListeners> {
+	constructor() {
+		super("domwindowopened", "domwindowclosed", "keydown", "onShutdown", "domcomplete");
+	}
+}
+
 class QApp extends ExtensionCommon.ExtensionAPI {
 	noteGrabber
 	EventDispatcher
@@ -53,7 +67,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 		this.Prefs = null;
 
-		this.EventDispatcher = new QEventDispatcher("domwindowopened", "domwindowclosed", "keydown", "onShutdown", "domcomplete");
+		this.EventDispatcher = new QAppEventDispatcher();
 		this.KeyboardHandler = {
 			windows: new WeakSet(),
 			addTo: (w: Window) => {

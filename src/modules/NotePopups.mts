@@ -41,24 +41,31 @@ export interface IPopupOptions {
 	enableSpellChecker?: boolean
 }
 
-export abstract class DefaultNotePopup extends QEventDispatcher<string> implements INotePopup {
+interface NoteListenerArgs {
+	close: (id: number, reason: string) => void
+}
+
+class NoteEventDispatcher extends QEventDispatcher<NoteListenerArgs> {
+	constructor() {
+		super("close")
+	}
+}
+
+export abstract class DefaultNotePopup extends NoteEventDispatcher implements INotePopup {
 	keyId: string
 	windowId: number
 	popupHandle: number
 	note: INote;
-	loadedNoteData: INoteData | null = null;
-	// messageId: string | undefined;
-	// needSaveOnClose = true;
-	// shown = false;
-	// dirty = false;
 	flags: number | undefined;
 
 	constructor(keyId: string, windowId: number, popupHandle: number, note: INote) {
-		super("close", "escape", "delete")
+		super()
 		this.keyId = keyId
 		this.windowId = windowId
 		this.popupHandle = popupHandle
 		this.note = note;
+
+		// this.ed.addListener("close", (id: number)=>{});
 	}
 
 	// addListener(name: DefaultNoteWindowListener, listener: (w: NoteWindow) => void): void {

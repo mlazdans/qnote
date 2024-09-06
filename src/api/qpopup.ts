@@ -5,6 +5,7 @@ var { BasePopup } = ChromeUtils.importESModule("resource:///modules/ExtensionPop
 // var { BasePopup } = ChromeUtils.importESModule("resource://qnote/modules-exp/QPopups.sys.mjs");
 var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
 
+var QDEB = true;
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
 interface Box {
@@ -12,6 +13,17 @@ interface Box {
 	left: number,
 	width: number,
 	height: number,
+}
+
+interface IQPopupListeners {
+	onclose: (id: number, reason: string) => void
+};
+
+// TODO: merge with IQPopupListener
+class QPopupEventDispatcher extends QEventDispatcher<IQPopupListeners> {
+	constructor() {
+		super("onclose");
+	}
 }
 
 function coalesce(...args: any): any {
@@ -22,9 +34,7 @@ function coalesce(...args: any): any {
 	return null;
 }
 
-var PopupEventDispatcher = new QEventDispatcher("oncreated", "onremoved", "onmove", "onresize");
-
-var QDEB = true;
+const PopupEventDispatcher = new QPopupEventDispatcher;
 
 var popupManager = {
 	counter: 0,

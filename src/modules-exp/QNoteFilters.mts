@@ -10,6 +10,16 @@ var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionPa
 var { ThreadPaneColumns } = ChromeUtils.importESModule("chrome://messenger/content/ThreadPaneColumns.mjs");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
+interface IQFilterListeners {
+	uninstall: () => void,
+}
+
+class QFiltersEventDispatcher extends QEventDispatcher<IQFilterListeners> {
+	constructor() {
+		super("uninstall");
+	}
+}
+
 // Current problems:
 // 1) match() does not expect promises
 // 2) we can addCustomTerm() but can not remove it
@@ -22,7 +32,7 @@ export class QNoteFilter
 
 	constructor(storageFolder?: string) {
 		this.storageFolder = storageFolder;
-		this.ed = new QEventDispatcher("uninstall");
+		this.ed = new QFiltersEventDispatcher();
 		// this.Services = globalThis.Services || ChromeUtils.import("resource://gre/modules/Services.jsm").Services;
 		// this.QuickFilterManager = QuickFilterManager;
 
