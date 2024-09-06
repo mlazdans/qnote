@@ -3,25 +3,15 @@ import { dateFormatWithPrefs } from './common.mjs';
 import { INote, INoteData } from './Note.mjs';
 import { QEventDispatcher } from './QEventDispatcher.mjs';
 
-type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>
-
 export interface INotePopup {
 	keyId: string;
 	windowId: number;
 	popupHandle: number;
 	note: INote;
 	flags: number | undefined;
-	// loadedNoteData: NoteData | undefined;
-	// messageId: string | undefined;
-	// needSaveOnClose: boolean;
-	// shown: boolean;
-	// dirty: boolean;
-	// constructor(windowId: number);
-	// update(note: NoteData): Promise<void>
 	focus(): Promise<void>
 	isFocused(): Promise<boolean>
 	pop(): Promise<void>
-	// close(): Promise<void>
 }
 
 export interface IPopupOptions {
@@ -95,16 +85,16 @@ export abstract class DefaultNotePopup extends NoteEventDispatcher implements IN
 	// 	// this.shown = false;
 	// }
 
-	get isModified(): boolean {
-		if(this.note){
-			const n1 = this.loadedNoteData;
-			const n2 = this.note;
-			if(n1 && n2 && n2.data){
-				return !this.isEqual(n1, n2.data);
-			}
-		}
-		return false;
-	}
+	// get isModified(): boolean {
+	// 	if(this.note){
+	// 		const n1 = this.loadedNoteData;
+	// 		const n2 = this.note;
+	// 		if(n1 && n2 && n2.data){
+	// 			return !this.isEqual(n1, n2.data);
+	// 		}
+	// 	}
+	// 	return false;
+	// }
 
 	// async reset(){
 	// 	if(!this.note){
@@ -307,22 +297,23 @@ export function note2QPopupOptions(note: INote, prefs: IPreferences): IPopupOpti
 	return opt;
 }
 
+// Wrapper around qpopup API
 export class QNotePopup extends DefaultNotePopup {
 	prefs: IPreferences;
-	private qpopupHandle: number
+	private id: number; // if from qpopup API
 
 	// Use create()
-	private constructor(qpopupHandle: number, keyId: string, windowId: number, popupHandle: number, note: INote, prefs: IPreferences) {
+	private constructor(id: number, keyId: string, windowId: number, popupHandle: number, note: INote, prefs: IPreferences) {
 		super(keyId, windowId, popupHandle, note);
 		this.popupHandle = popupHandle
 		this.prefs = prefs
-		this.qpopupHandle = qpopupHandle
+		this.id = id
 	}
 
 	static async create(keyId: string, windowId: number, popupHandle: number, note: INote, prefs: IPreferences): Promise<QNotePopup> {
-		return browser.qpopup.create(windowId, note2QPopupOptions(note, prefs)).then(qpopupHandle => {
-			console.log(`created qpopup ${qpopupHandle}`);
-			return new QNotePopup(qpopupHandle, keyId, windowId, popupHandle, note, prefs);
+		return browser.qpopup.create(windowId, note2QPopupOptions(note, prefs)).then(id => {
+			console.log(`created qpopup ${id}`);
+			return new QNotePopup(id, keyId, windowId, popupHandle, note, prefs);
 		});
 	}
 
@@ -350,15 +341,16 @@ export class QNotePopup extends DefaultNotePopup {
 	// }
 
 	async pop() {
-		browser.qpopup.pop(this.qpopupHandle).then(() => {
-			let l = (id: number) => {
-				console.log(`popped onRemoved ${this.qpopupHandle}:${id}`);
-				// super.close();
-				browser.qpopup.onRemoved.removeListener(l);
-			};
-			browser.qpopup.onRemoved.addListener(l);
-			console.log(`popped popup ${this.qpopupHandle}`);
-		});
+		return browser.qpopup.pop(this.id);
+		// browser.qpopup.pop(this.qpopupHandle).then(() => {
+		// 	let l = (id: number) => {
+		// 		console.log(`popped onRemoved ${this.qpopupHandle}:${id}`);
+		// 		// super.close();
+		// 		browser.qpopup.onRemoved.removeListener(l);
+		// 	};
+		// 	browser.qpopup.onRemoved.addListener(l);
+		// 	console.log(`popped popup ${this.qpopupHandle}`);
+		// });
 
 		// return super.pop(async opt => {
 		// 	opt = Object.assign(opt, {

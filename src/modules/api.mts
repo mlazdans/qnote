@@ -3,12 +3,12 @@ import { IPopupOptions } from "./NotePopups.mjs";
 
 export interface IQPopupAPI {
 	setDebug(on: boolean): Promise<void>
-	remove(id: number): Promise<void>
+	close(id: number, reason: "close" | "escape" | "delete"): Promise<void>
 	get(id: number): Promise<IPopupOptions>
 	pop(id: number): Promise<void>
 	create(windowsId: number, options: IPopupOptions): Promise<number>
 	update(id: number, options: IPopupOptions): Promise<IPopupOptions>
-	onRemoved: WebExtEvent<(id: number) => void>
+	onClosed: WebExtEvent<(id: number, state: IPopupOptions) => void>
 }
 
 export type PopupAnchor          = "window" | "threadpane" | "message";

@@ -12,6 +12,8 @@ export type MessageId = browser.messages.MessageId;
 export type MessageHeader = browser.messages.MessageHeader;
 export type MessagePart = browser.messages.MessagePart;
 
+export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>
+
 // Bitmask
 export const POP_NONE     = 0;
 export const POP_FOCUS    = 1;

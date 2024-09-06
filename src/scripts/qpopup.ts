@@ -140,13 +140,13 @@ function popup(){
 	// TODO: differentiate close/delete events
 	closeEl.addEventListener("click", e => {
 		// ext.CurrentNote.silentlyPersistAndClose();
-		browser.qpopup.remove(id);
+		browser.qpopup.close(id, "close");
 	});
 
 	delEl.addEventListener("click", e => {
 		// ext.CurrentNote.silentlyDeleteAndClose();
 		// ext.CurrentNote.close();
-		browser.qpopup.remove(id);
+		browser.qpopup.close(id, "delete");
 	});
 
 	// window.addEventListener("focus", () => {

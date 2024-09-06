@@ -38,8 +38,8 @@ const PopupEventDispatcher = new QPopupEventDispatcher;
 
 var popupManager = {
 	counter: 0,
-	popups: new Map<number, QNotePopup>,
-	add(popup: QNotePopup): void {
+	popups: new Map<number, QPopup>,
+	add(popup: QPopup): void {
 		QDEB&&console.debug(`qpopup.popupManager: Adding new popup with id ${popup.id}`);
 		if(this.has(popup.id)){
 			throw new Error(`qpopup: id ${popup.id} already exists`);
@@ -48,14 +48,14 @@ var popupManager = {
 		}
 	},
 	remove(id: number): boolean {
-		return this.get(id) ? this.popups.delete(id) : false;
+		return this.popups.delete(id)
 	},
-	get(id: number): QNotePopup {
-		let p = this.popups.get(id);
-		if(p){
-			return p;
+	get(id: number): QPopup {
+		if(this.popups.has(id)){
+			return this.popups.get(id)!
+		} else {
+			throw new Error(`qpopup: id ${id} not found`);
 		}
-		throw new Error(`qpopup: id ${id} not found`);
 	},
 	has(id: number): boolean {
 		return this.popups.has(id);
@@ -89,83 +89,36 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 		// ext no context?
 		return {
 			qpopup: {
-				onCreated: new ExtensionCommon.EventManager({
-					context,
-					name: "qpopup.onCreated",
-					register: (fire: ExtensionParentFire) => {
-						const l = (value: any) => {
-							fire.async(value);
-						};
-
-						PopupEventDispatcher.addListener("oncreated", l);
-
-						return () => {
-							PopupEventDispatcher.removeListener("oncreated", l);
-						};
-					}
-				}).api(),
-				onRemoved: new ExtensionCommon.EventManager({
+				onClosed: new ExtensionCommon.EventManager({
 					context,
 					name: "qpopup.onRemoved",
 					register: (fire: ExtensionParentFire) => {
-						const l = (value: any) => {
-							fire.async(value);
+						const l = (id: number, reason: string) => {
+							fire.async(id, reason);
 						};
 
-						PopupEventDispatcher.addListener("onremoved", l);
+						PopupEventDispatcher.addListener("onclose", l);
 
 						return () => {
-							PopupEventDispatcher.removeListener("onremoved", l);
-						};
-					}
-				}).api(),
-				onMove: new ExtensionCommon.EventManager({
-					context,
-					name: "qpopup.onMove",
-					register: (fire: ExtensionParentFire) => {
-						const l = (value: any) => {
-							fire.async(value);
-						};
-
-						PopupEventDispatcher.addListener("onmove", l);
-
-						return () => {
-							PopupEventDispatcher.removeListener("onmove", l);
-						};
-					}
-				}).api(),
-				onResize: new ExtensionCommon.EventManager({
-					context,
-					name: "qpopup.onResize",
-					register: (fire: ExtensionParentFire) => {
-						const l = (value: any) => {
-							fire.async(value);
-						};
-
-						PopupEventDispatcher.addListener("onresize", l);
-
-						return () => {
-							PopupEventDispatcher.removeListener("onresize", l);
+							PopupEventDispatcher.removeListener("onclose", l);
 						};
 					}
 				}).api(),
 				async setDebug(on: boolean){
 					QDEB = on;
 				},
-				async remove(id: number){
+				async close(id: number, reason: string){
 					QDEB&&console.debug("qpopup.remove()", id);
-					popupManager.get(id).close();
-					popupManager.remove(id);
-					PopupEventDispatcher.fireListeners("onremoved", id);
+					popupManager.get(id).destroy(reason);
 				},
 				async get(id: number){
-					return popupManager.get(id).options;
+					return popupManager.get(id).state;
 					// popup.popupInfo.focused = popup.isFocused;
 				},
 				async update(id: number, options: IPopupOptions){
 					let popup = popupManager.get(id);
 
-					let pi = popup.options;
+					let pi = popup.state;
 
 					// options come in null-ed
 					let { top, left, focused, offsetTop, offsetLeft } = options;
@@ -213,9 +166,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				async create(windowId: number, options: IPopupOptions) {
 					QDEB&&console.debug("qpopup.create()");
 
-					var popup = new QNotePopup(id2RealWindow(windowId), extension, options);
-
-					PopupEventDispatcher.fireListeners("oncreated", popup.options);
+					const popup = new QPopup(id2RealWindow(windowId), extension, options);
 
 					return popup.id;
 				}
@@ -224,13 +175,11 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 	}
 }
 
-class QNotePopup extends BasePopup {
+class QPopup extends BasePopup {
 	id: number;
-	onClose: Function | undefined;
-	isShown = false;
-	options: IPopupOptions;
+	state: IPopupOptions;
 
-	constructor(window: MozWindow, extension: any, options: IPopupOptions) {
+	constructor(window: MozWindow, extension: any, state: IPopupOptions) {
 		// const extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
 		let document = window.document;
@@ -273,16 +222,17 @@ class QNotePopup extends BasePopup {
 
 		super(extension, panel, popupURL, browserStyle, fixedWidth, blockParser);
 
-		// TODO: experiment
-		// panel.addEventListener("popupshowing", () => {
-		// 	// const titleEl = document.querySelector(".qpopup-title") as HTMLElement;
-		// 	// console.error("popupshowing from api", panel);
-		// 	// console.error("shadowRoot", panel.shadowRoot);
-		// });
-
 		this.id = id;
-		this.options = options;
+		this.state = state;
+
 		popupManager.add(this);
+	}
+
+	/** @override */
+	destroy(reason?: string) {
+		super.destroy();
+		popupManager.remove(this.id);
+		PopupEventDispatcher.fireListeners("onclose", this.id, reason ?? "");
 	}
 
 	moveTo(x: number, y: number){
@@ -306,20 +256,6 @@ class QNotePopup extends BasePopup {
 
 	// TODO: fix
 	focus(){
-	}
-
-	close() {
-		this.destroy();
-
-		if(this.panel){
-			this.panel.remove();
-		}
-
-		if(this.onClose){
-			this.onClose();
-		}
-
-		this.isShown = false;
 	}
 
 	// box = { top, left, width, height }
@@ -348,8 +284,8 @@ class QNotePopup extends BasePopup {
 	}
 
 	pop(){
-		QDEB&&console.debug("qpopup.pop()", this.options);
-		const { left, top, width, height, anchor, anchorPlacement } = this.options;
+		QDEB&&console.debug("qpopup.pop()", this.state);
+		const { left, top, width, height, anchor, anchorPlacement } = this.state;
 		const window = this.window;
 
 		return new Promise(resolve => {
@@ -404,8 +340,6 @@ class QNotePopup extends BasePopup {
 				this.panel.openPopup(null, "after_start");
 				this.panel.moveTo(left, top);
 			}
-
-			this.isShown = true;
 
 			resolve(true);
 		});
