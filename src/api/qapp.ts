@@ -392,7 +392,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 					let w = Services.wm.getMostRecentWindow("mail:3pane");
 
-					if(ThreadPaneColumns){
+					if(ThreadPaneColumns && ThreadPaneColumns.getColumn('qnote') === null){
 						const icon = {
 							id: "qnote_exists",
 							url: extension.baseURI.resolve("resource://qnote/images/icon-column.png"),
@@ -428,6 +428,8 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 								return note ? "qnote_exists" : "qnote_off";
 							}
 						});
+					} else {
+						QDEB&&console.log("ThreadPaneColumn already exists");
 					}
 
 					API.installKeyboardHandler(w);
