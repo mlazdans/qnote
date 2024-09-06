@@ -62,6 +62,7 @@ type IteratorUtilsPath         = "resource:///modules/iteratorUtils.jsm";
 type MailServicesPath          = "resource:///modules/MailServices.jsm";
 type ExtensionPopupsPath       = "resource:///modules/ExtensionPopups.jsm";
 type ExtensionPopupsESPath     = "resource:///modules/ExtensionPopups.sys.mjs";
+type QPopupsESPath             = "resource://qnote/modules-exp/QPopups.sys.mjs";
 
 type QEventDispatcherPath      = "resource://qnote/modules/QEventDispatcher.mjs";
 type DOMLocalizatorPath        = "resource://qnote/modules/DOMLocalizator.mjs"
@@ -231,6 +232,7 @@ declare namespace Components
 		public static importESModule(path: QEventDispatcherPath): QEventDispatcherExport;
 		public static importESModule(path: DOMLocalizatorPath): DOMLocalizatorExport;
 		public static importESModule(path: ExtensionPopupsESPath): BasePopupExport;
+		public static importESModule(path: QPopupsESPath): BasePopupExport;
 		public static importESModule(path: QCachePath): QCacheExport;
 		public static importESModule(path: ThreadPaneColumnsPath): any;
 		public static importESModule(path: ThreadPaneColumnsOldPath): any;
