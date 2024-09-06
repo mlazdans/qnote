@@ -9,15 +9,15 @@ var QDEB = true;
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
 interface Box {
-	top: number,
-	left: number,
-	width: number,
-	height: number,
+	top: number;
+	left: number;
+	width: number;
+	height: number;
 }
 
 interface IQPopupListeners {
-	onclose: (id: number, reason: string) => void
-};
+	onclose: (id: number, reason: string) => void;
+}
 
 // TODO: merge with IQPopupListener
 class QPopupEventDispatcher extends QEventDispatcher<IQPopupListeners> {
@@ -27,44 +27,41 @@ class QPopupEventDispatcher extends QEventDispatcher<IQPopupListeners> {
 }
 
 function coalesce(...args: any): any {
-	for(let a of args)
-		if(a !== null)
-			return a;
+	for (let a of args) if (a !== null) return a;
 
 	return null;
 }
 
-const PopupEventDispatcher = new QPopupEventDispatcher;
+const PopupEventDispatcher = new QPopupEventDispatcher();
 
 var popupManager = {
 	counter: 0,
-	popups: new Map<number, QPopup>,
+	popups: new Map<number, QPopup>(),
 	add(popup: QPopup): void {
-		QDEB&&console.debug(`qpopup.popupManager: Adding new popup with id ${popup.id}`);
-		if(this.has(popup.id)){
+		QDEB && console.debug(`qpopup.popupManager: Adding new popup with id ${popup.id}`);
+		if (this.has(popup.id)) {
 			throw new Error(`qpopup: id ${popup.id} already exists`);
 		} else {
 			this.popups.set(popup.id, popup);
 		}
 	},
 	remove(id: number): boolean {
-		return this.popups.delete(id)
+		return this.popups.delete(id);
 	},
 	get(id: number): QPopup {
-		if(this.popups.has(id)){
-			return this.popups.get(id)!
+		if (this.popups.has(id)) {
+			return this.popups.get(id)!;
 		} else {
 			throw new Error(`qpopup: id ${id} not found`);
 		}
 	},
 	has(id: number): boolean {
 		return this.popups.has(id);
-	}
-}
+	},
+};
 
 var qpopup = class extends ExtensionCommon.ExtensionAPI {
-	onShutdown() {
-	}
+	onShutdown() {}
 
 	getAPI(context: any) {
 		// this.i18n = new DOMLocalizator(id => {
@@ -102,20 +99,20 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						return () => {
 							PopupEventDispatcher.removeListener("onclose", l);
 						};
-					}
+					},
 				}).api(),
-				async setDebug(on: boolean){
+				async setDebug(on: boolean) {
 					QDEB = on;
 				},
-				async close(id: number, reason: string){
-					QDEB&&console.debug("qpopup.remove()", id);
+				async close(id: number, reason: string) {
+					QDEB && console.debug("qpopup.remove()", id);
 					popupManager.get(id).destroy(reason);
 				},
-				async get(id: number){
+				async get(id: number) {
 					return popupManager.get(id).state;
 					// popup.popupInfo.focused = popup.isFocused;
 				},
-				async update(id: number, options: IPopupOptions){
+				async update(id: number, options: IPopupOptions) {
 					let popup = popupManager.get(id);
 
 					let pi = popup.state;
@@ -123,16 +120,16 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					// options come in null-ed
 					let { top, left, focused, offsetTop, offsetLeft } = options;
 
-					if(top !== null || left !== null){
+					if (top !== null || left !== null) {
 						pi.top = coalesce(top, pi.top);
 						pi.left = coalesce(left, pi.left);
-						popup.moveTo(pi.left||0, pi.top||0);
+						popup.moveTo(pi.left || 0, pi.top || 0);
 					}
 
-					if(offsetTop !== null || offsetLeft !== null){
+					if (offsetTop !== null || offsetLeft !== null) {
 						pi.top = pi.top + coalesce(offsetTop, 0);
 						pi.left = pi.left + coalesce(offsetLeft, 0);
-						popup.moveTo(pi.left||0, pi.top||0);
+						popup.moveTo(pi.left || 0, pi.top || 0);
 					}
 
 					// TODO: broken
@@ -143,7 +140,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					// }
 
 					// MAYBE: implement lose focus too
-					if(focused){
+					if (focused) {
 						popup.focus();
 					}
 
@@ -153,7 +150,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 
 					return pi;
 				},
-				async pop(id: number){
+				async pop(id: number) {
 					return popupManager.get(id).pop();
 					// const popup = popupManager.get(id);
 					// return popup.pop().then(status => {
@@ -164,16 +161,16 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					// });
 				},
 				async create(windowId: number, options: IPopupOptions) {
-					QDEB&&console.debug("qpopup.create()");
+					QDEB && console.debug("qpopup.create()");
 
 					const popup = new QPopup(id2RealWindow(windowId), extension, options);
 
 					return popup.id;
-				}
-			}
-		}
+				},
+			},
+		};
 	}
-}
+};
 
 class QPopup extends BasePopup {
 	id: number;
@@ -185,11 +182,11 @@ class QPopup extends BasePopup {
 		let document = window.document;
 
 		let mainPopupSet = document.getElementById("mainPopupSet");
-		if(!mainPopupSet){
+		if (!mainPopupSet) {
 			throw new Error("mainPopupSet not found");
 		}
 
-		const id = (++popupManager.counter);
+		const id = ++popupManager.counter;
 
 		const panel = document.createXULElement("panel");
 		panel.setAttribute("id", "qnote-window-panel-" + id);
@@ -235,7 +232,7 @@ class QPopup extends BasePopup {
 		PopupEventDispatcher.fireListeners("onclose", this.id, reason ?? "");
 	}
 
-	moveTo(x: number, y: number){
+	moveTo(x: number, y: number) {
 		this.panel.moveTo(x, y);
 	}
 
@@ -255,11 +252,10 @@ class QPopup extends BasePopup {
 	// }
 
 	// TODO: fix
-	focus(){
-	}
+	focus() {}
 
 	// box = { top, left, width, height }
-	_center(innerBox: Box, outerBox: Box, absolute = true){
+	_center(innerBox: Box, outerBox: Box, absolute = true) {
 		const retBox: Box = {
 			top: 0,
 			left: 0,
@@ -275,7 +271,7 @@ class QPopup extends BasePopup {
 		retBox.left = Math.round((oWidth - iWidth) / 2);
 		retBox.top = Math.round((oHeight - iHeight) / 2);
 
-		if(absolute) {
+		if (absolute) {
 			retBox.left += outerBox.left;
 			retBox.top += outerBox.top;
 		}
@@ -283,55 +279,55 @@ class QPopup extends BasePopup {
 		return retBox;
 	}
 
-	pop(){
-		QDEB&&console.debug("qpopup.pop()", this.state);
+	pop() {
+		QDEB && console.debug("qpopup.pop()", this.state);
 		const { left, top, width, height, anchor, anchorPlacement } = this.state;
 		const window = this.window;
 
-		return new Promise(resolve => {
+		return new Promise((resolve) => {
 			const elements = {
 				window: "",
 				threadpane: "threadContentArea",
 				message: "messagepane",
 			};
 
-			if((left === null) && (top === null)){
+			if (left === null && top === null) {
 				let aEl: HTMLElement | null = null;
 				let adjX = 0;
 				let adjY = 0;
 
-				if(anchor && (anchor in elements)){
-					if(elements[anchor]){
+				if (anchor && anchor in elements) {
+					if (elements[anchor]) {
 						aEl = window.document.getElementById(elements[anchor]);
 					}
 				}
 
 				// Fall back to window in case referring element is not visible
-				if(!aEl || !aEl.clientWidth || !aEl.clientHeight){
+				if (!aEl || !aEl.clientWidth || !aEl.clientHeight) {
 					aEl = window.document.querySelector("#messengerWindow");
 				}
 
-				if(aEl && anchorPlacement){
-					if(anchorPlacement === 'center'){
+				if (aEl && anchorPlacement) {
+					if (anchorPlacement === "center") {
 						const wBox = {
 							top: (aEl as any).screenY, // TODO any
 							left: (aEl as any).screenX,
 							width: aEl.clientWidth,
-							height: aEl.clientHeight
+							height: aEl.clientHeight,
 						};
 						const currBox: Box = {
-							left: left||0,
-							top: top||0,
-							width: width||0,
-							height: height||0
+							left: left || 0,
+							top: top || 0,
+							width: width || 0,
+							height: height || 0,
 						};
 						const adjBox = this._center(currBox, wBox, false);
 						adjX = adjBox.left;
 						adjY = adjBox.top;
-					} else if(width && (anchorPlacement.startsWith("topcenter") || anchorPlacement.startsWith("bottomcenter"))){
-						adjX = (width / 2) * (- 1);
-					} else if(height && (anchorPlacement.startsWith("rightcenter") || anchorPlacement.startsWith("leftcenter"))){
-						adjY = (height / 2) * (- 1);
+					} else if (width && (anchorPlacement.startsWith("topcenter") || anchorPlacement.startsWith("bottomcenter"))) {
+						adjX = (width / 2) * -1;
+					} else if (height && (anchorPlacement.startsWith("rightcenter") || anchorPlacement.startsWith("leftcenter"))) {
+						adjY = (height / 2) * -1;
 					}
 				}
 				this.panel.openPopup(aEl, anchorPlacement);
