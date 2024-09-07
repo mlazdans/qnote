@@ -129,32 +129,20 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					return popupManager.get(id).state;
 					// popup.popupInfo.focused = popup.isFocused;
 				},
-				async update(id: number, options: IPopupOptions) {
+				async update(id: number, newState: IPopupOptions) {
 					let popup = popupManager.get(id);
 
-					let pi = popup.state;
+					let oldState = Object.assign({}, popup.state);
 
-					// options come in null-ed
-					let { top, left, focused, offsetTop, offsetLeft } = options;
+					// state come in null-ed
+					let { top, left, focused, offsetTop, offsetLeft } = newState;
 
-					if (top !== null || left !== null) {
-						pi.top = coalesce(top, pi.top);
-						pi.left = coalesce(left, pi.left);
-						popup.moveTo(pi.left || 0, pi.top || 0);
+					if(offsetTop !== null)newState.top = coalesce(oldState.top, 0) + coalesce(offsetTop, 0) as number;
+					if(offsetLeft !== null)newState.left = coalesce(oldState.left, 0) + coalesce(offsetLeft, 0) as number;
+
+					if (offsetTop !== null || offsetLeft !== null || top !== null || left !== null) {
+						popup.moveTo(coalesce(newState.left, 0), coalesce(newState.top, 0));
 					}
-
-					if (offsetTop !== null || offsetLeft !== null) {
-						pi.top = pi.top + coalesce(offsetTop, 0);
-						pi.left = pi.left + coalesce(offsetLeft, 0);
-						popup.moveTo(pi.left || 0, pi.top || 0);
-					}
-
-					// TODO: broken
-					// if(width !== null || height !== null){
-					// 	pi.width = coalesce(width, pi.width);
-					// 	pi.height = coalesce(height, pi.height);
-					// 	popup.sizeTo(pi.width, pi.height);
-					// }
 
 					// MAYBE: implement lose focus too
 					if (focused) {
@@ -165,7 +153,12 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					// 	popup.title = title;
 					// }
 
-					return pi;
+					const assignState: IPopupOptions = {};
+					Object.entries(newState).map(([k, v]) => {
+						if(v !== null)assignState[k as keyof IPopupOptions] = v;
+					});
+
+					return Object.assign(popup.state, assignState);
 				},
 				async pop(id: number) {
 					return popupManager.get(id).pop();
