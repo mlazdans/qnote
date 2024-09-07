@@ -63,18 +63,6 @@
 				"minimum": 0,
 				"description": ""
 			},
-			"printAttachTop": {
-				"type": "boolean",
-				"optional": true,
-				"default": false,
-				"description": ""
-			},
-			"printAttachBottom": {
-				"type": "boolean",
-				"optional": true,
-				"default": false,
-				"description": ""
-			},
 			"messageAttachTop": {
 				"type": "boolean",
 				"optional": true,

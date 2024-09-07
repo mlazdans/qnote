@@ -452,10 +452,6 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 					// API.QNoteAction = new QNoteAction({
 					// 	API: API,
 					// });
-
-					API.EventDispatcher.addListener('domwindowopened', (aSubject: MozWindow) => {
-						this.printerAttacher(aSubject);
-					});
 				},
 				async setDebug(on: boolean){
 					QDEB = on;
@@ -472,145 +468,6 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 					// } else {
 					// 	API.ColumnHandler.columnHandler.limit = Prefs.showFirstChars;
 					// }
-				},
-				async attachNoteToPrinter(w: MozWindow, note?: INoteData){
-					const fName = "qapp.attachNoteToPrinter()";
-
-					if(!API.Prefs || !(API.Prefs.printAttachTop || API.Prefs.printAttachBottom)){
-						QDEB&&console.debug(`${fName} - no prefs`);
-						return;
-					}
-
-					if(!note){
-						QDEB&&console.debug(`${fName} - no note`);
-						return;
-					}
-
-					// let w = API.id2RealWindow(windowId);
-					if(!w || !w.document){
-						QDEB&&console.debug(`${fName} - no window`);
-						return;
-					}
-
-					let body: HTMLBodyElement;
-
-					const bodyCollection = w.document.getElementsByTagName('body');
-
-					if(bodyCollection.length){
-						body = bodyCollection[0];
-					} else {
-						QDEB&&console.debug(`${fName} - no BODY`);
-						return;
-					}
-
-					QDEB&&console.debug(`${fName}`, note);
-
-					// Cleanup attached notes
-					let domNodes = w.document.getElementsByClassName('qnote-insidenote');
-					while(domNodes.length){
-						domNodes[0].remove();
-					}
-
-					if(API.Prefs.printAttachTop){
-						body.insertAdjacentHTML(
-							'afterbegin',
-							'<div class="qnote-insidenote qnote-insidenote-top" style="margin: 0; padding: 0; border: 1px solid black;">' +
-								this.applyTemplate(API.Prefs.attachTemplate, note) +
-							'</div>'
-						);
-
-						const el = document.querySelector('.qnote-insidenote-top .qnote-text-span');
-						if(el){
-							if(API.Prefs.treatTextAsHtml){
-								el.innerHTML = note.text ?? "";
-							} else {
-								el.textContent = note.text ?? "";
-							}
-						}
-					}
-
-					if(API.Prefs.printAttachBottom){
-						body.insertAdjacentHTML(
-							'beforeend',
-							'<div class="qnote-insidenote qnote-insidenote-bottom" style="margin: 0; padding: 0; border: 1px solid black;">' +
-								this.applyTemplate(API.Prefs.attachTemplate, note) +
-							'</div>'
-						);
-
-						const qnoteTextSpan = document.querySelector('.qnote-insidenote-bottom .qnote-text-span');
-						if(qnoteTextSpan){
-							const el = qnoteTextSpan as HTMLSpanElement;
-							if(API.Prefs.treatTextAsHtml){
-								el.innerHTML = note.text ?? "";
-							} else {
-								el.textContent = note.text ?? "";
-							}
-						}
-					}
-				},
-				// We need this step to grab messageUrisToPrint list
-				printerAttacher(aSubject: MozWindow) {
-					// Save list of printing urls
-					var messageUrisToPrint: Array<string>;
-					var self = this;
-
-					let printerWindowDOMListener = (e: Event) => {
-						if(!e.target){
-							return;
-						}
-
-						let document = e.target as Document;
-
-						// Not interested
-						if(
-							document.URL === 'about:blank' ||
-							!aSubject.opener ||
-							!aSubject.opener.messenger
-						){
-							return;
-						}
-
-						// If not uris to print
-						if(!(messageUrisToPrint && messageUrisToPrint.shift)){
-							return;
-						}
-
-						let messenger = aSubject.opener.messenger;
-
-						// let msg = messenger.msgHdrFromURI(messageUrisToPrint.shift());
-						let msg = messenger.msgHdrFromURI(messageUrisToPrint[0]);
-
-						// TODO: test
-						// self.attachNoteToPrinter(document.defaultView, API.noteGrabber.get(msg.messageId));
-						self.attachNoteToPrinter(aSubject, API.noteGrabber.get(msg.messageId));
-					};
-
-					let domLoadedListener = (e: Event) => {
-						let document = e.target as Document;
-
-						if(!document){
-							return;
-						}
-
-						// Level 1 filter - check if this print or print-preview window
-						if(!(document.URL.includes('chrome://messenger/content/msgPrintEngine'))){
-							return;
-						}
-
-						let pDocument = document.getElementById('content');
-						if(!pDocument){
-							return;
-						}
-
-						if(document.defaultView){
-							// @ts-ignore
-							messageUrisToPrint = document.defaultView.arguments[1];
-						}
-
-						pDocument.addEventListener("DOMContentLoaded", printerWindowDOMListener);
-					};
-
-					aSubject.addEventListener("DOMContentLoaded", domLoadedListener);
 				},
 				async messagePaneFocus(windowId: number){
 					// https://developer.thunderbird.net/add-ons/updating/tb115/adapt-to-changes-in-thunderbird-103-115
@@ -637,12 +494,6 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 				// 	API.updateView(w, keyId);
 				// },
-				applyTemplate(t: string, note: INoteData) {
-					return t
-						.replace("{{ qnote_date }}", note.tsFormatted ?? "")
-						.replace("{{ qnote_text }}", '<span class="qnote-text-span"></span>')
-					;
-				},
 				// async attachNotesToMultiMessage(windowId: number, notes: Array<NoteData>){
 				// 	// TODO: does not work with TB128
 				// 	let fName = `qapp.attachNotesToMultiMessage(${windowId})`;

@@ -419,8 +419,6 @@ export function convertPrefsToQAppPrefs(prefs: IPreferences): IQAppPreferences {
 		storageOption: prefs.storageOption,
 		storageFolder: prefs.storageFolder,
 		showFirstChars: prefs.showFirstChars,
-		printAttachTop: prefs.printAttachTop,
-		printAttachBottom: prefs.printAttachBottom,
 		messageAttachTop: prefs.messageAttachTop,
 		messageAttachBottom: prefs.messageAttachBottom,
 		attachTemplate: prefs.attachTemplate,

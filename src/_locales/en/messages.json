@@ -128,9 +128,6 @@
 	"delete": {
 		"message": "Delete"
 	},
-	"enable.print_attach": {
-		"message": "Attach to print"
-	},
 	"attach.bottom": {
 		"message": "bottom"
 	},

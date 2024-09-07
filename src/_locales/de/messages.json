@@ -128,9 +128,6 @@
 	"delete": {
 		"message": "Löschen"
 	},
-	"enable.print_attach": {
-		"message": "In der Druckausgabe"
-	},
 	"attach.bottom": {
 		"message": "unten"
 	},

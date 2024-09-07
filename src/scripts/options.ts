@@ -177,8 +177,6 @@ async function saveOption(name: keyof IPreferences){
 	// 	setPrefFromHtml(prefs, "dateLocale"),
 	// 	setPrefFromHtml(prefs, "messageAttachTop"),
 	// 	setPrefFromHtml(prefs, "messageAttachBottom"),
-	// 	setPrefFromHtml(prefs, "printAttachTop"),
-	// 	setPrefFromHtml(prefs, "printAttachBottom"),
 	// 	setPrefFromHtml(prefs, "treatTextAsHtml"),
 	// 	setPrefFromHtml(prefs, "attachTemplate"),
 	// 	setPrefFromHtml(prefs, "storageOption"),

@@ -33,8 +33,6 @@ export interface IWritableQAppPreferences {
 	storageOption      : StorageOption
 	storageFolder      : string
 	showFirstChars     : number
-	printAttachTop     : boolean
-	printAttachBottom  : boolean
 	messageAttachTop   : boolean
 	messageAttachBottom: boolean
 	attachTemplate     : string
@@ -69,8 +67,6 @@ export class QAppPrefs
 		storageOption      : "folder",
 		storageFolder      : "",
 		showFirstChars     : 3,
-		printAttachTop     : true,
-		printAttachBottom  : false,
 		messageAttachTop   : true,
 		messageAttachBottom: false,
 		attachTemplate     : '<div class="qnote-title">QNote: {{ qnote_date }}</div>\n<div class="qnote-text">{{ qnote_text }}</div>',

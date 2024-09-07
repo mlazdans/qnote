@@ -128,9 +128,6 @@
 	"delete": {
 		"message": "Șterge"
 	},
-	"enable.print_attach": {
-		"message": "Atașați la imprimare"
-	},
 	"attach.bottom": {
 		"message": "jos"
 	},
