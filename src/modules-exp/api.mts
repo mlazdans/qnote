@@ -31,7 +31,6 @@ export interface IQAppAPI {
 	setDebug(on: boolean): Promise<void>
 	messagePaneFocus(windowId: number): Promise<void>
 	setPrefs(prefs: IQAppPreferences): Promise<void>
-	// attachNoteToMessage(windowId: number, note: INoteData): Promise<void>
 	saveNoteCache(keyId: string, note: INoteData): Promise<void>
 	clearNoteCache(): Promise<void>
 	getProfilePath(): Promise<string>

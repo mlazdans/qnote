@@ -120,19 +120,6 @@
 		"async": true,
 		"parameters": []
 	},{
-		"name": "attachNoteToMessage",
-		"type": "function",
-		"description": "",
-		"async": true,
-		"parameters": [{
-			"name": "windowId",
-			"type": "integer",
-			"description": "windowId from windows API"
-		},{
-			"name": "note",
-			"$ref": "qnote.NoteData"
-		}]
-	},{
 		"name": "attachNotesToMultiMessage",
 		"type": "function",
 		"description": "",

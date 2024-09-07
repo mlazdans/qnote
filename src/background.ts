@@ -795,35 +795,6 @@ async function initExtension(){
 		}
 	});
 
-	browser.NotifyTools.onNotifyBackground.addListener(async (data) => {
-		if(data.command == "pop"){
-			browser.messages.query({
-				headerMessageId: data.messageId
-			}).then(async (MList: browser.messages.MessageList | string) => {
-				if(typeof MList === "string"){
-					console.warn("Unexpected query result: ", MList);
-					return;
-				}
-
-				if(MList.messages && (MList.messages.length === 1)){
-					let Message = MList.messages[0];
-					let flags = POP_EXISTING;
-					if(Prefs.focusOnDisplay){
-						flags |= POP_FOCUS;
-					}
-
-					QNotePopForMessage(Message.id, flags).then((isPopped: any) =>{
-						// Focus message pane in case popped
-						if(isPopped && !Prefs.focusOnDisplay){
-							console.error("TODO: focusMessagePane()");
-							// focusMessagePane(CurrentPopup.windowId);
-						}
-					});
-				}
-			});
-		}
-	});
-
 	await browser.scripting.messageDisplay.registerScripts([{
 		id: "qnote-message-display",
 		js: ["scripts/messageDisplay.js"],

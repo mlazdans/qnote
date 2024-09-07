@@ -1,3 +1,4 @@
+// TODO: double click: pop message
 import { AttachToMessageReplyData } from "../modules/Messages.mjs";
 
 function attachToMessage(reply: AttachToMessageReplyData | false) {

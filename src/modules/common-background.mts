@@ -232,6 +232,7 @@ export async function mpUpdateForNote(keyId: string, note: INoteData | null){
 
 	if(note) {
 		browser.qapp.saveNoteCache(keyId, note);
+		// TODO: somehow notify message pane if note changed
 		// getCurrentWindowIdAnd().then(windowId => browser.qapp.attachNoteToMessage(windowId, note));
 	}
 
