@@ -32,19 +32,22 @@
 //    Types for MozXULElement and others
 // https://github.com/dothq/browser-desktop/blob/nightly/types.d.ts
 
-import { QPopupDataReply, QPopupDataRequest } from "./modules/Messages.mjs";
-import { INote, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
-import { QNotePopup } from "./modules/NotePopups.mjs";
+import { AttachToMessage, AttachToMessageReply, PrefsUpdated } from "./modules/Messages.mjs";
+import { INoteData, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
+import { INotePopup, QNotePopup } from "./modules/NotePopups.mjs";
 import {
 	MessageId,
 	POP_EXISTING,
 	POP_FOCUS,
 	POP_NONE,
+	convertPrefsToQAppPrefs,
+	dateFormatWithPrefs,
 } from "./modules/common.mjs";
 import { getCurrentWindowIdAnd, getPrefs, mpUpdateForNote, sendPrefsToQApp, updateTabMenusAndIcons } from "./modules/common-background.mjs";
 import { IPreferences } from "./modules/api.mjs";
 
 var QDEB = true;
+var App: QNoteExtension;
 
 let BrowserAction = browser.action ? browser.action : browser.browserAction;
 
@@ -56,61 +59,193 @@ let BrowserAction = browser.action ? browser.action : browser.browserAction;
 // var i18n = new DOMLocalizator(browser.i18n.getMessage);
 var _ = browser.i18n.getMessage;
 
-// TODO: promise interface
-var PopupManager = {
-	counter: 0,
-	popups: new Map<number, QNotePopup>,
-	allocId(): number {
-		return ++this.counter;
-	},
-	add(popup: QNotePopup): void {
-		console.log(`Adding new windows with id ${popup.id}`);
-		if(this.has(popup.id)){
-			throw new Error(`PopupManager: id ${popup.id} already exists`);
-		} else {
-			this.popups.set(popup.id, popup);
-		}
-	},
-	remove(id: number): boolean {
-		return this.get(id) ? this.popups.delete(id) : false;
-	},
-	get(id: number): QNotePopup {
-		let p = this.popups.get(id);
-		if(p){
-			return p;
-		}
-		throw new Error(`PopupManager: id ${id} not found`);
-	},
-	has(id: number): boolean {
-		return this.popups.has(id);
+const PopupManager = new class {
+	private hCounter = 1
+	private popups = new Map<number, INotePopup>
+	private keyMap = new Map<string, number>
+
+	alloc(): number {
+		return this.hCounter++
 	}
+
+	add(handle: number, popup: QNotePopup): void {
+		if(this.popups.has(handle)){
+			throw new Error(`popup with handle already exists: ${handle}`);
+		} else if(this.keyMap.has(popup.keyId)){
+			throw new Error(`popup with keyId already exists: ${popup.keyId}`);
+		} else {
+			this.keyMap.set(popup.keyId, handle)
+			this.popups.set(handle, popup);
+		}
+	}
+
+	get(handle: number): INotePopup {
+		if(this.popups.has(handle)){
+			return this.popups.get(handle)!
+		} else {
+			throw new Error(`popup not found: ${handle}`)
+		}
+	}
+
+	delete(handle: number) {
+		if(this.popups.has(handle)){
+			const p = this.popups.get(handle)!
+			return this.keyMap.delete(p.keyId) || this.popups.delete(handle);
+		} else {
+			throw new Error(`popup not found: ${handle}`)
+		}
+	}
+
+	// removeByKeyId(keyId: string): boolean {
+	// 	const handle = this.keyMap.get(keyId);
+	// 	if(handle){
+	// 		return this.popups.delete(handle) && this.keyMap.delete(keyId);
+	// 	} else {
+	// 		throw new Error(`popup not found: ${keyId}`);
+	// 	}
+	// }
+
+	getByKeyId(keyId: string): INotePopup {
+		if(this.keyMap.has(keyId)){
+			return this.popups.get(this.keyMap.get(keyId)!)! // Safe to assume we do not have undefined|null data here
+		} else {
+			throw new Error(`popup not found: ${keyId}`);
+		}
+	}
+
+	hasKeyId(keyId: string): boolean {
+		return this.keyMap.has(keyId)
+	}
+}
+
+// type CreateNotesAsArgs =  typeof QNoteFolder | typeof XNoteFolder | typeof QNoteLocalStorage extends infer R ?
+// 	R extends typeof QNoteFolder
+// 		? [instanceType: R, keyId: string, root: string]
+// 		: R extends typeof QNoteLocalStorage
+// 			? [instanceType: R, keyId: string]
+// 			: never
+// 		: never
+// ;
+// createNote(...[instanceType, keyId, root]: CreateNotesAsArgs) {
+// 	QDEB&&console.debug(`createNote(${keyId})`, instanceType);
+// 	if(root && (instanceType == QNoteFolder || instanceType == XNoteFolder)){
+// 		return new instanceType(keyId, root);
+// 	} else if(instanceType == QNoteLocalStorage) {
+// 		return new instanceType(keyId);
+// 	} else {
+// 		throw new TypeError("Ivalid Prefs.storageOption");
+// 	}
+// }
+
+class QNoteExtension
+{
+	prefs: IPreferences
+
+	constructor(prefs: IPreferences) {
+		App = this;
+		this.prefs = prefs
+	}
+
+	createNote(keyId: string): QNoteLocalStorage | QNoteFolder {
+		QDEB&&console.debug(`createNote(${keyId})`);
+		if(this.prefs.storageOption == "ext"){
+			return new QNoteLocalStorage(keyId);
+		} else {
+			return new QNoteFolder(keyId, this.prefs.storageFolder);
+		}
+	}
+
+	async loadNote(keyId: string) {
+		const note = this.createNote(keyId);
+		return note.load().then(() => note);
+	}
+
+	async createPopup(keyId: string, prefs: IPreferences): Promise<INotePopup> {
+		return new Promise(async resolve => {
+			if(PopupManager.hasKeyId(keyId)){
+				return resolve(PopupManager.getByKeyId(keyId));
+			}
+
+			const windowId = await getCurrentWindowIdAnd();
+			const note = await this.loadNote(keyId);
+			let popup: QNotePopup | undefined;
+			let handle: number | undefined;
+
+			if(prefs.windowOption === 'xul'){
+				handle = PopupManager.alloc();
+				popup = await QNotePopup.create(keyId, windowId, handle, note, prefs);
+			} else if(prefs.windowOption == 'webext'){
+				console.error("TODO: new WebExtensionNoteWindow");
+				// CurrentNote = new WebExtensionNoteWindow(CurrentWindowId);
+			} else {
+				throw new TypeError("Prefs.windowOption");
+			}
+
+			console.log(`new popup: ${handle}`, popup);
+			if(popup && handle){
+				PopupManager.add(handle, popup);
+				popup.addListener("close", async (handle: number, reason: string, note: INoteData) => {
+					console.log("qpopup close !!!: ", handle, reason, note);
+					if(reason == "close"){
+						popup.note.data = note;
+						popup.note.save();
+						await mpUpdateForNote(popup.keyId, note);
+					} else if(reason == "delete"){
+						await popup.note.delete();
+						await mpUpdateForNote(popup.keyId, note);
+					} else {
+						console.warn(`Unknown close reason: ${reason}`);
+					}
+					PopupManager.delete(handle);
+				});
+				// const l = (w: NoteWindow) => {
+				// 	QDEB&&console.debug("afterclose", w);
+				// 	focusMessagePane(windowId);
+				// };
+				// popup.addListener("afterclose", l);
+				resolve(popup);
+			}
+		});
+	}
+
+	// async createNoteForMessage(id: MessageId) {
+	// 	return getMessageKeyId(id).then(keyId => this.createNote(keyId));
+	// }
+
+	// async loadNoteForMessageAnd(id: MessageId) {
+	// 	return this.createNoteForMessage(id).then(async note => {
+	// 		return note.load().then(() => note);
+	// 	});
+	// }
+
+	async changeMessage(Tab: browser.tabs.Tab, Message: browser.messages.MessageHeader){
+		QDEB&&console.debug("onMessageDisplayed(), messageId:", Message.id);
+
+		// let flags = POP_EXISTING;
+		// if(this.prefs.focusOnDisplay){
+		// 	flags |= POP_FOCUS;
+		// }
+
+		if(this.prefs.showOnSelect){
+			await this.createPopup(Message.headerMessageId, this.prefs).then(popup => popup.pop());
+		}
+	}
+
+	applyTemplate(t: string, data: INoteData): string {
+		return t
+			.replace("{{ qnote_date }}", dateFormatWithPrefs(this.prefs, data.ts))
+			.replace("{{ qnote_text }}", '<span class="qnote-text-span"></span>')
+		;
+	}
+
 }
 
 async function confirmDelete(shouldConfirm: boolean): Promise<boolean> {
 	return shouldConfirm ? await browser.legacy.confirm(_("delete.note"), _("are.you.sure")) : true;
 }
 
-async function resetTbState(){
-	browser.menus.removeAll();
-	const tabId = await getCurrentTabId();
-	if(tabId){
-		updateIcons(false, tabId);
-	}
-}
-
-async function loadNote(keyId: string) {
-	let note = createNote(keyId);
-	return note.load().then(() => note);
-}
-
 async function getMessageKeyId(id: MessageId) {
 	return browser.messages.get(id).then(parts => parts.headerMessageId);
-}
-
-async function loadNoteForMessageAnd(id: MessageId) {
-	return createNoteForMessage(id).then(async note => {
-		return note.load().then(() => note);
-	});
 }
 
 // TODO:
@@ -184,10 +319,6 @@ async function loadNoteForMessageAnd(id: MessageId) {
 // 	}).catch(silentCatcher());
 // }
 
-async function createNoteForMessage(id: MessageId) {
-	return getMessageKeyId(id).then(keyId => createNote(keyId));
-}
-
 // TODO
 // async function createNoteForMessage(id: MessageId) {
 // 	return getMessageKeyId(id).then(keyId => {
@@ -206,17 +337,6 @@ async function createNoteForMessage(id: MessageId) {
 // 		return note;
 // 	});
 // }
-
-function createNote(keyId: string) {
-	QDEB&&console.debug(`createNote(${keyId})`, Prefs.storageOption);
-	if(Prefs.storageOption === 'ext'){
-		return new QNote(keyId);
-	} else if(Prefs.storageOption === 'folder'){
-		return new QNoteFolder(keyId, Prefs.storageFolder);
-	} else {
-		throw new TypeError("Ivalid Prefs.storageOption");
-	}
-}
 
 async function createMultiNote(messageList: any, overwrite = false){
 	console.error("TODO: createMultiNote");
@@ -347,32 +467,6 @@ async function QNotePopForMessage(id: MessageId, flags = POP_NONE) {
 // 		}).catch(silentCatcher());
 // 	}
 // }
-async function createPopupWindow(note: INote): Promise<QNotePopup> {
-	return new Promise(async resolve => {
-		return getCurrentWindowIdAnd().then(async windowId => {
-			var popup: QNotePopup | undefined;
-			if(Prefs.windowOption === 'xul'){
-				popup = new QNotePopup(PopupManager.allocId(), windowId, note, Prefs);
-			} else if(Prefs.windowOption == 'webext'){
-				console.error("TODO: new WebExtensionNoteWindow");
-				// CurrentNote = new WebExtensionNoteWindow(CurrentWindowId);
-			} else {
-				throw new TypeError("Prefs.windowOption");
-			}
-
-			if(popup){
-				PopupManager.add(popup);
-				// const l = (w: NoteWindow) => {
-				// 	QDEB&&console.debug("afterclose", w);
-				// 	focusMessagePane(windowId);
-				// };
-				// popup.addListener("afterclose", l);
-				resolve(popup);
-			}
-		});
-	});
-
-}
 
 // async function initCurrentNote(): Promise<boolean> {
 // 	QDEB&&console.debug(`initCurrentNote()`);
@@ -414,21 +508,6 @@ async function createPopupWindow(note: INote): Promise<QNotePopup> {
 
 // 	return true;
 // }
-
-// We call this after options has been changed
-async function sendPrefs(){
-	browser.qapp.setPrefs({
-		storageOption: Prefs.storageOption,
-		storageFolder: Prefs.storageFolder,
-		showFirstChars: Prefs.showFirstChars,
-		printAttachTop: Prefs.printAttachTop,
-		printAttachBottom: Prefs.printAttachBottom,
-		messageAttachTop: Prefs.messageAttachTop,
-		messageAttachBottom: Prefs.messageAttachBottom,
-		attachTemplate: Prefs.attachTemplate,
-		treatTextAsHtml: Prefs.treatTextAsHtml,
-	});
-}
 
 // async function menuHandler(info){
 // 	if(!info.selectedMessages){
@@ -535,32 +614,16 @@ async function sendPrefs(){
 // TODO: move under app class at some point
 async function initExtension(){
 	QDEB&&console.debug("initExtension()");
-	await browser.ResourceUrl.register("qnote");
-	// await browser.ResourceUrl.register("qnote", "modules/");
-	// await browser.ResourceUrl.register("qnote", "api/");
-	// await browser.ResourceUrl.register("qnote", "scripts/");
 
-	// CurrentWindowId = await getCurrentWindowId();
-	// CurrentTabId = await getCurrentTabId();
+	// Return notes to qapp on request. Should be set before init
+	browser.qapp.onNoteRequest.addListener(async (keyId: string) => App.loadNote(keyId).then(note => note.data));
 
-	// CurrentNote = null;
-	// CurrentLang = browser.i18n.getUILanguage();
-
-	resetTbState();
-	Prefs = await loadPrefsWithDefaults();
-
-	// QDEB = !!Prefs.enableDebug;
+	await browser.qapp.init(convertPrefsToQAppPrefs(App.prefs));
 	await browser.qapp.setDebug(QDEB);
-	await browser.qpopup.setDebug(QDEB);
 
-	sendPrefs();
+	QNotePopup.init(QDEB);
 
-	console.log("setUpExtension() - OK");
-	// TBInfo = await browser.runtime.getBrowserInfo();
-
-	// Return notes to qapp on request
-	// browser.qapp.onNoteRequest.addListener(getQAppNoteData);
-	browser.qapp.onNoteRequest.addListener(async (keyId: string) => loadNote(keyId).then(note => note.data));
+	updateTabMenusAndIcons();
 
 	// window.addEventListener("unhandledrejection", event => {
 	// 	console.warn(`Unhandle: ${event.reason}`, event);
@@ -589,7 +652,7 @@ async function initExtension(){
 		// await CurrentNote.silentlyPersistAndClose();
 		console.error("TODO: CurrentNote.silentlyPersistAndClose()");
 
-		resetTbState();
+		updateTabMenusAndIcons();
 	});
 
 	// Create tabs
@@ -622,6 +685,7 @@ async function initExtension(){
 		console.error("TODO: browser.windows.onCreated");
 	});
 
+	// Remove window
 	browser.windows.onRemoved.addListener(async windowId => {
 		QDEB&&console.debug("windows.onRemoved(), windowId:", windowId);
 		console.error("TODO: browser.windows.onRemoved()");
@@ -650,50 +714,6 @@ async function initExtension(){
 
 		// await CurrentNote.silentlyPersistAndClose();
 	});
-
-	async function changeMessage(Tab: browser.tabs.Tab, Message: browser.messages.MessageHeader){
-		QDEB&&console.debug("onMessageDisplayed(), messageId:", Message.id);
-
-		let flags = POP_EXISTING;
-		if(Prefs.focusOnDisplay){
-			flags |= POP_FOCUS;
-		}
-
-		return loadNoteForMessageAnd(Message.id).then(async note => {
-			console.log("loadNoteForMessageAnd", note);
-			if(note.data.exists){
-				mpUpdateForNote(note.data);
-				createPopupWindow(note).then(async w => w.pop());
-			}
-			// createPopupWindow(note).then(async w => w.pop())
-		});
-		// .catch(() => console.error("loadNoteForMessageAnd.catch", arguments));
-
-		// const p = await pop();
-		// if(p){
-		// 	loadNoteForMessage(Message.id).then(note => {
-		// 		p.pop(note);
-		// 	});
-		// }
-
-		//updateCurrentMessage(CurrentTab);
-
-		// await CurrentPopup.silentlyPersistAndClose();
-
-		// CurrentTabId = getTabId(Tab);
-
-		// if(Prefs.showOnSelect){
-		// 	QNotePopForMessage(Message.id, flags).then(isPopped =>{
-		// 		// Focus message pane in case popped
-		// 		console.error("TODO: focusMessagePane()");
-		// 		// if(isPopped && !Prefs.focusOnDisplay){
-		// 		// 	focusMessagePane(CurrentNote.windowId);
-		// 		// }
-		// 	});
-		// } else {
-		// 	mpUpdateForMessage(Message.id);
-		// }
-	}
 
 	const toggler = async (Tab?: browser.tabs.Tab) => {
 		console.error("TODO: toggler");
@@ -781,7 +801,7 @@ async function initExtension(){
 
 		// let m = Messages.messages ? Messages.messages : Messages;
 		if(m.length == 1){
-			changeMessage(Tab, m[0]);
+			App.changeMessage(Tab, m[0]);
 		} else {
 			console.error("TODO: multi message");
 			// await CurrentNote.silentlyPersistAndClose();
@@ -834,7 +854,7 @@ async function initExtension(){
 		connection.onMessage.addListener(async (data: any) => {
 			let message;
 
-				QDEB&&console.log(`Received ${data.command} message: `, data);
+			QDEB&&console.log(`Received ${data.command} message: `, data);
 
 			if(message = (new PrefsUpdated).parse(data)){
 				App.prefs = await getPrefs();
