@@ -628,6 +628,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 					}
 				},
 				async updateColumsView() {
+					// TODO: it does not update sometimes
 					ThreadPaneColumns?.refreshCustomColumn("qnote");
 				},
 				// async updateView(windowId: number, keyId: string){
