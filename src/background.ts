@@ -3,6 +3,17 @@
 // TODO: save note pos and dims locally, outside note
 // TODO: save create and update time
 // TODO: attach keyb/col handler to all windows at the start
+// TODO: experiment with div overlays as popup in content scripts
+//       Something is broken with scrollbars in qpopup, textarea gets wrapped in some div
+// TODO: test brand new installation with XNote++ and then switch to QNote
+
+// App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup.api
+//  |     \                            \     \-> handles events sent by qpopup.api, fires events back to App through DefaultNotePopup
+//  |      \                            \--> WebExtension popup -> ext api (TODO)
+//  |       \-> fires events, registered by App
+//  |
+//  \-> PopupManager - self-maintains handles Map to INotePopup`s
+
 
 // Interesting links
 //
@@ -18,7 +29,6 @@
 //     XPCOM String Guide
 // https://firefox-source-docs.mozilla.org/xpcom/stringguide.html
 //
-
 //    Types for MozXULElement and others
 // https://github.com/dothq/browser-desktop/blob/nightly/types.d.ts
 
@@ -522,6 +532,7 @@ async function sendPrefs(){
 // 	}
 // }
 
+// TODO: move under app class at some point
 async function initExtension(){
 	QDEB&&console.debug("initExtension()");
 	await browser.ResourceUrl.register("qnote");
@@ -555,7 +566,7 @@ async function initExtension(){
 	// 	console.warn(`Unhandle: ${event.reason}`, event);
 	// });
 
-	await browser.qapp.init();
+	// Below are only various listeners
 
 	// KeyDown from qapp
 	browser.qapp.onKeyDown.addListener(e => {
@@ -759,6 +770,7 @@ async function initExtension(){
 	// 	}
 	// });
 
+	// Messages displayed
 	browser.messageDisplay.onMessagesDisplayed.addListener(async (Tab: browser.tabs.Tab, Messages: browser.messages.MessageHeader[] | browser.messages.MessageList) => {
 		let m;
 		if("messages" in Messages){
