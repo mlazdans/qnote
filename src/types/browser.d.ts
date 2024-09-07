@@ -53,5 +53,10 @@ declare global {
 		export namespace NotifyTools {
 			export const onNotifyBackground: WebExtEvent<(e: any) => void>;
 		}
+
+		export namespace scripting {
+			const messageDisplay: any;
+			function getRegisteredContentScripts(): any;
+		}
 	}
 }
