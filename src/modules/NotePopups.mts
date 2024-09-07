@@ -303,7 +303,7 @@ export function QPopupOptions2note(state: IPopupOptions): INoteData {
 		left: state.left,
 		top: state.top,
 		width: state.width,
-		height: state.width,
+		height: state.height,
 	}
 }
 
