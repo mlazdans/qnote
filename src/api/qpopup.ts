@@ -61,7 +61,24 @@ var popupManager = {
 };
 
 var qpopup = class extends ExtensionCommon.ExtensionAPI {
-	onShutdown() {}
+	static onDisable(id: string) {
+		console.log("[qpopup onDisable]", id);
+	}
+
+	static onUninstall(id: string) {
+		console.log("[qpopup onUninstall]", id);
+	}
+
+	static onUpdate(id: string, manifest: any) {
+		console.log("[qpopup onUpdate]", id, manifest);
+	}
+
+	onShutdown(_isAppShutdown: any) {
+		console.log("[qpopup onShutdown]", _isAppShutdown);
+		for(const id of popupManager.popups.keys()){
+			popupManager.get(id).destroy("shutdown");
+		}
+	}
 
 	getAPI(context: any) {
 		// this.i18n = new DOMLocalizator(id => {
@@ -225,11 +242,17 @@ class QPopup extends BasePopup {
 		popupManager.add(this);
 	}
 
-	/** @override */
 	destroy(reason?: string) {
+		console.log("DDD destroy", this.id);
+		if(popupManager.has(this.id)){
+			popupManager.remove(this.id);
+			PopupEventDispatcher.fireListeners("onclose", this.id, reason ?? "", this.state);
+		}
 		super.destroy();
-		popupManager.remove(this.id);
-		PopupEventDispatcher.fireListeners("onclose", this.id, reason ?? "", this.state);
+	}
+
+	// Is called from parent, w/o params - do not remove
+	closePopup() {
 	}
 
 	moveTo(x: number, y: number) {
