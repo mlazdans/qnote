@@ -25,7 +25,8 @@
 		"unlimitedStorage",
 		"downloads",
 		"menus",
-		"accountsRead"
+		"accountsRead",
+		"scripting"
 	],
 	"background": {
 		"page": "background.html"

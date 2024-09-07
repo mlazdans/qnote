@@ -812,68 +812,51 @@ async function initExtension(){
 		}
 	});
 
-	// TODO: bring back
-	// browser.scripting.messageDisplay.registerScripts([{
-	// 	id: "qnote-message-display",
-	// 	js: ["scripts/message-display.js"],
-	// 	css: ["html/qpopup.css"],
-	// }]);
+	await browser.scripting.messageDisplay.registerScripts([{
+		id: "qnote-message-display",
+		js: ["scripts/messageDisplay.js"],
+		css: ["html/qpopup.css"],
+	}]);
 
-	// browser.messageDisplayScripts.register({ js: [{ file: "scripts/message-display.js" }] });
+	browser.runtime.onMessage.addListener(async (data: any, sender: browser.runtime.MessageSender, _sendResponse) => {
+		QDEB&&console.log("Received message: ", data, sender);
 
-	// async function getSelectedMessageReply(keyId: string): Promise<SelectedMessageReply> {
-	// 	return loadNote(keyId).then(note => new SelectedMessageReply(note.data, Prefs));
-	// }
+		if((new AttachToMessage()).parse(data)){
+			if(sender.tab?.id) {
+				const List = await browser.messageDisplay.getDisplayedMessages(sender.tab.id);
 
-	// browser.runtime.onMessage.addListener(async (data: any, sender: browser.runtime.MessageSender): Promise<void> => {
-	// 	QDEB&&console.log("Received message: ", data, sender);
-	// 	if(data.command === "getSelectedMessage"){
-	// 		getCurrentTabIdAnd().then(tabId => {
-	// 			browser.messageDisplay.getDisplayedMessages(tabId).then(async List => {
-	// 				if(List.messages.length === 1){
-	// 					const reply = await getSelectedMessageReply(List.messages[0].headerMessageId);
-	// 					QDEB&&console.log("Sending selectedMessage reply: ", reply);
-	// 					browser.tabs.sendMessage(tabId, reply);
-	// 				} else {
-	// 					console.error("Unexpected getDisplayedMessages() count: ", List.messages.length);
-	// 				}
-	// 			});
-	// 		});
-	// 	} else {
-	// 		console.error("Unknown message: ", data);
-	// 	}
-	// });
+				if(List.length == 1){
+					const note = await App.loadNote(List[0].headerMessageId);
+					if(note.data){
+						const reply = new AttachToMessageReply({
+							note: note.data,
+							html: App.applyTemplate(App.prefs.attachTemplate, note.data),
+							prefs: App.prefs,
+						});
 
+						return reply.data;
+					}
+				}
+			}
+		} else {
+			console.error("Unknown message: ", data);
+		}
+
+		return false;
+	});
+
+	// Messages from content
 	browser.runtime.onConnect.addListener(connection => {
 		QDEB&&console.log("New connection: ", connection);
-		connection.onMessage.addListener((data: any) => {
-			// if(data.command === "getSelectedMessage"){
-			// 	getCurrentTabIdAnd().then(tabId => {
-			// 		browser.messageDisplay.getDisplayedMessages(tabId).then(async List => {
-			// 			if(List.messages.length === 1){
-			// 				const reply = await getSelectedMessageReply(List.messages[0].headerMessageId);
-			// 				QDEB&&console.log("Posting selectedMessage reply: ", reply);
-			// 				connection.postMessage(reply);
-			// 			} else {
-			// 				console.error("Unexpected getDisplayedMessages() count: ", List.messages.length);
-			// 			}
-			// 		});
-			// 	});
-
+		connection.onMessage.addListener(async (data: any) => {
 			let message;
 
 				QDEB&&console.log(`Received ${data.command} message: `, data);
-			if(message = (new QPopupDataRequest).parse(data)){
-				const p = PopupManager.get(message.id);
-				(new QPopupDataReply).post(connection, {
-					id: p.id,
-					opts: p.note2QPopupOptions()
-				});
-			// } else if(message = (new PreferencesRequest).parse(data)){
-			// 	(new PreferencesReply).post(connection, {
-			// 		prefs: App.prefs,
-			// 		XNoteStoragePath: await getXNoteStoragePath()
-			// 	});
+
+			if(message = (new PrefsUpdated).parse(data)){
+				App.prefs = await getPrefs();
+				console.log("new PrefsUpdated", message);
+				sendPrefsToQApp(App.prefs);
 			} else {
 				console.error("Unknown or incorrect message: ", data);
 			}
@@ -906,4 +889,7 @@ async function waitForLoad() {
 QDEB&&console.debug("ResourceUrl.register(qnote)");
 await browser.ResourceUrl.register("qnote");
 
-waitForLoad().then(async isAppStartup => new QNoteExtension(await getPrefs()));
+waitForLoad().then(async isAppStartup => {
+	App = new QNoteExtension(await getPrefs());
+	initExtension() // TODO: move inside App at some point
+});

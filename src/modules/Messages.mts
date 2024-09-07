@@ -1,28 +1,66 @@
-// Declarations
-interface IMessageData {
+import { IPreferences } from "./api.mjs";
+import { INoteData } from "./Note.mjs";
+
+interface IMessage<M> {
+	command: string;
+	parse(data: any): M | undefined;
+	post(port: browser.runtime.Port, data?: M): void;
+	send(tabId: number, data: M): void;
 }
 
-interface IMessage<T extends IMessageData> {
-	command: string
-	parse(data: any): T | undefined
-	post(port: browser.runtime.Port, data?: T): void
-	send(tabId: number, data: T): void
-}
-
-abstract class DefaultMessage<T extends IMessageData> implements IMessage<T> {
+abstract class DefaultMessage<M extends object = {}> implements IMessage<M> {
 	abstract command: string;
-	parse(data: any): T | undefined {
-		if(!("command" in data) || (data.command !== this.command)){
+	data: M | undefined;
+
+	constructor(data?: M) {
+		this.data = data;
+	}
+
+	parse(data: any): M | undefined {
+		if (!("command" in data) || data.command !== this.command) {
 			return undefined;
 		}
-		return {} as T;
+
+		const retData: M = {} as M;
+
+		for (const k in this.data) {
+			if (!(k in data)) {
+				return undefined;
+			} else {
+				retData[k] = data[k];
+			}
+		}
+
+		return retData;
 	}
-	send(tabId: number, data?: T): Promise<any> {
+
+	send(tabId: number, data?: M): Promise<any> {
 		return browser.tabs.sendMessage(tabId, { ...data, command: this.command });
 	}
-	post(port: browser.runtime.Port, data?: T): void {
+
+	post(port: browser.runtime.Port, data?: M): void {
 		port.postMessage({ ...data, command: this.command });
 	}
+}
+
+// PrefsUpdated
+export class PrefsUpdated extends DefaultMessage {
+	command = "PrefsUpdated";
+}
+
+// AttachToMessage
+export class AttachToMessage extends DefaultMessage {
+	command = "AttachToMessage";
+}
+
+// AttachToMessageReply
+export interface AttachToMessageReplyData {
+	prefs: IPreferences;
+	note: INoteData;
+	html: string;
+}
+export class AttachToMessageReply extends DefaultMessage<AttachToMessageReplyData> {
+	command = "AttachToMessageReply";
 }
 
 // Message: PopupDataRequest
@@ -58,13 +96,6 @@ abstract class DefaultMessage<T extends IMessageData> implements IMessage<T> {
 // 		return data
 // 	}
 // }
-
-// Message: prefsUpdated
-interface PrefsUpdatedData extends IMessageData {}
-
-export class PrefsUpdated extends DefaultMessage<PrefsUpdatedData> {
-	command = "PrefsUpdated";
-}
 
 // interface PreferencesRequestData extends IMessageData {
 // }
