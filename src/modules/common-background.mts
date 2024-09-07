@@ -204,41 +204,6 @@ export async function clearPrefs() {
 	return Promise.all(p);
 }
 
-// function resetTbState(){
-export async function updateTabMenusAndIcons(){
-	browser.menus.removeAll();
-	getCurrentTabIdAnd().then(tabId => updateIcons(false, tabId));
-}
-
-export async function updateIcons(on: boolean, tabId?: number){
-	let icon = on ? "images/icon.svg" : "images/icon-disabled.svg";
-
-	let BrowserAction = browser.action ? browser.action : browser.browserAction;
-
-	BrowserAction.setIcon({
-		path: icon,
-		tabId: tabId
-	});
-
-	browser.messageDisplayAction.setIcon({
-		path: icon,
-		tabId: tabId
-	});
-}
-
-export async function mpUpdateForNote(keyId: string, note: INoteData | null){
-	// Marks icons active
-	updateIcons(!!note);
-
-	if(note) {
-		browser.qapp.saveNoteCache(keyId, note);
-		// TODO: somehow notify message pane if note changed
-		// getCurrentWindowIdAnd().then(windowId => browser.qapp.attachNoteToMessage(windowId, note));
-	}
-
-	browser.qapp.updateColumsView();
-}
-
 async function getCurrentWindow(){
 	return browser.windows.getCurrent();
 }
@@ -259,6 +224,14 @@ export async function getCurrentWindowIdAnd(): Promise<number> {
 
 export async function getCurrentTab(){
 	return browser.tabs.getCurrent();
+}
+
+export async function getCurrentTabAnd(): Promise<browser.tabs.Tab> {
+	return new Promise(async resolve => {
+		return browser.tabs.getCurrent().then(tab => {
+			if(tab)resolve(tab);
+		});
+	});
 }
 
 export async function getCurrentTabId(){

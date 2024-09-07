@@ -43,7 +43,7 @@ import {
 	convertPrefsToQAppPrefs,
 	dateFormatWithPrefs,
 } from "./modules/common.mjs";
-import { getCurrentWindowIdAnd, getPrefs, mpUpdateForNote, sendPrefsToQApp, updateTabMenusAndIcons } from "./modules/common-background.mjs";
+import { getCurrentTabIdAnd, getCurrentWindowIdAnd, getPrefs, sendPrefsToQApp } from "./modules/common-background.mjs";
 import { IPreferences } from "./modules/api.mjs";
 
 var QDEB = true;
@@ -160,6 +160,40 @@ class QNoteExtension
 		return note.load().then(() => note);
 	}
 
+	async updateIcons(on: boolean, tabId?: number){
+		let icon = on ? "images/icon.svg" : "images/icon-disabled.svg";
+
+		let BrowserAction = browser.action ? browser.action : browser.browserAction;
+
+		BrowserAction.setIcon({
+			path: icon,
+			tabId: tabId
+		});
+
+		browser.messageDisplayAction.setIcon({
+			path: icon,
+			tabId: tabId
+		});
+	}
+
+	async updateTabMenusAndIcons(){
+		browser.menus.removeAll();
+		getCurrentTabIdAnd().then(tabId => this.updateIcons(false, tabId));
+	}
+
+	async updateView(keyId: string, note: INoteData | null){
+		// Marks icons active
+		this.updateIcons(!!note);
+
+		if(note) {
+			browser.qapp.saveNoteCache(keyId, note);
+			// TODO: somehow notify message pane if note changed
+			// getCurrentWindowIdAnd().then(windowId => browser.qapp.attachNoteToMessage(windowId, note));
+		}
+
+		browser.qapp.updateColumsView();
+	}
+
 	async createPopup(keyId: string, prefs: IPreferences): Promise<INotePopup> {
 		return new Promise(async resolve => {
 			if(PopupManager.hasKeyId(keyId)){
@@ -173,7 +207,7 @@ class QNoteExtension
 
 			if(prefs.windowOption === 'xul'){
 				handle = PopupManager.alloc();
-				popup = await QNotePopup.create(keyId, windowId, handle, note, prefs);
+				popup = await QNotePopup.create(keyId, windowId, handle, note, prefs); // TODO: keyId already in note
 			} else if(prefs.windowOption == 'webext'){
 				console.error("TODO: new WebExtensionNoteWindow");
 				// CurrentNote = new WebExtensionNoteWindow(CurrentWindowId);
@@ -189,10 +223,10 @@ class QNoteExtension
 					if(reason == "close"){
 						popup.note.data = note;
 						popup.note.save();
-						await mpUpdateForNote(popup.keyId, note);
+						await this.updateView(popup.keyId, note);
 					} else if(reason == "delete"){
 						await popup.note.delete();
-						await mpUpdateForNote(popup.keyId, note);
+						await this.updateView(popup.keyId, null);
 					} else {
 						console.warn(`Unknown close reason: ${reason}`);
 					}
@@ -218,7 +252,7 @@ class QNoteExtension
 	// 	});
 	// }
 
-	async changeMessage(Tab: browser.tabs.Tab, Message: browser.messages.MessageHeader){
+	async popMessage(Tab: browser.tabs.Tab, Message: browser.messages.MessageHeader){
 		QDEB&&console.debug("onMessageDisplayed(), messageId:", Message.id);
 
 		// let flags = POP_EXISTING;
@@ -226,9 +260,7 @@ class QNoteExtension
 		// 	flags |= POP_FOCUS;
 		// }
 
-		if(this.prefs.showOnSelect){
-			await this.createPopup(Message.headerMessageId, this.prefs).then(popup => popup.pop());
-		}
+		await this.createPopup(Message.headerMessageId, this.prefs).then(popup => popup.pop());
 	}
 
 	applyTemplate(t: string, data: INoteData): string {
@@ -237,6 +269,18 @@ class QNoteExtension
 			.replace("{{ qnote_text }}", '<span class="qnote-text-span"></span>')
 		;
 	}
+
+	// TODO:
+	// async getDisplayedMessagesForTab(Tab: browser.tabs.Tab) {
+	// 	// return browser.messageDisplay.getDisplayedMessage(getTabId(tab)).then(messagePartReturner);
+	// 	if(Tab.id){
+	// 		return browser.messageDisplay.getDisplayedMessages(Tab.id).then((messages) => {
+	// 			console.log("getDisplayedMessageForTab", messages);
+	// 		}
+	// 			// MessageList => messagePartReturner(MessageList.messages[0])
+	// 		);
+	// 	}
+	// }
 
 }
 
@@ -428,14 +472,6 @@ async function QNotePopForMessage(id: MessageId, flags = POP_NONE) {
 }
 
 // TODO:
-// async function getDisplayedMessageForTab(tab) {
-// 	// return browser.messageDisplay.getDisplayedMessage(getTabId(tab)).then(messagePartReturner);
-// 	return browser.messageDisplay.getDisplayedMessages(getTabId(tab)).then(
-// 		MessageList => messagePartReturner(MessageList.messages[0])
-// 	);
-// }
-
-// TODO:
 // async function QNotePopForTab(Tab, flags = POP_NONE) {
 // 	return getDisplayedMessageForTab(Tab).then(async Message => {
 // 		await CurrentPopup.silentlyPersistAndClose();
@@ -623,13 +659,19 @@ async function initExtension(){
 
 	QNotePopup.init(QDEB);
 
-	updateTabMenusAndIcons();
+	App.updateTabMenusAndIcons();
+
+	browser.scripting.messageDisplay.registerScripts([{
+		id: "qnote-message-display",
+		js: ["scripts/messageDisplay.js"],
+		css: ["html/qpopup.css"],
+	}]);
 
 	// window.addEventListener("unhandledrejection", event => {
 	// 	console.warn(`Unhandle: ${event.reason}`, event);
 	// });
 
-	// Below are only various listeners
+	// Below are various listeners only
 
 	// KeyDown from qapp
 	browser.qapp.onKeyDown.addListener(e => {
@@ -652,7 +694,7 @@ async function initExtension(){
 		// await CurrentNote.silentlyPersistAndClose();
 		console.error("TODO: CurrentNote.silentlyPersistAndClose()");
 
-		updateTabMenusAndIcons();
+		App.updateTabMenusAndIcons();
 	});
 
 	// Create tabs
@@ -731,27 +773,33 @@ async function initExtension(){
 		// QNotePopToggle(Tab || CurrentTabId);
 	};
 
-	// Click on main toolbar
-	BrowserAction.onClicked.addListener(Tab => {
-		QDEB&&console.debug("action.onClicked()");
+	const actionHandler = async (tab: browser.tabs.Tab) => {
+		QDEB&&console.debug("action", tab);
 
-		// QNotePopToggle(Tab || CurrentTabId);
-		toggler(Tab);
-	});
+		if(!tab.id){
+			return;
+		}
+
+		browser.messageDisplay.getDisplayedMessages(tab.id).then((messages) => {
+			if(messages.length == 1){
+				App.popMessage(tab, messages[0])
+			} else {
+				console.error("TODO: multimessage");
+			}
+		});
+	};
+
+	// Click on main toolbar
+	BrowserAction.onClicked.addListener(actionHandler);
 
 	// // Click on QNote button
-	browser.messageDisplayAction.onClicked.addListener(Tab => {
-		QDEB&&console.debug("messageDisplayAction.onClicked()");
-
-		// QNotePopToggle(Tab || CurrentTabId);
-		toggler(Tab);
-	});
+	browser.messageDisplayAction.onClicked.addListener(actionHandler);
 
 	// Handle keyboard shortcuts
-	browser.commands.onCommand.addListener(command => {
+	browser.commands.onCommand.addListener((command, tab) => {
 		if(command === 'qnote') {
 			QDEB&&console.debug("commands.onCommand()", command);
-			toggler();
+			actionHandler(tab);
 		} else {
 			console.error("Unknown browser.commands.onCommand: ", command);
 		}
@@ -792,6 +840,7 @@ async function initExtension(){
 
 	// Messages displayed
 	browser.messageDisplay.onMessagesDisplayed.addListener(async (Tab: browser.tabs.Tab, Messages: browser.messages.MessageHeader[] | browser.messages.MessageList) => {
+		// TODO: this check might not be relevant in the future
 		let m;
 		if("messages" in Messages){
 			m = Messages.messages;
@@ -799,9 +848,15 @@ async function initExtension(){
 			m = Messages;
 		}
 
-		// let m = Messages.messages ? Messages.messages : Messages;
 		if(m.length == 1){
-			App.changeMessage(Tab, m[0]);
+			const keyId = m[0].headerMessageId;
+			const note = await App.loadNote(keyId);
+
+			App.updateView(m[0].headerMessageId, note.data);
+
+			if(note.data && App.prefs.showOnSelect){
+				App.popMessage(Tab, m[0]);
+			}
 		} else {
 			console.error("TODO: multi message");
 			// await CurrentNote.silentlyPersistAndClose();
@@ -815,12 +870,7 @@ async function initExtension(){
 		}
 	});
 
-	await browser.scripting.messageDisplay.registerScripts([{
-		id: "qnote-message-display",
-		js: ["scripts/messageDisplay.js"],
-		css: ["html/qpopup.css"],
-	}]);
-
+	// Receive data from content
 	browser.runtime.onMessage.addListener(async (data: any, sender: browser.runtime.MessageSender, _sendResponse) => {
 		QDEB&&console.group("Received message:");
 		QDEB&&console.debug("data:", data);
@@ -851,7 +901,7 @@ async function initExtension(){
 		return false;
 	});
 
-	// Messages from content
+	// Receive data from content via connection
 	browser.runtime.onConnect.addListener(connection => {
 		QDEB&&console.log("New connection: ", connection);
 		connection.onMessage.addListener(async (data: any) => {
