@@ -108,7 +108,7 @@ function updateOptions(o: IPopupOptions){
 // }
 
 function resizeNote(w: number, h: number){
-	let rectLimit = {
+	const rectLimit = {
 		minWidth: 200,
 		minHeight: 125,
 		maxWidth: 800,
@@ -157,13 +157,13 @@ function popup(){
 		browser.qpopup.update(id, { text: YTextE.value });
 	});
 
-	let tDrag = (mouse: MouseEvent) => {
+	const tDrag = (mouse: MouseEvent) => {
 		if(mouse.target === null){
 			console.error("mouse.target is null");
 			return;
 		}
 
-		let el = mouse.target as HTMLElement;
+		const el = mouse.target as HTMLElement;
 		// let startX = 0, startY = 0;
 
 		el.style.cursor = 'move';
@@ -174,7 +174,7 @@ function popup(){
 		// 	startY = note.top;
 		// }
 
-		let mover = (e: MouseEvent) => {
+		const mover = (e: MouseEvent) => {
 			// let opts = structuredClone(Opts);
 
 			// if(vers91<0){
@@ -195,7 +195,7 @@ function popup(){
 			browser.qpopup.update(id, { offsetTop, offsetLeft });
 		};
 
-		let handleDragEnd = () => {
+		const handleDragEnd = () => {
 			window.removeEventListener("mousemove", mover);
 			window.removeEventListener("mouseup", handleDragEnd);
 			popupEl.style.opacity = '1';
@@ -208,19 +208,19 @@ function popup(){
 		popupEl.style.opacity = '0.4';
 	};
 
-	let tResize = (mouse: MouseEvent) => {
-		let startX = mouse.clientX;
-		let startY = mouse.clientY;
-		let startW = popupEl.offsetWidth;
-		let startH = popupEl.offsetHeight;
+	const tResize = (mouse: MouseEvent) => {
+		const startX = mouse.clientX;
+		const startY = mouse.clientY;
+		const startW = popupEl.offsetWidth;
+		const startH = popupEl.offsetHeight;
 
-		let resizer = (e: MouseEvent) => {
-			let w = startW + e.clientX - startX;
-			let h = startH + e.clientY - startY;
+		const resizer = (e: MouseEvent) => {
+			const w = startW + e.clientX - startX;
+			const h = startH + e.clientY - startY;
 			resizeNote(w, h);
 		};
 
-		let handleDragEnd = () => {
+		const handleDragEnd = () => {
 			window.removeEventListener("mousemove", resizer);
 			window.removeEventListener("mouseup", handleDragEnd);
 			popupEl.style.opacity = '1';
@@ -232,7 +232,7 @@ function popup(){
 		popupEl.style.opacity = '0.4';
 	};
 
-	let mDown = new WeakMap();
+	const mDown = new WeakMap();
 
 	mDown.set(titleEl, tDrag);
 	mDown.set(titleTextEl, tDrag);
@@ -249,8 +249,8 @@ function popup(){
 
 
 window.addEventListener("DOMContentLoaded", () => {
-	browser.qpopup.get(id).then(opts => {
-		updateOptions(opts);
+	browser.qpopup.get(id).then(state => {
+		updateOptions(state);
 		popup();
 	});
 });
