@@ -185,7 +185,7 @@ class QNoteExtension
 			if(popup && handle){
 				PopupManager.add(handle, popup);
 				popup.addListener("close", async (handle: number, reason: string, note: INoteData) => {
-					console.log("qpopup close !!!: ", handle, reason, note);
+					QDEB&&console.log("popup close: ", handle, reason);
 					if(reason == "close"){
 						popup.note.data = note;
 						popup.note.save();
@@ -822,7 +822,10 @@ async function initExtension(){
 	}]);
 
 	browser.runtime.onMessage.addListener(async (data: any, sender: browser.runtime.MessageSender, _sendResponse) => {
-		QDEB&&console.log("Received message: ", data, sender);
+		QDEB&&console.group("Received message:");
+		QDEB&&console.debug("data:", data);
+		QDEB&&console.debug("sender:", sender);
+		QDEB&&console.groupEnd();
 
 		if((new AttachToMessage()).parse(data)){
 			if(sender.tab?.id) {

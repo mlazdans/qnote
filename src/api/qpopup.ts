@@ -236,7 +236,7 @@ class QPopup extends BasePopup {
 	}
 
 	destroy(reason?: string) {
-		console.log("DDD destroy", this.id);
+		QDEB&&console.debug("qpopup.api.destroy id:", this.id);
 		if(popupManager.has(this.id)){
 			popupManager.remove(this.id);
 			PopupEventDispatcher.fireListeners("onclose", this.id, reason ?? "", this.state);
@@ -296,7 +296,7 @@ class QPopup extends BasePopup {
 	}
 
 	pop() {
-		QDEB && console.debug("qpopup.pop()", this.state);
+		QDEB && console.debug("qpopup.api.pop:", this.state);
 		const { left, top, width, height, anchor, anchorPlacement } = this.state;
 		const window = this.window;
 
