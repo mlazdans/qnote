@@ -1050,6 +1050,53 @@ declare interface nsIWindowWatcher {
 	registerNotification(observer: nsIObserver): void;
 }
 
+interface mozIDOMWindowProxy extends nsISupports {
+}
+
+type OutParam<T> = { value?: T };
+
+// https://searchfox.org/mozilla-central/source/dom/interfaces/base/nsIFocusManager.idl
+interface nsIFocusManager extends nsISupports {
+	readonly FLAG_RAISE: 1;
+	readonly FLAG_NOSCROLL: 2;
+	readonly FLAG_NOSWITCHFRAME: 4;
+	readonly FLAG_NOPARENTFRAME: 8;
+	readonly FLAG_NONSYSTEMCALLER: 16;
+	readonly FLAG_BYMOUSE: 4096;
+	readonly FLAG_BYKEY: 8192;
+	readonly FLAG_BYMOVEFOCUS: 16384;
+	readonly FLAG_NOSHOWRING: 32768;
+	readonly FLAG_SHOWRING: 1048576;
+	readonly FLAG_BYTOUCH: 2097152;
+	readonly FLAG_BYJS: 4194304;
+	readonly FLAG_BYLONGPRESS: 8388608;
+	readonly METHOD_MASK: 14708736;
+	readonly METHODANDRING_MASK: 15790080;
+	readonly MOVEFOCUS_FORWARD: 1;
+	readonly MOVEFOCUS_BACKWARD: 2;
+	readonly MOVEFOCUS_FORWARDDOC: 3;
+	readonly MOVEFOCUS_BACKWARDDOC: 4;
+	readonly MOVEFOCUS_FIRST: 5;
+	readonly MOVEFOCUS_LAST: 6;
+	readonly MOVEFOCUS_ROOT: 7;
+	readonly MOVEFOCUS_CARET: 8;
+	readonly MOVEFOCUS_FIRSTDOC: 9;
+	readonly MOVEFOCUS_LASTDOC: 10;
+
+	readonly activeWindow: mozIDOMWindowProxy;
+	readonly activeBrowsingContext: any; //BrowsingContext;
+	focusedWindow: mozIDOMWindowProxy;
+	readonly focusedContentBrowsingContext: any; // BrowsingContext;
+	readonly focusedElement: Element;
+	getLastFocusMethod(window: mozIDOMWindowProxy): u32;
+	setFocus(aElement: Element, aFlags: u32): void;
+	moveFocus(aWindow: mozIDOMWindowProxy, aStartElement: Element, aType: u32, aFlags: u32): Element;
+	clearFocus(aWindow: mozIDOMWindowProxy): void;
+	getFocusedElementForWindow(aWindow: mozIDOMWindowProxy, aDeep: boolean, aFocusedWindow: OutParam<mozIDOMWindowProxy>): Element;
+	moveCaretToFocus(aWindow: mozIDOMWindowProxy): void;
+	elementIsFocusable(aElement: Element, aFlags: u32): boolean;
+}
+
 //https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/Services.jsm
 declare namespace Services
 {
@@ -1070,6 +1117,7 @@ declare namespace Services
 	let prefs: any;
 	let scriptloader: any;
 	let io: Components.interfaces.nsIIOService // Cu.nsIIOService & nsINetUtil & nsISpeculativeConnect
+	let focus: nsIFocusManager;
 }
 
 declare namespace ExtensionCommon

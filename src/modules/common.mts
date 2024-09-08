@@ -14,11 +14,6 @@ export type MessagePart = browser.messages.MessagePart;
 
 export type AtLeast<T, K extends keyof T> = Partial<T> & Pick<T, K>
 
-// Bitmask
-export const POP_NONE     = 0;
-export const POP_FOCUS    = 1;
-export const POP_EXISTING = 2;
-
 export interface TypeCheckbox {
 	type: "checkbox"
 }
@@ -151,10 +146,6 @@ export function silentCatcher(){
 // 		getCurrentWindowIdAnd().then(windowId => browser.qapp.updateView(windowId));
 // 	}
 // }
-
-export async function focusMessagePane(windowId: number){
-	return browser.qapp.messagePaneFocus(windowId);
-}
 
 // async function loadAllNotes() {
 // 	let p;

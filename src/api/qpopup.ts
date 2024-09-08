@@ -201,7 +201,7 @@ class QPopup extends BasePopup {
 		const panel = document.createXULElement("panel");
 		panel.setAttribute("id", "qnote-window-panel-" + id);
 		panel.setAttribute("noautohide", "true");
-		panel.setAttribute("noautofocus", "true");
+		if(state.focusOnDisplay)panel.setAttribute("noautofocus", "true");
 		panel.setAttribute("class", "mail-extension-panel panel-no-padding browser-extension-panel");
 		panel.setAttribute("type", "arrow");
 		// panel.setAttribute("role", "group");
@@ -268,7 +268,9 @@ class QPopup extends BasePopup {
 	// }
 
 	// TODO: fix
-	focus() {}
+	focus() {
+		console.error("TODO: focus()");
+	}
 
 	// box = { top, left, width, height }
 	_center(innerBox: Box, outerBox: Box, absolute = true) {

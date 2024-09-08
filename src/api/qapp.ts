@@ -240,27 +240,6 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 		}
 	}
 
-	// id2RealWindow(w){
-	// 	try {
-	// 		return Number.isInteger(w) ? extension.windowManager.get(w).window : w;
-	// 	} catch {
-	// 	}
-	// }
-	id2RealWindow(windowId: number): MozWindow {
-		try {
-			return extension.windowManager.get(windowId).window;
-		} catch {
-			// QDEB&&console.debug("windowManager fail");
-			throw new Error("windowManager fail");
-		}
-		// return undefined;
-		// Get a window ID from a real window:
-		// context.extension.windowManager.getWrapper(realWindow).id;
-
-		// // Get all windows: (note this returns a Generator, not an array like the API)
-		// context.extension.windowManager.getAll();
-	}
-
 	// Legacy column
 	// updateView(w, keyId){
 	// 	let fName = `qapp.updateView(w, ${keyId})`;
@@ -317,20 +296,10 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 	// 	view.NoteChange(row, 1, 2);
 	// }
 
-	// getStorageFolder(): string {
-	// 	return this.Prefs?.storageOption == "folder" ? this.Prefs.storageFolder : "";
-	// }
-
-	// Not used currently
-	// realWindowWrap(realWindow){
-	// 	try {
-	// 		return extension.windowManager.getWrapper(realWindow);
-	// 	} catch {
-	// 	}
-	// }
-
 	getAPI(context: any) {
-		var API: QApp = this;
+		let API: QApp = this;
+		let focusSavedElement: Element | null = null;
+
 		context.callOnClose(API);
 
 		return {
@@ -377,7 +346,18 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 						};
 					}
 				}).api(),
-				// TODO: pass windowId
+				async focusSave() {
+					focusSavedElement = Services.focus.focusedElement;
+				},
+				async focusRestore() {
+					if(focusSavedElement){
+						try {
+							Services.focus.setFocus(focusSavedElement, 1);
+						} catch (e: any) {
+							console.error("focusRestore() failed:", e);
+						}
+					}
+				},
 				async init(prefs: IQAppPreferences){
 					QDEB&&console.debug("qapp.init()");
 					this.setPrefs(prefs);
@@ -468,19 +448,6 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 					// } else {
 					// 	API.ColumnHandler.columnHandler.limit = Prefs.showFirstChars;
 					// }
-				},
-				async messagePaneFocus(windowId: number){
-					// https://developer.thunderbird.net/add-ons/updating/tb115/adapt-to-changes-in-thunderbird-103-115
-					let w = API.id2RealWindow(windowId);
-					if(w && w.gFolderDisplay && w.gFolderDisplay.tree){
-						QDEB&&console.debug("focusMessagePane() - w.gFolderDisplay");
-						w.gFolderDisplay.tree.focus();
-					} else if(w && w.gTabmail && w.gTabmail.currentAbout3Pane){
-						QDEB&&console.debug("focusMessagePane() - w.gTabmail");
-						w.gTabmail.currentAbout3Pane.focus();
-					} else {
-						QDEB&&console.debug("focusMessagePane() - w.gFolderDisplay.tree not found", w);
-					}
 				},
 				async updateColumsView() {
 					// TODO: it does not update sometimes

@@ -160,16 +160,6 @@
 			"description": ""
 		}]
 	},{
-		"name": "messagePaneFocus",
-		"type": "function",
-		"description": "Focus message pane",
-		"async": true,
-		"parameters": [{
-			"name": "windowId",
-			"type": "integer",
-			"description": "windowId from windows API"
-		}]
-	},{
 		"name": "init",
 		"type": "function",
 		"description": "Initialize extension",
@@ -188,6 +178,18 @@
 			"optional": true,
 			"default": false
 		}]
+	},{
+		"name": "focusSave",
+		"type": "function",
+		"description": "",
+		"async": true,
+		"parameters": []
+	},{
+		"name": "focusRestore",
+		"type": "function",
+		"description": "",
+		"async": true,
+		"parameters": []
 	}],
 	"events": [{
 		"name": "onNoteRequest",

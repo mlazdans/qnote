@@ -37,9 +37,6 @@ import { INoteData, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
 import { INotePopup, QNotePopup } from "./modules/NotePopups.mjs";
 import {
 	MessageId,
-	POP_EXISTING,
-	POP_FOCUS,
-	POP_NONE,
 	convertPrefsToQAppPrefs,
 	dateFormatWithPrefs,
 } from "./modules/common.mjs";
@@ -218,25 +215,27 @@ class QNoteExtension
 			console.log(`new popup: ${handle}`, popup);
 			if(popup && handle){
 				PopupManager.add(handle, popup);
+				browser.qapp.focusSave();
+
 				popup.addListener("close", async (handle: number, reason: string, note: INoteData) => {
 					QDEB&&console.log("popup close: ", handle, reason);
 					if(reason == "close"){
 						popup.note.data = note;
 						popup.note.save();
 						await this.updateView(popup.keyId, note);
+						await browser.qapp.focusRestore();
 					} else if(reason == "delete"){
 						await popup.note.delete();
 						await this.updateView(popup.keyId, null);
+						await browser.qapp.focusRestore();
+					} else if(reason == "escape"){
+						await browser.qapp.focusRestore();
 					} else {
-						console.warn(`Unknown close reason: ${reason}`);
+						console.warn("Unknown close reason:", reason);
 					}
 					PopupManager.delete(handle);
 				});
-				// const l = (w: NoteWindow) => {
-				// 	QDEB&&console.debug("afterclose", w);
-				// 	focusMessagePane(windowId);
-				// };
-				// popup.addListener("afterclose", l);
+
 				resolve(popup);
 			}
 		});
@@ -415,61 +414,59 @@ async function createMultiNote(messageList: any, overwrite = false){
 	// });
 }
 
-async function QNotePopForMessage(id: MessageId, flags = POP_NONE) {
-	console.log("pop note");
-	let createNew = !(flags & POP_EXISTING);
-	let setFocus = flags & POP_FOCUS;
+// async function QNotePopForMessage(id: MessageId, flags = POP_NONE) {
+// 	console.log("pop note");
+// 	let createNew = !(flags & POP_EXISTING);
+// 	let setFocus = flags & POP_FOCUS;
 
-	// await CurrentNote.silentlyPersistAndClose();
+// 	// await CurrentNote.silentlyPersistAndClose();
 
-	/*
-	let createNew = !(flags & POP_EXISTING);
-	let setFocus = flags & POP_FOCUS;
+// 	let createNew = !(flags & POP_EXISTING);
+// 	let setFocus = flags & POP_FOCUS;
 
-	return CurrentPopup.loadNoteForMessage(id).then(note => {
-		CurrentPopup.messageId = id;
-		CurrentPopup.flags = flags;
-		if(note.exists || createNew){
-			// if(CurrentNote.popping){
-			// 	QDEB&&console.debug("already popping");
-			// 	return false;
-			// }
+// 	return CurrentPopup.loadNoteForMessage(id).then(note => {
+// 		CurrentPopup.messageId = id;
+// 		CurrentPopup.flags = flags;
+// 		if(note.exists || createNew){
+// 			// if(CurrentNote.popping){
+// 			// 	QDEB&&console.debug("already popping");
+// 			// 	return false;
+// 			// }
 
-			// CurrentNote.popping = true;
-			return CurrentPopup.pop().then(isPopped => {
-				if(setFocus && isPopped){
-					CurrentPopup.focus();
-				}
+// 			// CurrentNote.popping = true;
+// 			return CurrentPopup.pop().then(isPopped => {
+// 				if(setFocus && isPopped){
+// 					CurrentPopup.focus();
+// 				}
 
-				if(isPopped){
-					note.left = isPopped.left;
-					note.top = isPopped.top;
-				}
+// 				if(isPopped){
+// 					note.left = isPopped.left;
+// 					note.top = isPopped.top;
+// 				}
 
-				mpUpdateForNote(note);
+// 				mpUpdateForNote(note);
 
-				return isPopped;
-			// }).finally(() => {
-			// 	CurrentNote.popping = false;
-			});
-		} else {
-			mpUpdateForNote(note);
-		}
-	}).catch(e => {
-		if(e instanceof NoKeyIdError){
-			if(createNew){
-				browser.legacy.alert(_("no.message_id.header"));
-			}
-		} else if(e instanceof DirtyStateError){
-			if(createNew){
-				browser.legacy.alert(_("close.current.note"));
-			}
-		} else {
-			console.error(e);
-		}
-	});
-	*/
-}
+// 				return isPopped;
+// 			// }).finally(() => {
+// 			// 	CurrentNote.popping = false;
+// 			});
+// 		} else {
+// 			mpUpdateForNote(note);
+// 		}
+// 	}).catch(e => {
+// 		if(e instanceof NoKeyIdError){
+// 			if(createNew){
+// 				browser.legacy.alert(_("no.message_id.header"));
+// 			}
+// 		} else if(e instanceof DirtyStateError){
+// 			if(createNew){
+// 				browser.legacy.alert(_("close.current.note"));
+// 			}
+// 		} else {
+// 			console.error(e);
+// 		}
+// 	});
+// }
 
 // TODO:
 // async function QNotePopForTab(Tab, flags = POP_NONE) {

@@ -292,7 +292,7 @@ export function note2QPopupOptions(note: INote, prefs: IPreferences): IPopupOpti
 	}
 
 	opt.text = note.data?.text;
-	opt.title = "QNote: " + dateFormatWithPrefs(prefs, note.data?.ts);
+	opt.focusOnDisplay = prefs.focusOnDisplay;
 
 	return opt;
 }

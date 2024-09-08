@@ -97,15 +97,14 @@ function updateOptions(o: IPopupOptions){
 		YTextE.setAttribute("placeholder", Opts.placeholder);
 }
 
-// TODO: fix focus handling. Anyway, who's responsible for setting focus??
-// function sfocus(f: Function){
-// 	if(Opts.focusOnDisplay){
-// 		var isFocused = (document.activeElement === YTextE);
-// 		if(!isFocused){
-// 			f();
-// 		}
-// 	}
-// }
+function setFocus(f: CallableFunction){
+	if(Opts.focusOnDisplay){
+		var isFocused = (document.activeElement === YTextE);
+		if(!isFocused){
+			f();
+		}
+	}
+}
 
 function resizeNote(w: number, h: number){
 	const rectLimit = {
@@ -135,7 +134,7 @@ function resizeNote(w: number, h: number){
 function popup(){
 	i18n.setTexts(document);
 
-	// sfocus(() => window.focus());
+	setFocus(() => window.focus());
 
 	// TODO: differentiate close/delete events
 	closeEl.addEventListener("click", e => {
