@@ -291,6 +291,12 @@ export function note2QPopupOptions(note: INote, prefs: IPreferences): IPopupOpti
 		opt.top = undefined;
 	}
 
+	if(note.data?.ts) {
+		opt.title = "QNote: " + dateFormatWithPrefs(prefs, note.data?.ts);
+	} else {
+		opt.title = "QNote";
+	}
+
 	opt.text = note.data?.text;
 	opt.focusOnDisplay = prefs.focusOnDisplay;
 

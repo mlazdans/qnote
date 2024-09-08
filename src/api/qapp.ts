@@ -190,8 +190,8 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 				QDEB&&console.debug(`Unregistering ${cssUri}`);
 				cssService.unregisterSheet(uri, cssService.USER_SHEET);
 			}
-		} catch(e) {
-			console.error(e);
+		} catch (e: any) {
+			console.error("uninstallCSS() failed:", e);
 		}
 	}
 
@@ -203,8 +203,8 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 				QDEB&&console.debug(`Registering ${cssUri}`);
 				cssService.loadAndRegisterSheet(uri, cssService.USER_SHEET);
 			}
-		} catch(e) {
-			console.error(e);
+		} catch (e: any) {
+			console.error("installCSS() failed:", e);
 		}
 	}
 
@@ -550,8 +550,8 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 					if(!path.exists()){
 						try {
 							path.create(Ci.nsIFile.DIRECTORY_TYPE, 0o755);
-						} catch (e) {
-							console.error(e);
+						} catch (e: any) {
+							console.error("path.create() failed:", e);
 						}
 					}
 					return path.path;
