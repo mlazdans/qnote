@@ -1,16 +1,16 @@
 type FunctionWithArgs = (...args: any) => any;
 
-export class QEventDispatcher<A, K extends keyof A = keyof A, L extends FunctionWithArgs & A[K] = FunctionWithArgs & A[K]> {
+export class QEventDispatcher<A, K extends string & keyof A = string & keyof A, L extends FunctionWithArgs & A[K] = FunctionWithArgs & A[K]> {
 	private listenerMap: Map<K, Set<L>>;
 
-	constructor(key: K, ...moreKeys: K[]) {
-		this.listenerMap = new Map([[key, new Set()]]);
-		for (const key of moreKeys) {
-			this.listenerMap.set(key, new Set());
-		}
+	constructor() {
+		this.listenerMap = new Map();
 	}
 
 	addListener(key: K, listener: L) {
+		if (!this.listenerMap.has(key)) {
+			this.listenerMap.set(key, new Set());
+		}
 		this.listenerMap.get(key)?.add(listener);
 	}
 

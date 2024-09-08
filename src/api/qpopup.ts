@@ -15,16 +15,11 @@ interface Box {
 	height: number;
 }
 
-interface IQPopupListeners {
+class QPopupEventDispatcher extends QEventDispatcher<{
 	onclose: (id: number, reason: string, state: IPopupOptions) => void;
-}
-
-// TODO: merge with IQPopupListener
-class QPopupEventDispatcher extends QEventDispatcher<IQPopupListeners> {
-	constructor() {
-		super("onclose");
-	}
-}
+	onfocus: (id: number) => void;
+	onblur: (id: number) => void;
+}> {}
 
 function coalesce(...args: any): any {
 	for (let a of args) if (a !== null) return a;

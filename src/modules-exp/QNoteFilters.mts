@@ -10,15 +10,9 @@ var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionPa
 var { ThreadPaneColumns } = ChromeUtils.importESModule("chrome://messenger/content/ThreadPaneColumns.mjs");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
-interface IQFilterListeners {
+class QFiltersEventDispatcher extends QEventDispatcher<{
 	uninstall: () => void,
-}
-
-class QFiltersEventDispatcher extends QEventDispatcher<IQFilterListeners> {
-	constructor() {
-		super("uninstall");
-	}
-}
+}> {}
 
 // Current problems:
 // 1) match() does not expect promises

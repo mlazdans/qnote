@@ -31,15 +31,9 @@ export interface IPopupOptions {
 	enableSpellChecker?: boolean
 }
 
-interface NoteListenerArgs {
+class NoteEventDispatcher extends QEventDispatcher<{
 	close: (handle: number, reason: string, note: INoteData) => void
-}
-
-class NoteEventDispatcher extends QEventDispatcher<NoteListenerArgs> {
-	constructor() {
-		super("close")
-	}
-}
+}> {}
 
 export abstract class DefaultNotePopup extends NoteEventDispatcher implements INotePopup {
 	keyId: string

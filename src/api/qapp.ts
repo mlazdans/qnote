@@ -11,19 +11,13 @@ var { ThreadPaneColumns } = ChromeUtils.importESModule("chrome://messenger/conte
 var QDEB = true;
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
-interface IQAppListeners {
+class QAppEventDispatcher extends QEventDispatcher<{
 	domwindowopened: (aSubject: MozWindow, aTopic: string, aData: any) => void,
 	domwindowclosed: (aSubject: MozWindow, aTopic: string, aData: any) => void,
 	keydown: (e: KeyboardEvent) => void,
 	onShutdown: () => void,
 	domcomplete: (aSubject: MozWindow, aTopic: string, aData: any, e: Event) => void,
-}
-
-class QAppEventDispatcher extends QEventDispatcher<IQAppListeners> {
-	constructor() {
-		super("domwindowopened", "domwindowclosed", "keydown", "onShutdown", "domcomplete");
-	}
-}
+}> {}
 
 class QApp extends ExtensionCommon.ExtensionAPI {
 	noteGrabber
