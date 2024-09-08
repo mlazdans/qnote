@@ -61,40 +61,12 @@ const resizeEl    = querySelectorOrDie(".qpopup-controls-resize") as HTMLElement
 const closeEl     = querySelectorOrDie(".qpopup-title-closebutton") as HTMLElement;
 const delEl       = querySelectorOrDie("#note-delete") as HTMLElement;
 
-function updateOptions(o: IPopupOptions){
-	console.log("updateOptions");
-	if(Opts.enableSpellChecker !== o.enableSpellChecker)
-		Opts.enableSpellChecker = o.enableSpellChecker;
-
-	if(Opts.width !== o.width)
-		Opts.width = o.width;
-
-	if(Opts.height !== o.height)
-		Opts.height = o.height;
-
-	if(Opts.text !== o.text)
-		Opts.text = o.text;
-
-	if(Opts.title !== o.title)
-		Opts.title = o.title;
-
-	if(Opts.placeholder !== o.placeholder)
-		Opts.placeholder = o.placeholder;
-
-	if(Opts.enableSpellChecker !== null)
-		YTextE.setAttribute("spellcheck", Opts.enableSpellChecker ? "true" : "false");
-
-	if(Opts.text)
-		YTextE.value = Opts.text ?? "";
-
-	if(Opts.title)
-		titleTextEl.textContent = Opts.title;
-
-	if(Opts.width && Opts.height)
-		resizeNote(Opts.width, Opts.height);
-
-	if(Opts.placeholder)
-		YTextE.setAttribute("placeholder", Opts.placeholder);
+function updateElements(state: IPopupOptions){
+	YTextE.setAttribute("spellcheck", state.enableSpellChecker ? "true" : "false");
+	if(state.text)YTextE.value = state.text;
+	if(state.title)titleTextEl.textContent = state.title;
+	if(state.width && state.height)resizeNote(state.width, state.height);
+	if(state.placeholder)YTextE.setAttribute("placeholder", state.placeholder);
 }
 
 function setFocus(f: CallableFunction){
@@ -136,25 +108,10 @@ function popup(){
 
 	setFocus(() => window.focus());
 
-	// TODO: differentiate close/delete events
-	closeEl.addEventListener("click", e => {
-		// ext.CurrentNote.silentlyPersistAndClose();
-		browser.qpopup.close(id, "close");
-	});
-
-	delEl.addEventListener("click", e => {
-		// ext.CurrentNote.silentlyDeleteAndClose();
-		// ext.CurrentNote.close();
-		browser.qpopup.close(id, "delete");
-	});
-
-	// window.addEventListener("focus", () => {
-	// 	sfocus(() => YTextE.focus());
-	// });
-
-	YTextE.addEventListener("keyup", () => {
-		browser.qpopup.update(id, { text: YTextE.value });
-	});
+	closeEl.addEventListener("click", () => browser.qpopup.close(id, "close"));
+	delEl.addEventListener("click", () => browser.qpopup.close(id, "delete"));
+	window.addEventListener("focus", () => setFocus(() => YTextE.focus()));
+	YTextE.addEventListener("keyup", () => browser.qpopup.update(id, { text: YTextE.value }));
 
 	const tDrag = (mouse: MouseEvent) => {
 		if(mouse.target === null){
@@ -249,27 +206,8 @@ function popup(){
 
 window.addEventListener("DOMContentLoaded", () => {
 	browser.qpopup.get(id).then(state => {
-		updateOptions(state);
+		Object.assign(Opts, state);
+		updateElements(Opts);
 		popup();
 	});
 });
-
-// window.addEventListener("DOMContentLoaded", () => {
-// 	let xulPort = browser.runtime.connect({
-// 		name: "qpopup"
-// 	});
-
-// 	xulPort.onMessage.addListener(data => {
-// 		let reply;
-// 		if(reply = (new PopupDataReply).parse(data)){
-// 			if(reply.handle == id){ // TODO: do we need check id?
-// 				updateOptions(reply.opts);
-// 				popup();
-// 			}
-// 		} else {
-// 			console.error("Unknown or incorrect message: ", data);
-// 		}
-// 	});
-
-// 	(new PopupDataRequest).post(xulPort, { handle: id });
-// });
