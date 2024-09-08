@@ -203,6 +203,11 @@ function popup(){
 	window.addEventListener('mousedown', handleDragStart, false);
 }
 
+document.addEventListener("keyup", (e) => {
+	if(e.key == "Escape"){
+		browser.qpopup.close(id, "escape");
+	}
+});
 
 window.addEventListener("DOMContentLoaded", () => {
 	browser.qpopup.get(id).then(state => {
