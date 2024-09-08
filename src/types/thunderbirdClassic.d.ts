@@ -1145,7 +1145,7 @@ declare namespace ExtensionCommon
 		module?: string;
 		event?: string;
 		extensionApi?: object;
-		name: string;
+		name?: string;
 		register: Function;
 		inputHandling?: boolean;
 	}

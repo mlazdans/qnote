@@ -100,7 +100,6 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 			qpopup: {
 				onClose: new ExtensionCommon.EventManager({
 					context,
-					name: "qpopup.onClose",
 					register: (fire: ExtensionParentFire) => {
 						const l = (id: number, reason: string, state: IPopupOptions) => {
 							fire.async(id, reason, state);
@@ -115,7 +114,6 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				}).api(),
 				onFocus: new ExtensionCommon.EventManager({
 					context,
-					name: "qpopup.onFocus",
 					register: (fire: ExtensionParentFire) => {
 						const l = (id: number) => {
 							fire.async(id);
@@ -130,7 +128,6 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				}).api(),
 				onBlur: new ExtensionCommon.EventManager({
 					context,
-					name: "qpopup.onBlur",
 					register: (fire: ExtensionParentFire) => {
 						const l = (id: number) => {
 							fire.async(id);
