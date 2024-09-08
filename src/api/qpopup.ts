@@ -98,9 +98,9 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 		// ext no context?
 		return {
 			qpopup: {
-				onClosed: new ExtensionCommon.EventManager({
+				onClose: new ExtensionCommon.EventManager({
 					context,
-					name: "qpopup.onRemoved",
+					name: "qpopup.onClose",
 					register: (fire: ExtensionParentFire) => {
 						const l = (id: number, reason: string, state: IPopupOptions) => {
 							fire.async(id, reason, state);
@@ -110,6 +110,36 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 
 						return () => {
 							PopupEventDispatcher.removeListener("onclose", l);
+						};
+					},
+				}).api(),
+				onFocus: new ExtensionCommon.EventManager({
+					context,
+					name: "qpopup.onFocus",
+					register: (fire: ExtensionParentFire) => {
+						const l = (id: number) => {
+							fire.async(id);
+						};
+
+						PopupEventDispatcher.addListener("onfocus", l);
+
+						return () => {
+							PopupEventDispatcher.removeListener("onfocus", l);
+						};
+					},
+				}).api(),
+				onBlur: new ExtensionCommon.EventManager({
+					context,
+					name: "qpopup.onBlur",
+					register: (fire: ExtensionParentFire) => {
+						const l = (id: number) => {
+							fire.async(id);
+						};
+
+						PopupEventDispatcher.addListener("onblur", l);
+
+						return () => {
+							PopupEventDispatcher.removeListener("onblur", l);
 						};
 					},
 				}).api(),
@@ -130,7 +160,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					let oldState = Object.assign({}, popup.state);
 
 					// state come in null-ed
-					let { top, left, focused, offsetTop, offsetLeft } = newState;
+					let { top, left, offsetTop, offsetLeft } = newState;
 
 					if(offsetTop !== null)newState.top = coalesce(oldState.top, 0) + coalesce(offsetTop, 0) as number;
 					if(offsetLeft !== null)newState.left = coalesce(oldState.left, 0) + coalesce(offsetLeft, 0) as number;
@@ -139,9 +169,13 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						popup.moveTo(coalesce(newState.left, 0), coalesce(newState.top, 0));
 					}
 
-					// MAYBE: implement lose focus too
-					if (focused) {
-						popup.focus();
+					if(newState.focused !== oldState.focused){
+						console.log("newState.focused !== oldState.focused", newState.focused !== oldState.focused);
+						if(newState.focused === true){
+							PopupEventDispatcher.fireListeners("onfocus", id);
+						} else if(newState.focused === false){
+							PopupEventDispatcher.fireListeners("onblur", id);
+						}
 					}
 
 					// if(title){
@@ -261,11 +295,6 @@ class QPopup extends BasePopup {
 	// 	popup.style.width = width + 'px';
 	// 	popup.style.height = height + 'px';
 	// }
-
-	// TODO: fix
-	focus() {
-		console.error("TODO: focus()");
-	}
 
 	// box = { top, left, width, height }
 	_center(innerBox: Box, outerBox: Box, absolute = true) {

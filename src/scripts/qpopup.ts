@@ -70,11 +70,9 @@ function updateElements(state: IPopupOptions){
 }
 
 function setFocus(f: CallableFunction){
-	if(Opts.focusOnDisplay){
-		var isFocused = (document.activeElement === YTextE);
-		if(!isFocused){
-			f();
-		}
+	var focused = (document.activeElement === YTextE);
+	if(!focused){
+		f();
 	}
 }
 
@@ -106,11 +104,21 @@ function resizeNote(w: number, h: number){
 function popup(){
 	i18n.setTexts(document);
 
-	setFocus(() => window.focus());
+	if(Opts.focusOnDisplay){
+		setFocus(() => window.focus());
+	}
+
+	window.addEventListener("focus", () => {
+		setFocus(() => YTextE.focus());
+		browser.qpopup.update(id, { focused: true });
+	});
+
+	window.addEventListener("blur", () => {
+		browser.qpopup.update(id, { focused: false });
+	});
 
 	closeEl.addEventListener("click", () => browser.qpopup.close(id, "close"));
 	delEl.addEventListener("click", () => browser.qpopup.close(id, "delete"));
-	window.addEventListener("focus", () => setFocus(() => YTextE.focus()));
 	YTextE.addEventListener("keyup", () => browser.qpopup.update(id, { text: YTextE.value }));
 
 	const tDrag = (mouse: MouseEvent) => {

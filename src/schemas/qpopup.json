@@ -129,7 +129,7 @@
 		}]
 	}],
 	"events": [{
-		"name": "onClosed",
+		"name": "onClose",
 		"type": "function",
 		"description": "Fired when a popup is removed.",
 		"parameters": [{
@@ -142,6 +142,20 @@
 			"name": "options",
 			"$ref": "QPopupOptions",
 			"description": "Details of the popup that was removed."
+		}]
+	},{
+		"name": "onFocus",
+		"type": "function",
+		"parameters": [{
+			"name": "id",
+			"type": "integer"
+		}]
+	},{
+		"name": "onBlur",
+		"type": "function",
+		"parameters": [{
+			"name": "id",
+			"type": "integer"
 		}]
 	}]
 }]
