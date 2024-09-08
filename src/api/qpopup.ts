@@ -261,6 +261,16 @@ class QPopup extends BasePopup {
 		this.id = id;
 		this.state = state;
 
+		const self = this;
+
+		// Event flow: browser -> stack -> panel
+		this.browser.addEventListener("keydown", (e: KeyboardEvent) => {
+			if(e.key === 'Escape'){
+				e.preventDefault();
+			}
+		});
+
+
 		popupManager.add(this);
 	}
 

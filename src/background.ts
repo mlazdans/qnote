@@ -670,20 +670,6 @@ async function initExtension(){
 
 	// Below are various listeners only
 
-	// KeyDown from qapp
-	browser.qapp.onKeyDown.addListener(e => {
-		let ret = {};
-		if(e.key === 'Escape'){
-			console.error("TODO: Escape");
-			// if(CurrentNote.shown){
-			// 	CurrentNote.needSaveOnClose = false;
-			// 	CurrentNote.silentlyPersistAndClose();
-			// 	ret.preventDefault = true;
-			// }
-		}
-		return ret;
-	});
-
 	// Change folders
 	browser.mailTabs.onDisplayedFolderChanged.addListener(async (Tab, displayedFolder) => {
 		QDEB&&console.debug("mailTabs.onDisplayedFolderChanged()");

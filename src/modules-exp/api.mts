@@ -24,6 +24,10 @@ export interface INoteFileAPI<T extends INoteFileProvider> {
 	getAllKeys(root: string): Promise<Array<string>>
 }
 
+// Keep as example
+// const QAPP_ON_KEYDOWN_MAP = ["altKey", "code", "ctrlKey", "isComposing", "key", "location", "metaKey", "repeat", "shiftKey"] as const;
+// type KeyDownEventKeys = typeof QAPP_ON_KEYDOWN_MAP[number];
+
 export interface IQAppAPI {
 	createStoragePath(): Promise<string>
 	updateColumsView(): Promise<void>
@@ -37,7 +41,6 @@ export interface IQAppAPI {
 	focusRestore(): Promise<void>
 
 	onNoteRequest: WebExtEvent<(keyId: string) => void>
-	onKeyDown: WebExtEvent<(e: KeyboardEvent) => void>
 }
 
 export interface ILegacyAPI {

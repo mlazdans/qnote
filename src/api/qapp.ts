@@ -1,12 +1,12 @@
 import { IQAppPreferences } from "../modules/api.mjs";
 import { INoteData } from "../modules/Note.mjs";
 
-var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
-var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
+var { ExtensionParent }                       = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
+var { MailServices }                          = ChromeUtils.import("resource:///modules/MailServices.jsm");
+var { ThreadPaneColumns }                     = ChromeUtils.importESModule("chrome://messenger/content/ThreadPaneColumns.mjs");
 var { QNoteFilter, QNoteAction, QCustomTerm } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFilters.mjs");
-var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
-var { QCache } = ChromeUtils.importESModule("resource://qnote/modules/QCache.mjs");
-var { ThreadPaneColumns } = ChromeUtils.importESModule("chrome://messenger/content/ThreadPaneColumns.mjs");
+var { QEventDispatcher }                      = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
+var { QCache }                                = ChromeUtils.importESModule("resource://qnote/modules/QCache.mjs");
 
 var QDEB = true;
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
@@ -22,7 +22,6 @@ class QAppEventDispatcher extends QEventDispatcher<{
 class QApp extends ExtensionCommon.ExtensionAPI {
 	noteGrabber
 	EventDispatcher
-	KeyboardHandler
 	WindowObserver
 	Prefs: IQAppPreferences | null
 
@@ -60,62 +59,6 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 		this.Prefs = null;
 
 		this.EventDispatcher = new QAppEventDispatcher();
-		this.KeyboardHandler = {
-			windows: new WeakSet(),
-			addTo: (w: Window) => {
-				let fName = "KeyboardHandler.addTo()";
-				QDEB&&console.debug(`${fName} - attaching...`);
-
-				let kh = API.KeyboardHandler;
-
-				if(kh.windows.has(w)){
-					QDEB&&console.debug(`${fName} - already exists`);
-				} else if(
-					w &&
-					w.document &&
-					w.document.URL &&
-					w.document.URL.includes('chrome://messenger/content/messenger') ||
-					w.document.URL.includes('chrome://messenger/content/messageWindow')
-				) {
-					w.addEventListener("keydown", kh.handler);
-					kh.windows.add(w);
-					API.EventDispatcher.addListener('onShutdown', () => {
-						kh.removeFrom(w);
-					});
-
-					QDEB&&console.debug(`${fName} - attached!`);
-
-					return true;
-				} else {
-					QDEB&&console.debug(`${fName} - not attachable`);
-				}
-
-				return false;
-			},
-			removeFrom: (w: Window) => {
-				let fName = "KeyboardHandler.removeFrom()";
-				QDEB&&console.debug(`${fName} - removing...`);
-
-				let kh = API.KeyboardHandler;
-
-				if(kh.windows.has(w)){
-					w.removeEventListener("keydown", kh.handler)
-					kh.windows.delete(w);
-
-					QDEB&&console.debug(`${fName} - removed!`);
-
-					return true;
-				} else {
-					QDEB&&console.debug(`${fName} - does not exist`);
-				}
-
-				return false;
-			},
-			handler: (e: KeyboardEvent) => {
-				// QDEB&&console.debug("KeyboardHandler.handler()", e.code);
-				API.EventDispatcher.fireListeners("keydown", e);
-			}
-		}
 
 		this.WindowObserver = {
 			observe: function(aSubject: MozWindow, aTopic: string, aData: any) {
@@ -200,18 +143,6 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 		} catch (e: any) {
 			console.error("installCSS() failed:", e);
 		}
-	}
-
-	installKeyboardHandler(w: Window){
-		let kf = this.KeyboardHandler;
-
-		kf.addTo(w);
-
-		this.EventDispatcher.addListener('domcomplete', (aWindow: Window) => kf.addTo(aWindow));
-	}
-
-	uninstallKeyboardHandler(w: Window){
-		this.KeyboardHandler.removeFrom(w);
 	}
 
 	onShutdown(isAppShutdown: boolean) {
@@ -311,35 +242,6 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 						}
 					}
 				}).api(),
-				onKeyDown: new ExtensionCommon.EventManager({
-					context,
-					name: "qapp.onKeyDown",
-					register: (fire: ExtensionCommon.Fire) => {
-						let interested = ["altKey", "code", "ctrlKey", "isComposing", "key", "location", "metaKey", "repeat", "shiftKey"];
-						const l = (e: KeyboardEvent) => {
-							let e1: any = {};
-							for(let k of interested){
-								// e1[k] = e[k] !== undefined ? e[k] : undefined;
-								e1[k] = k in e ? e[k as keyof KeyboardEvent] : undefined;
-							}
-
-							let e2 = fire.sync(e1);
-
-							// MAYBE: implement some other features
-							if(e2.preventDefault){
-								e.preventDefault();
-							}
-
-							return e2;
-						};
-
-						API.EventDispatcher.addListener("keydown", l);
-
-						return () => {
-							API.EventDispatcher.removeListener("keydown", l);
-						};
-					}
-				}).api(),
 				async focusSave() {
 					focusSavedElement = Services.focus.focusedElement;
 				},
@@ -403,8 +305,6 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 					} else {
 						QDEB&&console.log("ThreadPaneColumn already exists");
 					}
-
-					API.installKeyboardHandler(w);
 
 					QDEB&&console.debug("Installing custom term");
 
