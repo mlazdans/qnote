@@ -120,31 +120,10 @@ function popup(){
 		}
 
 		const el = mouse.target as HTMLElement;
-		// let startX = 0, startY = 0;
 
 		el.style.cursor = 'move';
 
-		// Some strange behaviour starting with 91
-		// if(vers91<0){
-		// 	startX = note.left;
-		// 	startY = note.top;
-		// }
-
 		const mover = (e: MouseEvent) => {
-			// let opts = structuredClone(Opts);
-
-			// if(vers91<0){
-			// 	opt = {
-			// 		top: e.clientY - mouse.clientY + startY,
-			// 		left: e.clientX - mouse.clientX + startX
-			// 	};
-			// } else {
-			// 	opt = {
-			// 		offsetTop: e.clientY - mouse.clientY,
-			// 		offsetLeft: e.clientX - mouse.clientX
-			// 	};
-			// }
-
 			const offsetTop = e.clientY - mouse.clientY;
 			const offsetLeft = e.clientX - mouse.clientX;
 
