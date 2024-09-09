@@ -54,12 +54,13 @@ if (isNaN(id)) {
 const Opts: IPopupOptions = { };
 const i18n = new DOMLocalizator(browser.i18n.getMessage);
 
-const YTextE      = getElementByIdOrDie('note-text') as HTMLTextAreaElement;
-const popupEl     = querySelectorOrDie('.qpopup') as HTMLTextAreaElement;
-const titleTextEl = querySelectorOrDie(".qpopup-title-text") as HTMLElement;
-const resizeEl    = querySelectorOrDie(".qpopup-controls-resize") as HTMLElement;
-const closeEl     = querySelectorOrDie(".qpopup-title-closebutton") as HTMLElement;
-const delEl       = querySelectorOrDie("#note-delete") as HTMLElement;
+const YTextE       = getElementByIdOrDie('note-text') as HTMLTextAreaElement;
+const popupEl      = querySelectorOrDie('.qpopup') as HTMLTextAreaElement;
+const titleTextEl  = querySelectorOrDie(".qpopup-title-text") as HTMLElement;
+const resizeEl     = querySelectorOrDie(".qpopup-controls-resize") as HTMLElement;
+const closeEl      = querySelectorOrDie(".qpopup-title-closebutton") as HTMLElement;
+const delEl        = querySelectorOrDie("#note-delete") as HTMLElement;
+const screenshotEl = querySelectorOrDie("#note-screenshot") as HTMLElement;
 
 function updateElements(state: IPopupOptions){
 	YTextE.setAttribute("spellcheck", state.enableSpellChecker ? "true" : "false");
@@ -97,9 +98,10 @@ function resizeNote(w: number, h: number){
 function popup(){
 	i18n.setTexts(document);
 
-	closeEl.addEventListener("click", () => browser.qpopup.close(id, "close"));
-	delEl.addEventListener("click", () => browser.qpopup.close(id, "delete"));
-	YTextE.addEventListener("keyup", () => browser.qpopup.update(id, { text: YTextE.value }));
+	closeEl.addEventListener     ("click", () => browser.qpopup.close(id, "close"));
+	delEl.addEventListener       ("click", () => browser.qpopup.close(id, "delete"));
+	screenshotEl.addEventListener("click", () => browser.qpopup.takeScreenshot(id)); // TODO: animate on success
+	YTextE.addEventListener      ("keyup", () => browser.qpopup.update(id, { text: YTextE.value }));
 
 	const tDrag = (mouse: MouseEvent) => {
 		if(mouse.target === null){

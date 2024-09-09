@@ -8,6 +8,7 @@ export interface IQPopupAPI {
 	pop(id: number): Promise<void>
 	create(windowsId: number, options: IPopupOptions): Promise<number>
 	update(id: number, options: IPopupOptions): Promise<IPopupOptions>
+	takeScreenshot(id: number): Promise<boolean>
 	onClose: WebExtEvent<(id: number, reason: string, state: IPopupOptions) => void>
 	onFocus: WebExtEvent<(id: number) => void>
 	onBlur: WebExtEvent<(id: number) => void>

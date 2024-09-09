@@ -175,6 +175,25 @@
 	background: url(../images/supprimer.png) 0 0;
 }
 
+#note-screenshot {
+	height: 24px;
+	cursor: pointer;
+	flex-basis: bottom;
+}
+
+#note-screenshot > div {
+	width: 14px;
+	height: 14px;
+	margin: auto;
+	background: url(../images/screenshot-disabled.svg);
+	background-size: cover;
+}
+
+#note-screenshot > div:hover {
+	background: url(../images/screenshot.svg);
+	background-size: cover;
+}
+
 @media (prefers-color-scheme: dark) {
 	#note-text {
 		color: white;

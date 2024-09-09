@@ -289,5 +289,8 @@
 	},
 	"attach.template.reset": {
 		"message": "Reset template"
+	},
+	"take.screenshot": {
+		"message": "Take screenshot"
 	}
 }

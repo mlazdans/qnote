@@ -303,6 +303,13 @@ declare namespace Components
 			setTransferData(aFlavor: string, aData: any): void;
 		}
 
+		class imgIContainer extends nsISupports {
+		}
+
+		class imgITools extends nsISupports {
+			decodeImageFromBuffer(aBuffer: string, aSize: number, aMimeType: string): imgIContainer;
+		}
+
 		class nsISupportsString {
 			data: any
 		}

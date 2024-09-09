@@ -127,6 +127,15 @@
 			"name": "id",
 			"minimum": 1
 		}]
+	},{
+		"name": "takeScreenshot",
+		"type": "function",
+		"async": "callback",
+		"parameters": [{
+			"type": "integer",
+			"name": "id",
+			"minimum": 1
+		}]
 	}],
 	"events": [{
 		"name": "onClose",

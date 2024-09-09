@@ -143,6 +143,46 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				async setDebug(on: boolean) {
 					QDEB = on;
 				},
+				async takeScreenshot(id: number): Promise<boolean> {
+					const p = popupManager.get(id);
+
+					const canvas = p.window.document.createElement('canvas');
+					const ctx = canvas.getContext('2d');
+
+					if(!ctx){
+						console.error("Could not create cavas context");
+						return false;
+					}
+
+					try {
+						const bmp = await p.browser.drawSnapshot(0, 0, 0, 0, 1.0, "#fff", true);
+						const clipBoard = Services.clipboard;
+						const transferable = Cc["@mozilla.org/widget/transferable;1"].createInstance(Ci.nsITransferable);
+						const imageTools = Cc["@mozilla.org/image/tools;1"].getService(Ci.imgITools);
+
+						transferable.init(null);
+						canvas.width = bmp.width;
+						canvas.height = bmp.height;
+
+						// ctx.transferFromImageBitmap(bmp);
+						ctx.drawImage(bmp, 0, 0);
+						// const imageData = ctx.getImageData(0, 0, bmp.width, bmp.height);
+
+						const base64Data = canvas.toDataURL("image/png", 0.7).replace("data:image/png;base64,", "");
+
+						const image = p.window.atob(base64Data);
+						const imgDecoded = imageTools.decodeImageFromBuffer(image, image.length, "image/png");
+
+						transferable.addDataFlavor("application/x-moz-nativeimage");
+						transferable.setTransferData("application/x-moz-nativeimage", imgDecoded);
+						clipBoard.setData(transferable, null, Ci.nsIClipboard.kGlobalClipboard);
+					} catch (e) {
+						console.error("Taking snapshot failed ", e);
+						return false;
+					}
+
+					return true;
+				},
 				async close(id: number, reason: string) {
 					QDEB && console.debug("qpopup.remove()", id);
 					popupManager.get(id).destroy(reason);
