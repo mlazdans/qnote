@@ -235,12 +235,15 @@ class QPopup extends BasePopup {
 	id: number;
 	state: IPopupOptions;
 
+	private mainPopupSet;
+
 	constructor(window: MozWindow, extension: any, state: IPopupOptions) {
 		// const extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
 		let document = window.document;
 
 		let mainPopupSet = document.getElementById("mainPopupSet");
+
 		if (!mainPopupSet) {
 			throw new Error("mainPopupSet not found");
 		}
@@ -280,6 +283,7 @@ class QPopup extends BasePopup {
 
 		this.id = id;
 		this.state = state;
+		this.mainPopupSet = mainPopupSet;
 
 		const self = this;
 
@@ -306,6 +310,7 @@ class QPopup extends BasePopup {
 	destroy(reason?: string) {
 		QDEB&&console.debug("qpopup.api.destroy id:", this.id);
 		if(popupManager.has(this.id)){
+			this.mainPopupSet.removeChild(this.panel);
 			popupManager.remove(this.id);
 			PopupEventDispatcher.fireListeners("onclose", this.id, reason ?? "", this.state);
 		}
