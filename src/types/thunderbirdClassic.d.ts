@@ -1,3 +1,4 @@
+// Based on work of Brummolix
 /*!
 Copyright 2019 Brummolix (AutoarchiveReloaded, https://github.com/Brummolix/AutoarchiveReloaded )
 
@@ -104,12 +105,6 @@ interface QNoteFiltersExports {
 
 interface NoteDataExports {
 	INoteData: import("../modules/Note.mts").INoteData;
-}
-
-interface ExpApiExports {
-	QNoteFileAPI: typeof import("../modules-exp/api.mts").QNoteFileAPI
-	XNoteFileAPI: typeof import("../modules-exp/api.mts").XNoteFileAPI
-	LegacyAPI: typeof import("../modules-exp/api.mts").LegacyAPI
 }
 
 // interface FileUtilsExport {
@@ -242,8 +237,9 @@ declare namespace Components
 		public static importESModule(path: ServicesPath): any;
 		public static importESModule(path: QNoteFiltersPath): QNoteFiltersExports;
 		public static importESModule(path: NoteDataPath): NoteDataExports;
-		// public static importESModule(path: ApiPath): ApiExports;
-		public static importESModule(path: ExpApiPath): ExpApiExports;
+		public static importESModule(path: ExpApiPath): typeof import("../modules-exp/api.mts");
+		// TODO: simplify rest of them like this:
+		public static importESModule(path: "resource://qnote/modules/common.mjs"): typeof import("../modules/common.mts");
 		public static unload(path: string): void;
 		public static defineModuleGetter(param1: any, param2: any, param3: any): void;
 	}

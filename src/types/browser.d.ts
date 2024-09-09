@@ -24,7 +24,7 @@ declare global {
 	}
 
 	class XULDocument extends Document{
-		createXULElement(name: string): Element
+		createXULElement(name: string): XULElement
 	}
 
 	class MozXULElement extends XULElement{
