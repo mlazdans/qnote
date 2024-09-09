@@ -7,6 +7,11 @@
 //       Something is broken with scrollbars in qpopup, textarea gets wrapped in some div
 // TODO: test brand new installation with XNote++ and then switch to QNote
 
+// TODO: update messagepane after notechange
+// TODO: multinote
+// TODO: qpopup z-index
+// TODO: drag requestanimationframe?
+
 // App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup.api
 //  |     \                            \     \-> handles events sent by qpopup.api, fires events back to App through DefaultNotePopup
 //  |      \                            \--> WebExtension popup -> ext api (TODO)
@@ -184,8 +189,6 @@ class QNoteExtension
 
 		if(note) {
 			browser.qapp.saveNoteCache(keyId, note);
-			// TODO: somehow notify message pane if note changed
-			// getCurrentWindowIdAnd().then(windowId => browser.qapp.attachNoteToMessage(windowId, note));
 		}
 
 		browser.qapp.updateColumsView();
@@ -205,7 +208,7 @@ class QNoteExtension
 
 			if(prefs.windowOption === 'xul'){
 				handle = PopupManager.alloc();
-				popup = await QNotePopup.create(windowId, handle, note, prefs); // TODO: keyId already in note
+				popup = await QNotePopup.create(windowId, handle, note, prefs);
 			} else if(prefs.windowOption == 'webext'){
 				console.error("TODO: new WebExtensionNoteWindow");
 				// CurrentNote = new WebExtensionNoteWindow(CurrentWindowId);
