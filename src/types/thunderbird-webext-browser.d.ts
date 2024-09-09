@@ -17694,8 +17694,8 @@ declare namespace browser {
         // export const onMessagesDisplayed: WebExtEvent<(tab: tabs.Tab, messages: messages.MessageList) => void>;
 
         // MV2:
-        // export const onMessagesDisplayed: WebExtEvent<(tab: tabs.Tab, messages: messages.MessageHeader[]) => void>;
-        export const onMessagesDisplayed: WebExtEvent<(tab: tabs.Tab, messages: messages.MessageHeader[] | messages.MessageList) => void>;
+        export const onMessagesDisplayed: WebExtEvent<(tab: tabs.Tab, messages: messages.MessageHeader[]) => void>;
+        // export const onMessagesDisplayed: WebExtEvent<(tab: tabs.Tab, messages: messages.MessageHeader[] | messages.MessageList) => void>;
     }
 
     /**

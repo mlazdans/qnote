@@ -308,6 +308,7 @@ declare namespace Components
 
 		class imgITools extends nsISupports {
 			decodeImageFromBuffer(aBuffer: string, aSize: number, aMimeType: string): imgIContainer;
+			decodeImageFromArrayBuffer(aArrayBuffer: ArrayBuffer, aMimeType: string): imgIContainer;
 		}
 
 		class nsISupportsString {
