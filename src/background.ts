@@ -33,7 +33,7 @@
 // https://github.com/dothq/browser-desktop/blob/nightly/types.d.ts
 
 import { AttachToMessage, AttachToMessageReply, PrefsUpdated, RestoreFocus } from "./modules/Messages.mjs";
-import { INoteData, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
+import { INote, INoteData, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
 import { INotePopup, QNotePopup } from "./modules/NotePopups.mjs";
 import {
 	MessageId,
@@ -191,26 +191,26 @@ class QNoteExtension
 		browser.qapp.updateColumsView();
 	}
 
-	async createPopup(keyId: string, prefs: IPreferences): Promise<INotePopup> {
+	async createPopup(note: INote, prefs: IPreferences): Promise<INotePopup> {
 		await browser.qapp.focusSave();
 		return new Promise(async resolve => {
-			if(PopupManager.hasKeyId(keyId)){
-				return resolve(PopupManager.getByKeyId(keyId));
+			if(PopupManager.hasKeyId(note.keyId)){
+				return resolve(PopupManager.getByKeyId(note.keyId));
 			}
 
 			const windowId = await getCurrentWindowIdAnd();
-			const note = await this.loadNote(keyId);
+			// const note = await this.loadNote(keyId);
 			let popup: QNotePopup | undefined;
 			let handle: number | undefined;
 
 			if(prefs.windowOption === 'xul'){
 				handle = PopupManager.alloc();
-				popup = await QNotePopup.create(keyId, windowId, handle, note, prefs); // TODO: keyId already in note
+				popup = await QNotePopup.create(windowId, handle, note, prefs); // TODO: keyId already in note
 			} else if(prefs.windowOption == 'webext'){
 				console.error("TODO: new WebExtensionNoteWindow");
 				// CurrentNote = new WebExtensionNoteWindow(CurrentWindowId);
 			} else {
-				throw new TypeError("Prefs.windowOption");
+				throw new TypeError(`Unknown windowOption option: ${prefs.windowOption}`);
 			}
 
 			console.log(`new popup: ${handle}`, popup);
@@ -240,20 +240,10 @@ class QNoteExtension
 		});
 	}
 
-	// async createNoteForMessage(id: MessageId) {
-	// 	return getMessageKeyId(id).then(keyId => this.createNote(keyId));
-	// }
+	async popNote(note: INote){
+		QDEB&&console.debug("popNote(), keyId:", note.keyId);
 
-	// async loadNoteForMessageAnd(id: MessageId) {
-	// 	return this.createNoteForMessage(id).then(async note => {
-	// 		return note.load().then(() => note);
-	// 	});
-	// }
-
-	async popMessage(Tab: browser.tabs.Tab, Message: browser.messages.MessageHeader){
-		QDEB&&console.debug("onMessageDisplayed(), messageId:", Message.id);
-
-		this.createPopup(Message.headerMessageId, this.prefs).then(async popup => {
+		this.createPopup(note, this.prefs).then(async popup => {
 			popup.pop();
 		});
 	}
@@ -264,19 +254,6 @@ class QNoteExtension
 			.replace("{{ qnote_text }}", '<span class="qnote-text-span"></span>')
 		;
 	}
-
-	// TODO:
-	// async getDisplayedMessagesForTab(Tab: browser.tabs.Tab) {
-	// 	// return browser.messageDisplay.getDisplayedMessage(getTabId(tab)).then(messagePartReturner);
-	// 	if(Tab.id){
-	// 		return browser.messageDisplay.getDisplayedMessages(Tab.id).then((messages) => {
-	// 			console.log("getDisplayedMessageForTab", messages);
-	// 		}
-	// 			// MessageList => messagePartReturner(MessageList.messages[0])
-	// 		);
-	// 	}
-	// }
-
 }
 
 async function confirmDelete(shouldConfirm: boolean): Promise<boolean> {
@@ -752,16 +729,29 @@ async function initExtension(){
 		// QNotePopToggle(Tab || CurrentTabId);
 	};
 
-	const actionHandler = async (tab: browser.tabs.Tab) => {
+	const actionHandler = (tab: browser.tabs.Tab) => {
 		QDEB&&console.debug("action", tab);
 
 		if(!tab.id){
 			return;
 		}
 
-		browser.messageDisplay.getDisplayedMessages(tab.id).then((messages) => {
+		browser.messageDisplay.getDisplayedMessages(tab.id).then(async (messages) => {
 			if(messages.length == 1){
-				App.popMessage(tab, messages[0])
+				const keyId = messages[0].headerMessageId;
+				const note = await App.loadNote(keyId);
+
+				App.updateView(keyId, note.data);
+
+				if(note.data && App.prefs.showOnSelect){
+					App.popNote(note);
+				}
+
+				if(PopupManager.hasKeyId(keyId)){
+					PopupManager.getByKeyId(keyId).close();
+				} else {
+					App.popNote(note);
+				}
 			} else {
 				console.error("TODO: multimessage");
 			}
@@ -828,13 +818,12 @@ async function initExtension(){
 		}
 
 		if(m.length == 1){
-			const keyId = m[0].headerMessageId;
-			const note = await App.loadNote(keyId);
+			const note = await App.loadNote(m[0].headerMessageId);
 
 			App.updateView(m[0].headerMessageId, note.data);
 
 			if(note.data && App.prefs.showOnSelect){
-				App.popMessage(Tab, m[0]);
+				App.popNote(note);
 			}
 		} else {
 			console.error("TODO: multi message");

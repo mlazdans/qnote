@@ -10,6 +10,7 @@ export interface INotePopup {
 	note: INote;
 	flags: number | undefined;
 	pop(): Promise<void>
+	close(): Promise<void>
 }
 
 export interface IPopupOptions {
@@ -49,6 +50,7 @@ export abstract class DefaultNotePopup extends NoteEventDispatcher implements IN
 	}
 
 	abstract pop(): Promise<void>
+	abstract close(): Promise<void>
 
 	// async close(){
 	// 	this.fireListeners("afterclose", this);
@@ -257,8 +259,8 @@ export class QNotePopup extends DefaultNotePopup {
 	private id: number; // id from qpopup.api
 
 	// Use create() to instantiate object
-	private constructor(id: number, keyId: string, windowId: number, handle: number, note: INote, prefs: IPreferences) {
-		super(keyId, windowId, handle, note);
+	private constructor(id: number, windowId: number, handle: number, note: INote, prefs: IPreferences) {
+		super(note.keyId, windowId, handle, note);
 		this.handle = handle
 		this.prefs = prefs
 		this.id = id
@@ -290,15 +292,19 @@ export class QNotePopup extends DefaultNotePopup {
 		browser.qpopup.setDebug(debugOn);
 	}
 
-	static async create(keyId: string, windowId: number, handle: number, note: INote, prefs: IPreferences): Promise<QNotePopup> {
+	static async create(windowId: number, handle: number, note: INote, prefs: IPreferences): Promise<QNotePopup> {
 		return browser.qpopup.create(windowId, note2QPopupOptions(note, prefs)).then(id => {
 			console.log(`created qpopup ${id}`);
 
-			return new QNotePopup(id, keyId, windowId, handle, note, prefs);
+			return new QNotePopup(id, windowId, handle, note, prefs);
 		});
 	}
 
 	async pop() {
 		return browser.qpopup.pop(this.id);
+	}
+
+	async close() {
+		return browser.qpopup.close(this.id, "close");
 	}
 }
