@@ -148,7 +148,6 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 
 					const canvas = p.window.document.createElement('canvas');
 					const ctx = canvas.getContext('2d');
-
 					if(!ctx){
 						console.error("Could not create cavas context");
 						return false;
@@ -156,26 +155,26 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 
 					try {
 						const bmp = await p.browser.drawSnapshot(0, 0, 0, 0, 1.0, "#fff", true);
-						const clipBoard = Services.clipboard;
-						const transferable = Cc["@mozilla.org/widget/transferable;1"].createInstance(Ci.nsITransferable);
-						const imageTools = Cc["@mozilla.org/image/tools;1"].getService(Ci.imgITools);
-
-						transferable.init(null);
 						canvas.width = bmp.width;
 						canvas.height = bmp.height;
-
-						// ctx.transferFromImageBitmap(bmp);
 						ctx.drawImage(bmp, 0, 0);
-						// const imageData = ctx.getImageData(0, 0, bmp.width, bmp.height);
 
-						const base64Data = canvas.toDataURL("image/png", 0.7).replace("data:image/png;base64,", "");
+						canvas.toBlob(async (blob) => {
+							if(blob){
+								const transferable = Cc["@mozilla.org/widget/transferable;1"].createInstance(Ci.nsITransferable);
+								const imageTools = Cc["@mozilla.org/image/tools;1"].getService(Ci.imgITools);
 
-						const image = p.window.atob(base64Data);
-						const imgDecoded = imageTools.decodeImageFromBuffer(image, image.length, "image/png");
+								const blobData = await blob.arrayBuffer();
+								const imgDecoded = imageTools.decodeImageFromArrayBuffer(blobData, "image/png");
 
+								transferable.init(null);
 						transferable.addDataFlavor("application/x-moz-nativeimage");
 						transferable.setTransferData("application/x-moz-nativeimage", imgDecoded);
-						clipBoard.setData(transferable, null, Ci.nsIClipboard.kGlobalClipboard);
+								Services.clipboard.setData(transferable, null, Ci.nsIClipboard.kGlobalClipboard);
+							} else {
+								console.error("Decoding image failed");
+							}
+						}, "image/png", 0.9);
 					} catch (e) {
 						console.error("Taking snapshot failed ", e);
 						return false;
