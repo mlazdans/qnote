@@ -149,7 +149,6 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				},
 				async get(id: number) {
 					return popupManager.get(id).state;
-					// popup.popupInfo.focused = popup.isFocused;
 				},
 				async update(id: number, newState: IPopupOptions) {
 					let popup = popupManager.get(id);
@@ -166,15 +165,6 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						popup.moveTo(coalesce(newState.left, 0), coalesce(newState.top, 0));
 					}
 
-					if(newState.focused !== oldState.focused){
-						console.log("newState.focused !== oldState.focused", newState.focused !== oldState.focused);
-						if(newState.focused === true){
-							PopupEventDispatcher.fireListeners("onfocus", id);
-						} else if(newState.focused === false){
-							PopupEventDispatcher.fireListeners("onblur", id);
-						}
-					}
-
 					// if(title){
 					// 	popup.title = title;
 					// }
@@ -188,13 +178,6 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				},
 				async pop(id: number) {
 					return popupManager.get(id).pop();
-					// const popup = popupManager.get(id);
-					// return popup.pop().then(status => {
-					// 	// popup.options.top = popup.panel.screenY;
-					// 	// popup.options.left = popup.panel.screenX;
-
-					// 	return popup.id;
-					// });
 				},
 				async create(windowId: number, options: IPopupOptions) {
 					QDEB && console.debug("qpopup.create()");
@@ -227,7 +210,7 @@ class QPopup extends BasePopup {
 		const panel = document.createXULElement("panel");
 		panel.setAttribute("id", "qnote-window-panel-" + id);
 		panel.setAttribute("noautohide", "true");
-		if(state.focusOnDisplay)panel.setAttribute("noautofocus", "true");
+		panel.setAttribute("noautofocus", state.focusOnDisplay ? "false" : "true");
 		panel.setAttribute("class", "mail-extension-panel panel-no-padding browser-extension-panel");
 		panel.setAttribute("type", "arrow");
 		// panel.setAttribute("role", "group");
@@ -267,6 +250,15 @@ class QPopup extends BasePopup {
 			}
 		});
 
+		this.browser.addEventListener("focus", () => {
+			self.state.focused = true;
+			PopupEventDispatcher.fireListeners("onfocus", self.id);
+		});
+
+		this.browser.addEventListener("blur", () => {
+			self.state.focused = false;
+			PopupEventDispatcher.fireListeners("onblur", self.id);
+		});
 
 		popupManager.add(this);
 	}

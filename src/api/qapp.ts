@@ -248,10 +248,12 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 				async focusRestore() {
 					if(focusSavedElement){
 						try {
-							Services.focus.setFocus(focusSavedElement, 1);
+							Services.focus.setFocus(focusSavedElement, 0);
 						} catch (e: any) {
 							console.error("focusRestore() failed:", e);
 						}
+					} else {
+						console.warn("focusSavedWindow or focusSavedElement is not set");
 					}
 				},
 				async init(prefs: IQAppPreferences){

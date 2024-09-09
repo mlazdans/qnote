@@ -1,4 +1,5 @@
 import { DOMLocalizator } from "../modules/DOMLocalizator.mjs";
+import { RestoreFocus } from "../modules/Messages.mjs";
 import { IPopupOptions } from "../modules/NotePopups.mjs";
 import { getElementByIdOrDie, querySelectorOrDie } from "../modules/common.mjs";
 
@@ -55,7 +56,6 @@ const i18n = new DOMLocalizator(browser.i18n.getMessage);
 
 const YTextE      = getElementByIdOrDie('note-text') as HTMLTextAreaElement;
 const popupEl     = querySelectorOrDie('.qpopup') as HTMLTextAreaElement;
-const titleEl     = querySelectorOrDie(".qpopup-title") as HTMLElement;
 const titleTextEl = querySelectorOrDie(".qpopup-title-text") as HTMLElement;
 const resizeEl    = querySelectorOrDie(".qpopup-controls-resize") as HTMLElement;
 const closeEl     = querySelectorOrDie(".qpopup-title-closebutton") as HTMLElement;
@@ -67,13 +67,6 @@ function updateElements(state: IPopupOptions){
 	if(state.title)titleTextEl.textContent = state.title;
 	if(state.width && state.height)resizeNote(state.width, state.height);
 	if(state.placeholder)YTextE.setAttribute("placeholder", state.placeholder);
-}
-
-function setFocus(f: CallableFunction){
-	var focused = (document.activeElement === YTextE);
-	if(!focused){
-		f();
-	}
 }
 
 function resizeNote(w: number, h: number){
@@ -103,19 +96,6 @@ function resizeNote(w: number, h: number){
 
 function popup(){
 	i18n.setTexts(document);
-
-	if(Opts.focusOnDisplay){
-		setFocus(() => window.focus());
-	}
-
-	window.addEventListener("focus", () => {
-		setFocus(() => YTextE.focus());
-		browser.qpopup.update(id, { focused: true });
-	});
-
-	window.addEventListener("blur", () => {
-		browser.qpopup.update(id, { focused: false });
-	});
 
 	closeEl.addEventListener("click", () => browser.qpopup.close(id, "close"));
 	delEl.addEventListener("click", () => browser.qpopup.close(id, "delete"));
@@ -177,7 +157,6 @@ function popup(){
 
 	const mDown = new WeakMap();
 
-	mDown.set(titleEl, tDrag);
 	mDown.set(titleTextEl, tDrag);
 	mDown.set(resizeEl, tResize);
 
@@ -188,6 +167,13 @@ function popup(){
 	}
 
 	window.addEventListener('mousedown', handleDragStart, false);
+	window.addEventListener("focus", () => YTextE.focus());
+
+	if(!Opts.focusOnDisplay){
+		setTimeout(() => (new RestoreFocus).sendMessage(), 100); // NOTE: arbitrary 100ms. Probablu should attach to some event or smth
+	} else {
+		YTextE.focus();
+	}
 }
 
 document.addEventListener("keyup", (e) => {

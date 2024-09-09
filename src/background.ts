@@ -32,7 +32,7 @@
 //    Types for MozXULElement and others
 // https://github.com/dothq/browser-desktop/blob/nightly/types.d.ts
 
-import { AttachToMessage, AttachToMessageReply, PrefsUpdated } from "./modules/Messages.mjs";
+import { AttachToMessage, AttachToMessageReply, PrefsUpdated, RestoreFocus } from "./modules/Messages.mjs";
 import { INoteData, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
 import { INotePopup, QNotePopup } from "./modules/NotePopups.mjs";
 import {
@@ -192,6 +192,7 @@ class QNoteExtension
 	}
 
 	async createPopup(keyId: string, prefs: IPreferences): Promise<INotePopup> {
+		await browser.qapp.focusSave();
 		return new Promise(async resolve => {
 			if(PopupManager.hasKeyId(keyId)){
 				return resolve(PopupManager.getByKeyId(keyId));
@@ -215,8 +216,6 @@ class QNoteExtension
 			console.log(`new popup: ${handle}`, popup);
 			if(popup && handle){
 				PopupManager.add(handle, popup);
-				browser.qapp.focusSave();
-
 				popup.addListener("close", async (handle: number, reason: string, note: INoteData) => {
 					QDEB&&console.log("popup close: ", handle, reason);
 					if(reason == "close"){
@@ -254,12 +253,9 @@ class QNoteExtension
 	async popMessage(Tab: browser.tabs.Tab, Message: browser.messages.MessageHeader){
 		QDEB&&console.debug("onMessageDisplayed(), messageId:", Message.id);
 
-		// let flags = POP_EXISTING;
-		// if(this.prefs.focusOnDisplay){
-		// 	flags |= POP_FOCUS;
-		// }
-
-		await this.createPopup(Message.headerMessageId, this.prefs).then(popup => popup.pop());
+		this.createPopup(Message.headerMessageId, this.prefs).then(async popup => {
+			popup.pop();
+		});
 	}
 
 	applyTemplate(t: string, data: INoteData): string {
@@ -721,7 +717,7 @@ async function initExtension(){
 	// Change focus
 	browser.windows.onFocusChanged.addListener(async windowId => {
 		// QDEB&&console.debug("windows.onFocusChanged(), windowId:", windowId, CurrentNote);
-		console.error("browser.windows.onFocusChanged");
+		// console.error("browser.windows.onFocusChanged");
 
 		// if(
 		// 	true
@@ -854,13 +850,12 @@ async function initExtension(){
 	});
 
 	// Receive data from content
-	browser.runtime.onMessage.addListener(async (data: any, sender: browser.runtime.MessageSender, _sendResponse) => {
+	browser.runtime.onMessage.addListener(async (rawData: any, sender: browser.runtime.MessageSender, _sendResponse) => {
 		QDEB&&console.group("Received message:");
-		QDEB&&console.debug("data:", data);
+		QDEB&&console.debug("rawData:", rawData);
 		QDEB&&console.debug("sender:", sender);
-		QDEB&&console.groupEnd();
 
-		if((new AttachToMessage()).parse(data)){
+		if((new AttachToMessage()).parse(rawData)){
 			if(sender.tab?.id) {
 				const List = await browser.messageDisplay.getDisplayedMessages(sender.tab.id);
 
@@ -873,13 +868,19 @@ async function initExtension(){
 							prefs: App.prefs,
 						});
 
+						QDEB&&console.groupEnd();
+
 						return reply.data;
 					}
 				}
 			}
+		} else if((new RestoreFocus()).parse(rawData)){
+			browser.qapp.focusRestore();
 		} else {
-			console.error("Unknown message: ", data);
+			console.error("Unknown message");
 		}
+
+		QDEB&&console.groupEnd();
 
 		return false;
 	});

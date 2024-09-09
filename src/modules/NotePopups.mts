@@ -1,5 +1,5 @@
 import { IPreferences, PopupAnchor } from './api.mjs';
-import { dateFormatWithPrefs } from './common.mjs';
+import { note2QPopupOptions, QPopupOptions2note } from './common.mjs';
 import { INote, INoteData } from './Note.mjs';
 import { QEventDispatcher } from './QEventDispatcher.mjs';
 
@@ -9,8 +9,6 @@ export interface INotePopup {
 	handle: number;
 	note: INote;
 	flags: number | undefined;
-	focus(): Promise<void>
-	isFocused(): Promise<boolean>
 	pop(): Promise<void>
 }
 
@@ -48,27 +46,9 @@ export abstract class DefaultNotePopup extends NoteEventDispatcher implements IN
 		this.windowId = windowId
 		this.handle = handle
 		this.note = note;
-
-		// this.ed.addListener("close", (id: number)=>{});
 	}
 
-	// addListener(name: DefaultNoteWindowListener, listener: (w: NoteWindow) => void): void {
-	// 	super.addListener(name, listener);
-	// }
-
-	// async loadNoteForMessage(id: MessageId) {
-	// 	return loadNoteForMessage(id).then(note => {
-	// 		this.note = note;
-	// 		this.loadedNoteData = note.get();
-
-	// 		return note;
-	// 	});
-	// }
-
 	abstract pop(): Promise<void>
-	abstract focus(): Promise<void>
-	abstract isFocused(): Promise<boolean>
-	// abstract update(note: NoteData): Promise<void>
 
 	// async close(){
 	// 	this.fireListeners("afterclose", this);
@@ -270,44 +250,7 @@ export abstract class DefaultNotePopup extends NoteEventDispatcher implements IN
 
 }
 
-export function note2QPopupOptions(note: INote, prefs: IPreferences): IPopupOptions {
-	const opt: IPopupOptions = {};
-
-	opt.width = note.data?.width || prefs.width;
-	opt.height = note.data?.height || prefs.height;
-	opt.left = note.data?.left;
-	opt.top = note.data?.top;
-
-	if(prefs.alwaysDefaultPlacement){
-		opt.width = prefs.width;
-		opt.height = prefs.height;
-		opt.left = undefined;
-		opt.top = undefined;
-	}
-
-	if(note.data?.ts) {
-		opt.title = "QNote: " + dateFormatWithPrefs(prefs, note.data?.ts);
-	} else {
-		opt.title = "QNote";
-	}
-
-	opt.text = note.data?.text;
-	opt.focusOnDisplay = prefs.focusOnDisplay;
-
-	return opt;
-}
-
-export function QPopupOptions2note(state: IPopupOptions): INoteData {
-	return {
-		text: state.text,
-		left: state.left,
-		top: state.top,
-		width: state.width,
-		height: state.height,
-	}
-}
-
-// Wrapper around qpopup API
+// Wrapper around qpopup API, runs in background context
 export class QNotePopup extends DefaultNotePopup {
 	prefs: IPreferences;
 
@@ -319,12 +262,28 @@ export class QNotePopup extends DefaultNotePopup {
 		this.handle = handle
 		this.prefs = prefs
 		this.id = id
-		browser.qpopup.onClosed.addListener((id: number, reason: string, state: IPopupOptions) => {
+
+		browser.qpopup.onClose.addListener((id: number, reason: string, state: IPopupOptions) => {
 			if(id == this.id){
-				console.log("browser.qpopup.onClosed", id, reason, state);
-				this.fireListeners("close", this.handle, reason, QPopupOptions2note(state));
+				console.log("browser.qpopup.onClose", id, reason, state);
+				this.fireListeners("close", this.handle, reason, QPopupOptions2note(state)); //.catch(e => console.error(e));
 			}
 		});
+
+		// Not used currently. Keep this code around for now
+		// browser.qpopup.onFocus.addListener((id: number) => {
+		// 	console.log("browser.qpopup.onFocus", id);
+		// 	if(id == this.id){
+		// 		self.isFocused = true;
+		// 	}
+		// });
+
+		// browser.qpopup.onBlur.addListener((id: number) => {
+		// 	console.log("browser.qpopup.onBlur", id);
+		// 	if(id == this.id){
+		// 		self.isFocused = false;
+		// 	}
+		// });
 	}
 
 	static init(debugOn: boolean){
@@ -339,52 +298,7 @@ export class QNotePopup extends DefaultNotePopup {
 		});
 	}
 
-	// async update(){
-	// 	return browser.qpopup.update(this.note2QPopupOptions());
-	// }
-
-	// TODO: fix
-	async isFocused() {
-		console.error("TODO QNotePopup.isFocused()");
-		return true;
-		// return browser.qpopup.get(this.popupId).then(popupInfo => popupInfo ? popupInfo.focused : false);
-	}
-
-	// TODO: fix
-	async focus() {
-		console.error("TODO QNotePopup.focus()");
-		// return this.update({
-		// 	focused: true
-		// });
-	}
-
-	// async close() {
-	// 	browser.qpopup.remove(this.id).then(super.close);
-	// }
-
 	async pop() {
 		return browser.qpopup.pop(this.id);
-		// browser.qpopup.pop(this.qpopupHandle).then(() => {
-		// 	let l = (id: number) => {
-		// 		console.log(`popped onRemoved ${this.qpopupHandle}:${id}`);
-		// 		// super.close();
-		// 		browser.qpopup.onRemoved.removeListener(l);
-		// 	};
-		// 	browser.qpopup.onRemoved.addListener(l);
-		// 	console.log(`popped popup ${this.qpopupHandle}`);
-		// });
-
-		// return super.pop(async opt => {
-		// 	opt = Object.assign(opt, {
-		// 		windowId: this.windowId,
-		// 		anchor: Prefs.anchor,
-		// 		anchorPlacement: Prefs.anchorPlacement
-		// 	});
-
-		// 	return browser.qpopup.create(opt).then(popupInfo => {
-		// 		this.popupId = popupInfo.id;
-		// 		return popupInfo;
-		// 	});
-		// });
 	}
 }
