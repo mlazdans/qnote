@@ -37,15 +37,12 @@ export class QEventDispatcher<A, K extends string & keyof A = string & keyof A, 
 		return this.listenerMap.get(key)?.has(listener) ? true : false;
 	}
 
-	async fireListeners(key: K, ...args: Parameters<L>): Promise<void> {
-		return new Promise((resolve) => {
-			const listeners = this.listenerMap.get(key);
-			if (listeners) {
-				for (const listener of listeners) {
-					listener(...args);
-				}
-				resolve();
+	fireListeners(key: K, ...args: Parameters<L>): void {
+		const listeners = this.listenerMap.get(key);
+		if (listeners) {
+			for (const listener of listeners) {
+				listener(...args);
 			}
-		});
+		}
 	}
 }
