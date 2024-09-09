@@ -76,23 +76,12 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 	}
 
 	getAPI(context: any) {
-		// this.i18n = new DOMLocalizator(id => {
-		// 	return extension.localizeMessage(id);
-		// });
-
 		function id2RealWindow(windowId: number): MozWindow {
 			try {
 				return extension.windowManager.get(windowId).window;
 			} catch {
-				// QDEB&&console.debug("windowManager fail");
 				throw new Error("windowManager fail");
 			}
-			// return undefined;
-			// Get a window ID from a real window:
-			// context.extension.windowManager.getWrapper(realWindow).id;
-
-			// // Get all windows: (note this returns a Generator, not an array like the API)
-			// context.extension.windowManager.getAll();
 		}
 
 		// ext no context?
@@ -168,8 +157,8 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 								const imgDecoded = imageTools.decodeImageFromArrayBuffer(blobData, "image/png");
 
 								transferable.init(null);
-						transferable.addDataFlavor("application/x-moz-nativeimage");
-						transferable.setTransferData("application/x-moz-nativeimage", imgDecoded);
+								transferable.addDataFlavor("application/x-moz-nativeimage");
+								transferable.setTransferData("application/x-moz-nativeimage", imgDecoded);
 								Services.clipboard.setData(transferable, null, Ci.nsIClipboard.kGlobalClipboard);
 							} else {
 								console.error("Decoding image failed");
