@@ -227,6 +227,14 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 		context.callOnClose(API);
 
+		function id2RealWindow(windowId: number): MozWindow {
+			try {
+				return extension.windowManager.get(windowId).window;
+			} catch {
+				throw new Error("windowManager fail");
+			}
+		}
+
 		return {
 			qapp: {
 				onNoteRequest: new ExtensionCommon.EventManager({
@@ -357,70 +365,56 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 				// 	API.updateView(w, keyId);
 				// },
-				// async attachNotesToMultiMessage(windowId: number, notes: Array<NoteData>){
-				// 	// TODO: does not work with TB128
-				// 	let fName = `qapp.attachNotesToMultiMessage(${windowId})`;
+				async attachNotesToMultiMessage(windowId: number, notes: Array<INoteData>, keys: Array<string>){
+					const fName = `qapp.attachNotesToMultiMessage(${windowId})`;
 
-				// 	// if(!notes){
-				// 	// 	QDEB&&console.debug(`${fName} - no note data`);
-				// 	// 	return;
-				// 	// }
+					if(!notes){
+						QDEB&&console.debug(`${fName}: empty notes array`);
+						return;
+					}
 
-				// 	let w = API.id2RealWindow(windowId);
-				// 	if(!w || !w.document){
-				// 		QDEB&&console.debug(`${fName} - no window`);
-				// 		return;
-				// 	}
+					// const w = Services.wm.getMostRecentWindow("mail:3pane");
+					const w = id2RealWindow(windowId);
+					if(!w || !w.document){
+						QDEB&&console.debug(`${fName}: window not found`);
+						return;
+					}
 
-				// 	let messagepane = w.document.getElementById('multimessage') as any;
-				// 	if(!messagepane || !messagepane.contentDocument){
-				// 		QDEB&&console.debug(`${fName} - no multimessage`);
-				// 		return;
-				// 	}
+					const browser = w.document.querySelector("browser[src='about:3pane']") as any;
+					if(!browser){
+						QDEB&&console.debug(`${fName}: about:3pane browser element not found`);
+					}
 
-				// 	/**
-				// 	 * @type Document
-				// 	 */
-				// 	let document = messagepane.contentDocument;
-				// 	let cw = messagepane.contentWindow;
-				// 	// let messenger = w.messenger;
-				// 	let aFolderDisplay = w.gFolderDisplay;
-				// 	if(!(aFolderDisplay && aFolderDisplay.view && aFolderDisplay.view.dbView)){
-				// 		QDEB&&console.debug(`${fName} - no dbView`);
-				// 		return;
-				// 	}
+					if(!browser.contentDocument){
+						QDEB&&console.debug(`${fName}: browser.contentDocument not found`);
+					}
 
-				// 	if(!cw || !cw.gMessageSummary || !cw.gMessageSummary._msgNodes){
-				// 		QDEB&&console.debug(`${fName} - no gMessageSummary`);
-				// 		return;
-				// 	}
+					const multiMessageBrowser = browser.contentDocument.getElementById('multiMessageBrowser') as any;
+					if(!multiMessageBrowser){
+						QDEB&&console.debug(`${fName}: multiMessageBrowser not found`);
+						return;
+					}
 
-				// 	let view = aFolderDisplay.view.dbView;
-				// 	let summaryNodes = cw.gMessageSummary._msgNodes;
+					const document = multiMessageBrowser.contentDocument as Document
+					if(!document){
+						QDEB&&console.debug(`${fName}: multiMessageBrowser.contentDocument not found`);
+						return;
+					}
 
-				// 	document.querySelectorAll(".qnote-mm").forEach((e: HTMLElement) => {
-				// 		e.remove();
-				// 	});
+					const keySet = new Set(keys);
+					const messageList = document.querySelectorAll("#messageList > li") as NodeListOf<HTMLLIElement>;
+					for(const li of messageList){
+						const keyId = li.dataset.messageId;
+						const row = li.querySelector('.item-header');
+						if(!keyId || !keySet.has(keyId) || !row || row.querySelector("span.qnote-mm")){
+							continue;
+						}
 
-				// 	if(summaryNodes){
-				// 		notes.forEach(note => {
-				// 			let msgHdr = view.db.getMsgHdrForMessageID(note.keyId);
-				// 			if(msgHdr){
-				// 				// summaryKey based on mail\base\content\multimessageview.js
-				// 				let summaryKey = msgHdr.messageKey + msgHdr.folder.URI;
-				// 				if(note.exists && summaryNodes[summaryKey]){
-				// 					let row = summaryNodes[summaryKey].querySelector('.item_header');
-				// 					if(row){
-				// 						let qNote = document.createElement('span');
-				// 						qNote.classList.add("qnote-mm");
-
-				// 						row.appendChild(qNote);
-				// 					}
-				// 				}
-				// 			}
-				// 		});
-				// 	}
-				// },
+						const noteIndicator = document.createElement("span");
+						noteIndicator.classList.add("qnote-mm");
+						row.appendChild(noteIndicator);
+					}
+				},
 				async saveNoteCache(keyId: string, note: INoteData){
 					API.noteGrabber.set(keyId, note);
 				},

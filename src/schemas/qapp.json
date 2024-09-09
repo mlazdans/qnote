@@ -121,6 +121,12 @@
 			"items": {
 				"$ref": "qnote.NoteData"
 			}
+		},{
+			"type": "array",
+			"items": {
+				"name": "keyId",
+				"type": "string"
+			}
 		}]
 	},{
 		"name": "setPrefs",

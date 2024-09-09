@@ -7,14 +7,13 @@
 //       Something is broken with scrollbars in qpopup, textarea gets wrapped in some div
 // TODO: test brand new installation with XNote++ and then switch to QNote
 
-// TODO: update messagepane after notechange
-// TODO: multinote
+// TODO: update messagepane after notechange: https://webextension-api.thunderbird.net/en/128-esr-mv2/scripting.messageDisplay.html#registerscripts-scripts
 // TODO: qpopup z-index
 // TODO: drag requestanimationframe?
 
 // App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup.api
 //  |     \                            \     \-> handles events sent by qpopup.api, fires events back to App through DefaultNotePopup
-//  |      \                            \--> WebExtension popup -> ext api (TODO)
+//  |      \                            \-----> WebExtension popup -> ext api (TODO)
 //  |       \-> fires events, registered by App
 //  |
 //  \-> PopupManager - self-maintains handles Map to INotePopup`s
@@ -52,13 +51,6 @@ var QDEB = true;
 var App: QNoteExtension;
 
 let BrowserAction = browser.action ? browser.action : browser.browserAction;
-
-// var CurrentPopup: DefaultNoteWindow;
-// var CurrentTabId;
-// var CurrentWindowId; // MAYBE: should get rid of and replace with CurrentNote.windowId
-// var CurrentLang;
-// var TBInfo;
-// var i18n = new DOMLocalizator(browser.i18n.getMessage);
 var _ = browser.i18n.getMessage;
 
 const PopupManager = new class {
@@ -120,25 +112,6 @@ const PopupManager = new class {
 	}
 }
 
-// type CreateNotesAsArgs =  typeof QNoteFolder | typeof XNoteFolder | typeof QNoteLocalStorage extends infer R ?
-// 	R extends typeof QNoteFolder
-// 		? [instanceType: R, keyId: string, root: string]
-// 		: R extends typeof QNoteLocalStorage
-// 			? [instanceType: R, keyId: string]
-// 			: never
-// 		: never
-// ;
-// createNote(...[instanceType, keyId, root]: CreateNotesAsArgs) {
-// 	QDEB&&console.debug(`createNote(${keyId})`, instanceType);
-// 	if(root && (instanceType == QNoteFolder || instanceType == XNoteFolder)){
-// 		return new instanceType(keyId, root);
-// 	} else if(instanceType == QNoteLocalStorage) {
-// 		return new instanceType(keyId);
-// 	} else {
-// 		throw new TypeError("Ivalid Prefs.storageOption");
-// 	}
-// }
-
 class QNoteExtension
 {
 	prefs: IPreferences
@@ -160,6 +133,22 @@ class QNoteExtension
 	async loadNote(keyId: string) {
 		const note = this.createNote(keyId);
 		return note.load().then(() => note);
+	}
+
+	async updateMultiPane(messages: browser.messages.MessageHeader[]){
+		let noteArray = [];
+		let keyArray = [];
+		for(let m of messages){
+			const note = await this.loadNote(m.headerMessageId);
+			if(note.data){
+				noteArray.push(note.data);
+				keyArray.push(note.keyId);
+			}
+		};
+
+		const windowId = await getCurrentWindowIdAnd();
+
+		browser.qapp.attachNotesToMultiMessage(windowId, noteArray, keyArray);
 	}
 
 	async updateIcons(on: boolean, tabId?: number){
@@ -634,11 +623,17 @@ async function initExtension(){
 
 	App.updateTabMenusAndIcons();
 
-	browser.scripting.messageDisplay.registerScripts([{
-		id: "qnote-message-display",
-		js: ["scripts/messageDisplay.js"],
-		css: ["html/qpopup.css"],
-	}]);
+	// browser.scripting.messageDisplay.registerScripts([{
+	// 	id: "qnote-message-display",
+	// 	js: ["scripts/messageDisplay.js"],
+	// 	css: ["html/qpopup.css"],
+	// }]);
+
+	browser.messageDisplayScripts.register({
+		// id: "qnote-message-display",
+		js: [{ file: "scripts/messageDisplay.js" }],
+		css: [{ file: "html/qpopup.css" }],
+	});
 
 	// window.addEventListener("unhandledrejection", event => {
 	// 	console.warn(`Unhandle: ${event.reason}`, event);
@@ -811,15 +806,7 @@ async function initExtension(){
 	// });
 
 	// Messages displayed
-	browser.messageDisplay.onMessagesDisplayed.addListener(async (Tab: browser.tabs.Tab, Messages: browser.messages.MessageHeader[] | browser.messages.MessageList) => {
-		// TODO: this check might not be relevant in the future
-		let m;
-		if("messages" in Messages){
-			m = Messages.messages;
-		} else {
-			m = Messages;
-		}
-
+	browser.messageDisplay.onMessagesDisplayed.addListener(async (Tab: browser.tabs.Tab, m: browser.messages.MessageHeader[]) => {
 		if(m.length == 1){
 			const note = await App.loadNote(m[0].headerMessageId);
 
@@ -829,15 +816,8 @@ async function initExtension(){
 				App.popNote(note);
 			}
 		} else {
-			console.error("TODO: multi message");
-			// await CurrentNote.silentlyPersistAndClose();
-
-			// CurrentTabId = getTabId(Tab);
-
-			// // disble icons for multi select
-			// updateIcons(false);
-
-			// mpUpdateForMultiMessage(m);
+			App.updateIcons(false);
+			App.updateMultiPane(m);
 		}
 	});
 

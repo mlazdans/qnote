@@ -102,17 +102,6 @@ export function silentCatcher(){
 }
 
 // TODO:
-// async function mpUpdateForMultiMessage(messages){
-// 	let noteArray = [];
-// 	for(let m of messages){
-// 		await loadNoteForMessage(m.id).then(note => {
-// 			noteArray.push(note2QAppNote(note));
-// 		});
-// 	};
-// 	browser.qapp.attachNotesToMultiMessage(CurrentWindowId, noteArray);
-// }
-
-// TODO:
 // async function mpUpdateCurrent(){
 // 	return getDisplayedMessageForTab(CurrentTabId).then(message => {
 // 		return mpUpdateForMessage(message.id);

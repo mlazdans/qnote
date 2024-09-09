@@ -39,6 +39,7 @@ export interface IQAppAPI {
 	getProfilePath(): Promise<string>
 	focusSave(): Promise<void>
 	focusRestore(): Promise<void>
+	attachNotesToMultiMessage(windowId: number, notes: Array<INoteData>, keys: Array<string>): Promise<void>
 
 	onNoteRequest: WebExtEvent<(keyId: string) => void>
 }

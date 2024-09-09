@@ -26,7 +26,8 @@
 		"downloads",
 		"menus",
 		"accountsRead",
-		"scripting"
+		"scripting",
+		"messagesModify"
 	],
 	"background": {
 		"page": "background.html"
