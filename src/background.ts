@@ -38,13 +38,9 @@
 
 import { AttachToMessage, AttachToMessageReply, PrefsUpdated, RestoreFocus } from "./modules/Messages.mjs";
 import { INote, INoteData, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
-import { INotePopup, QNotePopup } from "./modules/NotePopups.mjs";
-import {
-	MessageId,
-	convertPrefsToQAppPrefs,
-	dateFormatWithPrefs,
-} from "./modules/common.mjs";
-import { getCurrentTabIdAnd, getCurrentWindowIdAnd, getPrefs, sendPrefsToQApp } from "./modules/common-background.mjs";
+import { INotePopup, IPopupState, QNotePopup } from "./modules/NotePopups.mjs";
+import { convertPrefsToQAppPrefs, dateFormatWithPrefs } from "./modules/common.mjs";
+import { confirmDelete, getCurrentTabId, getCurrentWindowId, getPrefs, isClipboardSet, sendPrefsToQApp } from "./modules/common-background.mjs";
 import { IPreferences } from "./modules/api.mjs";
 
 var QDEB = true;
@@ -54,61 +50,30 @@ let BrowserAction = browser.action ? browser.action : browser.browserAction;
 var _ = browser.i18n.getMessage;
 
 const PopupManager = new class {
-	private hCounter = 1
-	private popups = new Map<number, INotePopup>
-	private keyMap = new Map<string, number>
+	private popups = new Map<string, INotePopup>
 
-	alloc(): number {
-		return this.hCounter++
-	}
-
-	add(handle: number, popup: QNotePopup): void {
-		if(this.popups.has(handle)){
-			throw new Error(`popup with handle already exists: ${handle}`);
-		} else if(this.keyMap.has(popup.keyId)){
+	add(popup: QNotePopup): void {
+		if(this.popups.has(popup.keyId)){
 			throw new Error(`popup with keyId already exists: ${popup.keyId}`);
 		} else {
-			this.keyMap.set(popup.keyId, handle)
-			this.popups.set(handle, popup);
+			this.popups.set(popup.keyId, popup);
 		}
 	}
 
-	get(handle: number): INotePopup {
-		if(this.popups.has(handle)){
-			return this.popups.get(handle)!
+	get(keyId: string): INotePopup {
+		if(this.popups.has(keyId)){
+			return this.popups.get(keyId)!
 		} else {
-			throw new Error(`popup not found: ${handle}`)
+			throw new Error(`popup with keyId not found: ${keyId}`)
 		}
 	}
 
-	delete(handle: number) {
-		if(this.popups.has(handle)){
-			const p = this.popups.get(handle)!
-			return this.keyMap.delete(p.keyId) || this.popups.delete(handle);
-		} else {
-			throw new Error(`popup not found: ${handle}`)
-		}
+	remove(keyId: string) {
+		return this.popups.delete(keyId);
 	}
 
-	// removeByKeyId(keyId: string): boolean {
-	// 	const handle = this.keyMap.get(keyId);
-	// 	if(handle){
-	// 		return this.popups.delete(handle) && this.keyMap.delete(keyId);
-	// 	} else {
-	// 		throw new Error(`popup not found: ${keyId}`);
-	// 	}
-	// }
-
-	getByKeyId(keyId: string): INotePopup {
-		if(this.keyMap.has(keyId)){
-			return this.popups.get(this.keyMap.get(keyId)!)! // Safe to assume we do not have undefined|null data here
-		} else {
-			throw new Error(`popup not found: ${keyId}`);
-		}
-	}
-
-	hasKeyId(keyId: string): boolean {
-		return this.keyMap.has(keyId)
+	has(keyId: string): boolean {
+		return this.popups.has(keyId)
 	}
 }
 
@@ -185,19 +150,21 @@ class QNoteExtension
 
 	async createPopup(note: INote, prefs: IPreferences): Promise<INotePopup> {
 		await browser.qapp.focusSave();
-		return new Promise(async resolve => {
-			if(PopupManager.hasKeyId(note.keyId)){
-				return resolve(PopupManager.getByKeyId(note.keyId));
+		return new Promise(async (resolve, reject) => {
+			if(PopupManager.has(note.keyId)){
+				return resolve(PopupManager.get(note.keyId));
 			}
 
-			const windowId = await getCurrentWindowIdAnd();
-			// const note = await this.loadNote(keyId);
+			const windowId = await getCurrentWindowId();
+			if(!windowId){
+				return reject("Could not get current window");
+			}
+
 			let popup: QNotePopup | undefined;
-			let handle: number | undefined;
+			const noteData = await this.getNoteData(note.keyId);
 
 			if(prefs.windowOption === 'xul'){
-				handle = PopupManager.alloc();
-				popup = await QNotePopup.create(windowId, handle, note, prefs);
+				popup = await QNotePopup.create(note.keyId, windowId, QNotePopup.note2state(noteData || {}, prefs));
 			} else if(prefs.windowOption == 'webext'){
 				console.error("TODO: new WebExtensionNoteWindow");
 				// CurrentNote = new WebExtensionNoteWindow(CurrentWindowId);
@@ -205,26 +172,35 @@ class QNoteExtension
 				throw new TypeError(`Unknown windowOption option: ${prefs.windowOption}`);
 			}
 
-			console.log(`new popup: ${handle}`, popup);
-			if(popup && handle){
-				PopupManager.add(handle, popup);
-				popup.addListener("close", async (handle: number, reason: string, note: INoteData) => {
-					QDEB&&console.log("popup close: ", handle, reason);
+			if(popup){
+				console.log(`new popup: ${note.keyId}`, popup);
+				PopupManager.add(popup);
+				popup.addListener("close", async (keyIdIn: string, reason: string, state: IPopupState) => {
+					QDEB&&console.log("popup close: ", keyIdIn, reason);
+					PopupManager.remove(keyIdIn);
 					if(reason == "close"){
-						popup.note.data = note;
-						popup.note.save();
-						await this.updateView(popup.keyId, note);
+						const newNoteData = QNotePopup.state2note(state);
+						// New note
+						if(!noteData){
+							newNoteData.ts = Date.now();
+						}
+
+						if(newNoteData.text){
+							const newNote = App.createNote(keyIdIn);
+							newNote.updateData(newNoteData);
+							await newNote.save();
+							await this.updateView(keyIdIn, newNote.data);
+						}
 						await browser.qapp.focusRestore();
 					} else if(reason == "delete"){
-						await popup.note.delete();
-						await this.updateView(popup.keyId, null);
+						await App.createNote(keyIdIn).delete();
+						await this.updateView(keyIdIn, null);
 						await browser.qapp.focusRestore();
 					} else if(reason == "escape"){
 						await browser.qapp.focusRestore();
 					} else {
 						console.warn("Unknown close reason:", reason);
 					}
-					PopupManager.delete(handle);
 				});
 
 				resolve(popup);
@@ -741,12 +717,8 @@ async function initExtension(){
 
 				App.updateView(keyId, note.data);
 
-				if(note.data && App.prefs.showOnSelect){
-					App.popNote(note);
-				}
-
-				if(PopupManager.hasKeyId(keyId)){
-					PopupManager.getByKeyId(keyId).close();
+				if(PopupManager.has(keyId)){
+					PopupManager.get(keyId).close();
 				} else {
 					App.popNote(note);
 				}
