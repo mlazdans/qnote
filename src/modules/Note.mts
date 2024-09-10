@@ -1,21 +1,24 @@
 export type NoteType = QNoteFolder | XNoteFolder | QNoteLocalStorage;
-export type NoteClassType = typeof QNoteFolder | typeof XNoteFolder | typeof QNoteLocalStorage;
+export type NoteClassType =
+	| typeof QNoteFolder
+	| typeof XNoteFolder
+	| typeof QNoteLocalStorage;
 
 export interface INoteData {
-	text?: string
-	left?: number
-	top?: number
-	width?: number
-	height?: number
-	ts?: number
+	text?: string;
+	left?: number;
+	top?: number;
+	width?: number;
+	height?: number;
+	ts?: number;
 }
 
 export interface INote {
 	readonly keyId: string; // message-id header or another unique id
-	data: INoteData | null
+	data: INoteData | null;
 	load(): Promise<INoteData | null>;
-	save(): Promise<void>;
-	delete(): Promise<void>;
+	save(): Promise<boolean>;
+	delete(): Promise<boolean>;
 }
 
 // const l = ["aftersave", "afterdelete" , "afterupdate"];
@@ -44,12 +47,12 @@ export abstract class DefaultNote implements INote {
 	// 	});
 	// }
 
-	abstract save(): Promise<void>;
-	abstract delete(): Promise<void>;
+	abstract save(): Promise<boolean>;
+	abstract delete(): Promise<boolean>;
 	protected abstract subload(): Promise<INoteData | null>;
 
 	async load(): Promise<INoteData | null> {
-		return this.data = await this.subload()
+		return (this.data = await this.subload());
 	}
 
 	// protected async saver(saver: NoteSaver): Promise<boolean> {
@@ -84,23 +87,23 @@ export class QNoteLocalStorage extends DefaultNote {
 		return browser.storage.local
 			.get(this.keyId)
 			.then((store) =>
-				store[this.keyId]
-					? (this.data = store[this.keyId])
-					: null
+				store[this.keyId] ? (this.data = store[this.keyId]) : null
 			);
 	}
 
 	async save() {
-		this.data && browser.storage.local
-			.set({
-				[this.keyId]: this.data,
-			})
-			.then(() => true)
-			.catch(() => false);
+		return this.data
+			? browser.storage.local
+					.set({
+						[this.keyId]: this.data,
+					})
+					.then(() => true)
+					.catch(() => false)
+			: false;
 	}
 
 	async delete() {
-		browser.storage.local
+		return browser.storage.local
 			.remove(this.keyId)
 			.then(() => true)
 			.catch(() => false);
@@ -123,15 +126,18 @@ export class QNoteFolder extends DefaultNote {
 	}
 
 	async save() {
-		this.data && browser.qnote
-			.save(this.root, this.keyId, this.data)
-			.then(() => true)
-			.catch(() => false);
+		return this.data
+			? browser.qnote
+					.save(this.root, this.keyId, this.data)
+					.then(() => true)
+					.catch(() => false)
+			: false;
 	}
 
 	async delete() {
-		await browser.xnote.delete(this.root, this.keyId);
-		await browser.qnote.delete(this.root, this.keyId);
+		const d1 = await browser.xnote.delete(this.root, this.keyId);
+		const d2 = await browser.qnote.delete(this.root, this.keyId);
+		return d1 || d2;
 	}
 }
 
@@ -148,14 +154,16 @@ export class XNoteFolder extends DefaultNote {
 	}
 
 	async save() {
-		this.data && browser.xnote
-			.save(this.root, this.keyId, this.data)
-			.then(() => true)
-			.catch(() => false);
+		return this.data
+			? browser.xnote
+					.save(this.root, this.keyId, this.data)
+					.then(() => true)
+					.catch(() => false)
+			: false;
 	}
 
 	async delete() {
-		browser.xnote
+		return browser.xnote
 			.delete(this.root, this.keyId)
 			.then(() => true)
 			.catch(() => false);

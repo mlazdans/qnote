@@ -26,6 +26,7 @@ export class XNoteFile implements INoteFileProvider {
 			version: '2.3.1'
 		};
 	}
+
 	// Seems that "yyyy-mm-dd - HH:MM" format has been hardcoded for some time?
 	noteDateToDate(dateString: string): Date | undefined {
 		let dateParsers = [
@@ -80,6 +81,7 @@ export class XNoteFile implements INoteFileProvider {
 
 		return undefined;
 	}
+
 	dateToNoteDate(d: Date, mask: string) {
 		// If preferred, zeroise() can be moved out of the format() method for performance and reuse purposes
 		var zeroize = function (value: any, length?: number): string {
@@ -122,12 +124,15 @@ export class XNoteFile implements INoteFileProvider {
 			}
 		});
 	}
+
 	encodeFileName(str: string){
 		return escape(str).replace(/\//g, "%2F");
 	}
+
 	decodeFileName(str: string){
 		return unescape(str.replace(/%2F/g, "/"));
 	}
+
 	noteFile(root: string, keyId: string, enFileName = NF_DO_ENCODE){
 		try {
 			var file = new FileUtils.File(root);
@@ -141,6 +146,7 @@ export class XNoteFile implements INoteFileProvider {
 			return false;
 		}
 	}
+
 	getPrefs(){
 		var _xnotePrefs = Services.prefs.QueryInterface(Ci.nsIPrefBranch).getBranch("extensions.xnote.");
 		var defaultPrefs = this.getDefaultPrefs();
@@ -170,9 +176,11 @@ export class XNoteFile implements INoteFileProvider {
 
 		return p;
 	}
+
 	fileExists(file: any){
 		return file && file.exists();
 	}
+
 	getExistingFile(root: string, keyId: string){
 		let file;
 
@@ -186,6 +194,7 @@ export class XNoteFile implements INoteFileProvider {
 
 		return false;
 	}
+
 	save(root: string, keyId: string, note: INoteData){
 		var file = this.noteFile(root, keyId);
 
@@ -216,14 +225,14 @@ export class XNoteFile implements INoteFileProvider {
 
 		tempFile.moveTo(null, file.leafName);
 	}
+
 	delete(root: string, keyId: string){
 		const file = this.getExistingFile(root, keyId);
 		if(file){
 			file.remove(false);
-			return true;
 		}
-		return false;
 	}
+
 	load(root: string, keyId: string): INoteData | null {
 		var file = this.getExistingFile(root, keyId);
 
@@ -258,6 +267,7 @@ export class XNoteFile implements INoteFileProvider {
 
 		return note;
 	}
+
 	getAllKeys(root: string) {
 		var file = new FileUtils.File(root);
 		var eFiles = file.directoryEntries;
@@ -274,9 +284,11 @@ export class XNoteFile implements INoteFileProvider {
 
 		return notes;
 	}
+
 	getProfilePath() {
 		return Cc["@mozilla.org/file/directory_service;1"].getService(Ci.nsIProperties).get('ProfD', Ci.nsIFile);
 	}
+
 	getStoragePath(path: string | null) {
 		let prof = this.getProfilePath();
 

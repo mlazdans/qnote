@@ -19,8 +19,8 @@ export interface INoteFileProvider {
 export interface INoteFileAPI<T extends INoteFileProvider> {
 	provider: T
 	load(root: string, keyId: string): Promise<INoteData | null>
-	save(root: string, keyId: string, note: INoteData): Promise<void>
-	delete(root: string, keyId: string): Promise<void>
+	save(root: string, keyId: string, note: INoteData): Promise<boolean>
+	delete(root: string, keyId: string): Promise<boolean>
 	getAllKeys(root: string): Promise<Array<string>>
 }
 
@@ -80,6 +80,7 @@ function gen<T1 extends INoteFileProvider>(provider: T1): INoteFileAPI<T1> {
 			} catch(e: any) {
 				throw new ExtensionError(e.message);
 			}
+			return true;
 		},
 		async delete(root: string, keyId: string){
 			try {
@@ -87,6 +88,7 @@ function gen<T1 extends INoteFileProvider>(provider: T1): INoteFileAPI<T1> {
 			} catch(e: any) {
 				throw new ExtensionError(e.message);
 			}
+			return true;
 		},
 		async load(root: string, keyId: string){
 			try {
