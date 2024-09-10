@@ -1,15 +1,15 @@
 import * as luxon from "../modules/luxon.mjs";
-import { IPopupOptions } from "./NotePopups.mjs";
+import { IPopupState } from "./NotePopups.mjs";
 
 export interface IQPopupAPI {
 	setDebug(on: boolean): Promise<void>
 	close(id: number, reason: "close" | "escape" | "delete"): Promise<void>
-	get(id: number): Promise<IPopupOptions>
+	get(id: number): Promise<IPopupState>
 	pop(id: number): Promise<void>
-	create(windowsId: number, options: IPopupOptions): Promise<number>
-	update(id: number, options: IPopupOptions): Promise<IPopupOptions>
+	create(windowsId: number, state: IPopupState): Promise<number>
+	update(id: number, state: IPopupState): Promise<IPopupState>
 	takeScreenshot(id: number): Promise<boolean>
-	onClose: WebExtEvent<(id: number, reason: string, state: IPopupOptions) => void>
+	onClose: WebExtEvent<(id: number, reason: string, state: IPopupState) => void>
 	onFocus: WebExtEvent<(id: number) => void>
 	onBlur: WebExtEvent<(id: number) => void>
 }

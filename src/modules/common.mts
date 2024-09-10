@@ -3,8 +3,6 @@
 
 import { IPreferences, IQAppPreferences } from './api.mjs';
 import * as luxon from "../modules/luxon.mjs";
-import { INote, INoteData } from './Note.mjs';
-import { IPopupOptions } from './NotePopups.mjs';
 
 export class NoKeyIdError extends Error {};
 export class NoMessageError extends Error {};
@@ -410,44 +408,3 @@ export function convertPrefsToQAppPrefs(prefs: IPreferences): IQAppPreferences {
 	}
 }
 
-export function note2QPopupOptions(note: INote, prefs: IPreferences): IPopupOptions {
-	const opt: IPopupOptions = {
-		focused: undefined,
-		top: note.data?.top,
-		left: note.data?.left,
-		width: note.data?.width || prefs.width,
-		height: note.data?.height || prefs.height,
-		offsetTop: undefined,
-		offsetLeft: undefined,
-		anchor: prefs.anchor,
-		anchorPlacement: prefs.anchorPlacement,
-		title: "QNote",
-		text: note.data?.text,
-		placeholder: undefined,
-		focusOnDisplay: prefs.focusOnDisplay,
-		enableSpellChecker: prefs.enableSpellChecker,
-	}
-
-	if(prefs.alwaysDefaultPlacement){
-		opt.width = prefs.width;
-		opt.height = prefs.height;
-		opt.left = undefined;
-		opt.top = undefined;
-	}
-
-	if(note.data?.ts) {
-		opt.title = "QNote: " + dateFormatWithPrefs(prefs, note.data?.ts);
-	}
-
-	return opt;
-}
-
-export function QPopupOptions2note(state: IPopupOptions): INoteData {
-	return {
-		text: state.text,
-		left: state.left,
-		top: state.top,
-		width: state.width,
-		height: state.height,
-	}
-}

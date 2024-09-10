@@ -1,5 +1,5 @@
 import { IBox } from "../modules/common.mjs";
-import { IPopupOptions } from "../modules/NotePopups.mjs";
+import { IPopupState } from "../modules/NotePopups.mjs";
 
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var { BasePopup } = ChromeUtils.importESModule("resource:///modules/ExtensionPopups.sys.mjs");
@@ -11,7 +11,7 @@ var QDEB = true;
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 
 class QPopupEventDispatcher extends QEventDispatcher<{
-	onclose: (id: number, reason: string, state: IPopupOptions) => void;
+	onclose: (id: number, reason: string, state: IPopupState) => void;
 	onfocus: (id: number) => void;
 	onblur: (id: number) => void;
 }> {}
@@ -85,7 +85,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				onClose: new ExtensionCommon.EventManager({
 					context,
 					register: (fire: ExtensionParentFire) => {
-						const l = (id: number, reason: string, state: IPopupOptions) => {
+						const l = (id: number, reason: string, state: IPopupState) => {
 							fire.async(id, reason, state);
 						};
 
@@ -173,7 +173,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				async get(id: number) {
 					return popupManager.get(id).state;
 				},
-				async update(id: number, newState: IPopupOptions) {
+				async update(id: number, newState: IPopupState) {
 					let popup = popupManager.get(id);
 
 					let oldState = Object.assign({}, popup.state);
@@ -192,9 +192,9 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					// 	popup.title = title;
 					// }
 
-					const assignState: IPopupOptions = {};
+					const assignState: IPopupState = {};
 					Object.entries(newState).map(([k, v]) => {
-						if(v !== null)assignState[k as keyof IPopupOptions] = v;
+						if(v !== null)assignState[k as keyof IPopupState] = v;
 					});
 
 					return Object.assign(popup.state, assignState);
@@ -202,10 +202,10 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				async pop(id: number) {
 					return popupManager.get(id).pop();
 				},
-				async create(windowId: number, options: IPopupOptions) {
+				async create(windowId: number, state: IPopupState) {
 					QDEB && console.debug("qpopup.create()");
 
-					const popup = new QPopup(id2RealWindow(windowId), extension, options);
+					const popup = new QPopup(id2RealWindow(windowId), extension, state);
 
 					return popup.id;
 				},
@@ -216,11 +216,11 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 
 class QPopup extends BasePopup {
 	id: number;
-	state: IPopupOptions;
+	state: IPopupState;
 
 	private mainPopupSet;
 
-	constructor(window: MozWindow, extension: any, state: IPopupOptions) {
+	constructor(window: MozWindow, extension: any, state: IPopupState) {
 		const document = window.document;
 
 		const mainPopupSet = document.getElementById("mainPopupSet");

@@ -1,6 +1,6 @@
 import { DOMLocalizator } from "../modules/DOMLocalizator.mjs";
 import { RestoreFocus } from "../modules/Messages.mjs";
-import { IPopupOptions } from "../modules/NotePopups.mjs";
+import { IPopupState } from "../modules/NotePopups.mjs";
 import { getElementByIdOrDie, querySelectorOrDie } from "../modules/common.mjs";
 
 let QDEB = true;
@@ -8,7 +8,7 @@ let QDEB = true;
 QDEB&&console.debug("qpopup(content) new QPopup: ");
 
 // NOTE: keep this code around for now
-// let queuedUpdates: IPopupOptions = {};
+// let queuedUpdates: IPopupState = {};
 // let updateActivityTs = Date.now();
 // let timerId: number | undefined;
 
@@ -26,7 +26,7 @@ QDEB&&console.debug("qpopup(content) new QPopup: ");
 // 	}
 // }
 
-// function qpopupUpdateLazy(updates?: IPopupOptions): void {
+// function qpopupUpdateLazy(updates?: IPopupState): void {
 // 	updateActivityTs = Date.now();
 // 	Object.assign(queuedUpdates, updates);
 
@@ -51,7 +51,7 @@ if (isNaN(id)) {
 	throw new Error(`Incorrect value for query parameter id: ${id}`);
 }
 
-const Opts: IPopupOptions = { };
+const State: IPopupState = { };
 const i18n = new DOMLocalizator(browser.i18n.getMessage);
 
 const YTextE       = getElementByIdOrDie('note-text') as HTMLTextAreaElement;
@@ -62,7 +62,7 @@ const closeEl      = querySelectorOrDie(".qpopup-title-closebutton") as HTMLElem
 const delEl        = querySelectorOrDie("#note-delete") as HTMLElement;
 const screenshotEl = querySelectorOrDie("#note-screenshot") as HTMLElement;
 
-function updateElements(state: IPopupOptions){
+function updateElements(state: IPopupState){
 	YTextE.setAttribute("spellcheck", state.enableSpellChecker ? "true" : "false");
 	if(state.text)YTextE.value = state.text;
 	if(state.title)titleTextEl.textContent = state.title;
@@ -171,7 +171,7 @@ function popup(){
 	window.addEventListener('mousedown', handleDragStart, false);
 	window.addEventListener("focus", () => YTextE.focus());
 
-	if(!Opts.focusOnDisplay){
+	if(!State.focusOnDisplay){
 		setTimeout(() => (new RestoreFocus).sendMessage(), 100); // NOTE: arbitrary 100ms. Probablu should attach to some event or smth
 	} else {
 		YTextE.focus();
@@ -186,8 +186,8 @@ document.addEventListener("keyup", (e) => {
 
 window.addEventListener("DOMContentLoaded", () => {
 	browser.qpopup.get(id).then(state => {
-		Object.assign(Opts, state);
-		updateElements(Opts);
+		Object.assign(State, state);
+		updateElements(State);
 		popup();
 	});
 });
