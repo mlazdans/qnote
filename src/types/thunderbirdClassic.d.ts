@@ -1277,6 +1277,33 @@ declare var XULElement: {
     isInstance(obj: any): obj is XULElement;
 };
 
+interface XULFrameElement extends XULElement, MozFrameLoaderOwner {
+    readonly browserId: number;
+    readonly contentDocument: Document | null;
+    readonly contentWindow: WindowProxy | null;
+    readonly docShell: any; //nsIDocShell | null;
+    openWindowInfo: any; //nsIOpenWindowInfo | null;
+    readonly webNavigation: any; //nsIWebNavigation | null;
+    addEventListener<K extends keyof XULElementEventMap>(type: K, listener: (this: XULFrameElement, ev: XULElementEventMap[K]) => any, options?: boolean | AddEventListenerOptions): void;
+    addEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | AddEventListenerOptions): void;
+    removeEventListener<K extends keyof XULElementEventMap>(type: K, listener: (this: XULFrameElement, ev: XULElementEventMap[K]) => any, options?: boolean | EventListenerOptions): void;
+    removeEventListener(type: string, listener: EventListenerOrEventListenerObject, options?: boolean | EventListenerOptions): void;
+}
+
+declare var XULFrameElement: {
+    prototype: XULFrameElement;
+    new(): XULFrameElement;
+    isInstance(obj: any): obj is XULFrameElement;
+};
+
+interface MozFrameLoaderOwner {
+    readonly browsingContext: any; // BrowsingContext | null;
+    readonly frameLoader: any; // FrameLoader | null;
+    changeRemoteness(aOptions: any): void;  // aOptions: RemotenessOptions
+    swapFrameLoaders(aOtherLoaderOwner: XULFrameElement): void;
+    swapFrameLoaders(aOtherLoaderOwner: HTMLIFrameElement): void;
+}
+
 import Cu = Components.utils;
 import ChromeUtils = Components.utils;
 import Cc = Components.classes;

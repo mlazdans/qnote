@@ -36,6 +36,34 @@ export type HTMLInputCheckboxElement = HTMLInputElement & TypeCheckbox
 export type HTMLInputRadioElement    = HTMLInputElement & TypeRadio
 export type HTMLInputFileElement    = HTMLInputElement & TypeFile
 
+export interface IBox {
+	top: number;
+	left: number;
+	width: number;
+	height: number;
+}
+
+export var Box = {
+	center: function(innerBox: IBox, outerBox: IBox, absolute = true): IBox {
+		const retBox: IBox = {
+			top: 0,
+			left: 0,
+			width: 0,
+			height: 0,
+		};
+
+		retBox.left = Math.round((outerBox.width - innerBox.width) / 2);
+		retBox.top = Math.round((outerBox.height - innerBox.height) / 2);
+
+		if (absolute) {
+			retBox.left += outerBox.left;
+			retBox.top += outerBox.top;
+		}
+
+		return retBox;
+	}
+}
+
 // TODO: remove
 // function getTabId(Tab: messenger.tabs.Tab | undefined){
 // 	return Tab ? Tab.id : undefined;
@@ -408,12 +436,22 @@ export function convertPrefsToQAppPrefs(prefs: IPreferences): IQAppPreferences {
 }
 
 export function note2QPopupOptions(note: INote, prefs: IPreferences): IPopupOptions {
-	const opt: IPopupOptions = {};
-
-	opt.width = note.data?.width || prefs.width;
-	opt.height = note.data?.height || prefs.height;
-	opt.left = note.data?.left;
-	opt.top = note.data?.top;
+	const opt: IPopupOptions = {
+		focused: undefined,
+		top: note.data?.top,
+		left: note.data?.left,
+		width: note.data?.width || prefs.width,
+		height: note.data?.height || prefs.height,
+		offsetTop: undefined,
+		offsetLeft: undefined,
+		anchor: prefs.anchor,
+		anchorPlacement: prefs.anchorPlacement,
+		title: "QNote",
+		text: note.data?.text,
+		placeholder: undefined,
+		focusOnDisplay: prefs.focusOnDisplay,
+		enableSpellChecker: prefs.enableSpellChecker,
+	}
 
 	if(prefs.alwaysDefaultPlacement){
 		opt.width = prefs.width;
@@ -424,12 +462,7 @@ export function note2QPopupOptions(note: INote, prefs: IPreferences): IPopupOpti
 
 	if(note.data?.ts) {
 		opt.title = "QNote: " + dateFormatWithPrefs(prefs, note.data?.ts);
-	} else {
-		opt.title = "QNote";
 	}
-
-	opt.text = note.data?.text;
-	opt.focusOnDisplay = prefs.focusOnDisplay;
 
 	return opt;
 }

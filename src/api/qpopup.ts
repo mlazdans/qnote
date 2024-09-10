@@ -1,19 +1,14 @@
+import { IBox } from "../modules/common.mjs";
 import { IPopupOptions } from "../modules/NotePopups.mjs";
 
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var { BasePopup } = ChromeUtils.importESModule("resource:///modules/ExtensionPopups.sys.mjs");
 // var { BasePopup } = ChromeUtils.importESModule("resource://qnote/modules-exp/QPopups.sys.mjs");
 var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
+var { Box } = ChromeUtils.importESModule("resource://qnote/modules/common.mjs");
 
 var QDEB = true;
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
-
-interface Box {
-	top: number;
-	left: number;
-	width: number;
-	height: number;
-}
 
 class QPopupEventDispatcher extends QEventDispatcher<{
 	onclose: (id: number, reason: string, state: IPopupOptions) => void;
@@ -226,11 +221,9 @@ class QPopup extends BasePopup {
 	private mainPopupSet;
 
 	constructor(window: MozWindow, extension: any, state: IPopupOptions) {
-		// const extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
+		const document = window.document;
 
-		let document = window.document;
-
-		let mainPopupSet = document.getElementById("mainPopupSet");
+		const mainPopupSet = document.getElementById("mainPopupSet");
 
 		if (!mainPopupSet) {
 			throw new Error("mainPopupSet not found");
@@ -313,89 +306,73 @@ class QPopup extends BasePopup {
 		this.panel.moveTo(x, y);
 	}
 
-	// sizeTo(width: number, height: number){
-	// 	this.panel.sizeTo(width, height);
-	// }
-
-	// TODO: broken
-	// sizeTo(width, height){
-	// 	let popup = this.popupEl;
-
-	// 	// This seems to set rather size limits?
-	// 	//this.panel.sizeTo(width, height);
-
-	// 	popup.style.width = width + 'px';
-	// 	popup.style.height = height + 'px';
-	// }
-
-	// box = { top, left, width, height }
-	_center(innerBox: Box, outerBox: Box, absolute = true) {
-		const retBox: Box = {
-			top: 0,
-			left: 0,
-			width: 0,
-			height: 0,
-		};
-
-		const iWidth = innerBox.width;
-		const iHeight = innerBox.height;
-		const oWidth = outerBox.width;
-		const oHeight = outerBox.height;
-
-		retBox.left = Math.round((oWidth - iWidth) / 2);
-		retBox.top = Math.round((oHeight - iHeight) / 2);
-
-		if (absolute) {
-			retBox.left += outerBox.left;
-			retBox.top += outerBox.top;
-		}
-
-		return retBox;
-	}
-
 	pop() {
+		type AddScreenXY =  { screenX: number, screenY: number};
 		QDEB && console.debug("qpopup.api.pop:", this.state);
 		const { left, top, width, height, anchor, anchorPlacement } = this.state;
 		const window = this.window;
 
-		return new Promise((resolve) => {
-			const elements = {
-				window: "",
-				threadpane: "threadContentArea",
-				message: "messagepane",
-			};
+		const browser = window.document.querySelector("browser[src='about:3pane']") as XULFrameElement | null;
+		const threadPane = browser?.contentDocument?.getElementById('threadPane') as HTMLDivElement & AddScreenXY | null;
+		const messagePane = browser?.contentDocument?.getElementById('messagePane') as HTMLDivElement & AddScreenXY | null;
 
+		return new Promise((resolve) => {
 			if (left === null && top === null) {
-				let aEl: HTMLElement | null = null;
+				let aEl: (HTMLDivElement | HTMLBodyElement) & AddScreenXY | null;
 				let adjX = 0;
 				let adjY = 0;
 
-				if (anchor && anchor in elements) {
-					if (elements[anchor]) {
-						aEl = window.document.getElementById(elements[anchor]);
-					}
+				if((anchor == "threadpane") && threadPane){
+					aEl = threadPane;
+				} else if((anchor == "message") && messagePane){
+					aEl = messagePane;
+				} else {
+					aEl = window.document.querySelector("body") as HTMLBodyElement & AddScreenXY | null;
 				}
 
+				/**
+				 * New anchors on top of existing ones:
+				 *  before_start, before_end, after_start, after_end,
+				 *  start_before, start_after, end_before, end_after,
+				 *  overlap, after_pointer
+				 *
+				 *                   +--------------+        +------------+
+				 *                   | before_start |        | before_end |
+				 *    +--------------+--------------+--------+------------+------------+
+				 *    | start_before |   overlap    |                     | end_before |
+				 *    +--------------+--------------+                     +------------+
+				 *                   |                                    |
+				 *                   |             CONTAINER              |
+				 *                   |                                    |
+				 *     +-------------+                                    +-----------+
+				 *     | start_after |                                    | end_after |
+				 *     +-------------+-------------+----------+-----------+-----------+
+				 *                   | after_start |          | after_end |
+				 *                   +-------------+          +-----------+
+				 *
+				 *    after_pointer seems very similar to overlap
+				 */
+
 				// Fall back to window in case referring element is not visible
-				if (!aEl || !aEl.clientWidth || !aEl.clientHeight) {
-					aEl = window.document.querySelector("#messengerWindow");
-				}
+				// if (!aEl || !aEl.clientWidth || !aEl.clientHeight) {
+				// 	aEl = window.document.querySelector("#messengerWindow");
+				// }
 
 				if (aEl && anchorPlacement) {
 					if (anchorPlacement === "center") {
-						const wBox = {
-							top: (aEl as any).screenY, // TODO any
-							left: (aEl as any).screenX,
+						const wBox: IBox = {
+							top: aEl.screenY,
+							left: aEl.screenX,
 							width: aEl.clientWidth,
 							height: aEl.clientHeight,
 						};
-						const currBox: Box = {
-							left: left || 0,
-							top: top || 0,
+						const currBox: IBox = {
+							left: 0, // left and top is null
+							top: 0,
 							width: width || 0,
 							height: height || 0,
 						};
-						const adjBox = this._center(currBox, wBox, false);
+						const adjBox = Box.center(currBox, wBox, false);
 						adjX = adjBox.left;
 						adjY = adjBox.top;
 					} else if (width && (anchorPlacement.startsWith("topcenter") || anchorPlacement.startsWith("bottomcenter"))) {
@@ -403,9 +380,15 @@ class QPopup extends BasePopup {
 					} else if (height && (anchorPlacement.startsWith("rightcenter") || anchorPlacement.startsWith("leftcenter"))) {
 						adjY = (height / 2) * -1;
 					}
+					this.state.top = aEl.screenY + adjY;
+					this.state.left = aEl.screenX + adjX;
+					this.panel.openPopup(aEl, anchorPlacement, adjX, adjY);
+					this.panel.moveTo(this.state.left, this.state.top);
+				} else {
+					// This should never happend, only if aEl not found or anchorPlacement not set for some reason
+					console.warn("anchor element not found or anchorPlacement not set");
+					this.panel.openPopup(null, anchorPlacement);
 				}
-				this.panel.openPopup(aEl, anchorPlacement);
-				this.panel.moveTo(adjX, adjY);
 			} else {
 				this.panel.openPopup(null, "after_start");
 				this.panel.moveTo(left, top);
