@@ -204,79 +204,26 @@ export async function clearPrefs() {
 	return Promise.all(p);
 }
 
-async function getCurrentWindow(){
-	return browser.windows.getCurrent();
-}
-
 export async function getCurrentWindowId(){
-	return getCurrentWindow().then(Window => {
-		return Window.id;
-	});
-}
-
-export async function getCurrentWindowIdAnd(): Promise<number> {
-	return new Promise(async resolve => {
-		return getCurrentWindowId().then(windowId => {
-			if(windowId)resolve(windowId);
-		});
-	});
-}
-
-export async function getCurrentTab(){
-	return browser.tabs.getCurrent();
-}
-
-export async function getCurrentTabAnd(): Promise<browser.tabs.Tab> {
-	return new Promise(async resolve => {
-		return browser.tabs.getCurrent().then(tab => {
-			if(tab)resolve(tab);
-		});
-	});
+	return browser.windows.getCurrent().then(Window => Window.id);
 }
 
 export async function getCurrentTabId(){
-	return getCurrentTab().then(Tab => {
-		if(Tab?.id){
-			return Tab.id;
+	return browser.tabs.getCurrent().then(tab => {
+		if(tab?.id){
+			return tab.id;
 		} else {
-			return getCurrentWindowIdAnd().then(windowId => getWindowActiveTab(windowId).then(Tab => Tab?.id));
-		}
-	});
-
-	// var Tab;
-	// if(Tab = await getCurrentTab()){
-	// 	return Tab.id;
-	// } else {
-	// 	const windowId = await getCurrentWindowId();
-	// 	if(windowId){
-	// 		if(Tab = await getWindowActiveTab(windowId)){
-	// 			return Tab.id;
-	// 		}
-	// 	}
-	// }
-
-	// return undefined;
-	// return .then(async Tab => Tab ? Tab.id : await getWindowActiveTab(CurrentWindowId)));
-}
-
-async function getWindowActiveTab(windowId: number){
-	return browser.windows.get(windowId, { populate: true }).then(Window => {
-		if(Window.tabs){
-			for(let t of Window.tabs){
-				if(t.active){
-					return t;
+			return browser.windows.getCurrent({ populate: true }).then(window => {
+				if(window.tabs){
+					for(const t of window.tabs){
+						if(t.active){
+							return t.id;
+						}
+					}
 				}
-			}
+				return undefined;
+			});
 		}
-		return undefined;
-	});
-}
-
-export async function getCurrentTabIdAnd(): Promise<number> {
-	return new Promise(async resolve => {
-		return getCurrentTabId().then(tabId => {
-			if(tabId)resolve(tabId);
-		});
 	});
 }
 
@@ -317,4 +264,12 @@ async function getSavedPrefs(): Promise<Partial<IPreferences>> {
 	}
 
 	return ret;
+}
+
+export function isClipboardSet(content: INoteData | null): content is INoteData {
+	return content && content.text && content.text.trim ? content.text.trim().length > 0 : false;
+}
+
+export async function confirmDelete(shouldConfirm: boolean): Promise<boolean> {
+	return shouldConfirm ? await browser.legacy.confirm(_("delete.note"), _("are.you.sure")) : true;
 }

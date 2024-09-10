@@ -218,20 +218,6 @@ export function silentCatcher(){
 // 	});
 // }
 
-async function addToClipboard(note: INoteData){
-	await browser.qnote.copyToClipboard(note);
-}
-
-async function getFromClipboard(){
-	return browser.qnote.getFromClipboard();
-}
-
-async function isClipboardSet(){
-	return getFromClipboard().then(content => {
-		return content && content.text && content.text.trim ? content.text.trim().length > 0 : false;
-	});
-}
-
 // let messageHeaderReturner = (MessageHeader: MessageHeader) => {
 // 	if(MessageHeader){
 // 		return MessageHeader;
@@ -378,17 +364,6 @@ export function querySelectorOrDie(selector: string, ParentNode?: Element): Elem
 	const el = ParentNode ? ParentNode.querySelector(selector) : document.querySelector(selector);
 	if(el)return el;
 	throw new Error(`Required HTML element with selector ${selector} not found`);
-}
-
-export async function querySelectorAnd(selector: string): Promise<Element> {
-	return new Promise((resolve, reject) => {
-		const el = document.querySelector(selector);
-		if(el){
-			resolve(el);
-		} else {
-			reject();
-		}
-	});
 }
 
 export function isHTMLElement(node: Element): node is HTMLElement {
