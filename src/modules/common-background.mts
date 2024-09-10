@@ -270,6 +270,6 @@ export function isClipboardSet(content: INoteData | null): content is INoteData 
 	return content && content.text && content.text.trim ? content.text.trim().length > 0 : false;
 }
 
-export async function confirmDelete(shouldConfirm: boolean): Promise<boolean> {
-	return shouldConfirm ? await browser.legacy.confirm(_("delete.note"), _("are.you.sure")) : true;
+export async function confirmDelete(): Promise<boolean> {
+	return browser.legacy.confirm(_("delete.note"), _("are.you.sure"));
 }

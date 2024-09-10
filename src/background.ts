@@ -6,10 +6,10 @@
 // TODO: experiment with div overlays as popup in content scripts
 //       Something is broken with scrollbars in qpopup, textarea gets wrapped in some div
 // TODO: test brand new installation with XNote++ and then switch to QNote
-
 // TODO: update messagepane after notechange: https://webextension-api.thunderbird.net/en/128-esr-mv2/scripting.messageDisplay.html#registerscripts-scripts
 // TODO: qpopup z-index
 // TODO: drag requestanimationframe?
+// TODO: holding alt+q pops way too fast
 
 // App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup.api
 //  |     \                            \     \-> handles events sent by qpopup.api, fires events back to App through DefaultNotePopup
@@ -17,7 +17,6 @@
 //  |       \-> fires events, registered by App
 //  |
 //  \-> PopupManager - self-maintains handles Map to INotePopup`s
-
 
 // Interesting links
 //
@@ -90,30 +89,37 @@ class QNoteExtension
 		QDEB&&console.debug(`createNote(${keyId})`);
 		if(this.prefs.storageOption == "ext"){
 			return new QNoteLocalStorage(keyId);
-		} else {
+		} else if(this.prefs.storageOption == "folder"){
 			return new QNoteFolder(keyId, this.prefs.storageFolder);
+		} else {
+			throw new Error(`Unknown storageOption: ${this.prefs.storageOption}`);
 		}
 	}
 
-	async loadNote(keyId: string) {
+	async createAndLoadNote(keyId: string) {
 		const note = this.createNote(keyId);
 		return note.load().then(() => note);
+	}
+
+	async getNoteData(keyId: string) {
+		return this.createNote(keyId).load();
 	}
 
 	async updateMultiPane(messages: browser.messages.MessageHeader[]){
 		let noteArray = [];
 		let keyArray = [];
 		for(let m of messages){
-			const note = await this.loadNote(m.headerMessageId);
+			const note = await this.createAndLoadNote(m.headerMessageId);
 			if(note.data){
 				noteArray.push(note.data);
 				keyArray.push(note.keyId);
 			}
 		};
 
-		const windowId = await getCurrentWindowIdAnd();
-
+		const windowId = await getCurrentWindowId();
+		if(windowId) {
 		browser.qapp.attachNotesToMultiMessage(windowId, noteArray, keyArray);
+		}
 	}
 
 	async updateIcons(on: boolean, tabId?: number){
@@ -134,7 +140,7 @@ class QNoteExtension
 
 	async updateTabMenusAndIcons(){
 		browser.menus.removeAll();
-		getCurrentTabIdAnd().then(tabId => this.updateIcons(false, tabId));
+		getCurrentTabId().then(tabId => this.updateIcons(false, tabId));
 	}
 
 	async updateView(keyId: string, note: INoteData | null){
@@ -483,114 +489,12 @@ async function createMultiNote(messageList: any, overwrite = false){
 // 	return true;
 // }
 
-// async function menuHandler(info){
-// 	if(!info.selectedMessages){
-// 		console.error("No info.selectedMessages found");
-// 		return;
-// 	}
-
-// 	const messages = info.selectedMessages.messages;
-// 	if(info.selectedMessages.messages.length === 1){
-// 		// process single message
-// 		const id = messages[0].id;
-
-// 		// New
-// 		if(info.menuItemId === "create" || info.menuItemId === "modify"){
-// 			QNotePopForMessage(id, POP_FOCUS);
-// 		} else if(info.menuItemId === "paste"){
-// 			Menu.paste(id);
-// 		} else if(info.menuItemId === "options"){
-// 			browser.runtime.openOptionsPage();
-// 		// Existing
-// 		} else if(info.menuItemId === "copy"){
-// 			loadNoteForMessage(id).then(note => {
-// 				addToClipboard(note);
-// 			});
-// 		} else if(info.menuItemId === "paste"){
-// 			if(await isClipboardSet()){
-// 				Menu.paste(id);
-// 			}
-// 		} else if(info.menuItemId === "delete"){
-// 			if(CurrentNote.messageId === id){
-// 				await CurrentNote.silentlyDeleteAndClose();
-// 			} else {
-// 				if(await confirmDelete()) {
-// 					deleteNoteForMessage(id).then(updateNoteView).catch(e => browser.legacy.alert(_("error.deleting.note"), e.message));
-// 				}
-// 			}
-// 		} else if(info.menuItemId === "reset"){
-// 			if(CurrentNote.messageId === id){
-// 				CurrentNote.reset().then(() => {
-// 					CurrentNote.silentlyPersistAndClose().then(() => {
-// 						QNotePopForMessage(id, CurrentNote.flags)
-// 					});
-// 				});
-// 			} else {
-// 				saveNoteForMessage(id, {
-// 					left: undefined,
-// 					top: undefined,
-// 					width: Prefs.width,
-// 					height: Prefs.height
-// 				}).catch(e => browser.legacy.alert(_("error.saving.note"), e.message));
-// 			}
-// 		} else {
-// 			console.error("Unknown menuItemId: ", info.menuItemId);
-// 		}
-// 	} else {
-// 		// process multiple message selection
-// 		if(info.menuItemId === "create_multi"){
-// 			createMultiNote(info.selectedMessages.messages, true);
-// 		} else if(info.menuItemId === "paste_multi"){
-// 			if(await isClipboardSet()){
-// 				for(const m of info.selectedMessages.messages){
-// 					await Menu.paste(m.id);
-// 				};
-// 				mpUpdateForMultiMessage(info.selectedMessages.messages);
-// 			}
-// 		} else if(info.menuItemId === "delete_multi"){
-// 			if(await confirmDelete()) {
-// 				for(const m of info.selectedMessages.messages){
-// 					await ifNoteForMessageExists(m.id).then(() => {
-// 						if(CurrentNote.messageId === m.id){
-// 							CurrentNote.silentlyDeleteAndClose();
-// 						} else {
-// 							deleteNoteForMessage(m.id).then(updateNoteView).catch(e => browser.legacy.alert(_("error.deleting.note"), e.message));
-// 						}
-// 					}).catch(silentCatcher);
-// 				}
-// 				mpUpdateForMultiMessage(info.selectedMessages.messages);
-// 			}
-// 		} else if(info.menuItemId === "reset_multi"){
-// 			for(const m of info.selectedMessages.messages){
-// 				ifNoteForMessageExists(m.id).then(() => {
-// 					if(CurrentNote.messageId === m.id){
-// 						CurrentNote.reset().then(() => {
-// 							CurrentNote.silentlyPersistAndClose().then(() => {
-// 								QNotePopForMessage(m.id, CurrentNote.flags)
-// 							});
-// 						});
-// 					} else {
-// 						saveNoteForMessage(m.id, {
-// 							left: undefined,
-// 							top: undefined,
-// 							width: Prefs.width,
-// 							height: Prefs.height
-// 						}).catch(e => browser.legacy.alert(_("error.saving.note"), e.message));
-// 					}
-// 				}).catch(silentCatcher);
-// 			}
-// 		} else {
-// 			console.error("Unknown menuItemId: ", info.menuItemId);
-// 		}
-// 	}
-// }
-
 // TODO: move under app class at some point
 async function initExtension(){
 	QDEB&&console.debug("initExtension()");
 
 	// Return notes to qapp on request. Should be set before init
-	browser.qapp.onNoteRequest.addListener(async (keyId: string) => App.loadNote(keyId).then(note => note.data));
+	browser.qapp.onNoteRequest.addListener(async (keyId: string) => App.getNoteData(keyId));
 
 	await browser.qapp.init(convertPrefsToQAppPrefs(App.prefs));
 	await browser.qapp.setDebug(QDEB);
@@ -713,7 +617,7 @@ async function initExtension(){
 		browser.messageDisplay.getDisplayedMessages(tab.id).then(async (messages) => {
 			if(messages.length == 1){
 				const keyId = messages[0].headerMessageId;
-				const note = await App.loadNote(keyId);
+				const note = await App.createAndLoadNote(keyId);
 
 				App.updateView(keyId, note.data);
 
@@ -780,7 +684,7 @@ async function initExtension(){
 	// Messages displayed
 	browser.messageDisplay.onMessagesDisplayed.addListener(async (Tab: browser.tabs.Tab, m: browser.messages.MessageHeader[]) => {
 		if(m.length == 1){
-			const note = await App.loadNote(m[0].headerMessageId);
+			const note = await App.createAndLoadNote(m[0].headerMessageId);
 
 			App.updateView(m[0].headerMessageId, note.data);
 
@@ -804,11 +708,11 @@ async function initExtension(){
 				const List = await browser.messageDisplay.getDisplayedMessages(sender.tab.id);
 
 				if(List.length == 1){
-					const note = await App.loadNote(List[0].headerMessageId);
-					if(note.data){
+					const data = await App.getNoteData(List[0].headerMessageId);
+					if(data){
 						const reply = new AttachToMessageReply({
-							note: note.data,
-							html: App.applyTemplate(App.prefs.attachTemplate, note.data),
+							note: data,
+							html: App.applyTemplate(App.prefs.attachTemplate, data),
 							prefs: App.prefs,
 						});
 
