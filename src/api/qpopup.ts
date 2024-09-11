@@ -1,5 +1,17 @@
+import { PopupAnchor } from "../modules/api.mjs";
 import { IBox } from "../modules/common.mjs";
 import { IPopupState } from "../modules/NotePopups.mjs";
+
+type AddScreenXY =  { screenX: number, screenY: number};
+type AnchorElement = (HTMLDivElement | HTMLBodyElement) & AddScreenXY;
+type AchorProps = {
+	aEl: AnchorElement,
+	anchorPlacement: string,
+	posAdjX: number,
+	posAdjY: number,
+	anchorAdjX: number;
+	anchorAdjY: number;
+}
 
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var { BasePopup } = ChromeUtils.importESModule("resource:///modules/ExtensionPopups.sys.mjs");
@@ -17,7 +29,7 @@ class QPopupEventDispatcher extends QEventDispatcher<{
 }> {}
 
 function coalesce(...args: any): any {
-	for (let a of args) if (a !== null) return a;
+	for (let a of args) if (a != null) return a;
 
 	return null;
 }
@@ -174,33 +186,15 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					return popupManager.get(id).state;
 				},
 				async update(id: number, newState: IPopupState) {
-					let popup = popupManager.get(id);
-
-					let oldState = Object.assign({}, popup.state);
-
-					// state come in null-ed
-					let { top, left, offsetTop, offsetLeft } = newState;
-
-					if(offsetTop !== null)newState.top = coalesce(oldState.top, 0) + coalesce(offsetTop, 0) as number;
-					if(offsetLeft !== null)newState.left = coalesce(oldState.left, 0) + coalesce(offsetLeft, 0) as number;
-
-					if (offsetTop !== null || offsetLeft !== null || top !== null || left !== null) {
-						popup.moveTo(coalesce(newState.left, 0), coalesce(newState.top, 0));
-					}
-
-					// if(title){
-					// 	popup.title = title;
-					// }
-
-					const assignState: IPopupState = {};
-					Object.entries(newState).map(([k, v]) => {
-						if(v !== null)assignState[k as keyof IPopupState] = v;
-					});
-
-					return Object.assign(popup.state, assignState);
+					const popup = popupManager.get(id)
+					popup.update(newState);
+					return popup.state;
 				},
 				async pop(id: number) {
 					return popupManager.get(id).pop();
+				},
+				async anchor(id: number, anchorTo: PopupAnchor, anchorPlacement: string){
+					return popupManager.get(id).anchor(anchorTo, anchorPlacement);
 				},
 				async create(windowId: number, state: IPopupState) {
 					QDEB && console.debug("qpopup.create()");
@@ -270,7 +264,7 @@ class QPopup extends BasePopup {
 
 		// Event flow: browser -> stack -> panel
 		this.browser.addEventListener("keydown", (e: KeyboardEvent) => {
-			if(e.key === 'Escape'){
+			if(e.key == 'Escape'){
 				e.preventDefault();
 			}
 		});
@@ -307,87 +301,24 @@ class QPopup extends BasePopup {
 	}
 
 	pop() {
-		type AddScreenXY =  { screenX: number, screenY: number};
 		QDEB && console.debug("qpopup.api.pop:", this.state);
-		const { left, top, width, height, anchor, anchorPlacement } = this.state;
-		const window = this.window;
-
-		const browser = window.document.querySelector("browser[src='about:3pane']") as XULFrameElement | null;
-		const threadPane = browser?.contentDocument?.getElementById('threadPane') as HTMLDivElement & AddScreenXY | null;
-		const messagePane = browser?.contentDocument?.getElementById('messagePane') as HTMLDivElement & AddScreenXY | null;
+		const { left, top, width, height } = this.state;
 
 		return new Promise((resolve) => {
-			if (left === null && top === null) {
-				let aEl: (HTMLDivElement | HTMLBodyElement) & AddScreenXY | null;
-				let adjX = 0;
-				let adjY = 0;
+			// If left/top not set yet. New note or after note reset
+			if (left == null && top == null) {
+				const aProps = this.getAnchorProps();
 
-				if((anchor == "threadpane") && threadPane){
-					aEl = threadPane;
-				} else if((anchor == "message") && messagePane){
-					aEl = messagePane;
-				} else {
-					aEl = window.document.querySelector("body") as HTMLBodyElement & AddScreenXY | null;
-				}
+				if (aProps) {
+					const { aEl, anchorPlacement, posAdjX, posAdjY, anchorAdjX, anchorAdjY } = aProps;
 
-				/**
-				 * New anchors on top of existing ones:
-				 *  before_start, before_end, after_start, after_end,
-				 *  start_before, start_after, end_before, end_after,
-				 *  overlap, after_pointer
-				 *
-				 *                   +--------------+        +------------+
-				 *                   | before_start |        | before_end |
-				 *    +--------------+--------------+--------+------------+------------+
-				 *    | start_before |   overlap    |                     | end_before |
-				 *    +--------------+--------------+                     +------------+
-				 *                   |                                    |
-				 *                   |             CONTAINER              |
-				 *                   |                                    |
-				 *     +-------------+                                    +-----------+
-				 *     | start_after |                                    | end_after |
-				 *     +-------------+-------------+----------+-----------+-----------+
-				 *                   | after_start |          | after_end |
-				 *                   +-------------+          +-----------+
-				 *
-				 *    after_pointer seems very similar to overlap
-				 */
-
-				// Fall back to window in case referring element is not visible
-				// if (!aEl || !aEl.clientWidth || !aEl.clientHeight) {
-				// 	aEl = window.document.querySelector("#messengerWindow");
-				// }
-
-				if (aEl && anchorPlacement) {
-					if (anchorPlacement === "center") {
-						const wBox: IBox = {
-							top: aEl.screenY,
-							left: aEl.screenX,
-							width: aEl.clientWidth,
-							height: aEl.clientHeight,
-						};
-						const currBox: IBox = {
-							left: 0, // left and top is null
-							top: 0,
-							width: width || 0,
-							height: height || 0,
-						};
-						const adjBox = Box.center(currBox, wBox, false);
-						adjX = adjBox.left;
-						adjY = adjBox.top;
-					} else if (width && (anchorPlacement.startsWith("topcenter") || anchorPlacement.startsWith("bottomcenter"))) {
-						adjX = (width / 2) * -1;
-					} else if (height && (anchorPlacement.startsWith("rightcenter") || anchorPlacement.startsWith("leftcenter"))) {
-						adjY = (height / 2) * -1;
-					}
-					this.state.top = aEl.screenY + adjY;
-					this.state.left = aEl.screenX + adjX;
-					this.panel.openPopup(aEl, anchorPlacement, adjX, adjY);
-					this.panel.moveTo(this.state.left, this.state.top);
+					this.panel.openPopup(aEl, anchorPlacement, posAdjX, posAdjY);
+					this.state.top = this.panel.screenY + (height || 0) * anchorAdjY;
+					this.state.left = this.panel.screenX + (width || 0) * anchorAdjX;
 				} else {
 					// This should never happend, only if aEl not found or anchorPlacement not set for some reason
 					console.warn("anchor element not found or anchorPlacement not set");
-					this.panel.openPopup(null, anchorPlacement);
+					this.panel.openPopup(null, this.state.anchorPlacement || "after_start");
 				}
 			} else {
 				this.panel.openPopup(null, "after_start");
@@ -396,5 +327,144 @@ class QPopup extends BasePopup {
 
 			resolve(true);
 		});
+	}
+
+	anchor(anchorTo: PopupAnchor, anchorPlacement: string){
+		this.state.anchor = anchorTo;
+		this.state.anchorPlacement = anchorPlacement;
+		this.state.top = undefined;
+		this.state.left = undefined;
+
+		const aProps = this.getAnchorProps();
+
+		if(aProps){
+			const { width, height } = this.state;
+			const { aEl, anchorPlacement, posAdjX, posAdjY, anchorAdjX, anchorAdjY } = aProps;
+
+			this.panel.moveToAnchor(aEl, anchorPlacement, posAdjX, posAdjY);
+			this.state.top = this.panel.screenY + (height || 0) * anchorAdjY;
+			this.state.left = this.panel.screenX + (width || 0) * anchorAdjX;
+		} else {
+			this.panel.moveToAnchor(null, "after_start");
+		}
+	}
+
+	/**
+	 * New anchors on top of existing ones (src/scripts/options.ts):
+	 *  before_start, before_end, after_start, after_end,
+	 *  start_before, start_after, end_before, end_after,
+	 *  overlap, after_pointer
+	 *
+	 *                   +--------------+        +------------+
+	 *                   | before_start |        | before_end |
+	 *    +--------------+--------------+--------+------------+------------+
+	 *    | start_before |   overlap    |                     | end_before |
+	 *    +--------------+--------------+                     +------------+
+	 *                   |                                    |
+	 *                   |             CONTAINER              |
+	 *                   |                                    |
+	 *     +-------------+                                    +-----------+
+	 *     | start_after |                                    | end_after |
+	 *     +-------------+-------------+----------+-----------+-----------+
+	 *                   | after_start |          | after_end |
+	 *                   +-------------+          +-----------+
+	 *
+	 *    after_pointer seems very similar to overlap
+	 */
+	private getAnchorProps(): AchorProps | null {
+		const window = this.window;
+		const browser = window.document.querySelector("browser[src='about:3pane']") as XULFrameElement | null;
+		const threadPane = browser?.contentDocument?.getElementById('threadPane') as HTMLDivElement & AddScreenXY | null;
+		const messagePane = browser?.contentDocument?.getElementById('messagePane') as HTMLDivElement & AddScreenXY | null;
+
+		const { left, top, width, height, anchor, anchorPlacement } = this.state;
+
+		if (left == null && top == null) {
+			let aEl: AnchorElement | null;
+			if((anchor == "threadpane") && threadPane){
+				aEl = threadPane;
+			} else if((anchor == "message") && messagePane){
+				aEl = messagePane;
+			} else {
+				aEl = window.document.querySelector("body") as HTMLBodyElement & AddScreenXY | null;
+			}
+
+			if (aEl && anchorPlacement) {
+				let posAdjX = 0;
+				let posAdjY = 0;
+				let anchorAdjY = 0;
+				let anchorAdjX = 0;
+
+				if(anchorPlacement != "center"){
+				}
+
+				if (anchorPlacement == "center") {
+					const wBox: IBox = {
+						top: aEl.screenY,
+						left: aEl.screenX,
+						width: aEl.clientWidth,
+						height: aEl.clientHeight,
+					};
+					const currBox: IBox = {
+						left: 0, // left and top is null
+						top: 0,
+						width: width || 0,
+						height: height || 0,
+					};
+					const adjBox = Box.center(currBox, wBox, false);
+					posAdjX = adjBox.left;
+					posAdjY = adjBox.top;
+				} else {
+					const [ anchorCorner, popupCorner ] = anchorPlacement.split(" ");
+
+					if(popupCorner.startsWith("bottom")){
+						anchorAdjY = -1;
+					}
+
+					if(popupCorner.endsWith("right")){
+						anchorAdjX = -1;
+					}
+
+					if (width && (anchorCorner == "topcenter" || anchorCorner == "bottomcenter")) {
+						posAdjX = (width / 4) * -1;
+					}
+
+					if (height && (anchorCorner == "rightcenter" || anchorCorner == "leftcenter")) {
+						posAdjY = (height / 4) * -1;
+					}
+				}
+
+				return { aEl, anchorPlacement, posAdjX, posAdjY, anchorAdjX, anchorAdjY }
+			} else {
+				return null;
+			}
+		} else {
+			return null
+		}
+	}
+
+	update(newState: IPopupState): void {
+		const oldState = Object.assign({}, this.state);
+
+		// state properties come in null-ed
+		let { top, left, offsetTop, offsetLeft } = newState;
+
+		if(offsetTop !== null)newState.top = coalesce(oldState.top, 0) + coalesce(offsetTop, 0) as number;
+		if(offsetLeft !== null)newState.left = coalesce(oldState.left, 0) + coalesce(offsetLeft, 0) as number;
+
+		if (offsetTop !== null || offsetLeft !== null || top !== null || left !== null) {
+			this.moveTo(coalesce(newState.left, 0), coalesce(newState.top, 0));
+		}
+
+		// if(title){
+		// 	this.title = title;
+		// }
+
+		const assignState: IPopupState = {};
+		Object.entries(newState).map(([k, v]) => {
+			if(v !== null)assignState[k as keyof IPopupState] = v;
+		});
+
+		Object.assign(this.state, assignState);
 	}
 }
