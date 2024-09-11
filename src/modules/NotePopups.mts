@@ -1,5 +1,4 @@
-import { IPreferences, PopupAnchor } from './api.mjs';
-import { dateFormatWithPrefs } from './common.mjs';
+import { dateFormatWithPrefs, IPreferences, PopupAnchor } from './common.mjs';
 import { INoteData } from './Note.mjs';
 import { QEventDispatcher } from './QEventDispatcher.mjs';
 

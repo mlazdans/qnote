@@ -42,9 +42,8 @@
 import { AttachToMessage, AttachToMessageReply, PrefsUpdated, RestoreFocus } from "./modules/Messages.mjs";
 import { INote, INoteData, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
 import { INotePopup, IPopupState, QNotePopup } from "./modules/NotePopups.mjs";
-import { convertPrefsToQAppPrefs, dateFormatWithPrefs } from "./modules/common.mjs";
+import { convertPrefsToQAppPrefs, dateFormatWithPrefs, IPreferences } from "./modules/common.mjs";
 import { confirmDelete, getCurrentTabId, getCurrentWindowId, getPrefs, isClipboardSet, sendPrefsToQApp } from "./modules/common-background.mjs";
-import { IPreferences } from "./modules/api.mjs";
 import { Menu } from "./modules/Menu.mjs";
 
 var QDEB = true;

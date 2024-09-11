@@ -1,4 +1,4 @@
-import { IPreferences } from "./api.mjs";
+import { IPreferences } from "./common.mjs";
 import { INoteData } from "./Note.mjs";
 
 interface IMessage<M> {

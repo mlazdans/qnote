@@ -1,8 +1,7 @@
 import 'thunderbird-webext-browser';
-import { IQPopupAPI } from '../modules/api.mts';
 import { IQNoteFileAPI } from '../modules-exp/QNoteFile.mts';
 import { IXNoteFileAPI } from '../modules-exp/XNoteFile.mts';
-import { ILegacyAPI, IQAppAPI } from '../modules-exp/api.mts';
+import { ILegacyAPI, IQAppAPI, IQPopupAPI } from '../modules-exp/api.mts';
 
 export {}
 

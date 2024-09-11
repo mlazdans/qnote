@@ -1,4 +1,3 @@
-import { PopupAnchor } from "../modules/api.mjs";
 import { IBox } from "../modules/common.mjs";
 import { IPopupState } from "../modules/NotePopups.mjs";
 

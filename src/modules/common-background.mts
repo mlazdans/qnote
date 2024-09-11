@@ -1,6 +1,5 @@
 // This code should run in background and content
-import { IPreferences, IWritablePreferences, Prefs } from "./api.mjs";
-import { getPropertyType, convertPrefsToQAppPrefs, setProperty } from "./common.mjs";
+import { getPropertyType, convertPrefsToQAppPrefs, setProperty, IPreferences, IWritablePreferences, Prefs } from "./common.mjs";
 import { INoteData, QNoteFolder, QNoteLocalStorage, XNoteFolder } from "./Note.mjs";
 
 let QDEB = true;

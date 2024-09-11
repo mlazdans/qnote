@@ -1,7 +1,6 @@
 import { DOMLocalizator } from "../modules/DOMLocalizator.mjs";
-import { getElementByIdOrDie, HTMLInputCheckboxElement, HTMLInputFileElement, isInputElement, isSelectElement, isTextAreaElement, isTypeCheckbox, isTypeRadio, querySelectorOrDie } from "../modules/common.mjs";
+import { getElementByIdOrDie, HTMLInputCheckboxElement, HTMLInputFileElement, isInputElement, isSelectElement, isTextAreaElement, isTypeCheckbox, isTypeRadio, querySelectorOrDie, IPreferences, IWritablePreferences, LuxonDateFormatsMap, Prefs } from "../modules/common.mjs";
 import { ExportStats, getPrefs, getXNoteStoragePath, loadAllExtNotes, loadAllFolderNotes, saveNotesAs, savePrefs } from "../modules/common-background.mjs";
-import { IPreferences, IWritablePreferences, LuxonDateFormatsMap, Prefs } from "../modules/api.mjs";
 import * as luxon from "../modules/luxon.mjs";
 import { QNoteFolder, QNoteLocalStorage, XNoteFolder } from "../modules/Note.mjs";
 import { PrefsUpdated } from "../modules/Messages.mjs";

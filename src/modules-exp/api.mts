@@ -1,5 +1,6 @@
-import { IQAppPreferences } from "../modules/api.mjs";
+import { IQAppPreferences } from "../modules/common.mjs";
 import { INoteData } from "../modules/Note.mjs";
+import { IPopupState } from "../modules/NotePopups.mjs";
 import { IQNoteFileAPI } from "./QNoteFile.mjs";
 import { IXNoteFileAPI } from "./XNoteFile.mjs";
 
@@ -8,6 +9,17 @@ var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs");
 var { XNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/XNoteFile.mjs");
 var { ExtensionError } = ExtensionUtils;
+
+export interface IXNotePreferences {
+	usetag: boolean,
+	dateformat: string;
+	width: number,
+	height: number,
+	show_on_select: boolean,
+	show_first_x_chars_in_col: number,
+	storage_path: string,
+	version: string,
+}
 
 export interface INoteFileProvider {
 	load(root: string, keyId: string): INoteData | null
@@ -54,7 +66,20 @@ export interface ILegacyAPI {
 	isFolderWritable(path: string): Promise<boolean>
 }
 
-// TODO: test
+export interface IQPopupAPI {
+	setDebug(on: boolean): Promise<void>
+	close(id: number, reason: "close" | "escape" | "delete"): Promise<void>
+	get(id: number): Promise<IPopupState>
+	pop(id: number): Promise<void>
+	create(windowsId: number, state: IPopupState): Promise<number>
+	update(id: number, state: IPopupState): Promise<IPopupState>
+	takeScreenshot(id: number): Promise<boolean>
+	resetPosition(id: number): Promise<void>
+	onClose: WebExtEvent<(id: number, reason: string, state: IPopupState) => void>
+	onFocus: WebExtEvent<(id: number) => void>
+	onBlur: WebExtEvent<(id: number) => void>
+}
+
 function Transferable(source: any) {
 	const res = Cc["@mozilla.org/widget/transferable;1"].createInstance(Ci.nsITransferable);
 

@@ -1,4 +1,4 @@
-import { IQAppPreferences } from "../modules/api.mjs";
+import { IQAppPreferences } from "../modules/common.mjs";
 import { INoteData } from "../modules/Note.mjs";
 
 var { ExtensionParent }                       = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
