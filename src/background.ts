@@ -1,8 +1,6 @@
-// MAYBE: multiple notes simultaneously
 // MAYBE: note popup on mouse over
-// TODO: save note pos and dims locally, outside note
+// MAYBE: save note pos and dims locally, outside note
 // TODO: save create and update time
-// TODO: attach keyb/col handler to all windows at the start
 // TODO: experiment with div overlays as popup in content scripts
 //       Something is broken with scrollbars in qpopup, textarea gets wrapped in some div
 // TODO: test brand new installation with XNote++ and then switch to QNote
@@ -12,7 +10,7 @@
 // TODO: holding alt+q pops way too fast
 // TODO: when multiple popups are open, alt+q pops with selected message only. Not with focused popup
 // TODO: menu - close all opened notes
-// TODO: update colums, message view after mainipulations
+// TODO: update colums, message view after manipulations
 // TODO: icons: edit, copy, paste, delete, reset positions, settings
 // TODO: qpopup: less opacity for title
 // TODO: qpopup: handle zoom in-out
@@ -384,27 +382,29 @@ class QNoteExtension
 
 		popup.pop();
 	}
+
+	// TODO: better to have messageId (number) here rather than searching for keyId. Now... how to get that id here...
+	//       This means it should be somehow preserved from onMessageDisplayed() event...
+	// async function tagMessage(id, tagName, toTag = true) {
+	// async tagMessage(messageId: number){
+	// 	return getMessage(id).then(message => {
+	// 		QDEB&&console.debug(`tagMessage(id:${id}, tagName:${tagName}, toTag:${toTag})`);
+	// 		let tags = message.tags;
+
+	// 		if(toTag){
+	// 			if(!message.tags.includes(tagName)){
+	// 				tags.push(tagName);
+	// 			}
+	// 		} else {
+	// 			tags = tags.filter(item => item !== tagName);
+	// 		}
+
+	// 		return browser.messages.update(message.id, {
+	// 			tags: tags
+	// 		});
+	// 	});
+	// }
 }
-
-// TODO:
-// async function tagMessage(id, tagName, toTag = true) {
-// 	return getMessage(id).then(message => {
-// 		QDEB&&console.debug(`tagMessage(id:${id}, tagName:${tagName}, toTag:${toTag})`);
-// 		let tags = message.tags;
-
-// 		if(toTag){
-// 			if(!message.tags.includes(tagName)){
-// 				tags.push(tagName);
-// 			}
-// 		} else {
-// 			tags = tags.filter(item => item !== tagName);
-// 		}
-
-// 		return browser.messages.update(message.id, {
-// 			tags: tags
-// 		});
-// 	});
-// }
 
 // TODO: move under app class at some point
 async function initExtension(){
