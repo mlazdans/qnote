@@ -123,14 +123,14 @@ function popup(){
 		const handleDragEnd = () => {
 			window.removeEventListener("mousemove", mover);
 			window.removeEventListener("mouseup", handleDragEnd);
-			popupEl.style.opacity = '1';
+			browser.qpopup.setPanelStyle(id, { opacity: "1" });
 			el.style.cursor = '';
 		}
 
 		window.addEventListener("mouseup", handleDragEnd);
 		window.addEventListener("mousemove", mover);
 
-		popupEl.style.opacity = '0.4';
+		browser.qpopup.setPanelStyle(id, { opacity: "0.6" });
 	};
 
 	const tResize = (mouse: MouseEvent) => {
@@ -148,13 +148,13 @@ function popup(){
 		const handleDragEnd = () => {
 			window.removeEventListener("mousemove", resizer);
 			window.removeEventListener("mouseup", handleDragEnd);
-			popupEl.style.opacity = '1';
+			browser.qpopup.setPanelStyle(id, { opacity: "1" });
 		}
 
 		window.addEventListener("mouseup", handleDragEnd);
 		window.addEventListener("mousemove", resizer);
 
-		popupEl.style.opacity = '0.4';
+		browser.qpopup.setPanelStyle(id, { opacity: "0.5" });
 	};
 
 	const mDown = new WeakMap();

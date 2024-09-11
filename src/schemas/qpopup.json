@@ -145,6 +145,24 @@
 			"type": "integer",
 			"minimum": 1
 		}]
+	},{
+		"name": "setPanelStyle",
+		"type": "function",
+		"async": "callback",
+		"parameters": [{
+			"name": "id",
+			"type": "integer",
+			"minimum": 1
+		},{
+			"name": "state",
+			"type": "object",
+			"properties": {
+				"opacity": {
+					"type": "string",
+					"optional": true
+				}
+			}
+		}]
 	}],
 	"events": [{
 		"name": "onClose",

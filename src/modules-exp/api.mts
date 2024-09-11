@@ -1,3 +1,4 @@
+import { PanelStyle } from "../api/qpopup";
 import { IQAppPreferences } from "../modules/common.mjs";
 import { INoteData } from "../modules/Note.mjs";
 import { IPopupState } from "../modules/NotePopups.mjs";
@@ -75,6 +76,7 @@ export interface IQPopupAPI {
 	update(id: number, state: IPopupState): Promise<IPopupState>
 	takeScreenshot(id: number): Promise<boolean>
 	resetPosition(id: number): Promise<void>
+	setPanelStyle(id: number, style: PanelStyle): Promise<void>
 	onClose: WebExtEvent<(id: number, reason: string, state: IPopupState) => void>
 	onFocus: WebExtEvent<(id: number) => void>
 	onBlur: WebExtEvent<(id: number) => void>

@@ -12,6 +12,10 @@ type AchorProps = {
 	anchorAdjY: number;
 }
 
+export interface PanelStyle {
+	opacity?: string;
+}
+
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var { BasePopup } = ChromeUtils.importESModule("resource:///modules/ExtensionPopups.sys.mjs");
 // var { BasePopup } = ChromeUtils.importESModule("resource://qnote/modules-exp/QPopups.sys.mjs");
@@ -202,6 +206,9 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 
 					return popup.id;
 				},
+				async setPanelStyle(id: number, style: PanelStyle) {
+					Object.assign(popupManager.get(id).panel.style, style);
+				}
 			},
 		};
 	}

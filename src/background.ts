@@ -13,7 +13,7 @@
 // TODO: when multiple popups are open, alt+q pops with selected message only. Not with focused popup
 // TODO: menu - close all opened notes
 // TODO: update colums, message view after mainipulations
-// TODO: icons
+// TODO: icons: edit, copy, paste, delete, reset positions, settings
 
 // App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup.api
 //  |     \                            \     \-> handles events sent by qpopup.api, fires events back to App through DefaultNotePopup
