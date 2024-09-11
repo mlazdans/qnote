@@ -193,8 +193,8 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 				async pop(id: number) {
 					return popupManager.get(id).pop();
 				},
-				async anchor(id: number, anchorTo: PopupAnchor, anchorPlacement: string){
-					return popupManager.get(id).anchor(anchorTo, anchorPlacement);
+				async resetPosition(id: number){
+					return popupManager.get(id).resetPosition();
 				},
 				async create(windowId: number, state: IPopupState) {
 					QDEB && console.debug("qpopup.create()");
@@ -329,17 +329,14 @@ class QPopup extends BasePopup {
 		});
 	}
 
-	anchor(anchorTo: PopupAnchor, anchorPlacement: string){
-		this.state.anchor = anchorTo;
-		this.state.anchorPlacement = anchorPlacement;
-		this.state.top = undefined;
+	resetPosition(){
 		this.state.left = undefined;
-
+		this.state.top = undefined;
 		const aProps = this.getAnchorProps();
 
 		if(aProps){
-			const { width, height } = this.state;
 			const { aEl, anchorPlacement, posAdjX, posAdjY, anchorAdjX, anchorAdjY } = aProps;
+			const { width, height } = this.state;
 
 			this.panel.moveToAnchor(aEl, anchorPlacement, posAdjX, posAdjY);
 			this.state.top = this.panel.screenY + (height || 0) * anchorAdjY;

@@ -136,6 +136,15 @@
 			"name": "id",
 			"minimum": 1
 		}]
+	},{
+		"name": "resetPosition",
+		"type": "function",
+		"async": "callback",
+		"parameters": [{
+			"name": "id",
+			"type": "integer",
+			"minimum": 1
+		}]
 	}],
 	"events": [{
 		"name": "onClose",

@@ -9,6 +9,8 @@ export interface INotePopup {
 	flags: number | undefined;
 	pop(): Promise<void>
 	close(): Promise<void>
+	update(state: IPopupState): Promise<IPopupState>
+	resetPosition(): Promise<void>
 }
 
 export interface IPopupState {
@@ -29,7 +31,7 @@ export interface IPopupState {
 }
 
 export abstract class DefaultNotePopup extends QEventDispatcher<{
-	close: (keyId: string, reason: string, state: IPopupState) => void
+	close: (reason: string, state: IPopupState) => void
 }> implements INotePopup {
 	keyId: string
 	windowId: number
@@ -43,21 +45,22 @@ export abstract class DefaultNotePopup extends QEventDispatcher<{
 
 	abstract pop(): Promise<void>
 	abstract close(): Promise<void>
+	abstract update(state: IPopupState): Promise<IPopupState>
+	abstract resetPosition(): Promise<void>
 }
 
 // Wrapper around qpopup API, runs in background context
 export class QNotePopup extends DefaultNotePopup {
+	private id: number;
 
-	private id: number; // id from qpopup.api
-
-	// Use create() to instantiate object
+	// Use create() to instantiate object because we need id from qpopup.api which is async
 	private constructor(keyId: string, id: number, windowId: number) {
 		super(keyId, windowId);
 		this.id = id
 
 		browser.qpopup.onClose.addListener((id: number, reason: string, state: IPopupState) => {
 			if(id == this.id){
-				this.fireListeners("close", this.keyId, reason, state);
+				this.fireListeners("close", reason, state);
 			}
 		});
 
@@ -95,6 +98,14 @@ export class QNotePopup extends DefaultNotePopup {
 
 	async close() {
 		return browser.qpopup.close(this.id, "close");
+	}
+
+	async update(state: IPopupState) {
+		return browser.qpopup.update(this.id, state);
+	}
+
+	async resetPosition() {
+		return browser.qpopup.resetPosition(this.id);
 	}
 
 	static note2state(noteData: INoteData, prefs: IPreferences): IPopupState {
