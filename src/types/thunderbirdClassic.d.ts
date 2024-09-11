@@ -63,49 +63,6 @@ type IteratorUtilsPath         = "resource:///modules/iteratorUtils.jsm";
 type MailServicesPath          = "resource:///modules/MailServices.jsm";
 type ExtensionPopupsPath       = "resource:///modules/ExtensionPopups.jsm";
 type ExtensionPopupsESPath     = "resource:///modules/ExtensionPopups.sys.mjs";
-type QPopupsESPath             = "resource://qnote/modules-exp/QPopups.sys.mjs";
-
-type QEventDispatcherPath      = "resource://qnote/modules/QEventDispatcher.mjs";
-type DOMLocalizatorPath        = "resource://qnote/modules/DOMLocalizator.mjs"
-type QCachePath                = "resource://qnote/modules/QCache.mjs"
-type NoteDataPath              = "resource://qnote/modules/Note.mjs";
-// type ApiPath                   = "resource://qnote/modules/api.mjs";
-type NotePopupsPath            = "resource://qnote/modules/NotePopups.mjs"
-
-type QNoteFilePath             = "resource://qnote/modules-exp/QNoteFile.mjs";
-type XNoteFilePath             = "resource://qnote/modules-exp/XNoteFile.mjs";
-type QNoteFiltersPath          = "resource://qnote/modules-exp/QNoteFilters.mjs";
-type ExpApiPath                = "resource://qnote/modules-exp/api.mjs";
-
-interface QEventDispatcherExport {
-	QEventDispatcher: typeof import("../modules/QEventDispatcher.mjs").QEventDispatcher;
-}
-
-interface DOMLocalizatorExport {
-	DOMLocalizator: typeof import("../modules/DOMLocalizator.mjs").DOMLocalizator;
-}
-
-interface QCacheExport {
-	QCache: typeof import("../modules/QCache.mts").QCache;
-}
-
-interface QNoteFileExports {
-	QNoteFile: typeof import("../modules-exp/QNoteFile.mts").QNoteFile;
-}
-
-interface XNoteFileExports {
-	XNoteFile: typeof import("../modules-exp/XNoteFile.mts").XNoteFile;
-}
-
-interface QNoteFiltersExports {
-	QCustomTerm: typeof import("../modules-exp/QNoteFilters.mts").QCustomTerm;
-	QNoteAction: typeof import("../modules-exp/QNoteFilters.mts").QNoteAction;
-	QNoteFilter: typeof import("../modules-exp/QNoteFilters.mts").QNoteFilter;
-}
-
-interface NoteDataExports {
-	INoteData: import("../modules/Note.mts").INoteData;
-}
 
 // interface FileUtilsExport {
 // 	FileUtils: typeof FileUtils
@@ -224,21 +181,20 @@ declare namespace Components
 		public static import(path: ExtensionCommonPath): any;
 		public static import(path: FileUtilsPath): any;
 		public static import(path: ExtensionUtilsPath): any;
-		public static importESModule(path: QEventDispatcherPath): QEventDispatcherExport;
-		public static importESModule(path: DOMLocalizatorPath): DOMLocalizatorExport;
 		public static importESModule(path: ExtensionPopupsESPath): BasePopupExport;
-		public static importESModule(path: QPopupsESPath): BasePopupExport;
-		public static importESModule(path: QCachePath): QCacheExport;
 		public static importESModule(path: ThreadPaneColumnsPath): any;
 		public static importESModule(path: ThreadPaneColumnsOldPath): any;
-		public static importESModule(path: QNoteFilePath): QNoteFileExports;
-		public static importESModule(path: XNoteFilePath): XNoteFileExports;
 		public static importESModule(path: FileUtilsPath): any;
 		public static importESModule(path: ServicesPath): any;
-		public static importESModule(path: QNoteFiltersPath): QNoteFiltersExports;
-		public static importESModule(path: NoteDataPath): NoteDataExports;
-		public static importESModule(path: ExpApiPath): typeof import("../modules-exp/api.mts");
-		// TODO: simplify rest of them like this:
+		public static importESModule(path: "resource://qnote/modules-exp/QPopups.sys.mjs"): BasePopupExport;
+
+		public static importESModule(path: "resource://qnote/modules/QEventDispatcher.mjs"): typeof import("../modules/QEventDispatcher.mjs");
+		public static importESModule(path: "resource://qnote/modules/DOMLocalizator.mjs"): typeof import("../modules/DOMLocalizator.mjs");
+		public static importESModule(path: "resource://qnote/modules/QCache.mjs"): typeof import("../modules/QCache.mts");
+		public static importESModule(path: "resource://qnote/modules-exp/QNoteFile.mjs"): typeof import("../modules-exp/QNoteFile.mts");
+		public static importESModule(path: "resource://qnote/modules-exp/XNoteFile.mjs"): typeof import("../modules-exp/XNoteFile.mts");
+		public static importESModule(path: "resource://qnote/modules-exp/QNoteFilters.mjs"): typeof import("../modules-exp/QNoteFilters.mts");
+		public static importESModule(path: "resource://qnote/modules-exp/api.mjs"): typeof import("../modules-exp/api.mts");
 		public static importESModule(path: "resource://qnote/modules/common.mjs"): typeof import("../modules/common.mts");
 		public static unload(path: string): void;
 		public static defineModuleGetter(param1: any, param2: any, param3: any): void;
@@ -287,7 +243,7 @@ declare namespace Components
 			init(file: any,  ioFlags: number, perm: number, behaviorFlags: number | null): void;
 		}
 
-		type nsIIDRef = any; // TODO: ?
+		type nsIIDRef = any;
 		class nsIProperties extends nsISupports {
 			get(prop: string, iid: nsIIDRef): any
 			set(prop: string, value: any): void
@@ -295,7 +251,7 @@ declare namespace Components
 			undefine(prop: string): void
 		}
 
-		type nsILoadContext = any; // TODO: ?
+		type nsILoadContext = any;
 		class nsITransferable extends nsISupports {
 			init(aContext: nsILoadContext): void
 			addDataFlavor(aDataFlavor: string): void;
