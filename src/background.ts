@@ -14,6 +14,8 @@
 // TODO: menu - close all opened notes
 // TODO: update colums, message view after mainipulations
 // TODO: icons: edit, copy, paste, delete, reset positions, settings
+// TODO: qpopup: less opacity for title
+// TODO: qpopup: handle zoom in-out
 
 // App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup.api
 //  |     \                            \     \-> handles events sent by qpopup.api, fires events back to App through DefaultNotePopup
@@ -90,7 +92,7 @@ class QNoteExtension
 
 		App = this;
 		this.prefs = prefs;
-		// TODO: re-enable
+		// TODO: re-enable debug
 		// QDEB = prefs.enableDebug;
 	}
 
@@ -275,31 +277,12 @@ class QNoteExtension
 				});
 			} else if(info.menuItemId === "delete"){
 				if(!App.prefs.confirmDelete || await confirmDelete()) {
-					if(PopupManager.has(keyId)){
-						await PopupManager.get(keyId).close();
+					if(await App.deleteNote(keyId)){
+						App.updateView(keyId, null);
 					}
-					App.createNote(keyId).delete().then(() => App.updateView(keyId, null));
 				}
 			} else if(info.menuItemId === "reset"){
-				const popup = PopupManager.has(keyId) ? PopupManager.get(keyId) : null;
-				if(popup){
-					await popup.resetPosition();
-					return
-				}
-
-				const note = App.createNote(keyId);
-
-				note.load().then(async data => {
-					if(data){
-						note.updateData({
-							left: undefined,
-							top: undefined,
-							width: App.prefs.width,
-							height: App.prefs.height,
-						});
-						await note.save();
-					}
-				});
+				App.resetNote(keyId);
 			} else {
 				console.warn(`${menuDebugHandle} unknown menuItemId:`, info.menuItemId);
 			}
@@ -310,6 +293,7 @@ class QNoteExtension
 			} else if(info.menuItemId === "paste_multi"){
 				const sourceNoteData = await browser.qnote.getFromClipboard();
 				if(sourceNoteData && isClipboardSet(sourceNoteData)){
+					sourceNoteData.ts = Date.now();
 					for(const m of messages){
 						await App.saveNoteFrom(sourceNoteData, m.headerMessageId);
 					};
@@ -317,40 +301,56 @@ class QNoteExtension
 				}
 			} else if(info.menuItemId === "delete_multi"){
 				if(!App.prefs.confirmDelete || await confirmDelete()) {
-					// TODO: code dup with menu single delete
 					for(const m of messages){
-						const keyId = m.headerMessageId;
-						if(PopupManager.has(keyId)){
-							PopupManager.get(keyId).close();
-						}
-						await App.createNote(keyId).delete();
+						await App.deleteNote(m.headerMessageId);
 					}
 					App.updateMultiPane(messages);
 				}
 			} else if(info.menuItemId === "reset_multi"){
 				for(const m of messages){
-					// TODO: code dup with menu single delete
-					const keyId = m.headerMessageId;
-					const popup = PopupManager.has(keyId) ? PopupManager.get(keyId) : null;
-
-					if(popup){
-						await popup.resetPosition();
-					} else {
-						const note = await App.createAndLoadNote(keyId);
-
-						if(note.exists()){
-							note.updateData({
-								width: App.prefs.width,
-								height: App.prefs.height,
-								left: undefined,
-								top: undefined,
-							});
-						}
-					}
+					App.resetNote(m.headerMessageId);
 				}
 			} else {
 				console.warn(`${menuDebugHandle} unknown menuItemId: `, info.menuItemId);
 			}
+		}
+	}
+
+	async resetNote(keyId: string){
+		const popup = PopupManager.has(keyId) ? PopupManager.get(keyId) : null;
+
+		if(popup){
+			await popup.resetPosition();
+			return
+		}
+
+		const note = await App.createAndLoadNote(keyId);
+
+		if(note.exists()){
+			note.updateData({
+				left: undefined,
+				top: undefined,
+				width: App.prefs.width,
+				height: App.prefs.height,
+			});
+			note.save();
+		}
+	}
+
+	async deleteNote(keyId: string): Promise<boolean> {
+		const popup = PopupManager.has(keyId) ? PopupManager.get(keyId) : null;
+
+		if(popup){
+			await PopupManager.get(keyId).close();
+		}
+
+		const note = await App.createAndLoadNote(keyId);
+
+		if(note.exists()){
+			note.delete();
+			return true;
+		} else {
+			return false;
 		}
 	}
 }
