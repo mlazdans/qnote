@@ -37,9 +37,6 @@ QDEB&&console.debug("qpopup(content) new QPopup: ");
 
 const urlParams = new URLSearchParams(window.location.search);
 const idParam = urlParams.get("id");
-// const width = parseInt(urlParams.get("width") ?? "320");
-// const height = parseInt(urlParams.get("height") ?? "200");
-// const placeholder = urlParams.get("placeholder") ?? ""; // TODO: for multi note
 
 if(!idParam){
 	throw new Error("Missing query parameter: id");
@@ -61,6 +58,7 @@ const resizeEl     = querySelectorOrDie(".qpopup-controls-resize") as HTMLElemen
 const closeEl      = querySelectorOrDie(".qpopup-title-closebutton") as HTMLElement;
 const delEl        = querySelectorOrDie("#note-delete") as HTMLElement;
 const screenshotEl = querySelectorOrDie("#note-screenshot") as HTMLElement;
+const resetEl      = querySelectorOrDie("#note-reset") as HTMLElement;
 
 function updateElements(state: IPopupState){
 	YTextE.setAttribute("spellcheck", state.enableSpellChecker ? "true" : "false");
@@ -91,7 +89,7 @@ function resizeNote(w: number, h: number){
 		popupEl.style.width = w + 'px';
 		popupEl.style.height = h + 'px';
 	} else {
-		console.error("popupEl is gone");
+		QDEB&&console.warn("popupEl is gone");
 	}
 }
 
@@ -101,6 +99,7 @@ function popup(){
 	closeEl.addEventListener     ("click", () => browser.qpopup.close(id, "close"));
 	delEl.addEventListener       ("click", () => browser.qpopup.close(id, "delete"));
 	screenshotEl.addEventListener("click", () => browser.qpopup.takeScreenshot(id)); // TODO: animate on success
+	resetEl.addEventListener     ("click", () => browser.qpopup.resetPosition(id));
 	YTextE.addEventListener      ("keyup", () => browser.qpopup.update(id, { text: YTextE.value }));
 
 	const tDrag = (mouse: MouseEvent) => {
