@@ -62,7 +62,7 @@ export class QNoteLocalStorage extends DefaultNote {
 		return browser.storage.local
 			.get(this.keyId)
 			.then((store) =>
-				store[this.keyId] ? (this.data = store[this.keyId]) : null
+				store[this.keyId] ? store[this.keyId] : null
 			);
 	}
 
