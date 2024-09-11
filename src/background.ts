@@ -289,7 +289,7 @@ class QNoteExtension
 		// process multiple message selection
 		} else if(messages.length > 1){
 			if(info.menuItemId === "create_multi"){
-				createMultiNote(messages, true);
+				App.createMultiNote(messages, true);
 			} else if(info.menuItemId === "paste_multi"){
 				const sourceNoteData = await browser.qnote.getFromClipboard();
 				if(sourceNoteData && isClipboardSet(sourceNoteData)){
@@ -353,6 +353,36 @@ class QNoteExtension
 			return false;
 		}
 	}
+
+	async createMultiNote(messages: browser.messages.MessageHeader[], overwrite: boolean){
+		const windowId = await getCurrentWindowId();
+
+		if(!windowId){
+			// return reject("Could not get current window");
+			return;
+		}
+
+		const popupState = QNotePopup.note2state({}, this.prefs);
+		popupState.placeholder = _("multi.note.warning");
+
+		const popup = await QNotePopup.create("multi-note-create", windowId, popupState);
+
+		popup.addListener("close", async (reason, state) =>{
+			const noteData = QNotePopup.state2note(state);
+			noteData.ts = Date.now();
+
+			if(reason == "close"){
+				for(const m of messages){
+					if(!await this.getNoteData(m.headerMessageId)){
+						await this.saveNoteFrom(noteData, m.headerMessageId);
+					}
+				}
+			}
+			this.updateMultiPane(messages);
+		});
+
+		popup.pop();
+	}
 }
 
 // async function tagMessage(id, tagName, toTag = true) {
@@ -373,39 +403,6 @@ class QNoteExtension
 // 		});
 // 	});
 // }
-
-async function createMultiNote(messageList: any, overwrite = false){
-	console.error("TODO: createMultiNote");
-	// await CurrentPopup.silentlyPersistAndClose();
-	// let note = createNote('qnote.multi');
-	// CurrentPopup.note = note;
-	// CurrentPopup.note.title = _("multi.note");
-	// CurrentNote.note.placeholder = _("multi.note.warning");
-	// CurrentNote.loadedNoteData = {};
-
-	// let l = async () => {
-	// 	if(CurrentNote.needSaveOnClose && note.text){
-	// 		for(const m of messageList){
-	// 			await getMessageKeyId(m.id).then(keyId => {
-	// 				note.keyId = keyId;
-	// 				if(overwrite){
-	// 					saveNoteForMessage(m.id, note2QAppNote(note));
-	// 				} else {
-	// 					saveNoteForMessageIfNotExists(m.id, note2QAppNote(note));
-	// 				}
-	// 			});
-	// 		};
-	// 		mpUpdateForMultiMessage(messageList);
-	// 	}
-	// 	CurrentNote.removeListener("afterclose", l);
-	// };
-
-	// CurrentNote.addListener("afterclose", l);
-
-	// CurrentNote.pop().then(() => {
-	// 	CurrentNote.focus();
-	// });
-}
 
 // TODO: move under app class at some point
 async function initExtension(){
