@@ -108,7 +108,7 @@ export class QNotePopup extends DefaultNotePopup {
 	}
 
 	static note2state(noteData: INoteData, prefs: IPreferences): IPopupState {
-		const opt: IPopupState =  {
+		const state: IPopupState =  {
 			// focused: undefined,
 			top: noteData?.top,
 			left: noteData?.left,
@@ -126,17 +126,17 @@ export class QNotePopup extends DefaultNotePopup {
 		}
 
 		if(prefs.alwaysDefaultPlacement){
-			opt.width = prefs.width;
-			opt.height = prefs.height;
-			opt.left = undefined;
-			opt.top = undefined;
+			state.width = prefs.width;
+			state.height = prefs.height;
+			state.left = undefined;
+			state.top = undefined;
 		}
 
 		if(noteData?.ts) {
-			opt.title = "QNote: " + dateFormatWithPrefs(prefs, noteData?.ts);
+			state.title = "QNote: " + dateFormatWithPrefs(prefs, noteData?.ts);
 		}
 
-		return opt;
+		return state;
 	}
 
 	static state2note(state: IPopupState): INoteData {
