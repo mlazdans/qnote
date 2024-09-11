@@ -171,6 +171,8 @@ export const QNoteFileAPI: IQNoteFileAPI = {
 
 		transferable.addDataFlavor("text/qnote");
 		transferable.addDataFlavor("text/unicode");
+		transferable.addDataFlavor("text/plain");
+		transferable.addDataFlavor("text/html");
 		clipBoard.getData(transferable, Ci.nsIClipboard.kGlobalClipboard)
 
 		try {
@@ -179,22 +181,20 @@ export const QNoteFileAPI: IQNoteFileAPI = {
 			return null;
 		}
 
-		if(data.value){
+		if(data.value && flavour.value){
 			const intf = data.value as unknown as nsISupports;
-			const contentIntf = intf.QueryInterface(Ci.nsISupportsString);
-			if(contentIntf){
-				const content = contentIntf.data;
+			const content = intf.QueryInterface(Ci.nsISupportsString);
+			if(content){
 				if(flavour.value == "text/qnote"){
 					try {
-						return JSON.parse(content);
+						return JSON.parse(content.data);
 					} catch {
 						return null;
 					}
-				// TODO: test
-				// } else if(flavour.value == "text/unicode"){
-				// 	return {
-				// 		text: content
-				// 	}
+				} else if(flavour.value.startsWith("text/")){
+					return {
+						text: content.data
+					}
 				}
 			}
 		}
