@@ -91,7 +91,7 @@ export class Prefs {
 		dateLocale            : "",
 		width                 : 320,
 		height                : 200,
-		enableDebug           : false,
+		enableDebug           : true,
 		anchor                : "window",
 		anchorPlacement       : "center", // see options.js generatePosGrid()
 		alwaysDefaultPlacement: false,
