@@ -15,67 +15,42 @@ export interface INoteData {
 
 export interface INote {
 	readonly keyId: string; // message-id header or another unique id
-	data: INoteData | null;
 	load(): Promise<INoteData | null>;
 	save(): Promise<boolean>;
 	delete(): Promise<boolean>;
+	updateData(data: INoteData): void;
+	getData(): INoteData | null;
+	exists(): boolean;
 }
-
-// const l = ["aftersave", "afterdelete" , "afterupdate"];
-// type NoteListener = typeof l[number];
 
 export abstract class DefaultNote implements INote {
 	readonly keyId: string;
-	data: INoteData | null = null;
+	protected data: INoteData | null = null;
 
 	constructor(keyId: string) {
 		this.keyId = keyId;
-		// super(["aftersave", "afterdelete", "afterupdate"]);
-		// this.noteData = new NoteData();
 	}
-
-	// addListener(name: NoteListener, listener: Function): void {
-	// 	super.addListener(name, listener);
-	// }
-
-	// async load(loader: Function): Promise<NoteData> {
-	// 	return loader().then((data: NoteData) => {
-	// 		this.set(data);
-	// 		this.data.exists = !!data;
-
-	// 		return this.get();
-	// 	});
-	// }
 
 	abstract save(): Promise<boolean>;
 	abstract delete(): Promise<boolean>;
 	protected abstract subload(): Promise<INoteData | null>;
 
 	async load(): Promise<INoteData | null> {
-		return (this.data = await this.subload());
+		this.data = await this.subload();
+		return this.getData();
 	}
 
-	// protected async saver(saver: NoteSaver): Promise<boolean> {
-	// 	return saver().then(saved => {
-	// 		if(saved){
-	// 			this.data.exists = true;
-	// 			this.fireListeners("aftersave", this);
-	// 			this.fireListeners("afterupdate", this, "save");
-	// 		}
-	// 		return saved;
-	// 	});
-	// }
+	updateData(data: INoteData) {
+		this.data = Object.assign(this.data || {}, data);
+	}
 
-	// protected async deleter(deleter: NoteDeleter): Promise<boolean> {
-	// 	return deleter().then(deleted => {
-	// 		if(deleted){
-	// 			this.data.exists = false;
-	// 			this.fireListeners("afterdelete", this);
-	// 			this.fireListeners("afterupdate", this, "delete");
-	// 		}
-	// 		return deleted;
-	// 	});
-	// }
+	getData(): INoteData | null {
+		return this.data ? Object.assign({}, this.data) : null; // Don't want to pass a reference
+	}
+
+	exists(): boolean {
+		return this.data !== null;
+	}
 }
 
 export class QNoteLocalStorage extends DefaultNote {

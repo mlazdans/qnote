@@ -126,7 +126,7 @@ export async function loadAllFolderNotes(folder: string): Promise<NoteDataMap> {
 		for(const keyId of keys){
 			let note = new QNoteFolder(keyId, folder);
 			await note.load();
-			Notes.set(keyId, note.data);
+			Notes.set(keyId, note.getData());
 		}
 		return Notes;
 	});
@@ -150,13 +150,13 @@ export async function saveNotesAs(...[instanceType, importNotes, overwrite, root
 		}
 	}
 
-	for(const [keyId, note] of importNotes.entries()){
+	for(const [keyId, data] of importNotes.entries()){
 		let N = ctor(keyId);
 		await N.load().then(async oldData => {
 			if(oldData && !overwrite){
 				stats.existing++;
 			} else {
-				N.data =  note;
+				N.updateData(data);
 				return N.save().then(() => {
 					stats[oldData ? "overwritten" : "imported"]++;
 				}).catch(e => {
@@ -189,7 +189,7 @@ export async function loadAllExtNotes(): Promise<NoteDataMap> {
 		for(const keyId of keys){
 			let note = new QNoteLocalStorage(keyId);
 			await note.load();
-			Notes.set(keyId, note.data);
+			Notes.set(keyId, note.getData());
 		}
 		return Notes;
 	});
