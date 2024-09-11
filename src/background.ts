@@ -202,7 +202,7 @@ class QNoteExtension
 
 						if(newNoteData.text){
 							const newNote = App.createNote(keyId);
-							newNote.updateData(newNoteData);
+							newNote.assignData(newNoteData);
 							await newNote.save();
 							await this.updateView(keyId, newNote.getData());
 						}
@@ -238,7 +238,7 @@ class QNoteExtension
 
 	async saveNoteFrom(sourceData: INoteData, keyId: string) {
 		const targetNote = this.createNote(keyId);
-		targetNote.updateData(sourceData);
+		targetNote.assignData(sourceData);
 		targetNote.save();
 	}
 
@@ -327,7 +327,7 @@ class QNoteExtension
 		const note = await App.createAndLoadNote(keyId);
 
 		if(note.exists()){
-			note.updateData({
+			note.assignData({
 				left: undefined,
 				top: undefined,
 				width: App.prefs.width,
@@ -375,7 +375,7 @@ class QNoteExtension
 				for(const m of messages){
 					const note = await this.createAndLoadNote(m.headerMessageId);
 					if(!note.exists()){
-						note.updateData(noteData);
+						note.assignData(noteData);
 						note.save();
 					}
 				}

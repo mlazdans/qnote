@@ -18,7 +18,7 @@ export interface INote {
 	load(): Promise<INoteData | null>;
 	save(): Promise<boolean>;
 	delete(): Promise<boolean>;
-	updateData(data: INoteData): void;
+	assignData(data: INoteData): void;
 	getData(): INoteData | null;
 	exists(): boolean;
 }
@@ -40,7 +40,7 @@ export abstract class DefaultNote implements INote {
 		return this.getData();
 	}
 
-	updateData(data: INoteData) {
+	assignData(data: INoteData) {
 		this.data = Object.assign(this.data || {}, data);
 	}
 
@@ -61,9 +61,7 @@ export class QNoteLocalStorage extends DefaultNote {
 	async subload(): Promise<INoteData | null> {
 		return browser.storage.local
 			.get(this.keyId)
-			.then((store) =>
-				store[this.keyId] ? store[this.keyId] : null
-			);
+			.then((store) => (store[this.keyId] ? store[this.keyId] : null));
 	}
 
 	async save() {
