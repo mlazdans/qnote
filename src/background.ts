@@ -457,71 +457,60 @@ async function initExtension(){
 	});
 
 	// Change folders
-	browser.mailTabs.onDisplayedFolderChanged.addListener(async (Tab, displayedFolder) => {
+	browser.mailTabs.onDisplayedFolderChanged.addListener(async (tab, displayedFolder) => {
 		QDEB&&console.debug(`${debugHandle} mailTabs.onDisplayedFolderChanged()`);
-
-		// await CurrentNote.silentlyPersistAndClose();
-		// console.error("TODO: CurrentNote.silentlyPersistAndClose()");
-
 		App.updateTabMenusAndIcons();
 	});
 
 	// Create tabs
-	browser.tabs.onCreated.addListener(async tab => {
-		QDEB&&console.debug(`${debugHandle} tabs.onCreated(), tabId:`, tab.id);
-
-		// await CurrentNote.silentlyPersistAndClose();
-		// console.error("TODO: browser.tabs.onCreated");
-	});
+	// browser.tabs.onCreated.addListener(async tab => {
+	// 	QDEB&&console.debug(`${debugHandle} tabs.onCreated(), tabId:`, tab.id);
+	// });
 
 	// Change tabs
 	browser.tabs.onActivated.addListener(async activeInfo => {
-		QDEB&&console.debug(`${debugHandle} tabs.onActivated()`, activeInfo);
-
-		// await CurrentNote.silentlyPersistAndClose();
+		QDEB&&console.debug(`${debugHandle} tabs.onActivated(), id:`, activeInfo.tabId);
+		App.updateTabMenusAndIcons();
 	});
 
 	// Create window
-	browser.windows.onCreated.addListener(async window => {
-		QDEB&&console.debug("windows.onCreated(), windowId:", window.id);
+	// browser.windows.onCreated.addListener(async window => {
+	// 	QDEB&&console.debug("windows.onCreated(), windowId:", window.id);
 
-		// This check is needed for WebExtensionNoteWindow
-		if(window.type === "normal"){
-			// CurrentWindowId = Window.id;
-		}
+	// 	// This check is needed for WebExtensionNoteWindow
+	// 	if(window.type === "normal"){
+	// 		// CurrentWindowId = Window.id;
+	// 	}
 
-		// await CurrentNote.silentlyPersistAndClose();
-	});
+	// 	// await CurrentNote.silentlyPersistAndClose();
+	// });
 
 	// Remove window
-	browser.windows.onRemoved.addListener(async windowId => {
-		QDEB&&console.debug(`${debugHandle} windows.onRemoved(), windowId:`, windowId);
-		// console.error("TODO: browser.windows.onRemoved()");
-
-		// mpUpdateCurrent();
-	});
+	// browser.windows.onRemoved.addListener(async windowId => {
+	// 	QDEB&&console.debug(`${debugHandle} windows.onRemoved(), windowId:`, windowId);
+	// });
 
 	// Change focus
-	browser.windows.onFocusChanged.addListener(async windowId => {
-		// QDEB&&console.debug("windows.onFocusChanged(), windowId:", windowId, CurrentNote);
-		// console.error("browser.windows.onFocusChanged");
+	// browser.windows.onFocusChanged.addListener(async windowId => {
+	// 	// QDEB&&console.debug("windows.onFocusChanged(), windowId:", windowId, CurrentNote);
+	// 	// console.error("browser.windows.onFocusChanged");
 
-		// if(
-		// 	true
-		// 	|| windowId === browser.windows.WINDOW_ID_NONE
-		// 	|| windowId === CurrentNote.windowId
-		// 	|| windowId === CurrentNote.popupId // This check is needed for WebExtensionNoteWindow
-		// ){
-		// 	return;
-		// }
+	// 	// if(
+	// 	// 	true
+	// 	// 	|| windowId === browser.windows.WINDOW_ID_NONE
+	// 	// 	|| windowId === CurrentNote.windowId
+	// 	// 	|| windowId === CurrentNote.popupId // This check is needed for WebExtensionNoteWindow
+	// 	// ){
+	// 	// 	return;
+	// 	// }
 
-		// CurrentNote.windowId = CurrentWindowId = windowId;
-		// CurrentTabId = await getCurrentTabId();
+	// 	// CurrentNote.windowId = CurrentWindowId = windowId;
+	// 	// CurrentTabId = await getCurrentTabId();
 
-		// mpUpdateCurrent();
+	// 	// mpUpdateCurrent();
 
-		// await CurrentNote.silentlyPersistAndClose();
-	});
+	// 	// await CurrentNote.silentlyPersistAndClose();
+	// });
 
 	const actionHandler = (tab: browser.tabs.Tab) => {
 		const actiondebugHandle = `${debugHandle} [tab:${tab.id}]`
@@ -583,7 +572,7 @@ async function initExtension(){
 
 			// Single message
 			if(messages.length == 1){
-				const note = await App.createNote(messages[0].headerMessageId).load();
+				const note = await App.createAndLoadNote(messages[0].headerMessageId);
 
 				if(note){
 					await Menu.modify();
