@@ -16,10 +16,11 @@
 // TODO: icons: edit, copy, paste, delete, reset positions, settings
 // TODO: qpopup: less opacity for title
 // TODO: qpopup: handle zoom in-out
+// TODO: add "install", "update" handling if neccessary
 
-// App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup.api
+// App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup experiment API
 //  |     \                            \     \-> handles events sent by qpopup.api, fires events back to App through DefaultNotePopup
-//  |      \                            \-----> WebExtension popup -> ext api (TODO)
+//  |      \                            \-----> WebExtension popup -> browser.windows API
 //  |       \-> fires events, registered by App
 //  |
 //  \-> PopupManager - self-maintains handles Map to INotePopup`s
@@ -289,7 +290,7 @@ class QNoteExtension
 		// process multiple message selection
 		} else if(messages.length > 1){
 			if(info.menuItemId === "create_multi"){
-				App.createMultiNote(messages, true);
+				App.createMultiNote(messages);
 			} else if(info.menuItemId === "paste_multi"){
 				const sourceNoteData = await browser.qnote.getFromClipboard();
 				if(sourceNoteData && isClipboardSet(sourceNoteData)){
@@ -354,7 +355,7 @@ class QNoteExtension
 		}
 	}
 
-	async createMultiNote(messages: browser.messages.MessageHeader[], overwrite: boolean){
+	async createMultiNote(messages: browser.messages.MessageHeader[]){
 		const windowId = await getCurrentWindowId();
 
 		if(!windowId){
@@ -387,6 +388,7 @@ class QNoteExtension
 	}
 }
 
+// TODO:
 // async function tagMessage(id, tagName, toTag = true) {
 // 	return getMessage(id).then(message => {
 // 		QDEB&&console.debug(`tagMessage(id:${id}, tagName:${tagName}, toTag:${toTag})`);
@@ -440,8 +442,8 @@ async function initExtension(){
 
 	// Messages displayed
 	browser.messageDisplay.onMessagesDisplayed.addListener(async (tab: browser.tabs.Tab, messages: browser.messages.MessageHeader[]) => {
+		QDEB&&console.debug(`${debugHandle} messageDisplay.onMessagesDisplayed:`, messages);
 		if(messages.length == 1){
-			QDEB&&console.debug(`${debugHandle} messageDisplay.onMessagesDisplayed:`, messages);
 			const keyId = messages[0].headerMessageId;
 			const note = await App.createAndLoadNote(keyId);
 
@@ -450,8 +452,8 @@ async function initExtension(){
 			if(note.exists() && App.prefs.showOnSelect){
 				App.popNote(note);
 			}
-		} else {
-			App.updateIcons(false);
+		} else if(messages.length > 1){
+			App.updateIcons(true, tab.id);
 			App.updateMultiPane(messages);
 		}
 	});
@@ -533,7 +535,7 @@ async function initExtension(){
 					App.popNote(note);
 				}
 			} else if(messages.length >= 1){
-				console.error("TODO: multimessage");
+				App.createMultiNote(messages);
 			}
 		});
 	};
@@ -541,7 +543,7 @@ async function initExtension(){
 	// Click on main toolbar
 	BrowserAction.onClicked.addListener(actionHandler);
 
-	// // Click on QNote button
+	// Click on QNote button
 	browser.messageDisplayAction.onClicked.addListener(actionHandler);
 
 	// Handle keyboard shortcuts
@@ -647,10 +649,6 @@ async function initExtension(){
 	});
 
 	browser.menus.onClicked.addListener(App.menuHandler);
-
-	// TODO: add "install", "update" handling if neccessary
-	// if temporary - add reload button to the main toolbar to speed up developement
-	// messenger.runtime.onInstalled.addListener(async ({ reason, temporary })
 }
 
 async function waitForLoad() {
