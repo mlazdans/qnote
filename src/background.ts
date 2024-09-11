@@ -165,6 +165,22 @@ class QNoteExtension
 		browser.qapp.updateColumsView();
 	}
 
+	async saveOrUpdate(keyId: string, newNote: INoteData, overwrite: boolean): Promise<INoteData | null>{
+		const note = await this.createAndLoadNote(keyId);
+
+		if(note.exists() && !overwrite){
+			return note.getData();
+		}
+
+		if(note.exists()){
+			note.assignData(newNote);
+		} else {
+			note.assignData({ ...newNote, ts: Date.now() });
+		}
+
+		return await note.save() ? note.getData() : null;
+	}
+
 	async createPopup(keyId: string, noteData: INoteData | null): Promise<INotePopup> {
 		QDEB&&console.debug(`${debugHandle} createPopup:`, keyId);
 		await browser.qapp.focusSave();
@@ -195,20 +211,14 @@ class QNoteExtension
 					QDEB&&console.debug(`${debugHandle} popup close:`, keyId, reason);
 					PopupManager.remove(keyId);
 					if(reason == "close"){
-						const newNoteData = QNotePopup.state2note(state);
-						// New note
-						if(!noteData){
-							newNoteData.ts = Date.now();
-						}
-
-						if(newNoteData.text){
-							const newNote = App.createNote(keyId);
-							newNote.assignData(newNoteData);
-							await newNote.save();
-							await this.updateView(keyId, newNote.getData());
+						if(state.text){
+							await this.updateView(keyId,
+								await App.saveOrUpdate(keyId, QNotePopup.state2note(state), true)
+							);
 						}
 						await browser.qapp.focusRestore();
 					} else if(reason == "delete"){
+						// TODO: remove tag
 						await App.createNote(keyId).delete();
 						await this.updateView(keyId, null);
 						await browser.qapp.focusRestore();
@@ -237,12 +247,6 @@ class QNoteExtension
 		;
 	}
 
-	async saveNoteFrom(sourceData: INoteData, keyId: string) {
-		const targetNote = this.createNote(keyId);
-		targetNote.assignData(sourceData);
-		targetNote.save();
-	}
-
 	async menuHandler(info: browser.menus.OnClickData) {
 		var menuDebugHandle: string = `${debugHandle} [menuHandler]`;
 		if(!info.selectedMessages || !info.selectedMessages.messages.length){
@@ -264,7 +268,7 @@ class QNoteExtension
 				const sourceNoteData = await browser.qnote.getFromClipboard();
 				if(isClipboardSet(sourceNoteData)){
 					sourceNoteData.ts = Date.now();
-					App.saveNoteFrom(sourceNoteData, keyId);
+					App.saveOrUpdate(keyId, sourceNoteData, true);
 				} else {
 					QDEB&&console.debug(`${menuDebugHandle} paste - no data`);
 				}
@@ -296,7 +300,7 @@ class QNoteExtension
 				if(sourceNoteData && isClipboardSet(sourceNoteData)){
 					sourceNoteData.ts = Date.now();
 					for(const m of messages){
-						await App.saveNoteFrom(sourceNoteData, m.headerMessageId);
+						await App.saveOrUpdate(m.headerMessageId, sourceNoteData, true);
 					};
 					App.updateMultiPane(messages);
 				}
@@ -369,19 +373,13 @@ class QNoteExtension
 		const popup = await QNotePopup.create("multi-note-create", windowId, popupState);
 
 		popup.addListener("close", async (reason, state) =>{
-			const noteData = QNotePopup.state2note(state);
-			noteData.ts = Date.now();
-
-			if(reason == "close"){
+			if(reason == "close" && state.text){
+				const noteData = QNotePopup.state2note(state);
 				for(const m of messages){
-					const note = await this.createAndLoadNote(m.headerMessageId);
-					if(!note.exists()){
-						note.assignData(noteData);
-						note.save();
-					}
+					await App.saveOrUpdate(m.headerMessageId, noteData, false)
 				}
+				this.updateMultiPane(messages);
 			}
-			this.updateMultiPane(messages);
 		});
 
 		popup.pop();

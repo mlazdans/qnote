@@ -156,7 +156,6 @@ export async function saveNotesAs(...[instanceType, importNotes, overwrite, root
 				stats.existing++;
 			} else {
 				N.assignData(data);
-				// TODO: should we check save() return type?
 				return N.save().then(() => {
 					stats[oldData ? "overwritten" : "imported"]++;
 				}).catch(e => {
