@@ -10,6 +10,8 @@
 // TODO: qpopup z-index
 // TODO: drag requestanimationframe?
 // TODO: holding alt+q pops way too fast
+// TODO: when multiple popups are open, alt+q pops with selected message only. Not with focused popup
+// TODO: menu - close all opened notes
 
 // App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup.api
 //  |     \                            \     \-> handles events sent by qpopup.api, fires events back to App through DefaultNotePopup
@@ -41,6 +43,7 @@ import { INotePopup, IPopupState, QNotePopup } from "./modules/NotePopups.mjs";
 import { convertPrefsToQAppPrefs, dateFormatWithPrefs } from "./modules/common.mjs";
 import { confirmDelete, getCurrentTabId, getCurrentWindowId, getPrefs, isClipboardSet, sendPrefsToQApp } from "./modules/common-background.mjs";
 import { IPreferences } from "./modules/api.mjs";
+import { Menu } from "./modules/Menu.mjs";
 
 var QDEB = true;
 var App: QNoteExtension;
@@ -119,7 +122,7 @@ class QNoteExtension
 
 		const windowId = await getCurrentWindowId();
 		if(windowId) {
-		browser.qapp.attachNotesToMultiMessage(windowId, noteArray, keyArray);
+			browser.qapp.attachNotesToMultiMessage(windowId, noteArray, keyArray);
 		}
 	}
 
@@ -227,48 +230,125 @@ class QNoteExtension
 			.replace("{{ qnote_text }}", '<span class="qnote-text-span"></span>')
 		;
 	}
+
+	async saveNoteFrom(sourceData: INoteData, keyId: string) {
+		const targetNote = this.createNote(keyId);
+		targetNote.updateData(sourceData);
+		targetNote.save();
+	}
+
+	async menuHandler(info: browser.menus.OnClickData) {
+		if(!info.selectedMessages){
+			console.warn("[menu] no messages selected");
+			return;
+		}
+
+		const messages = info.selectedMessages.messages;
+
+		// process single message
+		if(info.selectedMessages.messages.length === 1){
+			const keyId = messages[0].headerMessageId;
+
+			if(info.menuItemId === "create" || info.menuItemId === "modify"){
+				App.popNote(await App.createAndLoadNote(keyId));
+			} else if(info.menuItemId === "paste"){
+				const sourceNoteData = await browser.qnote.getFromClipboard();
+				console.log("paste", sourceNoteData);
+				if(isClipboardSet(sourceNoteData)){
+					sourceNoteData.ts = Date.now();
+					App.saveNoteFrom(sourceNoteData, keyId);
+				}
+			} else if(info.menuItemId === "options"){
+				browser.runtime.openOptionsPage();
+			} else if(info.menuItemId === "copy"){
+				App.getNoteData(keyId).then(data => {
+					if(data) {
+						browser.qnote.copyToClipboard(data)
+					}
+				});
+			} else if(info.menuItemId === "delete"){
+				if(!App.prefs.confirmDelete || await confirmDelete()) {
+					if(PopupManager.has(keyId)){
+						await PopupManager.get(keyId).close();
+					}
+					App.createNote(keyId).delete().then(() => App.updateView(keyId, null));
+				}
+			} else if(info.menuItemId === "reset"){
+				const popup = PopupManager.has(keyId) ? PopupManager.get(keyId) : null;
+				if(popup){
+					await popup.resetPosition();
+					return
+				}
+
+				const note = App.createNote(keyId);
+
+				note.load().then(async data => {
+					if(data){
+						note.updateData({
+							left: undefined,
+							top: undefined,
+							width: App.prefs.width,
+							height: App.prefs.height,
+						});
+						await note.save();
+					}
+				});
+			} else {
+				console.error("Unknown menuItemId:", info.menuItemId);
+			}
+		// process multiple message selection
+		} else if(info.selectedMessages.messages.length > 1){
+			if(info.menuItemId === "create_multi"){
+				createMultiNote(info.selectedMessages.messages, true);
+			} else if(info.menuItemId === "paste_multi"){
+				const sourceNoteData = await browser.qnote.getFromClipboard();
+				if(sourceNoteData && isClipboardSet(sourceNoteData)){
+					for(const m of info.selectedMessages.messages){
+						await App.saveNoteFrom(sourceNoteData, m.headerMessageId);
+					};
+					App.updateMultiPane(info.selectedMessages.messages);
+				}
+			} else if(info.menuItemId === "delete_multi"){
+				if(!App.prefs.confirmDelete || await confirmDelete()) {
+					// TODO: code dup with menu single delete
+					for(const m of info.selectedMessages.messages){
+						const keyId = m.headerMessageId;
+						if(PopupManager.has(keyId)){
+							PopupManager.get(keyId).close();
+						}
+						await App.createNote(keyId).delete();
+					}
+					App.updateMultiPane(info.selectedMessages.messages);
+				}
+			} else if(info.menuItemId === "reset_multi"){
+				for(const m of info.selectedMessages.messages){
+					// TODO: code dup with menu single delete
+					const keyId = m.headerMessageId;
+					const popup = PopupManager.has(keyId) ? PopupManager.get(keyId) : null;
+
+					if(popup){
+						await popup.resetPosition();
+					} else {
+						const note = await App.createAndLoadNote(keyId);
+
+						if(note.exists()){
+							note.updateData({
+								width: App.prefs.width,
+								height: App.prefs.height,
+								left: undefined,
+								top: undefined,
+							});
+						}
+					}
+				}
+			} else {
+				console.error("Unknown menuItemId: ", info.menuItemId);
+			}
+		} else {
+			console.warn("No messages selected");
+		}
+	}
 }
-
-async function confirmDelete(shouldConfirm: boolean): Promise<boolean> {
-	return shouldConfirm ? await browser.legacy.confirm(_("delete.note"), _("are.you.sure")) : true;
-}
-
-async function getMessageKeyId(id: MessageId) {
-	return browser.messages.get(id).then(parts => parts.headerMessageId);
-}
-
-// TODO:
-// async function deleteNoteForMessage(id: MessageId) {
-// 	return createNoteForMessage(id).then(async note => {
-// 		return note.delete().then(() => note);
-// 	});
-// }
-
-// TODO:
-// async function saveNoteForMessage(id, data){
-// 	return loadNoteForMessage(id).then(note => {
-// 		note.set(data);
-// 		return note.save();
-// 	});
-// }
-
-// TODO:
-// async function saveNoteForMessageIfNotExists(id, data){
-// 	return loadNoteForMessage(id).then(note => {
-// 		if(!note.exists){
-// 			note.set(data);
-// 			return note.save();
-// 		}
-// 	});
-// }
-
-// async function getMessage(id: MessageId){
-// 	return browser.messages.get(id).then(messageHeaderReturner);
-// }
-
-// async function getMessageFull(id: MessageId){
-// 	return browser.messages.getFull(id).then(messagePartReturner);
-// }
 
 // async function tagMessage(id, tagName, toTag = true) {
 // 	return getMessage(id).then(message => {
@@ -353,6 +433,23 @@ async function initExtension(){
 	// });
 
 	// Below are various listeners only
+
+	// Messages displayed
+	browser.messageDisplay.onMessagesDisplayed.addListener(async (tab: browser.tabs.Tab, messages: browser.messages.MessageHeader[]) => {
+		if(messages.length == 1){
+			const keyId = messages[0].headerMessageId;
+			const note = await App.createAndLoadNote(keyId);
+
+			App.updateView(keyId, note.getData());
+
+			if(note.exists() && App.prefs.showOnSelect){
+				App.popNote(note);
+			}
+		} else {
+			App.updateIcons(false);
+			App.updateMultiPane(messages);
+		}
+	});
 
 	// Change folders
 	browser.mailTabs.onDisplayedFolderChanged.addListener(async (Tab, displayedFolder) => {
@@ -465,52 +562,35 @@ async function initExtension(){
 		}
 	});
 
-	// TODO: bring back
 	// Context menu on message
-	// browser.menus.onShown.addListener(async info => {
-	// 	await browser.menus.removeAll();
+	browser.menus.onShown.addListener(async (info, tab) => {
+		await browser.menus.removeAll();
 
-	// 	if(info && info.selectedMessages && (info.selectedMessages.messages.length > 1)){
-	// 		await Menu.multi();
-	// 		browser.menus.refresh();
-	// 	} else {
-	// 		let id;
+		const in_message_list = info.contexts.includes('message_list');
 
-	// 		// Click other than from messageList
-	// 		if(info.selectedMessages === undefined){
-	// 			let msg = await getDisplayedMessageForTab(CurrentTabId);
-	// 			id = msg.id;
-	// 		} else {
-	// 			if(info.selectedMessages.messages.length != 1){
-	// 				return;
-	// 			}
-	// 			id = Menu.getId(info);
-	// 		}
-
-	// 		loadNoteForMessage(id).then(async note => {
-	// 			if(note.exists){
-	// 				await Menu.modify();
-	// 			} else {
-	// 				await Menu.new();
-	// 			}
-	// 			browser.menus.refresh();
-	// 		}).catch(silentCatcher());
-	// 	}
-	// });
-
-	// Messages displayed
-	browser.messageDisplay.onMessagesDisplayed.addListener(async (Tab: browser.tabs.Tab, m: browser.messages.MessageHeader[]) => {
-		if(m.length == 1){
-			const note = await App.createAndLoadNote(m[0].headerMessageId);
-
-			App.updateView(m[0].headerMessageId, note.data);
-
-			if(note.data && App.prefs.showOnSelect){
-				App.popNote(note);
+		if(in_message_list){
+			if(!info.selectedMessages){
+				console.warn("selectedMessages object is not set")
+				return;
 			}
-		} else {
-			App.updateIcons(false);
-			App.updateMultiPane(m);
+
+			// Single message
+			if(info.selectedMessages.messages.length == 1){
+				const message = info.selectedMessages.messages[0];
+				const note = await App.createNote(message.headerMessageId).load();
+
+				if(note){
+					await Menu.modify();
+				} else {
+					await Menu.new();
+				}
+				browser.menus.refresh();
+			} else if(info.selectedMessages.messages.length > 1){
+				await Menu.multi();
+				browser.menus.refresh();
+			} else {
+				console.warn("no messages selected");
+			}
 		}
 	});
 
@@ -568,8 +648,7 @@ async function initExtension(){
 		});
 	});
 
-	// TODO: bring back
-	// browser.menus.onClicked.addListener(menuHandler);
+	browser.menus.onClicked.addListener(App.menuHandler);
 
 	// TODO: add "install", "update" handling if neccessary
 	// if temporary - add reload button to the main toolbar to speed up developement
