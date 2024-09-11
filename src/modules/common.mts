@@ -127,31 +127,6 @@ export function silentCatcher(){
 	}
 }
 
-// TODO:
-// async function mpUpdateCurrent(){
-// 	return getDisplayedMessageForTab(CurrentTabId).then(message => {
-// 		return mpUpdateForMessage(message.id);
-// 	}).catch(silentCatcher());
-// }
-
-// TODO: dead code?
-// async function getWindowMailTab(windowId){
-// 	return browser.windows.get(windowId, { populate: true }).then(Window => {
-// 		if(Window.tabs){
-// 			for(let t of Window.tabs){
-// 				if(t.mailTab){
-// 					return t;
-// 				}
-// 			}
-// 		}
-// 	});
-// }
-// async function getWindowMailTabId(windowId){
-// 	return getWindowMailTab(windowId).then(Tab => {
-// 		return getTabId(Tab);
-// 	});
-// }
-
 // NOTE: current ThreadPaneColumns implementation does not allow updating single row anyways
 // function updateNoteView(note?: NoteData){
 // 	if(note){
@@ -162,74 +137,6 @@ export function silentCatcher(){
 // 		getCurrentWindowIdAnd().then(windowId => browser.qapp.updateView(windowId));
 // 	}
 // }
-
-// async function loadAllNotes() {
-// 	let p;
-// 	if(Prefs.storageOption === 'ext'){
-// 		p = loadAllExtKeys();
-// 	} else if(Prefs.storageOption === 'folder'){
-// 		p = loadAllFolderKeys(Prefs.storageFolder);
-// 	} else {
-// 		throw new TypeError("Ivalid Prefs.storageOption");
-// 	}
-
-// 	return p.then(async keys => {
-// 		let Notes = [];
-// 		for(let k of keys){
-// 			loadNote(k.keyId).then(note => {
-// 				Notes.push(note);
-// 			});
-// 		}
-
-// 		return Notes;
-// 	});
-// }
-
-// Prepare note for sending to qapp
-// MAYBE: merge these 2 formats into one?
-// function note2QAppNote(note){
-// 	return note ? {
-// 		keyId: note.keyId,
-// 		exists: note.exists || false,
-// 		text: note.text || "",
-// 		ts: note.ts || 0,
-// 		tsFormatted: qDateFormat(note.ts)
-// 	} : null;
-// }
-
-// function note2QNote(note){
-// 	return note ? {
-// 		left: note.left,
-// 		top: note.top,
-// 		width: note.width,
-// 		height: note.height,
-// 		text: note.text,
-// 		ts: note.ts
-// 	} : null;
-// }
-
-// async function loadAllQAppNotes(){
-// 	return loadAllNotes().then(notes => {
-// 		for(let note of notes){
-// 			sendNoteToQApp(note);
-// 		}
-// 	});
-// }
-
-// let messageHeaderReturner = (MessageHeader: MessageHeader) => {
-// 	if(MessageHeader){
-// 		return MessageHeader;
-// 	}
-// 	throw new NoMessageError;
-// };
-
-// let messagePartReturner = (MessagePart: MessagePart) => {
-// 	if(MessagePart){
-// 		return MessagePart;
-// 	}
-// 	throw new NoMessageError;
-// };
-
 
 function ts2jsdate(ts?: Date | number): Date {
 	return ts === undefined ? new Date() : new Date(ts)
