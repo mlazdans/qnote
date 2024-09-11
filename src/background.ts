@@ -373,8 +373,10 @@ class QNoteExtension
 
 			if(reason == "close"){
 				for(const m of messages){
-					if(!await this.getNoteData(m.headerMessageId)){
-						await this.saveNoteFrom(noteData, m.headerMessageId);
+					const note = await this.createAndLoadNote(m.headerMessageId);
+					if(!note.exists()){
+						note.updateData(noteData);
+						note.save();
 					}
 				}
 			}
