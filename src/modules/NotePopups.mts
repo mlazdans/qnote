@@ -27,6 +27,7 @@ export interface IPopupState {
 	placeholder?: string
 	focusOnDisplay?: boolean
 	enableSpellChecker?: boolean
+	confirmDelete?: boolean
 }
 
 export abstract class DefaultNotePopup extends QEventDispatcher<{
@@ -123,6 +124,7 @@ export class QNotePopup extends DefaultNotePopup {
 			// placeholder: undefined,
 			focusOnDisplay: prefs.focusOnDisplay,
 			enableSpellChecker: prefs.enableSpellChecker,
+			confirmDelete: prefs.confirmDelete
 		}
 
 		if(prefs.alwaysDefaultPlacement){

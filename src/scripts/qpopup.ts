@@ -1,7 +1,7 @@
 import { DOMLocalizator } from "../modules/DOMLocalizator.mjs";
 import { RestoreFocus } from "../modules/Messages.mjs";
 import { IPopupState } from "../modules/NotePopups.mjs";
-import { getElementByIdOrDie, querySelectorOrDie } from "../modules/common.mjs";
+import { querySelectorOrDie } from "../modules/common.mjs";
 
 let QDEB = true;
 
@@ -97,7 +97,11 @@ function popup(){
 	i18n.setTexts(document);
 
 	closeEl.addEventListener     ("click", () => browser.qpopup.close(id, "close"));
-	delEl.addEventListener       ("click", () => browser.qpopup.close(id, "delete"));
+	delEl.addEventListener       ("click", () => {
+		if(!State.confirmDelete || confirm(i18n._("delete.note"))){
+			browser.qpopup.close(id, "delete");
+		}
+	});
 	screenshotEl.addEventListener("click", () => browser.qpopup.takeScreenshot(id)); // TODO: animate on success
 	resetEl.addEventListener     ("click", () => browser.qpopup.resetPosition(id));
 	YTextE.addEventListener      ("keyup", () => browser.qpopup.update(id, { text: YTextE.value }));

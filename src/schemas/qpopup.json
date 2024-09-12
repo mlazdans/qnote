@@ -59,6 +59,10 @@
 			"enableSpellChecker": {
 				"type": "boolean",
 				"optional": true
+			},
+			"confirmDelete": {
+				"type": "boolean",
+				"optional": true
 			}
 		}
 	}],
