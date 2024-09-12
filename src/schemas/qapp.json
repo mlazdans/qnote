@@ -137,35 +137,6 @@
 			"$ref": "Prefs"
 		}]
 	},{
-		"name": "clearNoteCache",
-		"type": "function",
-		"description": "",
-		"async": true,
-		"parameters": []
-	},{
-		"name": "saveNoteCache",
-		"type": "function",
-		"description": "",
-		"async": true,
-		"parameters": [{
-			"name": "keyId",
-			"type": "string",
-			"description": ""
-		},{
-			"name": "data",
-			"$ref": "qnote.NoteData"
-		}]
-	},{
-		"name": "deleteNoteCache",
-		"type": "function",
-		"description": "",
-		"async": true,
-		"parameters": [{
-			"name": "keyId",
-			"type": "string",
-			"description": ""
-		}]
-	},{
 		"name": "init",
 		"type": "function",
 		"description": "Initialize extension",

@@ -6,7 +6,8 @@ var { MailServices }                          = ChromeUtils.import("resource:///
 var { ThreadPaneColumns }                     = ChromeUtils.importESModule("chrome://messenger/content/ThreadPaneColumns.mjs");
 var { QNoteFilter, QNoteAction, QCustomTerm } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFilters.mjs");
 var { QEventDispatcher }                      = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
-var { QCache }                                = ChromeUtils.importESModule("resource://qnote/modules/QCache.mjs");
+var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs");
+var { XNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/XNoteFile.mjs");
 
 var QDEB = true;
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
@@ -19,7 +20,6 @@ class QAppEventDispatcher extends QEventDispatcher<{
 }> {}
 
 class QApp extends ExtensionCommon.ExtensionAPI {
-	noteGrabber
 	EventDispatcher: QAppEventDispatcher
 	WindowObserver
 	Prefs: IQAppPreferences | null
@@ -41,16 +41,11 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 		var API = this;
 
-		// We'll update cache and call listener once item arrives
-		// Caller must install onNoteRequest listener before init()
-		QDEB&&console.debug("Installing noteGrabber");
-		this.noteGrabber = new QCache();
-
 		QDEB&&console.debug("Installing custom term");
 		this.customTerm = new QCustomTerm();
 
 		QDEB&&console.debug("Installing custom action");
-		this.customAction = new QNoteAction(this.noteGrabber);
+		this.customAction = new QNoteAction();
 
 		QDEB&&console.debug("Installing filters");
 		this.customFilter = new QNoteFilter();
@@ -236,21 +231,26 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 			}
 		}
 
+		// TODO: code dup in filters
+		function getFolderNoteData(keyId: string): INoteData | null {
+			if(!API.Prefs?.storageFolder){
+				return null;
+			}
+
+			const QN = new QNoteFile;
+			const XN = new XNoteFile;
+
+			let note = QN.load(API.Prefs.storageFolder, keyId);
+
+			if(!note){
+				note = XN.load(API.Prefs.storageFolder, keyId);
+			}
+
+			return note;
+		}
+
 		return {
 			qapp: {
-				onNoteRequest: new ExtensionCommon.EventManager({
-					context,
-					name: "qapp.onNoteRequest",
-					register: (fire: ExtensionCommon.Fire) => {
-						// It makes sense to allow only one note requester
-						API.noteGrabber.setProvider(keyId => {
-							return fire.async(keyId);
-						});
-
-						return () => {
-						}
-					}
-				}).api(),
 				async focusSave() {
 					focusSavedElement = Services.focus.focusedElement;
 				},
@@ -296,21 +296,13 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 							resizable: true,
 							sortable: true,
 							textCallback: function(msgHdr: any){
-								// TODO: batch multiple note requests
-								let note = API.noteGrabber.get(msgHdr.messageId, () => {
-									ThreadPaneColumns.refreshCustomColumn("qnote");
-								});
-
+								const note = getFolderNoteData(msgHdr.messageId);
 								return note ? note.text : null;
 							},
 							iconCellDefinitions: iconCellDefinitions,
 							iconHeaderUrl: extension.baseURI.resolve("resource://qnote/images/icons/qnote.svg"),
 							iconCallback: function(msgHdr: any){
-								let note = API.noteGrabber.get(msgHdr.messageId, () => {
-									ThreadPaneColumns.refreshCustomColumn("qnote");
-								});
-
-								return note ? "qnote_exists" : "qnote_off";
+								return getFolderNoteData(msgHdr.messageId) ? "qnote_exists" : "qnote_off";
 							}
 						});
 					} else {
@@ -415,15 +407,6 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 						noteIndicator.classList.add("qnote-mm");
 						row.appendChild(noteIndicator);
 					}
-				},
-				async saveNoteCache(keyId: string, note: INoteData){
-					API.noteGrabber.set(keyId, note);
-				},
-				async clearNoteCache(){
-					API.noteGrabber.clear();
-				},
-				async deleteNoteCache(keyId: string){
-					API.noteGrabber.delete(keyId);
 				},
 				async getProfilePath() {
 					return Cc["@mozilla.org/file/directory_service;1"]

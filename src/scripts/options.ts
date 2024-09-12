@@ -338,10 +338,6 @@ async function initExportButtons(prefs: IPreferences){
 
 			await saveNotesAs(QNoteLocalStorage, notes, !!overwriteExistingNotes.checked).then(printImportStats);
 
-			if(prefs.storageOption == "ext"){
-				await browser.qapp.clearNoteCache();
-			}
-
 			disableExportImportConstrols(false);
 		});
 	});
@@ -403,9 +399,6 @@ function importInternalStorage(prefs: IPreferences) {
 			browser.storage.local.set(storage).then(async () => {
 				displayMsg([i18n._("storage.imported")], "Info");
 				const newPrefs = await getPrefs();
-				if(prefs.storageOption != newPrefs.storageOption){
-					await browser.qapp.clearNoteCache();
-				}
 				initOptionsPageValues(newPrefs);
 			}).catch((message: string) => {
 				displayErrors([i18n._("storage.import.failed", message)]);

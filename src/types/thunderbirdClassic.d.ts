@@ -190,7 +190,6 @@ declare namespace Components
 
 		public static importESModule(path: "resource://qnote/modules/QEventDispatcher.mjs"): typeof import("../modules/QEventDispatcher.mjs");
 		public static importESModule(path: "resource://qnote/modules/DOMLocalizator.mjs"): typeof import("../modules/DOMLocalizator.mjs");
-		public static importESModule(path: "resource://qnote/modules/QCache.mjs"): typeof import("../modules/QCache.mts");
 		public static importESModule(path: "resource://qnote/modules-exp/QNoteFile.mjs"): typeof import("../modules-exp/QNoteFile.mts");
 		public static importESModule(path: "resource://qnote/modules-exp/XNoteFile.mjs"): typeof import("../modules-exp/XNoteFile.mts");
 		public static importESModule(path: "resource://qnote/modules-exp/QNoteFilters.mjs"): typeof import("../modules-exp/QNoteFilters.mts");

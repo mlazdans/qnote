@@ -47,15 +47,10 @@ export interface IQAppAPI {
 	init(Prefs: IQAppPreferences): Promise<void>
 	setDebug(on: boolean): Promise<void>
 	setPrefs(prefs: IQAppPreferences): Promise<void>
-	saveNoteCache(keyId: string, note: INoteData): Promise<void>
-	deleteNoteCache(keyId: string): Promise<void>
-	clearNoteCache(): Promise<void>
 	getProfilePath(): Promise<string>
 	focusSave(): Promise<void>
 	focusRestore(): Promise<void>
 	attachNotesToMultiMessage(windowId: number, notes: Array<INoteData>, keys: Array<string>): Promise<void>
-
-	onNoteRequest: WebExtEvent<(keyId: string) => void>
 }
 
 export interface ILegacyAPI {
