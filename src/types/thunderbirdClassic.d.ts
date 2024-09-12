@@ -1061,6 +1061,31 @@ interface nsIFocusManager extends nsISupports {
 declare namespace Services
 {
 	interface mozIDOMWindowProxy extends nsISupports {}
+	interface nsIJSEnumerator extends nsISupports {
+		iterator(): nsIJSEnumerator;
+		next(): any;
+	}
+
+	interface nsID<uuid = string> {
+		readonly number: uuid;
+	}
+
+	interface nsISimpleEnumeratorBase extends nsISupports {
+		iterator(): nsIJSEnumerator;
+		entries(aIface: nsID): nsIJSEnumerator;
+	}
+
+	interface nsISimpleEnumerator extends nsISimpleEnumeratorBase {
+		hasMoreElements(): boolean;
+		getNext(): nsISupports;
+	}
+
+	interface nsIObserverService extends nsISupports {
+		addObserver(anObserver: nsIObserver, aTopic: string, ownsWeak?: boolean): void;
+		removeObserver(anObserver: nsIObserver, aTopic: string): void;
+		notifyObservers(aSubject: nsISupports | null, aTopic: string, someData?: string): void;
+		enumerateObservers(aTopic: string): nsISimpleEnumerator;
+	}
 
 	namespace prompt {
 		function alert(aParent: mozIDOMWindowProxy | null, aDialogTitle: string | null, aText: string | null): void
@@ -1071,6 +1096,7 @@ declare namespace Services
 		function compare(A: string, B: string): number
 	}
 
+	let obs: nsIObserverService;
 	let clipboard: Ci.nsIClipboard;
 	let ww: nsIWindowWatcher;
 	let wm: Ci.nsIWindowMediator;
