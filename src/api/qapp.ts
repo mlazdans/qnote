@@ -15,13 +15,12 @@ class QAppEventDispatcher extends QEventDispatcher<{
 	domwindowopened: (aSubject: MozWindow, aTopic: string, aData: any) => void,
 	domwindowclosed: (aSubject: MozWindow, aTopic: string, aData: any) => void,
 	keydown: (e: KeyboardEvent) => void,
-	onShutdown: () => void,
 	domcomplete: (aSubject: MozWindow, aTopic: string, aData: any, e: Event) => void,
 }> {}
 
 class QApp extends ExtensionCommon.ExtensionAPI {
 	noteGrabber
-	EventDispatcher
+	EventDispatcher: QAppEventDispatcher
 	WindowObserver
 	Prefs: IQAppPreferences | null
 
@@ -60,6 +59,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 		this.EventDispatcher = new QAppEventDispatcher();
 
+		// TODO: Is this used anymore?
 		this.WindowObserver = {
 			observe: function(aSubject: MozWindow, aTopic: string, aData: any) {
 				let fName = "qapp.WindowObserver.observe()";
@@ -145,24 +145,27 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 		}
 	}
 
+	// https://developer.thunderbird.net/add-ons/mailextensions/experiments#managing-your-experiments-lifecycle
 	onShutdown(isAppShutdown: boolean) {
-		console.debug("QNote.shutdown()");
+		console.debug("QNote.shutdown(), isAppShutdown:", isAppShutdown);
 
 		if (isAppShutdown) {
 			return;
 		}
 
-		Services.ww.unregisterNotification(this.WindowObserver);
+		Services.obs.notifyObservers(null, "startupcache-invalidate");
 
-		this.EventDispatcher.fireListeners("onShutdown");
+		if(ThreadPaneColumns){
+			ThreadPaneColumns.removeCustomColumn('qnote');
+		}
+
 		this.uninstallCSS("html/background.css");
-		// if(this.QNoteFilter){
-		// 	this.QNoteFilter.uninstall();
-		// }
 
 		if(this.customAction){
 			this.customAction.uninstall();
 		}
+
+		Services.ww.unregisterNotification(this.WindowObserver);
 	}
 
 	// Legacy column
@@ -224,8 +227,6 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 	getAPI(context: any) {
 		let API: QApp = this;
 		let focusSavedElement: Element | null = null;
-
-		context.callOnClose(API);
 
 		function id2RealWindow(windowId: number): MozWindow {
 			try {
@@ -448,9 +449,6 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 				}
 			}
 		}
-	}
-	close() {
-		ThreadPaneColumns.removeCustomColumn('qnote');
 	}
 }
 

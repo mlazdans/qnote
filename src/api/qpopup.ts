@@ -78,8 +78,13 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 		console.log("[qpopup onUpdate]", id, manifest);
 	}
 
-	onShutdown(_isAppShutdown: any) {
-		console.log("[qpopup onShutdown]", _isAppShutdown);
+	onShutdown(isAppShutdown: any) {
+		console.log("[qpopup onShutdown]", isAppShutdown);
+
+		if(isAppShutdown){
+			return;
+		}
+
 		for(const id of popupManager.popups.keys()){
 			popupManager.get(id).destroy("shutdown");
 		}
