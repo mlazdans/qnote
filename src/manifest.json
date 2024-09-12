@@ -13,9 +13,9 @@
 		}
 	},
 	"icons": {
-		"32": "images/icon.svg",
-		"48": "images/icon.svg",
-		"64": "images/icon.svg"
+		"32": "images/icons/qnote.svg",
+		"48": "images/icons/qnote.svg",
+		"64": "images/icons/qnote.svg"
 	},
 	"permissions": [
 		"messagesTagsList",

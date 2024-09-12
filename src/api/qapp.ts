@@ -279,7 +279,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 					if(ThreadPaneColumns && ThreadPaneColumns.getColumn('qnote') === null){
 						const icon = {
 							id: "qnote_exists",
-							url: extension.baseURI.resolve("resource://qnote/images/icon-column.png"),
+							url: extension.baseURI.resolve("resource://qnote/images/icons/qnote.svg"),
 						};
 						const icon2 = {
 							id: "qnote_off",
@@ -303,7 +303,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 								return note ? note.text : null;
 							},
 							iconCellDefinitions: iconCellDefinitions,
-							iconHeaderUrl: extension.baseURI.resolve("resource://qnote/images/icon-column.png"),
+							iconHeaderUrl: extension.baseURI.resolve("resource://qnote/images/icons/qnote.svg"),
 							iconCallback: function(msgHdr: any){
 								let note = API.noteGrabber.get(msgHdr.messageId, () => {
 									ThreadPaneColumns.refreshCustomColumn("qnote");

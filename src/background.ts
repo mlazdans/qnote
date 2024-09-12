@@ -15,6 +15,7 @@
 // TODO: qpopup: less opacity for title
 // TODO: qpopup: handle zoom in-out
 // TODO: add "install", "update" handling if neccessary
+// TODO: second column for text preview
 
 // App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup experiment API
 //  |     \                            \     \-> handles events sent by qpopup.api, fires events back to App through DefaultNotePopup
@@ -134,7 +135,7 @@ class QNoteExtension
 	}
 
 	async updateIcons(on: boolean, tabId?: number){
-		const icon = on ? "images/icon.svg" : "images/icon-disabled.svg";
+		const icon = on ? "images/icons/qnote.svg" : "images/icons/qnote-disabled.svg";
 
 		BrowserAction.setIcon({
 			path: icon,

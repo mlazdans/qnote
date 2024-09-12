@@ -51,14 +51,14 @@ if (isNaN(id)) {
 const State: IPopupState = { };
 const i18n = new DOMLocalizator(browser.i18n.getMessage);
 
-const YTextE       = getElementByIdOrDie('note-text') as HTMLTextAreaElement;
-const popupEl      = querySelectorOrDie('.qpopup') as HTMLTextAreaElement;
+const popupEl      = querySelectorOrDie('.qpopup') as HTMLDivElement;
 const titleTextEl  = querySelectorOrDie(".qpopup-title-text") as HTMLElement;
-const resizeEl     = querySelectorOrDie(".qpopup-controls-resize") as HTMLElement;
 const closeEl      = querySelectorOrDie(".qpopup-title-closebutton") as HTMLElement;
-const delEl        = querySelectorOrDie("#note-delete") as HTMLElement;
-const screenshotEl = querySelectorOrDie("#note-screenshot") as HTMLElement;
-const resetEl      = querySelectorOrDie("#note-reset") as HTMLElement;
+const YTextE       = querySelectorOrDie('.qnote-textinput') as HTMLTextAreaElement;
+const resizeEl     = querySelectorOrDie(".qpopup-controls-resize") as HTMLElement;
+const delEl        = querySelectorOrDie(".qnote-button-delete") as HTMLElement;
+const screenshotEl = querySelectorOrDie(".qnote-button-screenshot") as HTMLElement;
+const resetEl      = querySelectorOrDie(".qnote-button-reset") as HTMLElement;
 
 function updateElements(state: IPopupState){
 	YTextE.setAttribute("spellcheck", state.enableSpellChecker ? "true" : "false");
