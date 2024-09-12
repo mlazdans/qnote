@@ -5,10 +5,6 @@ import * as luxon from "../modules/luxon.mjs";
 import { QNoteFolder, QNoteLocalStorage, XNoteFolder } from "../modules/Note.mjs";
 import { PrefsUpdated } from "../modules/Messages.mjs";
 
-let backgroundPort: browser.runtime.Port;
-let isConnected: boolean;
-connectToBackground();
-
 let QDEB                        = true;
 const debugHandle               = "[qnote:options]";
 const i18n                      = new DOMLocalizator(browser.i18n.getMessage);
@@ -141,15 +137,6 @@ async function setPrefFromHtml<K extends keyof Partial<IPreferences>>(p: Partial
 	});
 }
 
-function connectToBackground() {
-	backgroundPort = browser.runtime.connect();
-	isConnected = true;
-	backgroundPort.onDisconnect.addListener(data => {
-		console.log(`${debugHandle} onDisconnect`, backgroundPort);
-		isConnected = false;
-	});
-}
-
 async function saveOption(name: keyof IPreferences){
 	QDEB&&console.debug(`${debugHandle} saving option ${name}`);
 
@@ -208,11 +195,7 @@ async function saveOption(name: keyof IPreferences){
 		return;
 	}
 
-	if(!isConnected){
-		connectToBackground();
-	}
-
-	savePrefs(newPrefs).then(() => (new PrefsUpdated).post(backgroundPort));
+	savePrefs(newPrefs).then(() => (new PrefsUpdated).sendMessage());
 }
 
 function initTags(tags: Array<messenger.messages.tags.MessageTag>): void {
@@ -548,31 +531,12 @@ async function initOptionsPage(prefs: IPreferences){
 			console.log(`Saving: ${prefKey}`);
 			saveOption(prefKey)
 		});
-
-		// return el.addEventListener(method, () => {
-		// if(ext.CurrentNote.dirty){
-		// 	ErrMsg = [i18n._("close.current.note")];
-		// 	displayErrorBox();
-		// 	e.preventDefault();
-		// 	e.stopImmediatePropagation();
-		// } else if(doSave) {
-			// setTimeout(() => {
-			// 	if(!--saving){
-			// 		saveOptions();
-			// 	}
-			// }, 200);
-			// saving++;
-		// }
 	};
 
 	document.querySelectorAll("textarea,select,input[type=text],input[type=number]").forEach(el => createSaveListener(el, "change"));
 	document.querySelectorAll("input[type=checkbox],input[type=radio]").forEach(el => createSaveListener(el, "click"));
 
 	QDEB&&console.assert(unAccountedForListeners.size === 0, `${debugHandle} no event listeners for preferences: `, [...unAccountedForListeners.values()].join(", "));
-
-	// Prevent buttons when note dirty
-	// document.querySelectorAll("button").forEach(el => saveListener(el, "click", false));
-	// document.querySelectorAll("input[type=file]").forEach(el => saveListener(el, "change", false));
 
 	// TODO:
 	// clearStorageButton.       addEventListener("click", clearStorage);

@@ -619,6 +619,10 @@ async function initExtension(){
 		} else if((new RestoreFocus()).parse(rawData)){
 			QDEB&&console.debug(`${debugHandle} received "RestoreFocus" message`);
 			browser.qapp.focusRestore();
+		} else if((new PrefsUpdated()).parse(rawData)){
+			QDEB&&console.debug(`${debugHandle} received "PrefsUpdated" message`);
+			App.prefs = await getPrefs();
+			sendPrefsToQApp(App.prefs);
 		} else {
 			console.error(`${debugHandle} unknown message`);
 		}
@@ -626,25 +630,6 @@ async function initExtension(){
 		QDEB&&console.groupEnd();
 
 		return false;
-	});
-
-	// Receive data from content via connection
-	browser.runtime.onConnect.addListener(connection => {
-		QDEB&&console.log(`${debugHandle} new connection:`, connection);
-
-		connection.onMessage.addListener(async (data: any) => {
-			let message;
-
-			QDEB&&console.log(`${debugHandle} connection.onMessage() received:`, data);
-
-			if(message = (new PrefsUpdated).parse(data)){
-				console.log(`${debugHandle} received "prefsUpdated" message:`, message);
-				App.prefs = await getPrefs();
-				sendPrefsToQApp(App.prefs);
-			} else {
-				console.error(`${debugHandle} unknown or incorrect message:`, data);
-			}
-		});
 	});
 
 	browser.menus.onClicked.addListener(App.menuHandler);
