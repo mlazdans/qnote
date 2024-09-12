@@ -164,10 +164,4 @@
 	.qpopup-controls-resize {
 		background-image: url(../images/redim-dark.png);
 	}
-	.qpopup-title-closebutton > img {
-		background: url(../images/close-dark.png) 0 0;
-	}
-	.qpopup-title-closebutton > img:hover {
-		background: url(../images/close-dark.png) 0 14px;
-	}
 }
