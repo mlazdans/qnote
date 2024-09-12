@@ -274,9 +274,9 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 					Services.ww.registerNotification(API.WindowObserver);
 
-					let w = Services.wm.getMostRecentWindow("mail:3pane");
+					// let w = Services.wm.getMostRecentWindow("mail:3pane");
 
-					if(ThreadPaneColumns && ThreadPaneColumns.getColumn('qnote') === null){
+					if(ThreadPaneColumns && ThreadPaneColumns.getColumn('qnote') == null){
 						const icon = {
 							id: "qnote_exists",
 							url: extension.baseURI.resolve("resource://qnote/images/icons/qnote.svg"),
