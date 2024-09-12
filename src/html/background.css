@@ -3,8 +3,9 @@
 	white-space: pre !important;
 } */
 
-.qnote-column-header {
-	list-style-image: url('../images/icon-column.png');
+/* Reduce svg image size because it occupies too much space in column */
+.qnote-column > img {
+	width: 70%;
 }
 
 .qnote-insidenote {
@@ -50,7 +51,7 @@
 } */
 
 .qnote-mm {
-	background-image: url('../images/icon.svg');
+	background-image: url('../images/icons/qnote.svg');
 	background-repeat: no-repeat;
 	background-position: center;
 	width: 16px;
