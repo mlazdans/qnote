@@ -53,12 +53,13 @@ const i18n = new DOMLocalizator(browser.i18n.getMessage);
 
 const popupEl      = querySelectorOrDie('.qpopup') as HTMLDivElement;
 const titleTextEl  = querySelectorOrDie(".qpopup-title-text") as HTMLElement;
-const closeEl      = querySelectorOrDie(".qpopup-title-closebutton") as HTMLElement;
-const YTextE       = querySelectorOrDie('.qnote-textinput') as HTMLTextAreaElement;
+const closeEl      = querySelectorOrDie(".qpopup-button-close") as HTMLElement;
+const YTextE       = querySelectorOrDie('.qpopup-textinput') as HTMLTextAreaElement;
 const resizeEl     = querySelectorOrDie(".qpopup-controls-resize") as HTMLElement;
-const delEl        = querySelectorOrDie(".qnote-button-delete") as HTMLElement;
-const screenshotEl = querySelectorOrDie(".qnote-button-screenshot") as HTMLElement;
-const resetEl      = querySelectorOrDie(".qnote-button-reset") as HTMLElement;
+const delEl        = querySelectorOrDie(".qpopup-button-delete") as HTMLElement;
+const screenshotEl = querySelectorOrDie(".qpopup-button-screenshot") as HTMLElement;
+const resetEl      = querySelectorOrDie(".qpopup-button-reset") as HTMLElement;
+const saveEl       = querySelectorOrDie(".qpopup-button-save") as HTMLElement;
 
 function updateElements(state: IPopupState){
 	YTextE.setAttribute("spellcheck", state.enableSpellChecker ? "true" : "false");
@@ -97,12 +98,30 @@ function popup(){
 	i18n.setTexts(document);
 
 	closeEl.addEventListener     ("click", () => browser.qpopup.close(id, "close"));
+	saveEl.addEventListener      ("click", () => browser.qpopup.close(id, "close"));
 	delEl.addEventListener       ("click", () => {
 		if(!State.confirmDelete || confirm(i18n._("delete.note"))){
 			browser.qpopup.close(id, "delete");
 		}
 	});
-	screenshotEl.addEventListener("click", () => browser.qpopup.takeScreenshot(id)); // TODO: animate on success
+	screenshotEl.addEventListener("click", () => {
+		browser.qpopup.takeScreenshot(id).then(result => {
+			if(result){
+				screenshotEl.animate({
+					backgroundSize: ["70%", "100%"],
+				}, 500).addEventListener("finish", () => {
+					screenshotEl.classList.add('qpopup-button-screenshot-taken');
+					setTimeout(() => {
+						screenshotEl.animate({
+							backgroundSize: ["100%", "80%"],
+						}, 500).addEventListener("finish", () => {
+							screenshotEl.classList.remove('qpopup-button-screenshot-taken');
+						});
+					}, 2000);
+				});
+			}
+		});
+	});
 	resetEl.addEventListener     ("click", () => browser.qpopup.resetPosition(id));
 	YTextE.addEventListener      ("keyup", () => browser.qpopup.update(id, { text: YTextE.value }));
 

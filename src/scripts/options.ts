@@ -91,9 +91,9 @@ function displayErrors(msgs: Array<string>){
 }
 
 function displayMsg(msgs: Array<string>, title: string){
-	const closeButton = querySelectorOrDie(".qpopup-title-closebutton", errorBox);
+	const closeButton = querySelectorOrDie(".qpopup-button-close", errorBox);
 	const titleBox = querySelectorOrDie(".qpopup-title-text", errorBox);
-	const errorContent = querySelectorOrDie(".qnote-text", errorBox);
+	const errorContent = querySelectorOrDie(".qpopup-textinput", errorBox);
 
 	titleBox.innerHTML = title;
 	errorContent.innerHTML = msgs.join("<br>");

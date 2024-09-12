@@ -1,128 +1,8 @@
-.popup {
-	height: 100vh;
-	width: 100vw;
-	display: flex;
-	flex-direction: column;
-	/* justify-content: space-between; */
+:root {
+	--title-height: 2rem;
+	--controls-height: 2rem;
+	--controls-icons-size: 1.5rem;
 }
-
-.qpopup-title {
-	color: black;
-	background: url(../images/title-background.png);
-	background-repeat: repeat-x;
-	background-position: bottom;
-	height: 32px;
-	background-color: #fff08d;
-	display: flex;
-	/* align-items: baseline; */
-	line-height: 32px;
-	font-size: small;
-	font-weight: bolder;
-	border-bottom: solid 1px #d19231;
-}
-.qpopup-title-text {
-	display: flex;
-	align-items: baseline;
-	margin-left: 9px;
-	flex-grow: 100;
-}
-
-.qpopup-title-closebutton {
-	display: flex;
-	margin: 9px;
-	flex-grow: 0;
-}
-
-.qpopup-title-closebutton > img {
-	cursor: pointer;
-	border: none;
-	width: 14px;
-	height: 14px;
-	background: url(../images/close.png) 0 0;
-}
-.qpopup-title-closebutton > img:hover {
-	background: url(../images/close.png) 0 14px;
-}
-
-.qpopup-controls {
-	height: 24px;
-	display: flex;
-	/* justify-content: space-between; */
-	/* align-items: flex-end; */
-	background-color: #FBFEBF;
-}
-
-.qpopup-custom-controls {
-	flex-grow: 100;
-	height: 24px;
-	display: flex;
-	align-items: baseline;
-}
-.qpopup-custom-controls > div {
-	display: flex;
-	height: 24px;
-	margin-left: 5px;
-}
-
-.qpopup-controls-resize {
-	flex-basis: bottom;
-	flex-grow: 1;
-	cursor: nwse-resize;
-	width: 14px;
-	height: 24px;
-	background: url(../images/redim.png);
-	background-repeat: no-repeat;
-	background-position: bottom right;
-}
-
-/* 24px (controls) + 32px (title) + 1px (border) */
-/* .qpopup-contents-wrap {
-	display: flex;
-	height: calc(100% - 57px);
-	overflow: auto;
-	background: url(../images/txt-background.png);
-	background-repeat: no-repeat;
-	background-position:right bottom;
-	background-color: #FBFEBF;
-}
-
-.qpopup-contents {
-	word-wrap: break-word;
-	color: black;
-	resize: none;
-	width: 100%;
-	height: 100%;
-	box-sizing: border-box;
-	margin: 0;
-	padding: 0;
-	border: solid 1px #FAF098;
-}
-
-.qpopup-contents > iframe {
-	margin: 0;
-	padding: 0;
-	border: none;
-}
-*/
-
-.qpopup-contents-wrap,
-.qpopup-contents-wrap > textarea {
-	width: 100%;
-	box-sizing: border-box;
-	line-height: 0;
-	margin: 0;
-	padding: 0;
-	/* border: 1px solid green; */
-}
-
-.qpopup-contents-wrap {
-	display: flex;
-	height: calc(100% - 57px);
-}
-
-/* .qpopup-contents-wrap > textarea {
-	display: block;
-} */
 
 .unselectable {
 	-webkit-touch-callout: none;
@@ -134,22 +14,49 @@
 	user-select: none;
 }
 
-/* TODO: get rid of global selectors */
-#note-wrap {
-	/* height: 100vh; */
+/* Main wrapper */
+.qpopup {
 	width: 100%;
+	height: 100%;
 	display: flex;
 	flex-direction: column;
-	justify-content: space-between;
 }
 
-#note-text {
+/* Title */
+.qpopup-title {
+	color: black;
+	background: url(../images/title-background.png);
+	background-repeat: repeat-x;
+	background-position: bottom;
+	height: var(--title-height);
+	background-color: #fff08d;
+	display: flex;
+	line-height: var(--title-height);
+	font-size: smaller;
+	font-weight: bolder;
+	border-bottom: solid 1px #d19231;
+	align-items: center;
+}
+.qpopup-title-text {
+	margin-left: calc(var(--title-height) / 4);
+	flex-grow: 1;
+}
+
+/* Mid section */
+.qpopup-contents-wrap {
+	width: 100%;
+	height: 100%;
+	height: calc(100% - var(--controls-height) - var(--title-height));
+}
+
+.qpopup-textinput {
 	color: black;
 	resize: none;
 	width: 100%;
 	height: 100%;
-	box-sizing: border-box;
-	margin: 0;
+	display: flex;
+	outline: none;
+
 	padding: 4px;
 	background: url(../images/txt-background.png);
 	background-repeat: no-repeat;
@@ -158,60 +65,86 @@
 	border: solid 1px #FAF098;
 }
 
-/* Delete button  */
-#note-delete {
-	height: 24px;
-	cursor: pointer;
-	flex-basis: bottom;
+/* Controls at the bottom */
+.qpopup-controls {
+	height: var(--controls-height);
+	display: flex;
+	/* justify-content: space-between; */
+	/* align-items: flex-end; */
+	background-color: #FBFEBF;
 }
-#note-delete > div {
-	width: 14px;
+
+.qpopup-custom-controls {
+	height: var(--controls-height);
+	display: flex;
+	flex-grow: 1;
+	align-items: center;
+}
+.qpopup-spacer {
+	flex-grow: 1;
+}
+.qpopup-controls-resize {
+	cursor: nwse-resize;
+	width: var(--controls-icons-size);
 	height: 14px;
-	margin: auto;
-	background: url(../images/supprimer.png) 14px 14px;
+	background: url(../images/redim.png);
+	background-repeat: no-repeat;
+	background-position: bottom right;
+	align-self: flex-end;
 }
-#note-delete > div:hover {
-	background: url(../images/supprimer.png) 0 0;
+
+/* Buttons  */
+.qpopup-button {
+	width: var(--controls-icons-size);
+	height: var(--controls-icons-size);
+	margin-left: calc(var(--controls-icons-size) / 4);
+	cursor: pointer;
+	background-size: calc(var(--controls-icons-size)*0.8) calc(var(--controls-icons-size)*0.8);
+	background-position: center;
+	background-repeat: no-repeat;
+}
+.qpopup-button:hover {
+	background-size: var(--controls-icons-size) var(--controls-icons-size);
+}
+
+/* Close button  */
+.qpopup-button-close {
+	margin: 0 calc(var(--title-height) / 4);
+	background-image: url(../images/icons/close-disabled.svg);
+	/* background-size: cover; */
+}
+.qpopup-button-close:hover {
+	background: url(../images/icons/close.svg);
+}
+
+/* Delete button  */
+.qpopup-button-delete {
+	background-image: url(../images/icons/delete.svg);
 }
 
 /* Screenshot button  */
-#note-screenshot {
-	height: 24px;
-	cursor: pointer;
-	flex-basis: bottom;
+.qpopup-button-screenshot {
+	background-image: url(../images/icons/camera.svg);
 }
-#note-screenshot > div {
-	width: 14px;
-	height: 14px;
-	margin: auto;
-	background: url(../images/icons/screenshot-disabled.svg);
-	background-size: cover;
-}
-#note-screenshot > div:hover {
-	background: url(../images/icons/screenshot.svg);
-	background-size: cover;
+
+.qpopup-button-screenshot-taken {
+	background-image: url(../images/icons/camera-flash.svg);
+	background-size: var(--controls-icons-size) var(--controls-icons-size);
 }
 
 /* Reset button  */
-#note-reset {
-	height: 24px;
-	cursor: pointer;
-	flex-basis: bottom;
-}
-#note-reset > div {
-	width: 14px;
-	height: 14px;
-	margin: auto;
-	background: url(../images/icons/reset-disabled.svg);
-	background-size: cover;
-}
-#note-reset > div:hover {
-	background: url(../images/icons/reset.svg);
-	background-size: cover;
+.qpopup-button-reset {
+	background-image: url(../images/icons/reset.svg);
 }
 
+/* Save button  */
+.qpopup-button-save {
+	background-image: url(../images/icons/save.svg);
+}
+
+/* TODO: dark theme */
 @media (prefers-color-scheme: dark) {
-	#note-text {
+	.qpopup-textinput {
 		color: white;
 		background-color: #2f2f33;
 		background-image: url(../images/txt-background-dark.png);
