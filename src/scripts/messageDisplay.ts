@@ -1,3 +1,4 @@
+// TODO: why this is called 2x?
 // TODO: double click: pop message
 import { AttachToMessageReplyData } from "../modules/Messages.mjs";
 
@@ -23,6 +24,8 @@ function attachToMessage(reply: AttachToMessageReplyData | false) {
 		}
 	}
 }
+
+document.querySelectorAll(".qnote-insidenote").forEach(e => e.remove());
 
 browser.runtime
 	.sendMessage({
