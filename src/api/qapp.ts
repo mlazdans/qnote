@@ -211,8 +211,6 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 					Services.ww.registerNotification(API.WindowObserver);
 
-					// let w = Services.wm.getMostRecentWindow("mail:3pane");
-
 					if(ThreadPaneColumns && ThreadPaneColumns.getColumn('qnote') == null){
 						const icon = {
 							id: "qnote_exists",
@@ -222,7 +220,6 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 							id: "qnote_off",
 							url: extension.baseURI.resolve("resource://qnote/images/1x1.gif"),
 						};
-						const iconCellDefinitions = [icon, icon2];
 
 						QDEB&&console.log("ThreadPaneColumns.addCustomColumn");
 						ThreadPaneColumns.addCustomColumn('qnote', {
@@ -235,55 +232,58 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 								const note = getFolderNoteData(msgHdr.messageId);
 								return note ? note.text : null;
 							},
-							iconCellDefinitions: iconCellDefinitions,
+							iconCellDefinitions: [icon, icon2],
 							iconHeaderUrl: extension.baseURI.resolve("resource://qnote/images/icons/qnote.svg"),
 							iconCallback: function(msgHdr: any){
 								return getFolderNoteData(msgHdr.messageId) ? "qnote_exists" : "qnote_off";
 							}
 						});
 					} else {
-						QDEB&&console.log("ThreadPaneColumn already exists");
+						QDEB&&console.debug("qnote column already exists");
+					}
+
+					if(ThreadPaneColumns && ThreadPaneColumns.getColumn('qnote-text') == null){
+						ThreadPaneColumns.addCustomColumn('qnote-text', {
+							name: "QText",
+							hidden: true,
+							resizable: true,
+							sortable: true,
+							textCallback: function(msgHdr: any){
+								const note = getFolderNoteData(msgHdr.messageId);
+								if(note?.text){
+									return note.text.substring(0, API.Prefs?.showFirstChars ?? 3);
+								} else {
+									return null;
+								}
+							},
+						});
+					} else {
+						QDEB&&console.debug("qnote-text column already exists");
 					}
 
 					QDEB&&console.debug("Installing custom term");
 
 					if(MailServices.filters.getCustomTerm(API.customTermId)){
-						QDEB&&console.log(`CustomTerm ${API.customTermId} already defined`);
+						QDEB&&console.debug(`CustomTerm ${API.customTermId} already defined`);
 					} else {
-						QDEB&&console.log(`Defining CustomTerm ${API.customTermId}`);
+						QDEB&&console.debug(`Defining CustomTerm ${API.customTermId}`);
 						MailServices.filters.addCustomTerm(API.customTerm);
 					}
-
-					// TODO: broken with TB > 115, disabling for now
-					// API.QNoteFilter = new QNoteFilter({
-					// 	API: API,
-					// 	QDEB: QDEB,
-					// 	w: w
-					// });
-
-					// QDEB&&console.debug("Installing custom action");
-					// API.QNoteAction = new QNoteAction({
-					// 	API: API,
-					// });
 				},
 				async setDebug(on: boolean){
 					QDEB = on;
 				},
 				async setPrefs(prefs: IQAppPreferences){
 					API.Prefs = prefs;
-
 					API.customAction.storageFolder = prefs.storageFolder;
 					API.customFilter.storageFolder = prefs.storageFolder;
 					API.customTerm.storageFolder = prefs.storageFolder;
-
-					// TODO: add text column
-					// if(ThreadPaneColumns){
-					// } else {
-					// 	API.ColumnHandler.columnHandler.limit = Prefs.showFirstChars;
-					// }
 				},
 				async updateColumsView() {
-					ThreadPaneColumns?.refreshCustomColumn("qnote");
+					if(ThreadPaneColumns){
+						ThreadPaneColumns.refreshCustomColumn("qnote");
+						ThreadPaneColumns.refreshCustomColumn("qnote-text");
+					}
 				},
 				async attachNotesToMultiMessage(keys: Array<string>){
 					const fName = `qapp.attachNotesToMultiMessage()`;

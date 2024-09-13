@@ -1,15 +1,16 @@
 // MAYBE: note popup on mouse over
 // MAYBE: save note pos and dims locally, outside note
-// TODO: save create and update time
+// MAYBE: save create and update time
 // TODO: test brand new installation with XNote++ and then switch to QNote
 // TODO: qpopup z-index
-// TODO: holding alt+q pops way too fast
-// TODO: when multiple popups are open, alt+q pops with selected message only, not with focused popup
+// TODO: AL+Q
+//       *) holding alt+q pops way too fast
+//       *) when multiple popups are open, alt+q pops with selected message only, not with focused popup
 // TODO: menu - close all opened notes
 // TODO: add "install", "update" handling if neccessary
-// TODO: second column for text preview
-// TODO: options get reset to default when incorrect path was entered
-// TODO: options - test import/export. Reset to defaults, etc unfinished features
+// TODO: options
+//       *) fix reset to defaults when incorrect path was entered
+//       *) test import/export. Reset to defaults, etc unfinished features
 
 // App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup experiment API
 //  |     \                            \     \-> handles events sent by qpopup.api, fires events back to App through DefaultNotePopup
@@ -611,8 +612,8 @@ class QNoteExtension
 			} else if((new PrefsUpdated()).parse(rawData)){
 				QDEB&&console.debug(`${debugHandle} received "PrefsUpdated" message`);
 				this.prefs = await getPrefs();
+				await sendPrefsToQApp(this.prefs);
 				this.updateViews();
-				sendPrefsToQApp(this.prefs);
 			} else {
 				console.error(`${debugHandle} unknown message`);
 			}
