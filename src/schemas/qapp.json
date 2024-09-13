@@ -113,15 +113,6 @@
 		"description": "",
 		"async": true,
 		"parameters": [{
-			"name": "windowId",
-			"type": "integer",
-			"description": "windowId from windows API"
-		},{
-			"type": "array",
-			"items": {
-				"$ref": "qnote.NoteData"
-			}
-		},{
 			"type": "array",
 			"items": {
 				"name": "keyId",

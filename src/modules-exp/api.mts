@@ -50,7 +50,7 @@ export interface IQAppAPI {
 	getProfilePath(): Promise<string>
 	focusSave(): Promise<void>
 	focusRestore(): Promise<void>
-	attachNotesToMultiMessage(windowId: number, notes: Array<INoteData>, keys: Array<string>): Promise<void>
+	attachNotesToMultiMessage(keys: Array<string>): Promise<void>
 }
 
 export interface ILegacyAPI {

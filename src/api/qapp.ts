@@ -358,44 +358,42 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 				// 	API.updateView(w, keyId);
 				// },
-				async attachNotesToMultiMessage(windowId: number, notes: Array<INoteData>, keys: Array<string>){
-					const fName = `qapp.attachNotesToMultiMessage(${windowId})`;
+				async attachNotesToMultiMessage(keys: Array<string>){
+					const fName = `qapp.attachNotesToMultiMessage()`;
 
-					if(!notes){
-						QDEB&&console.debug(`${fName}: empty notes array`);
-						return;
-					}
-
-					// const w = Services.wm.getMostRecentWindow("mail:3pane");
-					const w = id2RealWindow(windowId);
+					const w = Services.wm.getMostRecentWindow("mail:3pane");
+					// const w = id2RealWindow(windowId);
 					if(!w || !w.document){
-						QDEB&&console.debug(`${fName}: window not found`);
+						QDEB&&console.log(`${fName}: window not found, bail`);
 						return;
 					}
 
 					const browser = w.document.querySelector("browser[src='about:3pane']") as any;
 					if(!browser){
-						QDEB&&console.debug(`${fName}: about:3pane browser element not found`);
+						QDEB&&console.log(`${fName}: about:3pane browser element not found, bail`);
+						return;
 					}
 
 					if(!browser.contentDocument){
-						QDEB&&console.debug(`${fName}: browser.contentDocument not found`);
+						QDEB&&console.log(`${fName}: browser.contentDocument not found, bail`);
+						return;
 					}
 
 					const multiMessageBrowser = browser.contentDocument.getElementById('multiMessageBrowser') as any;
 					if(!multiMessageBrowser){
-						QDEB&&console.debug(`${fName}: multiMessageBrowser not found`);
+						QDEB&&console.log(`${fName}: multiMessageBrowser not found, bail`);
 						return;
 					}
 
 					const document = multiMessageBrowser.contentDocument as Document
 					if(!document){
-						QDEB&&console.debug(`${fName}: multiMessageBrowser.contentDocument not found`);
+						QDEB&&console.log(`${fName}: multiMessageBrowser.contentDocument not found, bail`);
 						return;
 					}
 
 					const keySet = new Set(keys);
 					const messageList = document.querySelectorAll("#messageList > li") as NodeListOf<HTMLLIElement>;
+					document.querySelectorAll("#messageList span.qnote-mm").forEach(e => e.remove());
 					for(const li of messageList){
 						const keyId = li.dataset.messageId;
 						const row = li.querySelector('.item-header');
