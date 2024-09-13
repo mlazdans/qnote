@@ -408,7 +408,7 @@ class QNoteExtension
 
 		QNotePopup.init(QDEB);
 
-		await this.updateView();
+		// await this.updateView();
 
 		// window.addEventListener("unhandledrejection", event => {
 		// 	console.warn(`Unhandle: ${event.reason}`, event);
@@ -441,10 +441,15 @@ class QNoteExtension
 		// });
 
 		// Change tabs
-		browser.tabs.onActivated.addListener(async activeInfo => {
-			QDEB&&console.debug(`${debugHandle} tabs.onActivated(), id:`, activeInfo.tabId);
-			this.updateView();
-		});
+		// browser.tabs.onActivated.addListener(async activeInfo => {
+		// 	QDEB&&console.debug(`${debugHandle} tabs.onActivated(), id:`, activeInfo);
+		// 	// this.updateView();
+		// });
+
+		// browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+		// 	QDEB&&console.debug(`${debugHandle} tabs.onUpdated(), id:`, tabId, changeInfo, tab);
+		// 	// this.updateView();
+		// });
 
 		// Create window
 		// browser.windows.onCreated.addListener(async window => {
