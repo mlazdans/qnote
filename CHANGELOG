@@ -1,6 +1,13 @@
 CHANGELOG QNote
 ===========================
 
+RELEASE 0.14.0 - ....
+-----------------
+- Complete rewrite in TypeScript. Fixes most of the issues with TB128
+- Add features: take note screenshot to clipboard
+- Fix note scrolling with large texts (#48)
+- Deprecated: storage option inside extension
+
 RELEASE 0.13.0 - Aug 21, 2024
 -----------------
 - Add templating support for attaching to print and message (#34, #47, #52)
