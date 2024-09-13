@@ -8,7 +8,6 @@
 // TODO: when multiple popups are open, alt+q pops with selected message only. Not with focused popup
 // TODO: menu - close all opened notes
 // TODO: icons: edit, copy, paste, delete, reset positions, settings
-// TODO: qpopup: less opacity for title
 // TODO: qpopup: handle zoom in-out
 // TODO: add "install", "update" handling if neccessary
 // TODO: second column for text preview

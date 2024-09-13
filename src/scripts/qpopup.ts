@@ -69,7 +69,7 @@ function updateElements(state: IPopupState){
 	if(state.placeholder)YTextE.setAttribute("placeholder", state.placeholder);
 }
 
-function resizeNote(w: number, h: number){
+function limitPanelSize(w: number, h: number){
 	const rectLimit = {
 		minWidth: 200,
 		minHeight: 125,
@@ -79,14 +79,15 @@ function resizeNote(w: number, h: number){
 
 	let width, height;
 
-	width = w > rectLimit.maxWidth ? rectLimit.maxWidth : w;
-	width = w < rectLimit.minWidth ? rectLimit.minWidth : w;
+	width = Math.max(Math.min(w, rectLimit.maxWidth), rectLimit.minWidth);
+	height = Math.max(Math.min(h, rectLimit.maxHeight), rectLimit.minHeight);
 
-	height = h > rectLimit.maxHeight ? rectLimit.maxHeight : h;
-	height = h < rectLimit.minHeight ? rectLimit.minHeight : h;
+	return { width, height }
+}
 
+function resizeNote(w: number, h: number){
 	if(popupEl){
-		browser.qpopup.update(id, { width, height });
+		browser.qpopup.update(id, limitPanelSize(w, h));
 		popupEl.style.width = w + 'px';
 		popupEl.style.height = h + 'px';
 	} else {
@@ -164,9 +165,8 @@ function popup(){
 		const startH = popupEl.offsetHeight;
 
 		const resizer = (e: MouseEvent) => {
-			const w = startW + e.clientX - startX;
-			const h = startH + e.clientY - startY;
-			resizeNote(w, h);
+			const panelDims = limitPanelSize(startW + e.clientX - startX, startH + e.clientY - startY);
+			resizeNote(panelDims.width, panelDims.height);
 		};
 
 		const handleDragEnd = () => {
