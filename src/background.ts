@@ -3,7 +3,6 @@
 // TODO: save create and update time
 // TODO: test brand new installation with XNote++ and then switch to QNote
 // TODO: qpopup z-index
-// TODO: drag requestanimationframe?
 // TODO: holding alt+q pops way too fast
 // TODO: when multiple popups are open, alt+q pops with selected message only. Not with focused popup
 // TODO: menu - close all opened notes

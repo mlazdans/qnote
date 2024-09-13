@@ -139,10 +139,12 @@ function popup(){
 		el.style.cursor = 'move';
 
 		const mover = (e: MouseEvent) => {
-			const offsetTop = e.clientY - mouse.clientY;
-			const offsetLeft = e.clientX - mouse.clientX;
+			requestAnimationFrame(() => {
+				const offsetTop = e.clientY - mouse.clientY;
+				const offsetLeft = e.clientX - mouse.clientX;
 
-			browser.qpopup.update(id, { offsetTop, offsetLeft });
+				browser.qpopup.update(id, { offsetTop, offsetLeft });
+			});
 		};
 
 		const handleDragEnd = () => {
@@ -165,8 +167,10 @@ function popup(){
 		const startH = popupEl.offsetHeight;
 
 		const resizer = (e: MouseEvent) => {
-			const panelDims = limitPanelSize(startW + e.clientX - startX, startH + e.clientY - startY);
-			resizeNote(panelDims.width, panelDims.height);
+			requestAnimationFrame(() => {
+				const panelDims = limitPanelSize(startW + e.clientX - startX, startH + e.clientY - startY);
+				resizeNote(panelDims.width, panelDims.height);
+			});
 		};
 
 		const handleDragEnd = () => {
