@@ -50,7 +50,6 @@ import { confirmDelete, getCurrentWindowId, getPrefs, isClipboardSet, sendPrefsT
 import { Menu } from "./modules/Menu.mjs";
 
 var QDEB = true;
-var App: QNoteExtension;
 
 const debugHandle = "[qnote:background]";
 const BrowserAction = browser.action ? browser.action : browser.browserAction;
@@ -96,7 +95,6 @@ class QNoteExtension
 	constructor(prefs: IPreferences) {
 		QDEB&&console.info(`${debugHandle} new QNoteExtension()`);
 
-		App = this;
 		this.prefs = prefs;
 		// TODO: re-enable debug
 		// QDEB = prefs.enableDebug;
@@ -132,11 +130,9 @@ class QNoteExtension
 	async updateView(){
 		const messages = await browser.messageDisplay.getDisplayedMessages();
 
-		console.log("updateView", messages);
-
 		if(messages.length == 1){
 			const keyId = messages[0].headerMessageId;
-			const note = await App.createAndLoadNote(keyId);
+			const note = await this.createAndLoadNote(keyId);
 
 			await this.updateIcons(note.exists());
 			await browser.tabs.executeScript({
@@ -153,13 +149,14 @@ class QNoteExtension
 			};
 
 			browser.qapp.attachNotesToMultiMessage(keyArray);
-			App.updateIcons(true);
+			this.updateIcons(true);
 		} else {
-			App.updateIcons(false);
+			this.updateIcons(false);
 		}
 		await browser.qapp.updateColumsView();
 	}
 
+	// TODO: add tag
 	async saveOrUpdate(keyId: string, newNote: INoteData, overwrite: boolean): Promise<INoteData | null>{
 		const note = await this.createAndLoadNote(keyId);
 
@@ -178,6 +175,24 @@ class QNoteExtension
 		await this.updateView();
 
 		return noteData;
+	}
+
+	async onNoteCloseHandler(keyId: string, reason: string, state: IPopupState) {
+		QDEB&&console.debug(`${debugHandle} popup close, keyId: ${keyId}, reason: ${reason}`, this);
+		PopupManager.remove(keyId);
+		if(reason == "close"){
+			if(state.text){
+				await this.saveOrUpdate(keyId, QNotePopup.state2note(state), true);
+			}
+			await browser.qapp.focusRestore();
+		} else if(reason == "delete"){
+			await this.deleteNote(keyId);
+			await browser.qapp.focusRestore();
+		} else if(reason == "escape"){
+			await browser.qapp.focusRestore();
+		} else {
+			console.warn(`${debugHandle} unknown popup close reason: ${reason}`);
+		}
 	}
 
 	async createPopup(keyId: string, noteData: INoteData | null): Promise<INotePopup> {
@@ -206,25 +221,7 @@ class QNoteExtension
 			if(popup){
 				QDEB&&console.debug(`${debugHandle} new popup: ${keyId}`, popup);
 				PopupManager.add(popup);
-				popup.addListener("close", async (reason: string, state: IPopupState) => {
-					QDEB&&console.debug(`${debugHandle} popup close, keyId: ${keyId}, reason: ${reason}`);
-					PopupManager.remove(keyId);
-					// Empty reason could mean close on shutdown, or toggle alt+q
-					if(reason == "close"){
-						if(state.text){
-							await App.saveOrUpdate(keyId, QNotePopup.state2note(state), true);
-						}
-						await browser.qapp.focusRestore();
-					} else if(reason == "delete"){
-						// TODO: remove tag
-						await App.deleteNote(keyId);
-						await browser.qapp.focusRestore();
-					} else if(reason == "escape"){
-						await browser.qapp.focusRestore();
-					} else {
-						console.warn(`${debugHandle} unknown popup close reason: ${reason}`);
-					}
-				});
+				popup.addListener("close", this.onNoteCloseHandler.bind(this)); // TODO: auto bind withing event dispatcher
 
 				resolve(popup);
 			}
@@ -260,55 +257,54 @@ class QNoteExtension
 			const keyId = messages[0].headerMessageId;
 
 			if(info.menuItemId === "create" || info.menuItemId === "modify"){
-				App.popNote(await App.createAndLoadNote(keyId));
+				this.popNote(await this.createAndLoadNote(keyId));
 			} else if(info.menuItemId === "paste"){
 				const sourceNoteData = await browser.qnote.getFromClipboard();
 				if(isClipboardSet(sourceNoteData)){
 					sourceNoteData.ts = Date.now();
-					App.saveOrUpdate(keyId, sourceNoteData, true);
+					this.saveOrUpdate(keyId, sourceNoteData, true);
 				} else {
 					QDEB&&console.debug(`${menuDebugHandle} paste - no data`);
 				}
 			} else if(info.menuItemId === "options"){
 				browser.runtime.openOptionsPage();
 			} else if(info.menuItemId === "copy"){
-				App.getNoteData(keyId).then(data => {
+				this.getNoteData(keyId).then(data => {
 					if(data) {
 						browser.qnote.copyToClipboard(data)
 					}
 				});
 			} else if(info.menuItemId === "delete"){
-				if(!App.prefs.confirmDelete || await confirmDelete()) {
-					await App.deleteNote(keyId)
+				if(!this.prefs.confirmDelete || await confirmDelete()) {
+					await this.deleteNote(keyId)
 				}
 			} else if(info.menuItemId === "reset"){
-				App.resetNote(keyId);
+				this.resetNote(keyId);
 			} else {
 				console.error(`BUG: ${menuDebugHandle} unknown menuItemId:`, info.menuItemId);
 			}
 		// process multiple message selection
+		// TODO: should not updateView() on every processed message!!
 		} else if(messages.length > 1){
 			if(info.menuItemId === "create_multi"){
-				App.createMultiNote(messages);
+				this.createMultiNote(messages);
 			} else if(info.menuItemId === "paste_multi"){
 				const sourceNoteData = await browser.qnote.getFromClipboard();
 				if(sourceNoteData && isClipboardSet(sourceNoteData)){
 					sourceNoteData.ts = Date.now();
 					for(const m of messages){
-						await App.saveOrUpdate(m.headerMessageId, sourceNoteData, true);
+						await this.saveOrUpdate(m.headerMessageId, sourceNoteData, true);
 					};
-					App.updateView();
 				}
 			} else if(info.menuItemId === "delete_multi"){
-				if(!App.prefs.confirmDelete || await confirmDelete()) {
+				if(!this.prefs.confirmDelete || await confirmDelete()) {
 					for(const m of messages){
-						await App.deleteNote(m.headerMessageId);
+						await this.deleteNote(m.headerMessageId);
 					}
-					App.updateView();
 				}
 			} else if(info.menuItemId === "reset_multi"){
 				for(const m of messages){
-					App.resetNote(m.headerMessageId);
+					this.resetNote(m.headerMessageId);
 				}
 			} else {
 				console.error(`BUG: ${menuDebugHandle} unknown menuItemId:`, info.menuItemId);
@@ -324,19 +320,20 @@ class QNoteExtension
 			return
 		}
 
-		const note = await App.createAndLoadNote(keyId);
+		const note = await this.createAndLoadNote(keyId);
 
 		if(note.exists()){
 			note.assignData({
 				left: undefined,
 				top: undefined,
-				width: App.prefs.width,
-				height: App.prefs.height,
+				width: this.prefs.width,
+				height: this.prefs.height,
 			});
 			note.save();
 		}
 	}
 
+	// TODO: remove tag
 	async deleteNote(keyId: string): Promise<boolean> {
 		const popup = PopupManager.has(keyId) ? PopupManager.get(keyId) : null;
 
@@ -344,11 +341,11 @@ class QNoteExtension
 			await PopupManager.get(keyId).close();
 		}
 
-		const note = await App.createAndLoadNote(keyId);
+		const note = await this.createAndLoadNote(keyId);
 
 		if(note.exists()){
 			await note.delete();
-			await App.updateView();
+			await this.updateView();
 			return true;
 		} else {
 			return false;
@@ -368,11 +365,11 @@ class QNoteExtension
 
 		const popup = await QNotePopup.create("multi-note-create", windowId, popupState);
 
-		popup.addListener("close", async (reason, state) =>{
+		popup.addListener("close", async (keyId, reason, state) =>{
 			if(reason == "close" && state.text){
 				const noteData = QNotePopup.state2note(state);
 				for(const m of messages){
-					await App.saveOrUpdate(m.headerMessageId, noteData, false)
+					await this.saveOrUpdate(m.headerMessageId, noteData, false)
 				}
 				// this.updateMultiPane(messages);
 			}
@@ -402,214 +399,212 @@ class QNoteExtension
 	// 		});
 	// 	});
 	// }
-}
 
-// TODO: move under app class at some point
-async function initExtension(){
-	QDEB&&console.log(`${debugHandle} initExtension()`);
+	async initExtension(){
+		QDEB&&console.log(`${debugHandle} initExtension()`);
 
-	await browser.qapp.init(convertPrefsToQAppPrefs(App.prefs));
-	await browser.qapp.setDebug(QDEB);
+		await browser.qapp.init(convertPrefsToQAppPrefs(this.prefs));
+		await browser.qapp.setDebug(QDEB);
 
-	QNotePopup.init(QDEB);
+		QNotePopup.init(QDEB);
 
-	await App.updateView();
+		await this.updateView();
 
-	// window.addEventListener("unhandledrejection", event => {
-	// 	console.warn(`Unhandle: ${event.reason}`, event);
-	// });
+		// window.addEventListener("unhandledrejection", event => {
+		// 	console.warn(`Unhandle: ${event.reason}`, event);
+		// });
 
-	// Below are various listeners only
+		// Below are various listeners only
 
-	// Messages displayed
-	browser.messageDisplay.onMessagesDisplayed.addListener(async (tab: browser.tabs.Tab, messages: browser.messages.MessageHeader[]) => {
-		QDEB&&console.debug(`${debugHandle} messageDisplay.onMessagesDisplayed:`, messages);
-		if(messages.length == 1){
-			const keyId = messages[0].headerMessageId;
-			const note = await App.createAndLoadNote(keyId);
-
-			if(note.exists() && App.prefs.showOnSelect){
-				await App.popNote(note);
-			}
-		}
-		App.updateView();
-	});
-
-	// Change folders
-	browser.mailTabs.onDisplayedFolderChanged.addListener(async (tab, _displayedFolder) => {
-		QDEB&&console.debug(`${debugHandle} mailTabs.onDisplayedFolderChanged()`);
-		// App.updateTabMenusAndIcons(tab.id);
-	});
-
-	// Create tabs
-	// browser.tabs.onCreated.addListener(async tab => {
-	// 	QDEB&&console.debug(`${debugHandle} tabs.onCreated(), tabId:`, tab.id);
-	// });
-
-	// Change tabs
-	browser.tabs.onActivated.addListener(async activeInfo => {
-		QDEB&&console.debug(`${debugHandle} tabs.onActivated(), id:`, activeInfo.tabId);
-		App.updateView();
-	});
-
-	// Create window
-	// browser.windows.onCreated.addListener(async window => {
-	// 	QDEB&&console.debug("windows.onCreated(), windowId:", window.id);
-
-	// 	// This check is needed for WebExtensionNoteWindow
-	// 	if(window.type === "normal"){
-	// 		// CurrentWindowId = Window.id;
-	// 	}
-
-	// 	// await CurrentNote.silentlyPersistAndClose();
-	// });
-
-	// Remove window
-	// browser.windows.onRemoved.addListener(async windowId => {
-	// 	QDEB&&console.debug(`${debugHandle} windows.onRemoved(), windowId:`, windowId);
-	// });
-
-	// Change focus
-	// browser.windows.onFocusChanged.addListener(async windowId => {
-	// 	// QDEB&&console.debug("windows.onFocusChanged(), windowId:", windowId, CurrentNote);
-	// 	// console.error("browser.windows.onFocusChanged");
-
-	// 	// if(
-	// 	// 	true
-	// 	// 	|| windowId === browser.windows.WINDOW_ID_NONE
-	// 	// 	|| windowId === CurrentNote.windowId
-	// 	// 	|| windowId === CurrentNote.popupId // This check is needed for WebExtensionNoteWindow
-	// 	// ){
-	// 	// 	return;
-	// 	// }
-
-	// 	// CurrentNote.windowId = CurrentWindowId = windowId;
-	// 	// CurrentTabId = await getCurrentTabId();
-
-	// 	// mpUpdateCurrent();
-
-	// 	// await CurrentNote.silentlyPersistAndClose();
-	// });
-
-	const actionHandler = (tab: browser.tabs.Tab) => {
-		const actiondebugHandle = `${debugHandle} [tab:${tab.id}]`
-
-		if(!tab.id){
-			QDEB&&console.debug(`${actiondebugHandle} no tab.id, bail`);
-			return;
-		}
-
-		browser.messageDisplay.getDisplayedMessages(tab.id).then(async (messages) => {
+		// Messages displayed
+		browser.messageDisplay.onMessagesDisplayed.addListener(async (tab: browser.tabs.Tab, messages: browser.messages.MessageHeader[]) => {
+			QDEB&&console.debug(`${debugHandle} messageDisplay.onMessagesDisplayed:`, messages);
 			if(messages.length == 1){
 				const keyId = messages[0].headerMessageId;
-				const note = await App.createAndLoadNote(keyId);
+				const note = await this.createAndLoadNote(keyId);
 
-				if(PopupManager.has(keyId)){
-					PopupManager.get(keyId).close();
-				} else {
-					App.popNote(note);
+				if(note.exists() && this.prefs.showOnSelect){
+					await this.popNote(note);
 				}
-			} else if(messages.length >= 1){
-				App.createMultiNote(messages);
 			}
+			this.updateView();
 		});
-	};
 
-	// Click on main toolbar
-	BrowserAction.onClicked.addListener(actionHandler);
+		// Change folders
+		browser.mailTabs.onDisplayedFolderChanged.addListener(async (tab, _displayedFolder) => {
+			QDEB&&console.debug(`${debugHandle} mailTabs.onDisplayedFolderChanged()`);
+		});
 
-	// Click on QNote button
-	browser.messageDisplayAction.onClicked.addListener(actionHandler);
+		// Create tabs
+		// browser.tabs.onCreated.addListener(async tab => {
+		// 	QDEB&&console.debug(`${debugHandle} tabs.onCreated(), tabId:`, tab.id);
+		// });
 
-	// Handle keyboard shortcuts
-	browser.commands.onCommand.addListener((command, tab) => {
-		if(command === 'qnote') {
-			QDEB&&console.debug(`${debugHandle} commands.onCommand() command:`, command);
-			actionHandler(tab);
-		} else {
-			console.error(`${debugHandle} unknown command: `, command);
-		}
-	});
+		// Change tabs
+		browser.tabs.onActivated.addListener(async activeInfo => {
+			QDEB&&console.debug(`${debugHandle} tabs.onActivated(), id:`, activeInfo.tabId);
+			this.updateView();
+		});
 
-	// Context menu on message
-	browser.menus.onShown.addListener(async (info, tab) => {
-		QDEB&&console.debug(`${debugHandle} menus.onShown()`);
+		// Create window
+		// browser.windows.onCreated.addListener(async window => {
+		// 	QDEB&&console.debug("windows.onCreated(), windowId:", window.id);
 
-		await browser.menus.removeAll();
+		// 	// This check is needed for WebExtensionNoteWindow
+		// 	if(window.type === "normal"){
+		// 		// CurrentWindowId = Window.id;
+		// 	}
 
-		const in_message_list = info.contexts.includes('message_list');
+		// 	// await CurrentNote.silentlyPersistAndClose();
+		// });
 
-		if(in_message_list){
-			if(!info.selectedMessages){
-				QDEB&&console.warn(`${debugHandle} selectedMessages object is not set, bail`)
+		// Remove window
+		// browser.windows.onRemoved.addListener(async windowId => {
+		// 	QDEB&&console.debug(`${debugHandle} windows.onRemoved(), windowId:`, windowId);
+		// });
+
+		// Change focus
+		// browser.windows.onFocusChanged.addListener(async windowId => {
+		// 	// QDEB&&console.debug("windows.onFocusChanged(), windowId:", windowId, CurrentNote);
+		// 	// console.error("browser.windows.onFocusChanged");
+
+		// 	// if(
+		// 	// 	true
+		// 	// 	|| windowId === browser.windows.WINDOW_ID_NONE
+		// 	// 	|| windowId === CurrentNote.windowId
+		// 	// 	|| windowId === CurrentNote.popupId // This check is needed for WebExtensionNoteWindow
+		// 	// ){
+		// 	// 	return;
+		// 	// }
+
+		// 	// CurrentNote.windowId = CurrentWindowId = windowId;
+		// 	// CurrentTabId = await getCurrentTabId();
+
+		// 	// mpUpdateCurrent();
+
+		// 	// await CurrentNote.silentlyPersistAndClose();
+		// });
+
+		const actionHandler = (tab: browser.tabs.Tab) => {
+			const actiondebugHandle = `${debugHandle} [tab:${tab.id}]`
+
+			if(!tab.id){
+				QDEB&&console.debug(`${actiondebugHandle} no tab.id, bail`);
 				return;
 			}
 
-			const messages = info.selectedMessages.messages;
-
-			// Single message
-			if(messages.length == 1){
-				const note = await App.createAndLoadNote(messages[0].headerMessageId);
-
-				if(note.exists()){
-					await Menu.modify();
-				} else {
-					await Menu.new();
-				}
-				browser.menus.refresh();
-			} else if(messages.length > 1){
-				await Menu.multi();
-				browser.menus.refresh();
-			} else {
-				QDEB&&console.warn(`${debugHandle} no messages selected`);
-			}
-		}
-	});
-
-	// Receive data from content
-	browser.runtime.onMessage.addListener(async (rawData: any, sender: browser.runtime.MessageSender, _sendResponse) => {
-		QDEB&&console.group(`${debugHandle} received message:`);
-		QDEB&&console.debug("rawData:", rawData);
-		QDEB&&console.debug("sender:", sender);
-
-		if((new AttachToMessage()).parse(rawData)){
-			if(sender.tab?.id) {
-				QDEB&&console.debug(`${debugHandle} received "AttachToMessage" message`);
-				const messages = await browser.messageDisplay.getDisplayedMessages(sender.tab.id);
-
+			browser.messageDisplay.getDisplayedMessages(tab.id).then(async (messages) => {
 				if(messages.length == 1){
-					const data = await App.getNoteData(messages[0].headerMessageId);
-					if(data){
-						const reply = new AttachToMessageReply({
-							note: data,
-							html: App.applyTemplate(App.prefs.attachTemplate, data),
-							prefs: App.prefs,
-							keyId: messages[0].headerMessageId
-						});
+					const keyId = messages[0].headerMessageId;
+					const note = await this.createAndLoadNote(keyId);
 
-						QDEB&&console.groupEnd();
+					if(PopupManager.has(keyId)){
+						PopupManager.get(keyId).close();
+					} else {
+						this.popNote(note);
+					}
+				} else if(messages.length >= 1){
+					this.createMultiNote(messages);
+				}
+			});
+		};
 
-						return reply.data;
+		// Click on main toolbar
+		BrowserAction.onClicked.addListener(actionHandler);
+
+		// Click on QNote button
+		browser.messageDisplayAction.onClicked.addListener(actionHandler);
+
+		// Handle keyboard shortcuts
+		browser.commands.onCommand.addListener((command, tab) => {
+			if(command === 'qnote') {
+				QDEB&&console.debug(`${debugHandle} commands.onCommand() command:`, command);
+				actionHandler(tab);
+			} else {
+				console.error(`${debugHandle} unknown command: `, command);
+			}
+		});
+
+		// Context menu on message
+		browser.menus.onShown.addListener(async (info, tab) => {
+			QDEB&&console.debug(`${debugHandle} menus.onShown()`);
+
+			await browser.menus.removeAll();
+
+			const in_message_list = info.contexts.includes('message_list');
+
+			if(in_message_list){
+				if(!info.selectedMessages){
+					QDEB&&console.warn(`${debugHandle} selectedMessages object is not set, bail`)
+					return;
+				}
+
+				const messages = info.selectedMessages.messages;
+
+				// Single message
+				if(messages.length == 1){
+					const note = await this.createAndLoadNote(messages[0].headerMessageId);
+
+					if(note.exists()){
+						await Menu.modify();
+					} else {
+						await Menu.new();
+					}
+					browser.menus.refresh();
+				} else if(messages.length > 1){
+					await Menu.multi();
+					browser.menus.refresh();
+				} else {
+					QDEB&&console.warn(`${debugHandle} no messages selected`);
+				}
+			}
+		});
+
+		// Receive data from content
+		browser.runtime.onMessage.addListener(async (rawData: any, sender: browser.runtime.MessageSender, _sendResponse) => {
+			QDEB&&console.group(`${debugHandle} received message:`, this);
+			QDEB&&console.debug("rawData:", rawData);
+			QDEB&&console.debug("sender:", sender);
+
+			if((new AttachToMessage()).parse(rawData)){
+				if(sender.tab?.id) {
+					QDEB&&console.debug(`${debugHandle} received "AttachToMessage" message`);
+					const messages = await browser.messageDisplay.getDisplayedMessages(sender.tab.id);
+
+					if(messages.length == 1){
+						const data = await this.getNoteData(messages[0].headerMessageId);
+						if(data){
+							const reply = new AttachToMessageReply({
+								note: data,
+								html: this.applyTemplate(this.prefs.attachTemplate, data),
+								prefs: this.prefs,
+								keyId: messages[0].headerMessageId
+							});
+
+							QDEB&&console.groupEnd();
+
+							return reply.data;
+						}
 					}
 				}
+			} else if((new RestoreFocus()).parse(rawData)){
+				QDEB&&console.debug(`${debugHandle} received "RestoreFocus" message`);
+				browser.qapp.focusRestore();
+			} else if((new PrefsUpdated()).parse(rawData)){
+				QDEB&&console.debug(`${debugHandle} received "PrefsUpdated" message`);
+				this.prefs = await getPrefs();
+				sendPrefsToQApp(this.prefs);
+			} else {
+				console.error(`${debugHandle} unknown message`);
 			}
-		} else if((new RestoreFocus()).parse(rawData)){
-			QDEB&&console.debug(`${debugHandle} received "RestoreFocus" message`);
-			browser.qapp.focusRestore();
-		} else if((new PrefsUpdated()).parse(rawData)){
-			QDEB&&console.debug(`${debugHandle} received "PrefsUpdated" message`);
-			App.prefs = await getPrefs();
-			sendPrefsToQApp(App.prefs);
-		} else {
-			console.error(`${debugHandle} unknown message`);
-		}
 
-		QDEB&&console.groupEnd();
+			QDEB&&console.groupEnd();
 
-		return false;
-	});
+			return false;
+		});
 
-	browser.menus.onClicked.addListener(App.menuHandler);
+		browser.menus.onClicked.addListener(this.menuHandler.bind(this));
+	}
 }
 
 async function waitForLoad() {
@@ -631,6 +626,5 @@ QDEB&&console.debug(`${debugHandle} ResourceUrl.register("qnote")`);
 await browser.ResourceUrl.register("qnote");
 
 waitForLoad().then(async isAppStartup => {
-	App = new QNoteExtension(await getPrefs());
-	initExtension() // TODO: move inside App at some point
+	(new QNoteExtension(await getPrefs())).initExtension();
 });
