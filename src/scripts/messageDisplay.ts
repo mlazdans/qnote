@@ -2,7 +2,7 @@
 import { AttachToMessageReplyData } from "../modules/Messages.mjs";
 
 function attachToMessage(reply: AttachToMessageReplyData | undefined) {
-	// Cleanup
+	// Cleanup already attached note
 	document.querySelectorAll(".qnote-insidenote").forEach(e => e.remove());
 
 	if(!reply){

@@ -20,7 +20,7 @@ var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionPa
 var { BasePopup } = ChromeUtils.importESModule("resource:///modules/ExtensionPopups.sys.mjs");
 // var { BasePopup } = ChromeUtils.importESModule("resource://qnote/modules-exp/QPopups.sys.mjs");
 var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
-var { Box } = ChromeUtils.importESModule("resource://qnote/modules/common.mjs");
+var { Box, coalesce } = ChromeUtils.importESModule("resource://qnote/modules/common.mjs");
 
 var QDEB = true;
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
@@ -30,12 +30,6 @@ class QPopupEventDispatcher extends QEventDispatcher<{
 	onfocus: (id: number) => void;
 	onblur: (id: number) => void;
 }> {}
-
-function coalesce(...args: any): any {
-	for (let a of args) if (a != null) return a;
-
-	return null;
-}
 
 const PopupEventDispatcher = new QPopupEventDispatcher();
 

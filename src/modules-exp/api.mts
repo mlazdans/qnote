@@ -26,7 +26,7 @@ export interface INoteFileProvider {
 	load(root: string, keyId: string): INoteData | null
 	save(root: string, keyId: string, note: INoteData): void
 	delete(root: string, keyId: string): void
-	getAllKeys(root: string): Array<string> // TODO: maybe use Generator/yield?
+	getAllKeys(root: string): Array<string> // MAYBE: use Generator/yield?
 }
 
 export interface INoteFileAPI<T extends INoteFileProvider> {

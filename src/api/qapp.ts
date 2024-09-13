@@ -163,73 +163,9 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 		Services.ww.unregisterNotification(this.WindowObserver);
 	}
 
-	// Legacy column
-	// updateView(w, keyId){
-	// 	let fName = `qapp.updateView(w, ${keyId})`;
-
-	// 	if(!w || !w.document){
-	// 		w = Services.wm.getMostRecentWindow("mail:3pane")
-	// 	}
-
-	// 	if(!w || !w.document){
-	// 		QDEB&&console.debug(`${fName} - no window`);
-	// 		return;
-	// 	}
-
-	// 	let mainPopupSet = w.document.getElementById('mainPopupSet');
-	// 	if(!mainPopupSet){
-	// 		QDEB&&console.debug(`${fName} - no mainPopupSet`);
-	// 		return;
-	// 	}
-
-	// 	let aFolderDisplay = w.gFolderDisplay;
-	// 	if(!(aFolderDisplay && aFolderDisplay.view && aFolderDisplay.view.dbView)){
-	// 		QDEB&&console.debug(`${fName} - no dbView`);
-	// 		return;
-	// 	}
-
-	// 	let view = aFolderDisplay.view.dbView;
-	// 	let row;
-
-	// 	if(keyId && view.db){
-	// 		let msgHdr = view.db.getMsgHdrForMessageID(keyId);
-	// 		if(msgHdr){
-	// 			row = view.findIndexOfMsgHdr(msgHdr, false);
-	// 		}
-	// 	} else {
-	// 		row = view.currentlyDisplayedMessage;
-	// 	}
-
-	// 	//let rangeCount = treeSelection.getRangeCount();
-	// 	// nsIMsgDBView.idl
-	// 	// NoteChange(nsMsgViewIndex, PRInt32, nsMsgViewNotificationCodeValue)
-	// 	// const nsMsgViewNotificationCodeValue changed = 2;
-	// 	/**
-	// 	 * Notify tree that rows have changed.
-	// 	 *
-	// 	 * @param aFirstLineChanged   first view index for changed rows.
-	// 	 * @param aNumRows            number of rows changed; < 0 means removed.
-	// 	 * @param aChangeType         changeType.
-	// 	 */
-	// 	// void NoteChange(in nsMsgViewIndex aFirstLineChanged, in long aNumRows,
-	// 	// 	in nsMsgViewNotificationCodeValue aChangeType);
-
-	// 	// MAYBE: probably a good idea to change all rows in a view or at least add func parameter
-	// 	// https://developer.mozilla.org/en-US/docs/Mozilla/Tech/XPCOM/Reference/Interface/nsITreeBoxObject#invalidateCell
-	// 	view.NoteChange(row, 1, 2);
-	// }
-
 	getAPI(context: any) {
 		let API: QApp = this;
 		let focusSavedElement: Element | null = null;
-
-		function id2RealWindow(windowId: number): MozWindow {
-			try {
-				return extension.windowManager.get(windowId).window;
-			} catch {
-				throw new Error("windowManager fail");
-			}
-		}
 
 		// TODO: code dup in filters
 		function getFolderNoteData(keyId: string): INoteData | null {
@@ -340,29 +276,19 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 					API.customFilter.storageFolder = prefs.storageFolder;
 					API.customTerm.storageFolder = prefs.storageFolder;
 
-					// TODO: currently it is not possible to have text and icon simultaneously
+					// TODO: add text column
 					// if(ThreadPaneColumns){
 					// } else {
 					// 	API.ColumnHandler.columnHandler.limit = Prefs.showFirstChars;
 					// }
 				},
 				async updateColumsView() {
-					// TODO: it does not update sometimes
 					ThreadPaneColumns?.refreshCustomColumn("qnote");
 				},
-				// async updateView(windowId: number, keyId: string){
-				// 	let w = null;
-				// 	if(windowId) {
-				// 		w = API.id2RealWindow(windowId);
-				// 	}
-
-				// 	API.updateView(w, keyId);
-				// },
 				async attachNotesToMultiMessage(keys: Array<string>){
 					const fName = `qapp.attachNotesToMultiMessage()`;
 
 					const w = Services.wm.getMostRecentWindow("mail:3pane");
-					// const w = id2RealWindow(windowId);
 					if(!w || !w.document){
 						QDEB&&console.log(`${fName}: window not found, bail`);
 						return;

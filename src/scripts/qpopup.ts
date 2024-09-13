@@ -196,7 +196,7 @@ function popup(){
 	window.addEventListener("focus", () => YTextE.focus());
 
 	if(!State.focusOnDisplay){
-		setTimeout(() => (new RestoreFocus).sendMessage(), 100); // NOTE: arbitrary 100ms. Probablu should attach to some event or smth
+		setTimeout(() => (new RestoreFocus).sendMessage(), 100); // NOTE: arbitrary 100ms. Probably should attach to some event or smth
 	} else {
 		YTextE.focus();
 	}

@@ -44,7 +44,6 @@ export class QNoteFile implements INoteFileProvider {
 		return false;
 	}
 
-	// TODO: this actually could return garbage or missing fields or old structs or just fail on JSON.parse
 	load(root: string, keyId: string): INoteData | null {
 		var file = this.getExistingFile(root, keyId);
 
@@ -90,7 +89,7 @@ export class QNoteFile implements INoteFileProvider {
 
 		var con = Cc["@mozilla.org/intl/converter-output-stream;1"].createInstance(Ci.nsIConverterOutputStream);
 		// con.init(fileOutStream, "utf-8", 0, 0xFFFD); // U+FFFD = replacement character
-		con.init(fileOutStream, "utf-8"); // TODO: test - removed extra paramaters
+		con.init(fileOutStream, "utf-8");
 		con.writeString(data);
 		con.close();
 

@@ -143,7 +143,6 @@
 	background-image: url(../images/icons/save.svg);
 }
 
-/* TODO: dark theme */
 @media (prefers-color-scheme: dark) {
 	.qpopup-textinput {
 		color: white;

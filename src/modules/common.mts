@@ -1,6 +1,4 @@
 // This code should run everywhere: background, content, experiments
-// TODO: remove functions with side effects
-
 import * as luxon from "../modules/luxon.mjs";
 
 export type PopupAnchor          = "window" | "threadpane" | "message";
@@ -138,11 +136,6 @@ export var Box = {
 	}
 }
 
-// TODO: remove
-// function getTabId(Tab: messenger.tabs.Tab | undefined){
-// 	return Tab ? Tab.id : undefined;
-// }
-
 // function xnotePrefsMapper(prefs: XNotePrefs): object {
 // 	var map = {
 // 		usetag: 'useTag',
@@ -194,24 +187,6 @@ export function getPropertyType<O, K extends keyof O>(obj: O, key: K) {
 // 	// } else {
 // 	// 	console.error(`Unsupported preference type: ${type} for key ${k}`);
 // 	// }
-// }
-
-export function silentCatcher(){
-	return (...args: any) => {
-		// QDEB&&console.debug(...args);
-		console.debug(...args);
-	}
-}
-
-// NOTE: current ThreadPaneColumns implementation does not allow updating single row anyways
-// function updateNoteView(note?: NoteData){
-// 	if(note){
-// 		sendNoteToQApp(note).then(() => {
-// 			getCurrentWindowIdAnd().then(windowId => browser.qapp.updateView(windowId, note.keyId));
-// 		});
-// 	} else {
-// 		getCurrentWindowIdAnd().then(windowId => browser.qapp.updateView(windowId));
-// 	}
 // }
 
 function ts2jsdate(ts?: Date | number): Date {
@@ -327,14 +302,13 @@ export function php2luxon(format: string, dt: luxon.DateTime): string {
 	return conStr;
 }
 
-// export function coalesce(...args: any): any {
-// 	for(let a of args)
-// 		if(a !== null)
-// 			return a;
+export function coalesce(...args: any): any {
+	for (let a of args) if (a != null) return a;
 
-// 	return null;
-// }
+	return null;
+}
 
+// TODO: document is global, should not be here or should pass as arg
 export function getElementByIdOrDie(id: string): HTMLElement {
 	const el = document.getElementById(id);
 	if(el)return el;
