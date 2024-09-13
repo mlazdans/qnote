@@ -9,6 +9,7 @@
 // TODO: add "install", "update" handling if neccessary
 // TODO: second column for text preview
 // TODO: options get reset to default when incorrect path was entered
+// TODO: options - test import/export. Reset to defaults, etc unfinished features
 
 // App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup experiment API
 //  |     \                            \     \-> handles events sent by qpopup.api, fires events back to App through DefaultNotePopup
