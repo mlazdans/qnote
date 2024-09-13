@@ -280,5 +280,8 @@
 	},
 	"take.screenshot": {
 		"message": "Take screenshot"
+	},
+	"deprecated": {
+		"message": "Deprecated"
 	}
 }
