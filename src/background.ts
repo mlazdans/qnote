@@ -113,22 +113,25 @@ class QNoteExtension
 		return this.createNote(keyId).load();
 	}
 
-	async updateIcons(on: boolean){
+	async updateIcons(tabId: number, on: boolean){
 		const params: UpdateIconsDetails = { path: on ? "images/icons/qnote.svg" : "images/icons/qnote-disabled.svg" };
+		params.tabId = tabId;
 
 		BrowserAction.setIcon(params);
 		browser.messageDisplayAction.setIcon(params);
 	}
 
-	async updateView(){
-		const messages = await browser.messageDisplay.getDisplayedMessages();
+	async updateTabView(tabId: number){
+		QDEB&&console.debug("updateTabView() for tabId:", tabId);
+
+		const messages = await browser.messageDisplay.getDisplayedMessages(tabId);
 
 		if(messages.length == 1){
 			const keyId = messages[0].headerMessageId;
 			const note = await this.createAndLoadNote(keyId);
 
-			await this.updateIcons(note.exists());
-			await browser.tabs.executeScript({
+			await this.updateIcons(tabId, note.exists());
+			await browser.tabs.executeScript(tabId, {
 				file: "scripts/messageDisplay.js",
 			});
 		} else if(messages.length >= 1){
@@ -142,11 +145,28 @@ class QNoteExtension
 			};
 
 			browser.qapp.attachNotesToMultiMessage(keyArray);
-			this.updateIcons(true);
+			this.updateIcons(tabId, true);
 		} else {
-			this.updateIcons(false);
+			this.updateIcons(tabId, false);
 		}
 		await browser.qapp.updateColumsView();
+	}
+
+	async updateViews(tabId?: number | undefined){
+		if(tabId){
+			this.updateTabView(tabId);
+		} else {
+			browser.tabs.query({
+				type: ["content", "mail", "messageDisplay"],
+				status: "complete",
+				windowType: "normal"
+			}).then(tabs => {
+				tabs.forEach(tab => {
+					if(tab.id)
+						this.updateTabView(tab.id);
+				});
+			});
+		}
 	}
 
 	// TODO: add tag
@@ -165,7 +185,7 @@ class QNoteExtension
 
 		const noteData = await note.save() ? note.getData() : null;
 
-		await this.updateView();
+		await this.updateViews();
 
 		return noteData;
 	}
@@ -338,7 +358,7 @@ class QNoteExtension
 
 		if(note.exists()){
 			await note.delete();
-			await this.updateView();
+			await this.updateViews();
 			return true;
 		} else {
 			return false;
@@ -417,10 +437,10 @@ class QNoteExtension
 				const note = await this.createAndLoadNote(keyId);
 
 				if(note.exists() && this.prefs.showOnSelect){
-					await this.popNote(note);
+					this.popNote(note);
 				}
 			}
-			this.updateView();
+			this.updateViews(tab.id);
 		});
 
 		// Change folders
@@ -591,6 +611,7 @@ class QNoteExtension
 			} else if((new PrefsUpdated()).parse(rawData)){
 				QDEB&&console.debug(`${debugHandle} received "PrefsUpdated" message`);
 				this.prefs = await getPrefs();
+				this.updateViews();
 				sendPrefsToQApp(this.prefs);
 			} else {
 				console.error(`${debugHandle} unknown message`);
@@ -602,6 +623,8 @@ class QNoteExtension
 		});
 
 		browser.menus.onClicked.addListener(this.menuHandler.bind(this));
+
+		this.updateViews();
 	}
 }
 
