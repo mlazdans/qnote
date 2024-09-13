@@ -219,3 +219,15 @@ window.addEventListener("DOMContentLoaded", () => {
 		popup();
 	});
 });
+
+let oldPixelRatio = window.devicePixelRatio || window.screen.availWidth / document.documentElement.clientWidth;
+window.addEventListener("resize", () => {
+	const pixelRatio = window.devicePixelRatio || window.screen.availWidth / document.documentElement.clientWidth;
+	if(pixelRatio != oldPixelRatio){
+		requestAnimationFrame(() => {
+			popupEl.style.display = 'none';
+			popupEl.style.display = '';
+		});
+		oldPixelRatio = pixelRatio;
+	}
+});
