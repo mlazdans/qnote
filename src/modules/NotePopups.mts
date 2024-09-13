@@ -31,7 +31,7 @@ export interface IPopupState {
 }
 
 export abstract class DefaultNotePopup extends QEventDispatcher<{
-	close: (reason: string, state: IPopupState) => void
+	close: (keyId: string, reason: string, state: IPopupState) => void
 }> implements INotePopup {
 	keyId: string
 	windowId: number
@@ -60,7 +60,7 @@ export class QNotePopup extends DefaultNotePopup {
 
 		browser.qpopup.onClose.addListener((id: number, reason: string, state: IPopupState) => {
 			if(id == this.id){
-				this.fireListeners("close", reason, state);
+				this.fireListeners("close", keyId, reason, state);
 			}
 		});
 
