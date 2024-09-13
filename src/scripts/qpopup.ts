@@ -108,13 +108,15 @@ function popup(){
 		browser.qpopup.takeScreenshot(id).then(result => {
 			if(result){
 				screenshotEl.animate({
-					backgroundSize: ["70%", "100%"],
-				}, 500).addEventListener("finish", () => {
+					backgroundSize: ["80%", "100%"],
+					easing: ["ease-in"],
+				}, 1000).addEventListener("finish", () => {
 					screenshotEl.classList.add('qpopup-button-screenshot-taken');
 					setTimeout(() => {
 						screenshotEl.animate({
 							backgroundSize: ["100%", "80%"],
-						}, 500).addEventListener("finish", () => {
+							easing: ["ease-out"],
+						}, 1000).addEventListener("finish", () => {
 							screenshotEl.classList.remove('qpopup-button-screenshot-taken');
 						});
 					}, 2000);

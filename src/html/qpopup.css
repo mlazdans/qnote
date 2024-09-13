@@ -111,10 +111,11 @@
 .qpopup-button-close {
 	margin: 0 calc(var(--title-height) / 4);
 	background-image: url(../images/icons/close-disabled.svg);
-	/* background-size: cover; */
+	background-size: calc(var(--controls-icons-size)*0.8) calc(var(--controls-icons-size)*0.8);
 }
 .qpopup-button-close:hover {
-	background: url(../images/icons/close.svg);
+	background-image: url(../images/icons/close.svg);
+	background-size: calc(var(--controls-icons-size)*0.8) calc(var(--controls-icons-size)*0.8);
 }
 
 /* Delete button  */
