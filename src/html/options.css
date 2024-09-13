@@ -172,7 +172,6 @@ td {
 
 #dateBlock {
 	display: grid;
-	align-items: auto;
 	grid-template-columns: min-content min-content;
 }
 
