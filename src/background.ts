@@ -1,16 +1,12 @@
 // MAYBE: note popup on mouse over
 // MAYBE: save note pos and dims locally, outside note
 // TODO: save create and update time
-// TODO: experiment with div overlays as popup in content scripts
-//       Something is broken with scrollbars in qpopup, textarea gets wrapped in some div
 // TODO: test brand new installation with XNote++ and then switch to QNote
-// TODO: update messagepane after notechange: https://webextension-api.thunderbird.net/en/128-esr-mv2/scripting.messageDisplay.html#registerscripts-scripts
 // TODO: qpopup z-index
 // TODO: drag requestanimationframe?
 // TODO: holding alt+q pops way too fast
 // TODO: when multiple popups are open, alt+q pops with selected message only. Not with focused popup
 // TODO: menu - close all opened notes
-// TODO: update colums, message view after manipulations
 // TODO: icons: edit, copy, paste, delete, reset positions, settings
 // TODO: qpopup: less opacity for title
 // TODO: qpopup: handle zoom in-out
