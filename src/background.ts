@@ -22,7 +22,7 @@
 //  |      \                            \-----> WebExtension popup -> browser.windows API
 //  |       \-> fires events, registered by App
 //  |
-//  \-> PopupManager - self-maintains handles Map to INotePopup`s
+//  \-> PopupManager - maps INotePopup`s <-> keyId
 
 // Interesting links
 //
@@ -45,7 +45,7 @@ import { AttachToMessage, AttachToMessageReply, PrefsUpdated, RestoreFocus } fro
 import { INote, INoteData, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
 import { INotePopup, IPopupState, QNotePopup } from "./modules/NotePopups.mjs";
 import { convertPrefsToQAppPrefs, dateFormatWithPrefs, IPreferences } from "./modules/common.mjs";
-import { confirmDelete, getCurrentTabId, getCurrentWindowId, getPrefs, isClipboardSet, sendPrefsToQApp } from "./modules/common-background.mjs";
+import { confirmDelete, getCurrentWindowId, getPrefs, isClipboardSet, sendPrefsToQApp } from "./modules/common-background.mjs";
 import { Menu } from "./modules/Menu.mjs";
 
 var QDEB = true;
@@ -54,6 +54,11 @@ var App: QNoteExtension;
 const debugHandle = "[qnote:background]";
 const BrowserAction = browser.action ? browser.action : browser.browserAction;
 const _ = browser.i18n.getMessage;
+
+type UpdateIconsDetails = {
+	path?: browser._manifest.IconPath | undefined;
+	tabId?: number | undefined;
+}
 
 const PopupManager = new class {
 	private popups = new Map<string, INotePopup>
@@ -116,52 +121,42 @@ class QNoteExtension
 		return this.createNote(keyId).load();
 	}
 
-	async updateMultiPane(messages: browser.messages.MessageHeader[]){
-		let noteArray = [];
-		let keyArray = [];
-		for(let m of messages){
-			const keyId = m.headerMessageId;
-			const data = await this.getNoteData(keyId);
-			if(data){
-				noteArray.push(data);
-				keyArray.push(keyId);
-			}
-		};
+	async updateIcons(on: boolean){
+		const params: UpdateIconsDetails = { path: on ? "images/icons/qnote.svg" : "images/icons/qnote-disabled.svg" };
 
-		const windowId = await getCurrentWindowId();
-		if(windowId) {
-			browser.qapp.attachNotesToMultiMessage(windowId, noteArray, keyArray);
+		BrowserAction.setIcon(params);
+		browser.messageDisplayAction.setIcon(params);
+	}
+
+	async updateView(){
+		const messages = await browser.messageDisplay.getDisplayedMessages();
+
+		console.log("updateView", messages);
+
+		if(messages.length == 1){
+			const keyId = messages[0].headerMessageId;
+			const note = await App.createAndLoadNote(keyId);
+
+			await this.updateIcons(note.exists());
+			await browser.tabs.executeScript({
+				file: "scripts/messageDisplay.js",
+			});
+		} else if(messages.length >= 1){
+			const keyArray = [];
+			for(let m of messages){
+				const keyId = m.headerMessageId;
+				const data = await this.getNoteData(keyId);
+				if(data){
+					keyArray.push(keyId);
+				}
+			};
+
+			browser.qapp.attachNotesToMultiMessage(keyArray);
+			App.updateIcons(true);
+		} else {
+			App.updateIcons(false);
 		}
-	}
-
-	async updateIcons(on: boolean, tabId?: number){
-		const icon = on ? "images/icons/qnote.svg" : "images/icons/qnote-disabled.svg";
-
-		BrowserAction.setIcon({
-			path: icon,
-			tabId: tabId
-		});
-
-		browser.messageDisplayAction.setIcon({
-			path: icon,
-			tabId: tabId
-		});
-	}
-
-	async updateTabMenusAndIcons(){
-		browser.menus.removeAll();
-		getCurrentTabId().then(tabId => this.updateIcons(false, tabId));
-	}
-
-	async updateView(keyId: string, note: INoteData | null){
-		// Marks icons active
-		this.updateIcons(!!note);
-
-		if(note) {
-			browser.qapp.saveNoteCache(keyId, note);
-		}
-
-		browser.qapp.updateColumsView();
+		await browser.qapp.updateColumsView();
 	}
 
 	async saveOrUpdate(keyId: string, newNote: INoteData, overwrite: boolean): Promise<INoteData | null>{
@@ -177,7 +172,11 @@ class QNoteExtension
 			note.assignData({ ...newNote, ts: Date.now() });
 		}
 
-		return await note.save() ? note.getData() : null;
+		const noteData = await note.save() ? note.getData() : null;
+
+		await this.updateView();
+
+		return noteData;
 	}
 
 	async createPopup(keyId: string, noteData: INoteData | null): Promise<INotePopup> {
@@ -207,24 +206,22 @@ class QNoteExtension
 				QDEB&&console.debug(`${debugHandle} new popup: ${keyId}`, popup);
 				PopupManager.add(popup);
 				popup.addListener("close", async (reason: string, state: IPopupState) => {
-					QDEB&&console.debug(`${debugHandle} popup close:`, keyId, reason);
+					QDEB&&console.debug(`${debugHandle} popup close, keyId: ${keyId}, reason: ${reason}`);
 					PopupManager.remove(keyId);
+					// Empty reason could mean close on shutdown, or toggle alt+q
 					if(reason == "close"){
 						if(state.text){
-							await this.updateView(keyId,
-								await App.saveOrUpdate(keyId, QNotePopup.state2note(state), true)
-							);
+							await App.saveOrUpdate(keyId, QNotePopup.state2note(state), true);
 						}
 						await browser.qapp.focusRestore();
 					} else if(reason == "delete"){
 						// TODO: remove tag
-						await App.createNote(keyId).delete();
-						await this.updateView(keyId, null);
+						await App.deleteNote(keyId);
 						await browser.qapp.focusRestore();
 					} else if(reason == "escape"){
 						await browser.qapp.focusRestore();
 					} else {
-						console.warn(`${debugHandle} unknown popup close reason:`, reason);
+						console.warn(`${debugHandle} unknown popup close reason: ${reason}`);
 					}
 				});
 
@@ -253,7 +250,7 @@ class QNoteExtension
 			return;
 		}
 
-		QDEB&&console.info(`${menuDebugHandle} menuItemId: `, info.menuItemId);
+		QDEB&&console.info(`${menuDebugHandle} menuItemId:`, info.menuItemId);
 
 		const messages = info.selectedMessages.messages;
 
@@ -281,14 +278,12 @@ class QNoteExtension
 				});
 			} else if(info.menuItemId === "delete"){
 				if(!App.prefs.confirmDelete || await confirmDelete()) {
-					if(await App.deleteNote(keyId)){
-						App.updateView(keyId, null);
-					}
+					await App.deleteNote(keyId)
 				}
 			} else if(info.menuItemId === "reset"){
 				App.resetNote(keyId);
 			} else {
-				console.warn(`${menuDebugHandle} unknown menuItemId:`, info.menuItemId);
+				console.error(`BUG: ${menuDebugHandle} unknown menuItemId:`, info.menuItemId);
 			}
 		// process multiple message selection
 		} else if(messages.length > 1){
@@ -301,21 +296,21 @@ class QNoteExtension
 					for(const m of messages){
 						await App.saveOrUpdate(m.headerMessageId, sourceNoteData, true);
 					};
-					App.updateMultiPane(messages);
+					App.updateView();
 				}
 			} else if(info.menuItemId === "delete_multi"){
 				if(!App.prefs.confirmDelete || await confirmDelete()) {
 					for(const m of messages){
 						await App.deleteNote(m.headerMessageId);
 					}
-					App.updateMultiPane(messages);
+					App.updateView();
 				}
 			} else if(info.menuItemId === "reset_multi"){
 				for(const m of messages){
 					App.resetNote(m.headerMessageId);
 				}
 			} else {
-				console.warn(`${menuDebugHandle} unknown menuItemId: `, info.menuItemId);
+				console.error(`BUG: ${menuDebugHandle} unknown menuItemId:`, info.menuItemId);
 			}
 		}
 	}
@@ -351,7 +346,8 @@ class QNoteExtension
 		const note = await App.createAndLoadNote(keyId);
 
 		if(note.exists()){
-			note.delete();
+			await note.delete();
+			await App.updateView();
 			return true;
 		} else {
 			return false;
@@ -377,7 +373,7 @@ class QNoteExtension
 				for(const m of messages){
 					await App.saveOrUpdate(m.headerMessageId, noteData, false)
 				}
-				this.updateMultiPane(messages);
+				// this.updateMultiPane(messages);
 			}
 		});
 
@@ -385,7 +381,7 @@ class QNoteExtension
 	}
 
 	// TODO: better to have messageId (number) here rather than searching for keyId. Now... how to get that id here...
-	//       This means it should be somehow preserved from onMessageDisplayed() event...
+	//       This means it should be somehow preserved from onMessagesDisplayed() event...
 	// async function tagMessage(id, tagName, toTag = true) {
 	// async tagMessage(messageId: number){
 	// 	return getMessage(id).then(message => {
@@ -411,27 +407,12 @@ class QNoteExtension
 async function initExtension(){
 	QDEB&&console.log(`${debugHandle} initExtension()`);
 
-	// Return notes to qapp on request. Should be set before init
-	browser.qapp.onNoteRequest.addListener(async (keyId: string) => App.getNoteData(keyId));
-
 	await browser.qapp.init(convertPrefsToQAppPrefs(App.prefs));
 	await browser.qapp.setDebug(QDEB);
 
 	QNotePopup.init(QDEB);
 
-	App.updateTabMenusAndIcons();
-
-	// browser.scripting.messageDisplay.registerScripts([{
-	// 	id: "qnote-message-display",
-	// 	js: ["scripts/messageDisplay.js"],
-	// 	css: ["html/qpopup.css"],
-	// }]);
-
-	browser.messageDisplayScripts.register({
-		// id: "qnote-message-display",
-		js: [{ file: "scripts/messageDisplay.js" }],
-		css: [{ file: "html/qpopup.css" }],
-	});
+	await App.updateView();
 
 	// window.addEventListener("unhandledrejection", event => {
 	// 	console.warn(`Unhandle: ${event.reason}`, event);
@@ -446,21 +427,17 @@ async function initExtension(){
 			const keyId = messages[0].headerMessageId;
 			const note = await App.createAndLoadNote(keyId);
 
-			App.updateView(keyId, note.getData());
-
 			if(note.exists() && App.prefs.showOnSelect){
-				App.popNote(note);
+				await App.popNote(note);
 			}
-		} else if(messages.length > 1){
-			App.updateIcons(true, tab.id);
-			App.updateMultiPane(messages);
 		}
+		App.updateView();
 	});
 
 	// Change folders
-	browser.mailTabs.onDisplayedFolderChanged.addListener(async (tab, displayedFolder) => {
+	browser.mailTabs.onDisplayedFolderChanged.addListener(async (tab, _displayedFolder) => {
 		QDEB&&console.debug(`${debugHandle} mailTabs.onDisplayedFolderChanged()`);
-		App.updateTabMenusAndIcons();
+		// App.updateTabMenusAndIcons(tab.id);
 	});
 
 	// Create tabs
@@ -471,7 +448,7 @@ async function initExtension(){
 	// Change tabs
 	browser.tabs.onActivated.addListener(async activeInfo => {
 		QDEB&&console.debug(`${debugHandle} tabs.onActivated(), id:`, activeInfo.tabId);
-		App.updateTabMenusAndIcons();
+		App.updateView();
 	});
 
 	// Create window
@@ -526,8 +503,6 @@ async function initExtension(){
 				const keyId = messages[0].headerMessageId;
 				const note = await App.createAndLoadNote(keyId);
 
-				App.updateView(keyId, note.getData());
-
 				if(PopupManager.has(keyId)){
 					PopupManager.get(keyId).close();
 				} else {
@@ -575,7 +550,7 @@ async function initExtension(){
 			if(messages.length == 1){
 				const note = await App.createAndLoadNote(messages[0].headerMessageId);
 
-				if(note){
+				if(note.exists()){
 					await Menu.modify();
 				} else {
 					await Menu.new();
@@ -599,10 +574,10 @@ async function initExtension(){
 		if((new AttachToMessage()).parse(rawData)){
 			if(sender.tab?.id) {
 				QDEB&&console.debug(`${debugHandle} received "AttachToMessage" message`);
-				const List = await browser.messageDisplay.getDisplayedMessages(sender.tab.id);
+				const messages = await browser.messageDisplay.getDisplayedMessages(sender.tab.id);
 
-				if(List.length == 1){
-					const data = await App.getNoteData(List[0].headerMessageId);
+				if(messages.length == 1){
+					const data = await App.getNoteData(messages[0].headerMessageId);
 					if(data){
 						const reply = new AttachToMessageReply({
 							note: data,
