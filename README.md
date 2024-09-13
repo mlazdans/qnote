@@ -98,3 +98,6 @@ _Floating panel_ has nicer looks but does not display well on MacOS. Fall back t
 # Donations
 
 I enjoy some [beer (EUR)](https://www.paypal.com/donate/?hosted_button_id=CCFL84AMQKV4S) or [beer (USD)](https://www.paypal.com/donate/?hosted_button_id=NKF22QJS87LWN) now and then. Much appreciated! ;)
+
+# Icons
+Very nice icons grabbed from [Gartoon Redux Action Icons Pack](https://www.iconarchive.com/show/gartoon-action-icons-by-gartoon-team.html)
