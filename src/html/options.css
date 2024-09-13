@@ -184,3 +184,19 @@ td {
 ::backdrop {
 	backdrop-filter: blur(4px);
 }
+
+.gear-rotate {
+	animation: rotate 3s infinite linear;
+}
+
+@keyframes rotate {
+	0% {
+		transform: rotate(0deg);
+	}
+	50% {
+		transform: rotate(180deg);
+	}
+	100% {
+		transform: rotate(360deg);
+	}
+}

@@ -290,7 +290,7 @@ function disableExportImportConstrols(yes: boolean): void {
 async function initExportButtons(prefs: IPreferences){
 	let listener = (type: typeof QNoteFolder | typeof XNoteFolder) => {
 		return async () => {
-			console.log(`${debugHandle} exportButton<${type}>::click()`);
+			console.log(`${debugHandle} exportButton<${type.name}>::click()`);
 
 			// Select path where to put QNotes or XNotes
 			browser.legacy.folderPicker(prefs.storageFolder ? prefs.storageFolder : null).then(async selectedPath => {
@@ -544,7 +544,11 @@ async function initOptionsPage(prefs: IPreferences){
 	resetDefaultsButton.disabled = clearStorageButton.disabled = true;
 	resetDefaultsButton.title = clearStorageButton.title = "TODO";
 
-	exportStorageButton.      addEventListener("click", exportStorage);
+	exportStorageButton.addEventListener("click", () => {
+		exportStorage().catch((e: string) => {
+			console.warn(`${debugHandle}:`, e);
+		});
+	});
 	importFile.               addEventListener("change", () => importInternalStorage(prefs));
 	storageFolderBrowseButton.addEventListener("click", () => storageFolderPicker(prefs));
 
