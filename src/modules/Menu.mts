@@ -75,7 +75,7 @@ export var Menu = {
 		// Create multi
 		browser.menus.create({
 			id: "create_multi",
-			title: _("create.or.update.selected.notes"),
+			title: _("create.new.note"),
 			contexts: ["message_list"],
 			icons: "../images/icons/new.svg",
 		});
@@ -83,7 +83,7 @@ export var Menu = {
 		// Paste multi
 		browser.menus.create({
 			id: "paste_multi",
-			title: _("paste.into.selected.messages"),
+			title: _("paste"),
 			contexts: ["message_list"],
 			enabled: isClipboardSet(await browser.qnote.getFromClipboard()),
 			icons: "../images/icons/paste.svg",
@@ -92,7 +92,7 @@ export var Menu = {
 		// Delete multi
 		browser.menus.create({
 			id: "delete_multi",
-			title: _("delete.selected.notes"),
+			title: _("delete.note"),
 			contexts: ["message_list"],
 			icons: "../images/icons/trash.svg",
 		});
@@ -100,7 +100,7 @@ export var Menu = {
 		// Reset multi
 		browser.menus.create({
 			id: "reset_multi",
-			title: _("reset.selected.notes.windows"),
+			title: _("reset.note.window"),
 			contexts: ["message_list"],
 			icons: "../images/icons/reset.svg",
 		});

@@ -248,15 +248,6 @@
 	"storage.clear.button.descr": {
 		"message": "Effacer les préférences et les notes enregistrées dans le stockage de l’extension"
 	},
-	"create.or.update.selected.notes": {
-		"message": "Créer ou mettre à jour les notes sélectionnées"
-	},
-	"delete.selected.notes": {
-		"message": "Supprimer les notes sélectionnées"
-	},
-	"reset.selected.notes.windows": {
-		"message": "Réinitialiser les positions des notes sélectionnées"
-	},
 	"could.not.initialize.storage.folder": {
 		"message": "Impossible d’initialiser le dossier de stockage de QNote !\nVérifiez les paramètres de l’extension."
 	},
@@ -277,9 +268,6 @@
 	},
 	"paste": {
 		"message": "Coller"
-	},
-	"paste.into.selected.messages": {
-		"message": "Coller dans les messages"
 	},
 	"attach.template": {
 		"message": "Modèle"

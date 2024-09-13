@@ -15,16 +15,16 @@
 		"message": "JSON parse error: $1"
 	},
 	"modify.note": {
-		"message": "Modify note"
+		"message": "Edit"
 	},
 	"delete.note": {
-		"message": "Delete note"
+		"message": "Delete"
 	},
 	"reset.note.window": {
-		"message": "Reset note position"
+		"message": "Reset position"
 	},
 	"create.new.note": {
-		"message": "Create new note"
+		"message": "New note"
 	},
 	"toggleqnote": {
 		"message": "Toggle note"
@@ -248,15 +248,6 @@
 	"storage.clear.button.descr": {
 		"message": "Wipe preferences and notes saved in extension storage"
 	},
-	"create.or.update.selected.notes": {
-		"message": "Create or update selected notes"
-	},
-	"delete.selected.notes": {
-		"message": "Delete selected notes"
-	},
-	"reset.selected.notes.windows": {
-		"message": "Reset selected notes positions"
-	},
 	"could.not.initialize.storage.folder": {
 		"message": "Could not initialize QNote storage folder!\nPlease review add-on settings."
 	},
@@ -277,9 +268,6 @@
 	},
 	"paste": {
 		"message": "Paste"
-	},
-	"paste.into.selected.messages": {
-		"message": "Paste into messages"
 	},
 	"attach.template": {
 		"message": "Template"
