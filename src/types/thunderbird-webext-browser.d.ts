@@ -17667,7 +17667,7 @@ declare namespace browser {
         // MV2 115:128:
         // export function getDisplayedMessages(tabId: number): Promise<messages.MessageHeader[]>;
         // export function getDisplayedMessages(tabId: number): Promise<messages.MessageList | messages.MessageHeader[]>;
-        export function getDisplayedMessages(tabId: number): Promise<messages.MessageHeader[]>;
+        export function getDisplayedMessages(tabId?: number): Promise<messages.MessageHeader[]>;
 
         /**
          * Opens a message in a new tab or in a new window.
