@@ -122,6 +122,10 @@
 .qpopup-button-screenshot {
 	background-image: url(../images/icons/screenshot.svg);
 }
+.qpopup-button-screenshot-taken {
+	background-image: url(../images/icons/ok.svg);
+	background-size: var(--controls-icons-size) var(--controls-icons-size);
+}
 
 /* Reset button  */
 .qpopup-button-reset {

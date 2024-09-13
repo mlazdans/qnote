@@ -4,9 +4,8 @@
 // TODO: test brand new installation with XNote++ and then switch to QNote
 // TODO: qpopup z-index
 // TODO: holding alt+q pops way too fast
-// TODO: when multiple popups are open, alt+q pops with selected message only. Not with focused popup
+// TODO: when multiple popups are open, alt+q pops with selected message only, not with focused popup
 // TODO: menu - close all opened notes
-// TODO: icons: edit, copy, paste, delete, reset positions, settings
 // TODO: add "install", "update" handling if neccessary
 // TODO: second column for text preview
 // TODO: options get reset to default when incorrect path was entered
