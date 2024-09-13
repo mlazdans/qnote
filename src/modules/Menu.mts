@@ -7,6 +7,7 @@ export var Menu = {
 		id: "options",
 		title: _("options"),
 		contexts: ["message_list", "page", "frame"],
+		icons: "../images/icons/gear.svg",
 	},
 	modify: async () => {
 		// Modify
@@ -14,6 +15,7 @@ export var Menu = {
 			id: "modify",
 			title: _("modify.note"),
 			contexts: ["message_list", "page", "frame"],
+			icons: "../images/icons/edit.svg",
 		});
 
 		// Copy
@@ -21,6 +23,7 @@ export var Menu = {
 			id: "copy",
 			title: _("copy"),
 			contexts: ["message_list", "page", "frame"],
+			icons: "../images/icons/copy.svg",
 		});
 
 		// Existing paste
@@ -29,6 +32,7 @@ export var Menu = {
 			title: _("paste"),
 			enabled: isClipboardSet(await browser.qnote.getFromClipboard()),
 			contexts: ["message_list", "page", "frame"],
+			icons: "../images/icons/paste.svg",
 		});
 
 		// Delete
@@ -36,6 +40,7 @@ export var Menu = {
 			id: "delete",
 			title: _("delete.note"),
 			contexts: ["message_list", "page", "frame"],
+			icons: "../images/icons/trash.svg"
 		});
 
 		// Reset
@@ -43,6 +48,7 @@ export var Menu = {
 			id: "reset",
 			title: _("reset.note.window"),
 			contexts: ["message_list", "page", "frame"],
+			icons: "../images/icons/reset.svg"
 		});
 
 		browser.menus.create(Menu.optionsMenu as browser.menus._CreateCreateProperties);
@@ -52,6 +58,7 @@ export var Menu = {
 			id: "create",
 			title: _("create.new.note"),
 			contexts: ["message_list", "page", "frame"],
+			icons: "../images/icons/new.svg",
 		});
 
 		if(isClipboardSet(await browser.qnote.getFromClipboard())){
@@ -59,6 +66,7 @@ export var Menu = {
 				id: "paste",
 				title: _("paste"),
 				contexts: ["message_list", "page", "frame"],
+				icons: "../images/icons/paste.svg",
 			});
 			browser.menus.create(Menu.optionsMenu as browser.menus._CreateCreateProperties);
 		}
@@ -69,6 +77,7 @@ export var Menu = {
 			id: "create_multi",
 			title: _("create.or.update.selected.notes"),
 			contexts: ["message_list"],
+			icons: "../images/icons/new.svg",
 		});
 
 		// Paste multi
@@ -77,6 +86,7 @@ export var Menu = {
 			title: _("paste.into.selected.messages"),
 			contexts: ["message_list"],
 			enabled: isClipboardSet(await browser.qnote.getFromClipboard()),
+			icons: "../images/icons/paste.svg",
 		});
 
 		// Delete multi
@@ -84,6 +94,7 @@ export var Menu = {
 			id: "delete_multi",
 			title: _("delete.selected.notes"),
 			contexts: ["message_list"],
+			icons: "../images/icons/trash.svg",
 		});
 
 		// Reset multi
@@ -91,6 +102,7 @@ export var Menu = {
 			id: "reset_multi",
 			title: _("reset.selected.notes.windows"),
 			contexts: ["message_list"],
+			icons: "../images/icons/reset.svg",
 		});
 
 		browser.menus.create(Menu.optionsMenu as browser.menus._CreateCreateProperties);

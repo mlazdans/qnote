@@ -110,27 +110,17 @@
 /* Close button  */
 .qpopup-button-close {
 	margin: 0 calc(var(--title-height) / 4);
-	background-image: url(../images/icons/close-disabled.svg);
-	background-size: calc(var(--controls-icons-size)*0.8) calc(var(--controls-icons-size)*0.8);
-}
-.qpopup-button-close:hover {
 	background-image: url(../images/icons/close.svg);
-	background-size: calc(var(--controls-icons-size)*0.8) calc(var(--controls-icons-size)*0.8);
 }
 
 /* Delete button  */
 .qpopup-button-delete {
-	background-image: url(../images/icons/delete.svg);
+	background-image: url(../images/icons/trash.svg);
 }
 
 /* Screenshot button  */
 .qpopup-button-screenshot {
-	background-image: url(../images/icons/camera.svg);
-}
-
-.qpopup-button-screenshot-taken {
-	background-image: url(../images/icons/camera-flash.svg);
-	background-size: var(--controls-icons-size) var(--controls-icons-size);
+	background-image: url(../images/icons/screenshot.svg);
 }
 
 /* Reset button  */
