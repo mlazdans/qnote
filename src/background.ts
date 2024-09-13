@@ -16,6 +16,7 @@
 // TODO: qpopup: handle zoom in-out
 // TODO: add "install", "update" handling if neccessary
 // TODO: second column for text preview
+// TODO: options get reset to default when incorrect path was entered
 
 // App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup experiment API
 //  |     \                            \     \-> handles events sent by qpopup.api, fires events back to App through DefaultNotePopup
@@ -583,6 +584,7 @@ async function initExtension(){
 							note: data,
 							html: App.applyTemplate(App.prefs.attachTemplate, data),
 							prefs: App.prefs,
+							keyId: messages[0].headerMessageId
 						});
 
 						QDEB&&console.groupEnd();

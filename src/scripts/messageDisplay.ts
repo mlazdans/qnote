@@ -1,12 +1,7 @@
 // TODO: why this is called 2x?
-// TODO: double click: pop message
 import { AttachToMessageReplyData } from "../modules/Messages.mjs";
 
-function attachToMessage(reply: AttachToMessageReplyData | false) {
-	if (!reply) {
-		return;
-	}
-
+function attachToMessage(reply: AttachToMessageReplyData) {
 	if (reply.prefs.messageAttachTop) {
 		document.body.insertAdjacentHTML("afterbegin", '<div class="qnote-insidenote qnote-insidenote-top">' + reply.html + "</div>");
 	}
@@ -15,14 +10,24 @@ function attachToMessage(reply: AttachToMessageReplyData | false) {
 		document.body.insertAdjacentHTML("beforeend", '<div class="qnote-insidenote qnote-insidenote-bottom">' + reply.html + "</div>");
 	}
 
-	const el = document.querySelector(".qnote-text-span");
-	if (el) {
+	document.querySelectorAll(".qnote-text-span").forEach(el => {
+		console.log("el", el);
 		if (reply.prefs.treatTextAsHtml) {
 			el.innerHTML = reply.note.text || "";
 		} else {
 			el.textContent = reply.note.text || "";
 		}
-	}
+	});
+
+	// NOTE: disabled for now because this entire script is injected 2x
+	// document.querySelectorAll(".qnote-insidenote").forEach(el => {
+	// 	if(el instanceof HTMLDivElement){
+	// 		el.addEventListener("dblclick", e => {
+	// 			window.getSelection()?.removeAllRanges();
+	// 			console.log("POP!", reply.keyId);
+	// 		});
+	// 	}
+	// });
 }
 
 document.querySelectorAll(".qnote-insidenote").forEach(e => e.remove());

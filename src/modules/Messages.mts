@@ -68,6 +68,7 @@ export interface AttachToMessageReplyData {
 	prefs: IPreferences;
 	note: INoteData;
 	html: string;
+	keyId: string;
 }
 export class AttachToMessageReply extends DefaultMessage<AttachToMessageReplyData> {
 	command = "AttachToMessageReply";
