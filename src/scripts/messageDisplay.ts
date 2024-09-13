@@ -1,7 +1,14 @@
 // TODO: why this is called 2x?
 import { AttachToMessageReplyData } from "../modules/Messages.mjs";
 
-function attachToMessage(reply: AttachToMessageReplyData) {
+function attachToMessage(reply: AttachToMessageReplyData | undefined) {
+	// Cleanup
+	document.querySelectorAll(".qnote-insidenote").forEach(e => e.remove());
+
+	if(!reply){
+		return;
+	}
+
 	if (reply.prefs.messageAttachTop) {
 		document.body.insertAdjacentHTML("afterbegin", '<div class="qnote-insidenote qnote-insidenote-top">' + reply.html + "</div>");
 	}
@@ -11,7 +18,6 @@ function attachToMessage(reply: AttachToMessageReplyData) {
 	}
 
 	document.querySelectorAll(".qnote-text-span").forEach(el => {
-		console.log("el", el);
 		if (reply.prefs.treatTextAsHtml) {
 			el.innerHTML = reply.note.text || "";
 		} else {
@@ -29,8 +35,6 @@ function attachToMessage(reply: AttachToMessageReplyData) {
 	// 	}
 	// });
 }
-
-document.querySelectorAll(".qnote-insidenote").forEach(e => e.remove());
 
 browser.runtime
 	.sendMessage({
