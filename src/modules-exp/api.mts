@@ -48,8 +48,8 @@ export interface IQAppAPI {
 	setDebug(on: boolean): Promise<void>
 	setPrefs(prefs: IQAppPreferences): Promise<void>
 	getProfilePath(): Promise<string>
-	focusSave(): Promise<void>
-	focusRestore(): Promise<void>
+	saveFocus(): Promise<void>
+	restoreFocus(): Promise<void>
 	attachNotesToMultiMessage(keys: Array<string>): Promise<void>
 }
 

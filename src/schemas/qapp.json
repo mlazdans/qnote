@@ -147,26 +147,16 @@
 			"default": false
 		}]
 	},{
-		"name": "focusSave",
+		"name": "saveFocus",
 		"type": "function",
 		"description": "",
 		"async": true,
 		"parameters": []
 	},{
-		"name": "focusRestore",
+		"name": "restoreFocus",
 		"type": "function",
 		"description": "",
 		"async": true,
 		"parameters": []
-	}],
-	"events": [{
-		"name": "onNoteRequest",
-		"type": "function",
-		"description": "Fired when a qapp needs note from addon.",
-		"parameters": [{
-			"name": "keyId",
-			"type": "string",
-			"description": ""
-		}]
 	}]
 }]

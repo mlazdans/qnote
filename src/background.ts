@@ -11,6 +11,7 @@
 // TODO: options
 //       *) fix reset to defaults when incorrect path was entered
 //       *) test import/export. Reset to defaults, etc unfinished features
+// TODO: write usage docs (inc filters, actions)
 
 // App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup experiment API
 //  |     \                            \     \-> handles events sent by qpopup.api, fires events back to App through DefaultNotePopup
@@ -192,18 +193,18 @@ class QNoteExtension
 	}
 
 	async onNoteCloseHandler(keyId: string, reason: string, state: IPopupState) {
-		QDEB&&console.debug(`${debugHandle} popup close, keyId: ${keyId}, reason: ${reason}`, this);
+		QDEB&&console.debug(`${debugHandle} popup close, keyId: ${keyId}, reason: ${reason}`);
 		PopupManager.remove(keyId);
 		if(reason == "close"){
 			if(state.text){
 				await this.saveOrUpdate(keyId, QNotePopup.state2note(state), true);
 			}
-			await browser.qapp.focusRestore();
+			await browser.qapp.restoreFocus();
 		} else if(reason == "delete"){
 			await this.deleteNote(keyId);
-			await browser.qapp.focusRestore();
+			await browser.qapp.restoreFocus();
 		} else if(reason == "escape"){
-			await browser.qapp.focusRestore();
+			await browser.qapp.restoreFocus();
 		} else {
 			console.warn(`${debugHandle} unknown popup close reason: ${reason}`);
 		}
@@ -211,7 +212,7 @@ class QNoteExtension
 
 	async createPopup(keyId: string, noteData: INoteData | null): Promise<INotePopup> {
 		QDEB&&console.debug(`${debugHandle} createPopup:`, keyId);
-		await browser.qapp.focusSave();
+		await browser.qapp.saveFocus();
 		return new Promise(async (resolve, reject) => {
 			if(PopupManager.has(keyId)){
 				return resolve(PopupManager.get(keyId));
@@ -608,7 +609,7 @@ class QNoteExtension
 				}
 			} else if((new RestoreFocus()).parse(rawData)){
 				QDEB&&console.debug(`${debugHandle} received "RestoreFocus" message`);
-				browser.qapp.focusRestore();
+				browser.qapp.restoreFocus();
 			} else if((new PrefsUpdated()).parse(rawData)){
 				QDEB&&console.debug(`${debugHandle} received "PrefsUpdated" message`);
 				this.prefs = await getPrefs();
