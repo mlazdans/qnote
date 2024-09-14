@@ -269,3 +269,21 @@ export const LegacyAPI: ILegacyAPI = {
 		}
 	}
 }
+
+export function getFolderNoteData(keyId: string, root: string): INoteData | null {
+	const QN = new QNoteFile;
+	const XN = new XNoteFile;
+
+	try {
+		return QN.load(root, keyId);
+	} catch (e) {
+		console.warn(`Could not parse qnote file with keyId: ${keyId}, reason:`, e instanceof Error ? e.message : e);
+		try {
+			return XN.load(root, keyId);
+		} catch {
+			console.warn(`Could not parse xnote file with keyId: ${keyId}, reason:`, e instanceof Error ? e.message : e);
+		};
+	}
+
+	return null;
+}

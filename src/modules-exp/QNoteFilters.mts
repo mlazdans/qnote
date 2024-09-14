@@ -2,7 +2,7 @@ import { INoteData } from "../modules/Note.mjs";
 
 var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
 var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs");
-var { XNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/XNoteFile.mjs");
+var { getFolderNoteData } = ChromeUtils.importESModule("resource://qnote/modules-exp/api.mjs");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var { ThreadPaneColumns } = ChromeUtils.importESModule("chrome://messenger/content/ThreadPaneColumns.mjs");
@@ -17,8 +17,9 @@ class QFiltersEventDispatcher extends QEventDispatcher<{
 // 2) we can addCustomTerm() but can not remove it
 export class QNoteFilter
 {
-	storageFolder: string | undefined // TODO: sync after prefs change
-	ed
+	ed: QFiltersEventDispatcher
+
+	private storageFolder: string | undefined
 	// qfQnoteDomId = 'qfb-qs-qnote'
 	// QuickFilterManager: any;
 
@@ -77,6 +78,10 @@ export class QNoteFilter
 		// }
 
 		// this.attachToWindow(options.w);
+	}
+
+	setStorageFolder(path: string){
+		this.storageFolder = path;
 	}
 
 	// TODO: probably should move to WebExtensions
@@ -321,6 +326,7 @@ export class QNoteFilter
 			// 	return;
 			// }
 
+			// TODO: remove once local storage option will be removed completely
 			if(!this.storageFolder){
 				let textbox = document.createElementNS("http://www.w3.org/1999/xhtml", "span") as HTMLSpanElement;
 				if(textbox){
@@ -470,16 +476,13 @@ export class QNoteFilter
 // We need completely restart TB if CustomTerm code changes
 // Currenlty there are no means to remove filter or there is but I'm not aware, please let me know: qnote@dqdp.net
 
-// TODO: try brind all calls to options.API
-// TODO: scopes
 export class QCustomTerm implements Ci.nsIMsgSearchCustomTerm {
 	id: string
 	name: string
 	needsBody: boolean = false
 	ops: Array<Ci.nsMsgSearchOpValue>
-	QN
-	XN
-	storageFolder: string | undefined // TODO: sync after prefs change
+
+	private storageFolder: string | undefined
 
 	constructor(storageFolder?: string) {
 		this.id = 'qnote@dqdp.net#qnoteText';
@@ -494,36 +497,30 @@ export class QCustomTerm implements Ci.nsIMsgSearchCustomTerm {
 			Ci.nsMsgSearchOp.BeginsWith,
 			Ci.nsMsgSearchOp.EndsWith
 		];
+	}
 
-		this.QN = new QNoteFile;
-		this.XN = new XNoteFile;
+	setStorageFolder(path: string){
+		this.storageFolder = path;
 	}
 
 	getEnabled(scope: any, op: any) {
 		return true;
 	}
+
 	getAvailable(scope: any, op: any) {
 		return true;
 	}
+
 	getAvailableOperators(scope: nsMsgSearchScopeValue) {
 		return this.ops;
 	}
+
 	match(msgHdr: nsIMsgDBHdr, searchValue: string, searchOp: Ci.nsMsgSearchOpValue): boolean {
-		const notesRoot = this.storageFolder;
-
-		if(!notesRoot){
+		if(!this.storageFolder){
 			return false;
 		}
 
-		var note;
-		try {
-			note = this.QN.load(notesRoot, msgHdr.messageId);
-			if(!note){
-				note = this.XN.load(notesRoot, msgHdr.messageId);
-			}
-		} catch(e) {
-			return false;
-		}
+		const note = getFolderNoteData(msgHdr.messageId, this.storageFolder);
 
 		if(!note){
 			return false;
@@ -562,29 +559,42 @@ export class QCustomTerm implements Ci.nsIMsgSearchCustomTerm {
 
 export class QNoteAction
 {
-	storageFolder: string | undefined // TODO: sync after prefs change
 	ruleMap: Map<string, string>
+
+	private storageFolder: string | undefined
+	private installedActions;
 
 	constructor(storageFolder?: string) {
 		this.storageFolder = storageFolder;
-		this.ruleMap = new Map;
+		this.ruleMap = new Map<string, string>;
+		this.installedActions = new Set<QCustomActionAbstract>;
 
 		// Add
 		var caAdd = new QCustomAddAction(storageFolder);
 		if(caAdd.install()){
 			this.ruleMap.set(caAdd.id, "qnote-ruleactiontarget-add");
+			this.installedActions.add(caAdd);
 		}
 
 		// Update
 		var caUpdate = new QCustomUpdateAction(storageFolder);
 		if(caUpdate.install()){
 			this.ruleMap.set(caUpdate.id, "qnote-ruleactiontarget-update");
+			this.installedActions.add(caUpdate);
 		}
 
 		// Delete
 		let caDelete = new QCustomDeleteAction(storageFolder);
 		if(caDelete.install()){
 			this.ruleMap.set(caDelete.id, "qnote-ruleactiontarget-delete");
+			this.installedActions.add(caDelete);
+		}
+	}
+
+	setStorageFolder(path: string){
+		this.storageFolder = path;
+		for(const a of this.installedActions.values()){
+			a.setStorageFolder(path);
 		}
 	}
 
@@ -707,12 +717,16 @@ abstract class QCustomActionAbstract implements nsIMsgFilterCustomAction
 	isAsync = false
 	needsBody = false
 
-	storageFolder: string | undefined // TODO: sync after prefs change
+	protected storageFolder: string | undefined
 
 	constructor(id: string, name: string, storageFolder?: string) {
 		this.storageFolder = storageFolder;
 		this.id = id;
 		this.name = name;
+	}
+
+	setStorageFolder(path: string){
+		this.storageFolder = path;
 	}
 
 	isValidForType(type: nsMsgFilterTypeType, scope: nsMsgSearchScopeValue): boolean {
@@ -739,8 +753,12 @@ abstract class QCustomActionAbstract implements nsIMsgFilterCustomAction
 	}
 
 	updateView(): void {
-		ThreadPaneColumns?.refreshCustomColumn("qnote");
+		if(ThreadPaneColumns) {
+			ThreadPaneColumns.refreshCustomColumn("qnote");
+			ThreadPaneColumns.refreshCustomColumn("qnote-text");
+		}
 	}
+
 	// applyAction(msgHdrs: Array<nsIMsgDBHdr>, actionValue: string){
 	// 	this.apply(msgHdrs.map(m => {
 	// 		return m.messageId;
@@ -777,7 +795,6 @@ class QCustomAddAction extends QCustomActionAbstract
 			return;
 		}
 
-		const QN = new QNoteFile;
 		const ts = Date.now();
 		msgHdrs.forEach(m => {
 			const keyId = m.messageId;
@@ -786,6 +803,7 @@ class QCustomAddAction extends QCustomActionAbstract
 			note.text = actionValue;
 			note.ts = ts;
 
+			const QN = new QNoteFile;
 			if(!QN.getExistingFile(notesRoot, keyId)){
 				QN.save(notesRoot, keyId, note);
 			}
@@ -808,7 +826,7 @@ class QCustomUpdateAction extends QCustomActionAbstract
 		}
 
 		const QN = new QNoteFile;
-		let ts = Date.now();
+		const ts = Date.now();
 		msgHdrs.forEach(m => {
 			const keyId = m.messageId;
 			const note: INoteData = {}; // TODO: test
@@ -839,10 +857,10 @@ class QCustomDeleteAction extends QCustomActionAbstract
 			return;
 		}
 
-		const QN = new QNoteFile;
 		msgHdrs.forEach(m => {
-			QN.delete(notesRoot, m.messageId);
+			(new QNoteFile).delete(notesRoot, m.messageId);
 		});
+
 		this.updateView();
 	}
 }

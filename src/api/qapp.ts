@@ -1,13 +1,11 @@
 import { IQAppPreferences } from "../modules/common.mjs";
-import { INoteData } from "../modules/Note.mjs";
 
 var { ExtensionParent }                       = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var { MailServices }                          = ChromeUtils.import("resource:///modules/MailServices.jsm");
 var { ThreadPaneColumns }                     = ChromeUtils.importESModule("chrome://messenger/content/ThreadPaneColumns.mjs");
 var { QNoteFilter, QNoteAction, QCustomTerm } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFilters.mjs");
 var { QEventDispatcher }                      = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
-var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs");
-var { XNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/XNoteFile.mjs");
+var { getFolderNoteData }                     = ChromeUtils.importESModule("resource://qnote/modules-exp/api.mjs");
 
 var QDEB = true;
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
@@ -41,6 +39,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 		var API = this;
 
+		// TODO: should move these under init() and provide storageFolder in constructor
 		QDEB&&console.debug("Installing custom term");
 		this.customTerm = new QCustomTerm();
 
@@ -54,7 +53,6 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 		this.EventDispatcher = new QAppEventDispatcher();
 
-		// TODO: Is this used anymore?
 		this.WindowObserver = {
 			observe: function(aSubject: MozWindow, aTopic: string, aData: any) {
 				let fName = "qapp.WindowObserver.observe()";
@@ -167,24 +165,6 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 		let API: QApp = this;
 		let focusSavedElement: Element | null = null;
 
-		// TODO: code dup in filters
-		function getFolderNoteData(keyId: string): INoteData | null {
-			if(!API.Prefs?.storageFolder){
-				return null;
-			}
-
-			const QN = new QNoteFile;
-			const XN = new XNoteFile;
-
-			let note = QN.load(API.Prefs.storageFolder, keyId);
-
-			if(!note){
-				note = XN.load(API.Prefs.storageFolder, keyId);
-			}
-
-			return note;
-		}
-
 		return {
 			qapp: {
 				async focusSave() {
@@ -229,13 +209,19 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 							resizable: true,
 							sortable: true,
 							textCallback: function(msgHdr: any){
-								const note = getFolderNoteData(msgHdr.messageId);
-								return note ? note.text : null;
+								if(API.Prefs?.storageFolder){
+									const note = getFolderNoteData(msgHdr.messageId, API.Prefs.storageFolder);
+									return note ? note.text : null;
+								}
+								return null;
 							},
 							iconCellDefinitions: [icon, icon2],
 							iconHeaderUrl: extension.baseURI.resolve("resource://qnote/images/icons/qnote.svg"),
 							iconCallback: function(msgHdr: any){
-								return getFolderNoteData(msgHdr.messageId) ? "qnote_exists" : "qnote_off";
+								if(API.Prefs?.storageFolder){
+									return getFolderNoteData(msgHdr.messageId, API.Prefs.storageFolder) ? "qnote_exists" : "qnote_off";
+								}
+								return null;
 							}
 						});
 					} else {
@@ -249,12 +235,13 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 							resizable: true,
 							sortable: true,
 							textCallback: function(msgHdr: any){
-								const note = getFolderNoteData(msgHdr.messageId);
-								if(note?.text){
-									return note.text.substring(0, API.Prefs?.showFirstChars ?? 3);
-								} else {
-									return null;
+								if(API.Prefs?.storageFolder){
+									const note = getFolderNoteData(msgHdr.messageId, API.Prefs.storageFolder);
+									if(note?.text){
+										return note.text.substring(0, API.Prefs.showFirstChars ?? 3);
+									}
 								}
+								return null;
 							},
 						});
 					} else {
@@ -275,9 +262,9 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 				},
 				async setPrefs(prefs: IQAppPreferences){
 					API.Prefs = prefs;
-					API.customAction.storageFolder = prefs.storageFolder;
-					API.customFilter.storageFolder = prefs.storageFolder;
-					API.customTerm.storageFolder = prefs.storageFolder;
+					API.customAction.setStorageFolder(prefs.storageFolder);
+					API.customFilter.setStorageFolder(prefs.storageFolder);
+					API.customTerm.setStorageFolder(prefs.storageFolder);
 				},
 				async updateColumsView() {
 					if(ThreadPaneColumns){
