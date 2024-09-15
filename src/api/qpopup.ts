@@ -239,6 +239,8 @@ class QPopup extends BasePopup {
 		panel.setAttribute("role", "group");
 		panel.setAttribute("tabspecific", "true");
 		panel.setAttribute("neverhidden", "true"); // Bizarrely this was needed for scrollbars to work
+		// panel.setAttribute("level", "top"); // With level=top popups pop over each other on focus. But they do not disapper when switching to another window
+		// panel.setAttribute("level", "parent");
 
 		// window.addEventListener("click", () => {
 		// 	console.error("click from api");
