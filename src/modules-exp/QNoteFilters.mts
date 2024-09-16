@@ -84,7 +84,6 @@ export class QNoteFilter
 		this.storageFolder = path;
 	}
 
-	// TODO: probably should move to WebExtensions
 	// getPrefsO(){
 	// 	return this.Services.prefs.QueryInterface(Ci.nsIPrefBranch).getBranch("extensions.qnote.");
 	// }
@@ -326,7 +325,6 @@ export class QNoteFilter
 			// 	return;
 			// }
 
-			// TODO: remove once local storage option will be removed completely
 			if(!this.storageFolder){
 				let textbox = document.createElementNS("http://www.w3.org/1999/xhtml", "span") as HTMLSpanElement;
 				if(textbox){
@@ -633,8 +631,6 @@ export class QNoteAction
 			parentNode.updateRemoveButton();
 		};
 
-		// TODO: should find a better way processing these classes below
-		// They depend on window.MozXULElement (aSubject)
 		abstract class atQNote extends aSubject.MozXULElement {
 			abstract _connectedCallback(): void
 			connectedCallback() {
@@ -788,24 +784,18 @@ class QCustomAddAction extends QCustomActionAbstract
 		super('qnote@dqdp.net#qnote-action-add', 'Add QNote', storageFolder);
 	}
 
-	applyAction(msgHdrs: Array<nsIMsgDBHdr>, actionValue: string, copyListener: nsIMsgCopyServiceListener, filterType: nsMsgFilterTypeType, msgWindow: nsIMsgWindow): void {
+	applyAction(msgHdrs: Array<nsIMsgDBHdr>, text: string, copyListener: nsIMsgCopyServiceListener, filterType: nsMsgFilterTypeType, msgWindow: nsIMsgWindow): void {
 		const notesRoot = this.storageFolder;
 
-		if(!actionValue || !notesRoot){
+		if(!text || !notesRoot){
 			return;
 		}
 
 		const ts = Date.now();
 		msgHdrs.forEach(m => {
-			const keyId = m.messageId;
-			const note: INoteData = {}; // TODO: test
-
-			note.text = actionValue;
-			note.ts = ts;
-
 			const QN = new QNoteFile;
-			if(!QN.getExistingFile(notesRoot, keyId)){
-				QN.save(notesRoot, keyId, note);
+			if(!QN.getExistingFile(notesRoot, m.messageId)){
+				QN.save(notesRoot, m.messageId, { text, ts });
 			}
 		});
 		this.updateView();
@@ -818,23 +808,18 @@ class QCustomUpdateAction extends QCustomActionAbstract
 		super('qnote@dqdp.net#qnote-action-update', 'Update QNote', storageFolder);
 	}
 
-	applyAction(msgHdrs: Array<nsIMsgDBHdr>, actionValue: string, copyListener: nsIMsgCopyServiceListener, filterType: nsMsgFilterTypeType, msgWindow: nsIMsgWindow): void {
+	applyAction(msgHdrs: Array<nsIMsgDBHdr>, text: string, copyListener: nsIMsgCopyServiceListener, filterType: nsMsgFilterTypeType, msgWindow: nsIMsgWindow): void {
 		const notesRoot = this.storageFolder;
 
-		if(!actionValue || !notesRoot){
+		if(!text || !notesRoot){
 			return;
 		}
 
-		const QN = new QNoteFile;
-		const ts = Date.now();
 		msgHdrs.forEach(m => {
-			const keyId = m.messageId;
-			const note: INoteData = {}; // TODO: test
-
-			note.text = actionValue;
-			note.ts = ts;
-
-			QN.save(notesRoot, keyId, note);
+			const QN = new QNoteFile;
+			if(QN.getExistingFile(notesRoot, m.messageId)){
+				QN.save(notesRoot, m.messageId, { text });
+			}
 		});
 		this.updateView();
 	}
