@@ -23,9 +23,9 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 	Prefs: IQAppPreferences | null
 
 	customTermId = 'qnote@dqdp.net#qnoteText'
-	customTerm
-	customAction
-	customFilter
+	customTerm: typeof QCustomTerm.prototype
+	customAction: typeof QNoteAction.prototype
+	customFilter: typeof QNoteFilter.prototype
 
 	constructor(...args: ConstructorParameters<typeof ExtensionCommon.ExtensionAPI>){
 		// TODO: do some experiments
@@ -35,11 +35,9 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 		const fName = "new qapp()";
 		QDEB&&console.debug(`${fName}`);
+
 		super(...args);
 
-		var API = this;
-
-		// TODO: should move these under init() and provide storageFolder in constructor
 		QDEB&&console.debug("Installing custom term");
 		this.customTerm = new QCustomTerm();
 
@@ -53,6 +51,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 		this.EventDispatcher = new QAppEventDispatcher();
 
+		const API = this;
 		this.WindowObserver = {
 			observe: function(aSubject: MozWindow, aTopic: string, aData: any) {
 				let fName = "qapp.WindowObserver.observe()";
@@ -162,7 +161,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 	}
 
 	getAPI(context: any) {
-		let API: QApp = this;
+		const API: QApp = this;
 		let focusSavedElement: Element | null = null;
 
 		return {
