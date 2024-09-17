@@ -1,40 +1,25 @@
 import { IPreferences } from "./common.mjs";
 import { INoteData } from "./Note.mjs";
 
-interface IMessage<M> {
-	command: string;
-	parse(data: any): M | boolean;
-	post(port: browser.runtime.Port, data?: M): void;
-	send(tabId: number, data: M): Promise<any>
-	sendMessage(data?: M): Promise<any>
-}
-
-abstract class DefaultMessage<M extends object | undefined = undefined> implements IMessage<M> {
+abstract class DefaultMessage<M extends object = {}> {
 	abstract command: string;
-	data: M | undefined;
 
-	constructor(data?: M) {
-		this.data = data;
+	parse(data: any): M | undefined {
+		if (!data || !("command" in data) || data.command !== this.command) {
+			return;
+		}
+
+		for (const k of Object.getOwnPropertyNames(this)) {
+			if (!(k in data)) {
+				return;
+			}
+		}
+
+		return data;
 	}
 
-	parse(data: any): M | boolean {
-		if (!data || !("command" in data) || data.command !== this.command) {
-			return false;
-		}
-
-		if(this.data !== undefined){
-			const retData = {} as M;
-			for (const k in this.data) {
-				if (!(k in data)) {
-					return false;
-				} else {
-					retData![k] = data[k]; // Safe to assume retData is initially {}. Types could be off though
-				}
-			}
-			return retData;
-		} else {
-			return true;
-		}
+	from(data: M): M {
+		return Object.assign({}, data);
 	}
 
 	// Send to tab and optionally receive reply
@@ -64,11 +49,11 @@ export class AttachToMessage extends DefaultMessage {
 }
 
 // AttachToMessageReply
-export interface AttachToMessageReplyData {
-	prefs: IPreferences;
-	note: INoteData;
-	html: string;
-	keyId: string;
+export abstract class AttachToMessageReplyData {
+	abstract prefs: IPreferences;
+	abstract note: INoteData;
+	abstract html: string;
+	abstract keyId: string;
 }
 export class AttachToMessageReply extends DefaultMessage<AttachToMessageReplyData> {
 	command = "AttachToMessageReply";
@@ -79,78 +64,19 @@ export class RestoreFocus extends DefaultMessage {
 	command = "RestoreFocus";
 }
 
-// Message: PopupDataRequest
-// interface PopupDataRequestData extends IMessageData {
-// 	handle: number
-// }
+// NoteDataRequest
+export abstract class NoteDataRequestData {
+	abstract keyId: string
+}
+export class NoteDataRequest extends DefaultMessage<NoteDataRequestData> {
+	command = "NoteDataRequest"
+}
 
-// interface PopupDataReplyData {
-// 	handle: number,
-// 	opts: IPopupOptions
-// }
-
-// export class PopupDataRequest extends DefaultMessage<PopupDataRequestData> {
-// 	command = "PopupDataRequest";
-// 	parse(data: any): PopupDataRequestData | undefined {
-// 		if(!super.parse(data) || !("handle" in data)){
-// 			return undefined;
-// 		}
-
-// 		return {
-// 			handle: parseInt(data.handle),
-// 		};
-// 	}
-// }
-
-// export class PopupDataReply extends DefaultMessage<PopupDataReplyData> {
-// 	command = "PopupDataReply";
-// 	parse(data: any): PopupDataReplyData | undefined {
-// 		if(!super.parse(data) || !("opts" in data) || !("handle" in data)){
-// 			return undefined;
-// 		}
-
-// 		return data
-// 	}
-// }
-
-// interface PreferencesRequestData extends IMessageData {
-// }
-
-// export interface PreferencesReplyData extends IMessageData {
-// 	XNoteStoragePath: string,
-// 	prefs: IPreferences
-// }
-
-// export class PreferencesRequest extends DefaultMessage<PreferencesRequestData> {
-// 	command = "PreferencesRequest";
-// }
-
-// export class PreferencesReply extends DefaultMessage<PreferencesReplyData> {
-// 	command = "PreferencesReply";
-// 	parse(data: any): PreferencesReplyData | undefined {
-// 		if(!super.parse(data) || !("prefs" in data) || !("XNoteStoragePath" in data)){
-// 			return undefined;
-// 		}
-
-// 		return data
-// 	}
-// }
-
-// interface PushNoteData extends MessageData {
-// 	note: NoteData
-// 	prefs: Preferences
-// }
-
-// export class PushNoteMessage extends DefaultMessage {
-// 	command = "pushNote";
-// 	parse(data: any): PushNoteData | undefined {
-// 		if(!super.parse(data) || !("note" in data) || !("prefs" in data)){
-// 			return undefined;
-// 		}
-
-// 		return {
-// 			note: data.note,
-// 			prefs: data.prefs,
-// 		};
-// 	}
-// }
+// NoteDataReply
+abstract class NoteDataReplyData {
+	abstract keyId: string
+	abstract note: INoteData | null
+}
+export class NoteDataReply extends DefaultMessage<NoteDataReplyData> {
+	command = "NoteDataReply"
+}

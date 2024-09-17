@@ -34,9 +34,9 @@
 //    Types for MozXULElement and others
 // https://github.com/dothq/browser-desktop/blob/nightly/types.d.ts
 
-import { AttachToMessage, AttachToMessageReply, PrefsUpdated, RestoreFocus } from "./modules/Messages.mjs";
+import { AttachToMessage, AttachToMessageReply, NoteDataReply, NoteDataRequest, PrefsUpdated, RestoreFocus } from "./modules/Messages.mjs";
 import { INote, INoteData, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
-import { INotePopup, IPopupState, QNotePopup } from "./modules/NotePopups.mjs";
+import { INotePopup, QNotePopup, WebExtensionPopup } from "./modules/NotePopups.mjs";
 import { convertPrefsToQAppPrefs, dateFormatWithPrefs, IPreferences } from "./modules/common.mjs";
 import { confirmDelete, getCurrentWindowId, getPrefs, isClipboardSet, sendPrefsToQApp } from "./modules/common-background.mjs";
 import { Menu } from "./modules/Menu.mjs";
@@ -583,9 +583,12 @@ class QNoteExtension
 
 		// Receive data from content
 		browser.runtime.onMessage.addListener(async (rawData: any, sender: browser.runtime.MessageSender, _sendResponse) => {
-			QDEB&&console.group(`${debugHandle} received message:`, this);
+			QDEB&&console.group(`${debugHandle} received message:`);
 			QDEB&&console.debug("rawData:", rawData);
 			QDEB&&console.debug("sender:", sender);
+			QDEB&&console.groupEnd();
+
+			let data;
 
 			if((new AttachToMessage()).parse(rawData)){
 				if(sender.tab?.id) {
@@ -595,34 +598,43 @@ class QNoteExtension
 					if(messages.length == 1){
 						const data = await this.getNoteData(messages[0].headerMessageId);
 						if(data){
-							const reply = new AttachToMessageReply({
+							return (new AttachToMessageReply).from({
 								note: data,
 								html: this.applyTemplate(this.prefs.attachTemplate, data),
 								prefs: this.prefs,
 								keyId: messages[0].headerMessageId
 							});
-
-							QDEB&&console.groupEnd();
-
-							return reply.data;
 						}
 					}
 				}
-			} else if((new RestoreFocus()).parse(rawData)){
+				return;
+			}
+
+			if((new RestoreFocus()).parse(rawData)){
 				QDEB&&console.debug(`${debugHandle} received "RestoreFocus" message`);
 				browser.qapp.restoreFocus();
-			} else if((new PrefsUpdated()).parse(rawData)){
+				return;
+			}
+
+			if((new PrefsUpdated()).parse(rawData)){
 				QDEB&&console.debug(`${debugHandle} received "PrefsUpdated" message`);
 				this.prefs = await getPrefs();
 				await sendPrefsToQApp(this.prefs);
 				await this.updateViews();
-			} else {
-				console.error(`${debugHandle} unknown message`);
+				return;
 			}
 
-			QDEB&&console.groupEnd();
+			if(data = (new NoteDataRequest()).parse(rawData)){
+				QDEB&&console.debug(`${debugHandle} received "NoteDataRequest" message`);
+				return (new NoteDataReply).from({
+					keyId: data.keyId,
+					note: await this.getNoteData(data.keyId)
+				});
+			}
 
-			return false;
+				console.error(`${debugHandle} unknown message`);
+
+			return;
 		});
 
 		browser.menus.onClicked.addListener(this.menuHandler.bind(this));
