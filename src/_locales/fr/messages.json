@@ -59,9 +59,6 @@
 	"overwrite.existing.notes": {
 		"message": "Remplacer les notes existantes"
 	},
-	"can.use.xnote.folder": {
-		"message": "(dossier de XNote++ accepté)"
-	},
 	"no.message_id.header": {
 		"message": "Impossible de créer la note : message sans en-tête d’identification (message-id:)"
 	},
@@ -73,9 +70,6 @@
 	},
 	"import.finished.stats": {
 		"message": "Importation terminée :\n$1 notes importées\n$2 notes erronées\n$3 notes existantes\n$4 notes remplacées"
-	},
-	"import.fail": {
-		"message": "Impossible d’importer les notes"
 	},
 	"xnote.folder.inaccessible": {
 		"message": "Dossier de XNote++ introuvable ou inexploitable"

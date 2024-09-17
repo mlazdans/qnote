@@ -45,7 +45,7 @@ if(!idParam){
 const id = parseInt(idParam);
 
 if (isNaN(id)) {
-	throw new Error(`Incorrect value for query parameter id: ${id}`);
+	throw new Error(`Incorrect query parameter value for id: ${id}`);
 }
 
 const State: IPopupState = { };

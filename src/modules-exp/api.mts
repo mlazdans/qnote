@@ -11,17 +11,6 @@ var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNo
 var { XNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/XNoteFile.mjs");
 var { ExtensionError } = ExtensionUtils;
 
-export interface IXNotePreferences {
-	usetag: boolean,
-	dateformat: string;
-	width: number,
-	height: number,
-	show_on_select: boolean,
-	show_first_x_chars_in_col: number,
-	storage_path: string,
-	version: string,
-}
-
 export interface INoteFileProvider {
 	load(root: string, keyId: string): INoteData | null
 	save(root: string, keyId: string, note: INoteData): void

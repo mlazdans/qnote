@@ -36,8 +36,17 @@ export abstract class DefaultNote implements INote {
 	protected abstract subload(): Promise<INoteData | null>;
 
 	async load(): Promise<INoteData | null> {
-		this.data = await this.subload();
-		return this.getData();
+		try {
+			this.data = await this.subload();
+			return this.getData();
+		} catch(e) {
+			if(e instanceof Error){
+				console.error("Error loading note:", e.message);
+			} else {
+				console.error("Error loading note:", e);
+			}
+			return null;
+		}
 	}
 
 	assignData(data: INoteData) {
@@ -92,10 +101,7 @@ export class QNoteFolder extends DefaultNote {
 	}
 
 	async subload(): Promise<INoteData | null> {
-		return browser.qnote.load(this.root, this.keyId).then((data) => {
-			// Check maybe XNote exists
-			return data ?? browser.xnote.load(this.root, this.keyId);
-		});
+		return browser.qnote.load(this.root, this.keyId);
 	}
 
 	async save() {

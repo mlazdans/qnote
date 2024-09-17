@@ -149,6 +149,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 
 		if(ThreadPaneColumns){
 			ThreadPaneColumns.removeCustomColumn('qnote');
+			ThreadPaneColumns.removeCustomColumn('qnote-text');
 		}
 
 		this.uninstallCSS("html/background.css");
@@ -210,17 +211,19 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 							textCallback: function(msgHdr: any){
 								if(API.Prefs?.storageFolder){
 									const note = getFolderNoteData(msgHdr.messageId, API.Prefs.storageFolder);
-									return note ? note.text : null;
+									return note?.text ?? "";
+								} else {
+									return "";
 								}
-								return null;
 							},
 							iconCellDefinitions: [icon, icon2],
 							iconHeaderUrl: extension.baseURI.resolve("resource://qnote/images/icons/qnote.svg"),
 							iconCallback: function(msgHdr: any){
 								if(API.Prefs?.storageFolder){
 									return getFolderNoteData(msgHdr.messageId, API.Prefs.storageFolder) ? "qnote_exists" : "qnote_off";
+								} else {
+									return 'qnote_off';
 								}
-								return null;
 							}
 						});
 					} else {
@@ -240,7 +243,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 										return note.text.substring(0, API.Prefs.showFirstChars ?? 3);
 									}
 								}
-								return null;
+								return "";
 							},
 						});
 					} else {

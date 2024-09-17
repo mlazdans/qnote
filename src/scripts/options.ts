@@ -1,6 +1,6 @@
 import { DOMLocalizator } from "../modules/DOMLocalizator.mjs";
-import { getElementByIdOrDie, HTMLInputCheckboxElement, HTMLInputFileElement, isInputElement, isSelectElement, isTextAreaElement, isTypeCheckbox, isTypeRadio, querySelectorOrDie, IPreferences, IWritablePreferences, LuxonDateFormatsMap, Prefs } from "../modules/common.mjs";
-import { ExportStats, getPrefs, getXNoteStoragePath, loadAllExtNotes, loadAllFolderNotes, saveNotesAs, savePrefs } from "../modules/common-background.mjs";
+import { getElementByIdOrDie, HTMLInputCheckboxElement, HTMLInputFileElement, isInputElement, isSelectElement, isTextAreaElement, isTypeCheckbox, isTypeRadio, querySelectorOrDie, IPreferences, IWritablePreferences, LuxonDateFormatsMap, Prefs, xnotePrefsMapper } from "../modules/common.mjs";
+import { clearPrefs, ExportStats, getPrefs, getXNoteStoragePath, loadAllExtNotes, loadAllFolderNotes, saveNotesAs, savePrefs } from "../modules/common-background.mjs";
 import * as luxon from "../modules/luxon.mjs";
 import { QNoteFolder, QNoteLocalStorage, XNoteFolder } from "../modules/Note.mjs";
 import { PrefsUpdated } from "../modules/Messages.mjs";
@@ -62,29 +62,6 @@ dateFormats.set('time_group', [
 function setLabelColor(forE: string, color: string): void {
 	(querySelectorOrDie('label[for=' + forE + ']') as HTMLLabelElement).style.color = color;
 }
-
-// async function saveOptionsDefaultHandler(prefs: IPreferences) {
-// 	ext.CurrentNote && await ext.CurrentNote.silentlyPersistAndClose();
-
-// 	let oldPrefs = Object.assign({}, ext.Prefs);
-
-// 	ext.Prefs = await ext.loadPrefsWithDefaults();
-
-// 	// Storage option changed
-// 	if(prefs.storageOption !== oldPrefs.storageOption){
-// 		await ext.browser.qapp.clearNoteCache();
-// 	}
-
-// 	// Folder changed
-// 	if(prefs.storageFolder !== oldPrefs.storageFolder){
-// 		await ext.browser.qapp.clearNoteCache();
-// 	}
-
-// 	await ext.setUpExtension();
-// 	initOptionsPageValues();
-
-// 	return true;
-// };
 
 function displayErrors(msgs: Array<string>){
 	displayMsg(msgs, i18n._('error'));
@@ -174,21 +151,20 @@ async function saveOption(name: keyof IPreferences){
 	// 	ErrMsg.push('This should never happen. Please <a href="https://github.com/mlazdans/qnote/issues">report</a>!');
 	// });
 
-	// Some validations. TODO: to validate or not to validate other values?
+	// Some folder validations
 	if((name == "storageOption") || (name == "storageFolder")) {
 		await setPrefFromHtml(newPrefs, "storageFolder");
 		await setPrefFromHtml(newPrefs, "storageOption");
 		if(newPrefs.storageOption == "folder"){
-			if(newPrefs.storageFolder && await browser.legacy.isFolderWritable(newPrefs.storageFolder)){
-				setLabelColor("storageOptionFolder", '');
-			} else {
-				setLabelColor('storageOptionFolder', 'red');
+			if(!newPrefs.storageFolder || !await browser.legacy.isFolderWritable(newPrefs.storageFolder)){
 				ErrMsg.push(i18n._("folder.unaccesible", newPrefs.storageFolder));
 			}
 		} else {
 			newPrefs.storageFolder = "";
 		}
 	}
+
+	toggleFormConstrols(newPrefs, false);
 
 	if(ErrMsg.length){
 		displayErrors(ErrMsg);
@@ -277,14 +253,25 @@ function printImportStats(stats: ExportStats){
 		[i18n._("import.finished.stats", [stats.imported, stats.errored, stats.existing, stats.overwritten]).replace(/\n/g, "<br>\n")],
 		"Info"
 	);
-	// displayErrors([i18n._("import.fail")]);
 }
 
-function disableExportImportConstrols(yes: boolean): void {
-	importFolderButton.disabled = yes;
-	exportQNotesButton.disabled = yes;
-	exportXNotesButton.disabled = yes;
-	importFolderLoader.style.display = yes ? '' : 'none';
+async function toggleFormConstrols(prefs: Partial<IPreferences>, defaultDisabled: boolean) {
+	document.querySelectorAll("fieldset").forEach(e => {
+		e.disabled = defaultDisabled;
+	});
+
+	posGrid.style.display = defaultDisabled ? "none" : "";
+
+	exportXNotesButton.disabled = exportQNotesButton.disabled = importFolderButton.disabled = defaultDisabled;
+	importFolderLoader.style.display = defaultDisabled ? '' : 'none';
+
+	if(prefs.storageOption == "folder"){
+		const isError = !prefs.storageFolder || !await browser.legacy.isFolderWritable(prefs.storageFolder);
+		if(!defaultDisabled && isError){
+			exportXNotesButton.disabled = exportQNotesButton.disabled = importFolderButton.disabled = true;
+		}
+		setLabelColor('storageOptionFolder', isError ? 'red' : '');
+	}
 }
 
 async function initExportButtons(prefs: IPreferences){
@@ -292,9 +279,16 @@ async function initExportButtons(prefs: IPreferences){
 		return async () => {
 			console.log(`${debugHandle} exportButton<${type.name}>::click()`);
 
-			// Select path where to put QNotes or XNotes
-			browser.legacy.folderPicker(prefs.storageFolder ? prefs.storageFolder : null).then(async selectedPath => {
-				disableExportImportConstrols(true);
+			// Select path where to export QNotes / XNotes
+			browser.legacy.folderPicker(await browser.qapp.getProfilePath()).then(async selectedPath => {
+				if(prefs.storageOption == 'folder'){
+					if(selectedPath == prefs.storageFolder) {
+						displayErrors([i18n._("dest.path.same")]);
+						return;
+					}
+				}
+
+				toggleFormConstrols(prefs, true);
 
 				const notes =
 					prefs.storageOption == 'folder'
@@ -303,7 +297,7 @@ async function initExportButtons(prefs: IPreferences){
 
 				await saveNotesAs(type, notes, !!overwriteExistingNotes.checked, selectedPath).then(printImportStats);
 
-				disableExportImportConstrols(false);
+				toggleFormConstrols(prefs, false);
 			});
 		}
 	};
@@ -313,26 +307,34 @@ async function initExportButtons(prefs: IPreferences){
 	importFolderButton.addEventListener('click', async () => {
 		console.log(`${debugHandle} importFolderButton::click()`);
 
-		// Select path from where import  QNotes or XNotes into local storate
-		browser.legacy.folderPicker(prefs.storageFolder ? prefs.storageFolder : null).then(async selectedPath => {
-			disableExportImportConstrols(true);
-
-			const notes = await loadAllFolderNotes(selectedPath);
-
-			await saveNotesAs(QNoteLocalStorage, notes, !!overwriteExistingNotes.checked).then(printImportStats);
-
-			disableExportImportConstrols(false);
+		// Path from where to import .xnote or .qnote files
+		browser.legacy.folderPicker(await browser.qapp.getProfilePath()).then(async selectedPath => {
+			toggleFormConstrols(prefs, true);
+			if(prefs.storageOption == "folder"){
+				if(selectedPath == prefs.storageFolder) {
+					displayErrors([i18n._("source.path.same")]);
+				} else {
+					const notes = await loadAllFolderNotes(selectedPath);
+					await saveNotesAs(QNoteFolder, notes, !!overwriteExistingNotes.checked, prefs.storageFolder).then(printImportStats);
+				}
+			} else if(prefs.storageOption == "ext") {
+				const notes = await loadAllFolderNotes(selectedPath);
+				await saveNotesAs(QNoteLocalStorage, notes, !!overwriteExistingNotes.checked).then(printImportStats);
+			} else {
+				console.error("Bug: unknown storageOption:", prefs.storageOption);
+			}
+			toggleFormConstrols(prefs, false);
 		});
 	});
 
 }
 
+// Saving is handled by different handler
 async function storageOptionChange(){
 	const option = await getPrefFromHtml("storageOption");
-	// getStorageOptionValue();
 
 	if(!input_storageFolder.value){
-		input_storageFolder.value = await getXNoteStoragePath();
+		input_storageFolder.value = await browser.qapp.createStoragePath();
 	}
 
 	if(option == 'folder'){
@@ -343,10 +345,11 @@ async function storageOptionChange(){
 }
 
 async function storageFolderPicker(prefs: IPreferences){
-	var path = await getXNoteStoragePath();
+
+	let path = prefs.storageFolder;
 
 	if(!await browser.legacy.isFolderWritable(path)){
-		path = prefs.storageFolder;
+		path = await getXNoteStoragePath();
 	}
 
 	if(!await browser.legacy.isFolderWritable(path)){
@@ -359,7 +362,7 @@ async function storageFolderPicker(prefs: IPreferences){
 	});
 }
 
-function importInternalStorage(prefs: IPreferences) {
+function importInternalStorage() {
 	const file = importFile.files?.item(0);
 
 	if(!file){
@@ -380,9 +383,10 @@ function importInternalStorage(prefs: IPreferences) {
 			var storage = JSON.parse(result.toString());
 
 			browser.storage.local.set(storage).then(async () => {
-				displayMsg([i18n._("storage.imported")], "Info");
 				const newPrefs = await getPrefs();
+				savePrefs(newPrefs).then(() => (new PrefsUpdated).sendMessage());
 				initOptionsPageValues(newPrefs);
+				displayMsg([i18n._("storage.imported")], "Info");
 			}).catch((message: string) => {
 				displayErrors([i18n._("storage.import.failed", message)]);
 			});
@@ -400,27 +404,27 @@ function importInternalStorage(prefs: IPreferences) {
 	reader.readAsText(file);
 }
 
-// async function clearStorage(){
-// 	if(confirm(i18n._("are.you.sure"))){
-// 		return browser.storage.local.clear().then(async () => {
-// 			await browser.qapp.clearNoteCache();
-// 			setUpExtension();
-// 			initOptionsPageValues();
-// 			displayMsg([i18n._("storage.cleared")], "Info");
-// 		}).catch((message: string) => {
-// 			displayErrors([i18n._("storage.clear.failed", message)]);
-// 		});
-// 	}
-// }
+async function clearStorage(){
+	if(confirm(i18n._("are.you.sure"))){
+		return browser.storage.local.clear().then(async () => {
+			const newPrefs = await getPrefs();
+			savePrefs(newPrefs).then(() => (new PrefsUpdated).sendMessage());
+			initOptionsPageValues(newPrefs);
+			displayMsg([i18n._("storage.cleared")], "Info");
+		}).catch((message: string) => {
+			displayErrors([i18n._("storage.clear.failed", message)]);
+		});
+	}
+}
 
-// async function resetDefaults(){
-// 	return clearPrefs().then(async () => {
-// 		await browser.qapp.clearNoteCache();
-// 		setUpExtension();
-// 		initOptionsPageValues();
-// 		alert(i18n._("options.reset"));
-// 	});
-// }
+async function resetDefaults(){
+	return clearPrefs().then(async () => {
+		const newPrefs = await getPrefs();
+		savePrefs(newPrefs).then(() => (new PrefsUpdated).sendMessage());
+		initOptionsPageValues(newPrefs);
+		displayMsg([i18n._("options.reset")], "Info");
+	});
+}
 
 function gridPosChange(){
 	document.querySelectorAll("#posGrid .cell").forEach(el => {
@@ -439,6 +443,7 @@ async function initOptionsPageValues(prefs: IPreferences){
 	storageOptionChange();
 	dateFormatChange();
 	gridPosChange();
+	toggleFormConstrols(prefs, false);
 }
 
 // Anchor
@@ -538,19 +543,15 @@ async function initOptionsPage(prefs: IPreferences){
 
 	QDEB&&console.assert(unAccountedForListeners.size === 0, `${debugHandle} no event listeners for preferences: `, [...unAccountedForListeners.values()].join(", "));
 
-	// TODO:
-	// clearStorageButton.       addEventListener("click", clearStorage);
-	// resetDefaultsButton.      addEventListener("click", resetDefaults);
-	resetDefaultsButton.disabled = clearStorageButton.disabled = true;
-	resetDefaultsButton.title = clearStorageButton.title = "TODO";
-
 	exportStorageButton.addEventListener("click", () => {
 		exportStorage().catch((e: string) => {
 			console.warn(`${debugHandle}:`, e);
 		});
 	});
-	importFile.               addEventListener("change", () => importInternalStorage(prefs));
+	importFile.               addEventListener("change", importInternalStorage);
 	storageFolderBrowseButton.addEventListener("click", () => storageFolderPicker(prefs));
+	clearStorageButton.       addEventListener("click", clearStorage);
+	resetDefaultsButton.      addEventListener("click", resetDefaults);
 
 	// Handle storage option click
 	document.querySelectorAll("input[name=storageOption]").forEach(e => e.addEventListener("click", storageOptionChange));

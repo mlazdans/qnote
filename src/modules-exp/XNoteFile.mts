@@ -1,6 +1,6 @@
 import { INoteData } from "../modules/Note.mjs";
-import { setProperty } from "../modules/common.mjs";
-import { INoteFileAPI, INoteFileProvider, IXNotePreferences } from "./api.mjs";
+import { IXNotePreferences, setProperty } from "../modules/common.mjs";
+import { INoteFileAPI, INoteFileProvider } from "./api.mjs";
 
 var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
 
@@ -8,7 +8,7 @@ const NF_DO_ENCODE = 1;
 const NF_DO_NOT_ENCODE = 0;
 
 export interface IXNoteFileAPI extends INoteFileAPI<XNoteFile> {
-	getPrefs(): Promise<IXNotePreferences> // TODO sync with getDefaultPrefs(): XNotePrefs {
+	getPrefs(): Promise<Partial<IXNotePreferences>>
 	getStoragePath(path?: string | null): Promise<string>
 }
 
@@ -147,33 +147,30 @@ export class XNoteFile implements INoteFileProvider {
 	}
 
 	getPrefs(){
-		var _xnotePrefs = Services.prefs.QueryInterface(Ci.nsIPrefBranch).getBranch("extensions.xnote.");
-		var defaultPrefs = this.getDefaultPrefs();
-		var p = this.getDefaultPrefs();
+		const pi = Services.prefs.QueryInterface(Ci.nsIPrefBranch).getBranch("extensions.xnote.");
+		const defaultPrefs = this.getDefaultPrefs();
+		const prefs = {} as Partial<IXNotePreferences>;
 
 		for(const _k of Object.keys(defaultPrefs)){
-			let f;
-			let k = _k as keyof IXNotePreferences;
-			let t = typeof defaultPrefs[k];
-
-			if(t === 'boolean'){
-				f = 'getBoolPref';
-			} else if(t === 'string'){
-				f = 'getCharPref';
-			} else if(t === 'number'){
-				f = 'getIntPref';
+			if(!pi.prefHasUserValue(_k)){
+				continue;
 			}
 
-			//p[k] = defaultPrefs[k];
+			const k = _k as keyof IXNotePreferences;
+			const t = typeof defaultPrefs[k];
 
-			if(f && _xnotePrefs.prefHasUserValue(k)){
-				setProperty(p, k, _xnotePrefs[f](k));
-				// p[k] = _xnotePrefs[f](k);
-				// p[k] = defaultPrefs[k].constructor(p[k]); // Type cast
+			if(t === 'boolean'){
+				setProperty(prefs, k, pi.getBoolPref(k));
+			} else if(t === 'string'){
+				setProperty(prefs, k, pi.getCharPref(k));
+			} else if(t === 'number'){
+				setProperty(prefs, k, pi.getIntPref(k));
+			} else {
+				console.warn(`Unknown type: ${t}`);
 			}
 		}
 
-		return p;
+		return prefs;
 	}
 
 	fileExists(file: any){

@@ -40,6 +40,17 @@ export interface IWritablePreferences extends IWritableQAppPreferences {
 export type IPreferences = Readonly<IWritablePreferences>;
 export type IQAppPreferences = Readonly<IWritableQAppPreferences>;
 
+export interface IXNotePreferences {
+	usetag: boolean,
+	dateformat: string;
+	width: number,
+	height: number,
+	show_on_select: boolean,
+	show_first_x_chars_in_col: number,
+	storage_path: string,
+	version: string,
+}
+
 export class QAppPrefs
 {
 	static readonly defaults: IQAppPreferences = {
@@ -136,25 +147,27 @@ export var Box = {
 	}
 }
 
-// function xnotePrefsMapper(prefs: XNotePrefs): object {
-// 	var map = {
-// 		usetag: 'useTag',
-// 		width: 'width',
-// 		height: 'height',
-// 		show_on_select: 'showOnSelect',
-// 		show_first_x_chars_in_col: 'showFirstChars',
-// 		storage_path: 'storageFolder'
-// 	};
+export function xnotePrefsMapper(prefs: Partial<IXNotePreferences>): Partial<IPreferences> {
+	const map: Map<keyof IXNotePreferences, keyof IWritablePreferences> = new Map([
+		["usetag", 'useTag'],
+		["width", "width"],
+		["height", "height"],
+		["show_on_select", "showOnSelect"],
+		["show_first_x_chars_in_col", "showFirstChars"],
+		["storage_path", "storageFolder"],
+		["dateformat", "dateFormat"],
+	]);
 
-// 	for(let k in map){
-// 		// key as keyof MyClass
-// 		if(prefs[k as keyof XNotePrefs] !== undefined){
-// 			ret[map[k] as keyof Prefs] = prefs[k];
-// 		}
-// 	}
+	const ret: Partial<IWritablePreferences> = {};
 
-// 	return ret;
-// }
+	map.forEach((qnoteKey, xnoteKey) => {
+		if(prefs[xnoteKey] !== undefined){
+			setProperty(ret, qnoteKey, prefs[xnoteKey]);
+		}
+	});
+
+	return ret;
+}
 
 export function getProperty<O, K extends keyof O>(obj: O, key: K) {
 	return obj[key];
@@ -167,27 +180,6 @@ export function setProperty<O, K extends keyof O>(obj: O, key: K, value: O[K]) {
 export function getPropertyType<O, K extends keyof O>(obj: O, key: K) {
 	return typeof obj[key];
 }
-
-// export function setPropertyAndType<T, K extends keyof T, V extends T[K] & number>(obj: T, key: K, value: V) {
-// }
-
-// export function setPropertyWithType<T, K extends keyof T, V extends typeof T[K]>(obj: T, key: K, value: V) {
-// 	obj[key] = value;
-// 	// const type = getPropertyType(obj, key);
-
-// 	// const type = typeof obj[key];
-// 	// if(type === "number"){
-// 	// 	obj[key] = "2";
-// 	// 	// Number(value);
-// 	// 	setProperty(obj, key, Number(value))
-// 	// } else if(type === "boolean"){
-// 	// 	setProperty(obj, key, Boolean(value))
-// 	// } else if(type === "string"){
-// 	// 	setProperty(obj, key, String(value))
-// 	// } else {
-// 	// 	console.error(`Unsupported preference type: ${type} for key ${k}`);
-// 	// }
-// }
 
 function ts2jsdate(ts?: Date | number): Date {
 	return ts === undefined ? new Date() : new Date(ts)

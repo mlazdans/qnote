@@ -8,9 +8,6 @@
 //       *) when multiple popups are open, alt+q pops with selected message only, not with focused popup
 // TODO: menu - close all opened notes
 // TODO: add "install", "update" handling if neccessary
-// TODO: options
-//       *) fix reset to defaults when incorrect path was entered
-//       *) test import/export. Reset to defaults, etc unfinished features
 // TODO: write usage docs (inc filters, actions)
 
 // App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup experiment API
@@ -236,7 +233,7 @@ class QNoteExtension
 			if(popup){
 				QDEB&&console.debug(`${debugHandle} new popup: ${keyId}`, popup);
 				PopupManager.add(popup);
-				popup.addListener("close", this.onNoteCloseHandler.bind(this)); // TODO: auto bind withing event dispatcher
+				popup.addListener("close", this.onNoteCloseHandler.bind(this)); // TODO: auto bind within event dispatcher
 
 				resolve(popup);
 			}
@@ -418,12 +415,16 @@ class QNoteExtension
 	async initExtension(){
 		QDEB&&console.log(`${debugHandle} initExtension()`);
 
+		if(this.prefs.storageOption == "folder"){
+			if(!this.prefs.storageFolder || !await browser.legacy.isFolderWritable(this.prefs.storageFolder)) {
+				browser.legacy.alert(_("could.not.initialize.storage.folder"));
+			}
+		}
+
 		await browser.qapp.init(convertPrefsToQAppPrefs(this.prefs));
 		await browser.qapp.setDebug(QDEB);
 
 		QNotePopup.init(QDEB);
-
-		// await this.updateView();
 
 		// window.addEventListener("unhandledrejection", event => {
 		// 	console.warn(`Unhandle: ${event.reason}`, event);
@@ -614,7 +615,7 @@ class QNoteExtension
 				QDEB&&console.debug(`${debugHandle} received "PrefsUpdated" message`);
 				this.prefs = await getPrefs();
 				await sendPrefsToQApp(this.prefs);
-				this.updateViews();
+				await this.updateViews();
 			} else {
 				console.error(`${debugHandle} unknown message`);
 			}

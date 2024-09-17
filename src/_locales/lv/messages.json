@@ -59,9 +59,6 @@
 	"overwrite.existing.notes": {
 		"message": "Pārrakstīt esošās zīmītes"
 	},
-	"can.use.xnote.folder": {
-		"message": "(varat lietot arī XNote++ mapi)"
-	},
 	"no.message_id.header": {
 		"message": "Nevar izveidot zīmīti. Vēstule bez 'message-id:' hedera"
 	},
@@ -73,9 +70,6 @@
 	},
 	"import.finished.stats": {
 		"message": "Imports pabeigts:\nimportētās zīmītes - $1\nkļūdainās zīmītes - $2\njau esošās zīmītes - $3\npārrakstītās zīmītes - $4"
-	},
-	"import.fail": {
-		"message": "Nevarēja importēt zīmītes"
 	},
 	"xnote.folder.inaccessible": {
 		"message": "XNote++ mape nav atrasta vai nav piekļuves"

@@ -1,5 +1,5 @@
 // This code should run in background and content
-import { getPropertyType, convertPrefsToQAppPrefs, setProperty, IPreferences, IWritablePreferences, Prefs } from "./common.mjs";
+import { getPropertyType, convertPrefsToQAppPrefs, setProperty, IPreferences, IWritablePreferences, Prefs, xnotePrefsMapper } from "./common.mjs";
 import { INoteData, QNoteFolder, QNoteLocalStorage, XNoteFolder } from "./Note.mjs";
 
 let QDEB = true;
@@ -24,63 +24,35 @@ type SaveNotesAsArgs =  typeof QNoteFolder | typeof XNoteFolder | typeof QNoteLo
 ;
 
 export async function getPrefs(): Promise<IPreferences> {
-	const fName = "getPrefs()";
-	const prefs = await getSavedPrefs();
-	const retPrefs: IWritablePreferences = structuredClone(Prefs.defaults);
+	const fName = "prefs()";
 
-	const isEmpty = Object.keys(prefs).length === 0;
+	const savedPrefs = await getSavedPrefs();
+	const prefs: IWritablePreferences = Object.assign({}, Prefs.defaults, savedPrefs);
 
-	// TODO: handle XNote prefs
-	// let defaultPrefs = getDefaultPrefs();
-	// let isEmptyPrefs = Object.keys(p).length === 0;
-
-	// Check for xnote settings if no settings at all
-	// if(isEmptyPrefs){
-	// 	let l = xnotePrefsMapper(await browser.xnote.getPrefs());
-	// 	for(let k in defaultPrefs){
-	// 		if(l[k] === undefined){
-	// 			p[k] = defaultPrefs[k];
-	// 		} else {
-	// 			p[k] = l[k];
-	// 		}
-	// 	}
-	// }
+	const isEmpty = Object.keys(savedPrefs).length === 0;
 
 	if(isEmpty){
-		QDEB&&console.debug(`${fName} - preferences is empty`);
-		// If XNote++ storage_path is set and readable, then use it
-		// else check if XNote folder exists inside profile directory
-		let path = await getXNoteStoragePath();
+		QDEB&&console.log(`${fName} - no saved preferences, fallback to defaults`);
 
-		if(await browser.legacy.isFolderWritable(path)){
-			retPrefs.storageOption = 'folder';
-			retPrefs.storageFolder = path;
-		} else {
-			path = await browser.qapp.createStoragePath();
-			if(await browser.legacy.isFolderWritable(path)){
-				retPrefs.storageOption = 'folder';
-				retPrefs.storageFolder = path;
-			} else {
-				browser.legacy.alert(_("could.not.initialize.storage.folder"));
-				retPrefs.storageOption = 'ext';
-			}
+		// Set xnote prefs
+		Object.assign(prefs, xnotePrefsMapper(await browser.xnote.getPrefs()));
+
+		if(prefs.tagName){
+			prefs.tagName = prefs.tagName.toLowerCase();
 		}
+
+		// Override old XNote default "yyyy-mm-dd - HH:MM"
+		if(prefs.dateFormat === "yyyy-mm-dd - HH:MM"){
+			prefs.dateFormat = 'Y-m-d H:i';
+		}
+
+		prefs.storageOption = 'folder';
+		prefs.storageFolder = await browser.qapp.createStoragePath();
 	} else {
 		QDEB&&console.debug(`${fName} - loading preferences`);
-		// Apply to defaults
-		Object.assign(retPrefs, prefs);
 	}
 
-	if(retPrefs.tagName){
-		retPrefs.tagName = retPrefs.tagName.toLowerCase();
-	}
-
-	// Override old XNote default "yyyy-mm-dd - HH:MM"
-	if(retPrefs.dateFormat === "yyyy-mm-dd - HH:MM"){
-		retPrefs.dateFormat = 'Y-m-d H:i';
-	}
-
-	return retPrefs;
+	return prefs;
 }
 
 export async function getXNoteStoragePath(): Promise<string> {
@@ -123,10 +95,16 @@ export async function loadAllFolderNotes(folder: string): Promise<NoteDataMap> {
 	return loadAllFolderKeys(folder).then(async keys => {
 		const Notes = new Map;
 		for(const keyId of keys){
-			let note = new QNoteFolder(keyId, folder);
-			await note.load();
-			Notes.set(keyId, note.getData());
+			let data = await (new QNoteFolder(keyId, folder)).load();
+
+			// Try .xnote
+			if(!data){
+				data = await (new XNoteFolder(keyId, folder)).load();
+			}
+
+			Notes.set(keyId, data);
 		}
+
 		return Notes;
 	});
 }

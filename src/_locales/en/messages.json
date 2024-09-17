@@ -59,9 +59,6 @@
 	"overwrite.existing.notes": {
 		"message": "Overwrite existing notes"
 	},
-	"can.use.xnote.folder": {
-		"message": "(you can use XNote++ folder)"
-	},
 	"no.message_id.header": {
 		"message": "Can't create note. Message without 'message-id:' header"
 	},
@@ -72,10 +69,7 @@
 		"message": "(please use tag manager to manage tags)"
 	},
 	"import.finished.stats": {
-		"message": "Import finished:\nimported notes - $1\nerrored notes - $2\nexisting notes - $3\noverwritten notes - $4"
-	},
-	"import.fail": {
-		"message": "Could not import notes"
+		"message": "Notes import / export finished:\nsaved - $1\nerrors - $2\nexisting - $3\noverwritten - $4"
 	},
 	"xnote.folder.inaccessible": {
 		"message": "XNote++ folder not found or is not readable"
@@ -231,7 +225,7 @@
 		"message": "Export XNotes"
 	},
 	"import.folder.button.descr": {
-		"message": "Import .qnote or .xnote files into extension storage"
+		"message": "Import .qnote or .xnote files into selected storage"
 	},
 	"export.qnotes.button.descr": {
 		"message": "Export notes from selected storage .qnote format"
@@ -283,5 +277,11 @@
 	},
 	"deprecated": {
 		"message": "Deprecated"
+	},
+	"source.path.same": {
+		"message": "Source folder is the same as current storage folder. Please choose different source folder!"
+	},
+	"dest.path.same": {
+		"message": "Destination folder is the same as current storage folder. Please choose different destination folder!"
 	}
 }

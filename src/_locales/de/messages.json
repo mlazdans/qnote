@@ -59,9 +59,6 @@
 	"overwrite.existing.notes": {
 		"message": "Vorhandene Notizen überschreiben"
 	},
-	"can.use.xnote.folder": {
-		"message": "(Sie können den bestehenden XNote++ Ordner verwenden)"
-	},
 	"no.message_id.header": {
 		"message": "QNote kann nicht erstellt werden: Email besitzt keine 'Nachrichten-ID'"
 	},
@@ -73,9 +70,6 @@
 	},
 	"import.finished.stats": {
 		"message": "Notizen importiert:\ninsgesamt - $1\nfehlerhaft - $2\nvorhanden - $3\nüberschrieben - $4"
-	},
-	"import.fail": {
-		"message": "Notizen konnten nicht importiert werden."
 	},
 	"xnote.folder.inaccessible": {
 		"message": "XNote++ Ordner nicht gefunden oder nicht lesbar"

@@ -59,9 +59,6 @@
 	"overwrite.existing.notes": {
 		"message": "Suprascrieți notele existente"
 	},
-	"can.use.xnote.folder": {
-		"message": "(puteți utiliza folderul XNote++)"
-	},
 	"no.message_id.header": {
 		"message": "Nu se poate crea o notă. Mesaj fără antetul 'message-id:'"
 	},
@@ -73,9 +70,6 @@
 	},
 	"import.finished.stats": {
 		"message": "Import finalizat:\nnote importate - $1\nnote eronate - $2\nnote existente - $3\nnote suprascrise - $4"
-	},
-	"import.fail": {
-		"message": "Nu s-au putut importa notele"
 	},
 	"xnote.folder.inaccessible": {
 		"message": "Dosarul XNote++ nu a fost găsit sau nu poate fi citit"
