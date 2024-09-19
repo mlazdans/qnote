@@ -52,9 +52,11 @@ export interface ILegacyAPI {
 	isFolderWritable(path: string): Promise<boolean>
 }
 
+export type IPopupCloseReason = "close" | "escape" | "delete" | "sync";
+
 export interface IQPopupAPI {
 	setDebug(on: boolean): Promise<void>
-	close(id: number, reason: "close" | "escape" | "delete"): Promise<void>
+	close(id: number, reason: IPopupCloseReason): Promise<void>
 	get(id: number): Promise<IPopupState>
 	pop(id: number): Promise<void>
 	create(windowsId: number, state: IPopupState): Promise<number>
@@ -62,7 +64,7 @@ export interface IQPopupAPI {
 	takeScreenshot(id: number): Promise<boolean>
 	resetPosition(id: number): Promise<void>
 	setPanelStyle(id: number, style: PanelStyle): Promise<void>
-	onClose: WebExtEvent<(id: number, reason: string, state: IPopupState) => void>
+	onClose: WebExtEvent<(id: number, reason: IPopupCloseReason, state: IPopupState) => void>
 	onFocus: WebExtEvent<(id: number) => void>
 	onBlur: WebExtEvent<(id: number) => void>
 }

@@ -9,6 +9,7 @@
 // TODO: menu - close all opened notes
 // TODO: add "install", "update" handling if neccessary
 // TODO: write usage docs (inc filters, actions)
+// TODO: check if can make compatible wtih TB115
 
 // App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup experiment API
 //  |     \                            \     \-> handles events sent by qpopup.api, fires events back to App through DefaultNotePopup
@@ -34,12 +35,14 @@
 //    Types for MozXULElement and others
 // https://github.com/dothq/browser-desktop/blob/nightly/types.d.ts
 
-import { AttachToMessage, AttachToMessageReply, NoteDataReply, NoteDataRequest, PrefsUpdated, RestoreFocus } from "./modules/Messages.mjs";
-import { INote, INoteData, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
-import { INotePopup, QNotePopup, WebExtensionPopup } from "./modules/NotePopups.mjs";
+import { AttachToMessage, AttachToMessageReply, PopupDataReply, PopupDataRequest, PrefsUpdated, RestoreFocus, SyncNote } from "./modules/Messages.mjs";
+import { INoteData, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
+import { INotePopup, IPopupState, note2state, QNotePopup, state2note, WebExtensionPopup } from "./modules/NotePopups.mjs";
 import { convertPrefsToQAppPrefs, dateFormatWithPrefs, IPreferences } from "./modules/common.mjs";
 import { confirmDelete, getCurrentWindowId, getPrefs, isClipboardSet, sendPrefsToQApp } from "./modules/common-background.mjs";
 import { Menu } from "./modules/Menu.mjs";
+import { QEventDispatcher } from "./modules/QEventDispatcher.mjs";
+import { IPopupCloseReason } from "./modules-exp/api.mjs";
 
 var QDEB = true;
 
@@ -55,7 +58,7 @@ type UpdateIconsDetails = {
 const PopupManager = new class {
 	private popups = new Map<string, INotePopup>
 
-	add(popup: QNotePopup): void {
+	add(popup: QNotePopup | WebExtensionPopup): void {
 		if(this.popups.has(popup.keyId)){
 			throw new Error(`popup with keyId already exists: ${popup.keyId}`);
 		} else {
@@ -78,13 +81,21 @@ const PopupManager = new class {
 	has(keyId: string): boolean {
 		return this.popups.has(keyId)
 	}
+
+	iter(f: (keyId: string, popup: INotePopup) => void){
+		for(const [keyId, popup] of this.popups.entries()){
+			f(keyId, popup);
+		}
+	}
 }
 
-class QNoteExtension
-{
+class QNoteExtension extends QEventDispatcher<{
+	onnote: (keyId: string, reason: IPopupCloseReason, noteData: INoteData) => void
+}> {
 	prefs: IPreferences
 
 	constructor(prefs: IPreferences) {
+		super();
 		QDEB&&console.info(`${debugHandle} new QNoteExtension()`);
 
 		this.prefs = prefs;
@@ -189,25 +200,29 @@ class QNoteExtension
 		return noteData;
 	}
 
-	async onNoteCloseHandler(keyId: string, reason: string, state: IPopupState) {
+	async onNoteHandler(keyId: string, reason: IPopupCloseReason, noteData: INoteData) {
 		QDEB&&console.debug(`${debugHandle} popup close, keyId: ${keyId}, reason: ${reason}`);
-		PopupManager.remove(keyId);
 		if(reason == "close"){
-			if(state.text){
-				await this.saveOrUpdate(keyId, QNotePopup.state2note(state), true);
+			PopupManager.remove(keyId);
+			if(noteData.text){
+				await this.saveOrUpdate(keyId, noteData, true);
 			}
 			await browser.qapp.restoreFocus();
 		} else if(reason == "delete"){
+			PopupManager.remove(keyId);
 			await this.deleteNote(keyId);
 			await browser.qapp.restoreFocus();
 		} else if(reason == "escape"){
+			PopupManager.remove(keyId);
 			await browser.qapp.restoreFocus();
+		} else if(reason == "sync"){
+			PopupManager.get(keyId).note.assignData(noteData);
 		} else {
 			console.warn(`${debugHandle} unknown popup close reason: ${reason}`);
 		}
 	}
 
-	async createPopup(keyId: string, noteData: INoteData | null): Promise<INotePopup> {
+	async createPopup(keyId: string): Promise<INotePopup> {
 		QDEB&&console.debug(`${debugHandle} createPopup:`, keyId);
 		await browser.qapp.saveFocus();
 		return new Promise(async (resolve, reject) => {
@@ -215,35 +230,35 @@ class QNoteExtension
 				return resolve(PopupManager.get(keyId));
 			}
 
+			let popup: QNotePopup | WebExtensionPopup | undefined;
+
+			const note = await this.createAndLoadNote(keyId);
+
+			if(this.prefs.windowOption === 'xul'){
 			const windowId = await getCurrentWindowId();
 			if(!windowId){
 				return reject("Could not get current window");
 			}
-
-			let popup: QNotePopup | undefined;
-
-			if(this.prefs.windowOption === 'xul'){
-				popup = await QNotePopup.create(keyId, windowId, QNotePopup.note2state(noteData || {}, this.prefs));
+				popup = await QNotePopup.create(keyId, note, windowId, note2state(note.getData() || {}, this.prefs));
 			} else if(this.prefs.windowOption == 'webext'){
-				console.error("TODO: new WebExtensionNoteWindow");
+				popup = new WebExtensionPopup(keyId, note, note2state(note.getData() || {}, this.prefs));
 			} else {
 				throw new TypeError(`${debugHandle} unknown windowOption option: ${this.prefs.windowOption}`);
 			}
 
-			if(popup){
 				QDEB&&console.debug(`${debugHandle} new popup: ${keyId}`, popup);
+
 				PopupManager.add(popup);
-				popup.addListener("close", this.onNoteCloseHandler.bind(this)); // TODO: auto bind within event dispatcher
+			popup.addListener("onnote", this.onNoteHandler.bind(this));
 
 				resolve(popup);
-			}
 		});
 	}
 
-	async popNote(note: INote){
-		QDEB&&console.info(`${debugHandle} popNote(), keyId:`, note.keyId);
+	async popNote(keyId: string){
+		QDEB&&console.info(`${debugHandle} popNote(), keyId:`, keyId);
 
-		this.createPopup(note.keyId, note.getData()).then(popup => popup.pop());
+		this.createPopup(keyId).then(popup => popup.pop());
 	}
 
 	applyTemplate(t: string, data: INoteData): string {
@@ -269,7 +284,7 @@ class QNoteExtension
 			const keyId = messages[0].headerMessageId;
 
 			if(info.menuItemId === "create" || info.menuItemId === "modify"){
-				this.popNote(await this.createAndLoadNote(keyId));
+				this.popNote(keyId);
 			} else if(info.menuItemId === "paste"){
 				const sourceNoteData = await browser.qnote.getFromClipboard();
 				if(isClipboardSet(sourceNoteData)){
@@ -372,10 +387,10 @@ class QNoteExtension
 			return;
 		}
 
-		const popupState = QNotePopup.note2state({}, this.prefs);
+		const popupState = note2state({}, this.prefs);
 		popupState.placeholder = _("multi.note.warning");
 
-		const popup = await QNotePopup.create("multi-note-create", windowId, popupState);
+		// TODO: webext window
 
 		popup.addListener("close", async (keyId, reason, state) =>{
 			if(reason == "close" && state.text){
@@ -440,7 +455,7 @@ class QNoteExtension
 				const note = await this.createAndLoadNote(keyId);
 
 				if(note.exists() && this.prefs.showOnSelect){
-					this.popNote(note);
+					this.popNote(keyId);
 				}
 			}
 			this.updateViews(tab.id);
@@ -479,10 +494,27 @@ class QNoteExtension
 		// 	// await CurrentNote.silentlyPersistAndClose();
 		// });
 
-		// Remove window
-		// browser.windows.onRemoved.addListener(async windowId => {
-		// 	QDEB&&console.debug(`${debugHandle} windows.onRemoved(), windowId:`, windowId);
-		// });
+		browser.windows.onRemoved.addListener(async (id: number) => {
+			QDEB&&console.debug(`${debugHandle} windows.onRemoved(), windowId:`, id);
+			PopupManager.iter((keyId, popup) => {
+				// Take care of window close outside of note controls
+				if(popup instanceof WebExtensionPopup){
+					if(id === popup.getId()){
+						this.onNoteHandler(keyId, "close", popup.note.getData() || {});
+					}
+				}
+			});
+		});
+
+		browser.qpopup.onClose.addListener((id: number, reason: IPopupCloseReason, state: IPopupState) => {
+			PopupManager.iter((keyId, popup) => {
+				if(popup instanceof QNotePopup){
+					if(id == popup.getId()){
+						this.onNoteHandler(keyId, reason, state2note(state));
+					}
+				}
+			});
+		});
 
 		// Change focus
 		// browser.windows.onFocusChanged.addListener(async windowId => {
@@ -517,12 +549,11 @@ class QNoteExtension
 			browser.messageDisplay.getDisplayedMessages(tab.id).then(async (messages) => {
 				if(messages.length == 1){
 					const keyId = messages[0].headerMessageId;
-					const note = await this.createAndLoadNote(keyId);
 
 					if(PopupManager.has(keyId)){
 						PopupManager.get(keyId).close();
 					} else {
-						this.popNote(note);
+						this.popNote(keyId);
 					}
 				} else if(messages.length >= 1){
 					this.createMultiNote(messages);
@@ -582,19 +613,15 @@ class QNoteExtension
 		});
 
 		// Receive data from content
-		browser.runtime.onMessage.addListener(async (rawData: any, sender: browser.runtime.MessageSender, _sendResponse) => {
+		browser.runtime.onMessage.addListener((rawData: any, sender: browser.runtime.MessageSender, _sendResponse) => {
 			QDEB&&console.group(`${debugHandle} received message:`);
 			QDEB&&console.debug("rawData:", rawData);
 			QDEB&&console.debug("sender:", sender);
 			QDEB&&console.groupEnd();
 
-			let data;
-
 			if((new AttachToMessage()).parse(rawData)){
-				if(sender.tab?.id) {
 					QDEB&&console.debug(`${debugHandle} received "AttachToMessage" message`);
-					const messages = await browser.messageDisplay.getDisplayedMessages(sender.tab.id);
-
+				return browser.messageDisplay.getDisplayedMessages(sender.tab?.id).then(async messages => {
 					if(messages.length == 1){
 						const data = await this.getNoteData(messages[0].headerMessageId);
 						if(data){
@@ -606,35 +633,44 @@ class QNoteExtension
 							});
 						}
 					}
-				}
-				return;
+					return undefined;
+				});
 			}
 
 			if((new RestoreFocus()).parse(rawData)){
 				QDEB&&console.debug(`${debugHandle} received "RestoreFocus" message`);
-				browser.qapp.restoreFocus();
-				return;
+				return browser.qapp.restoreFocus();
 			}
 
 			if((new PrefsUpdated()).parse(rawData)){
 				QDEB&&console.debug(`${debugHandle} received "PrefsUpdated" message`);
-				this.prefs = await getPrefs();
-				await sendPrefsToQApp(this.prefs);
-				await this.updateViews();
-				return;
+				return getPrefs().then(prefs => {
+					this.prefs = prefs;
+					sendPrefsToQApp(prefs).then(() => this.updateViews())
+				});
 			}
 
-			if(data = (new NoteDataRequest()).parse(rawData)){
-				QDEB&&console.debug(`${debugHandle} received "NoteDataRequest" message`);
-				return (new NoteDataReply).from({
-					keyId: data.keyId,
-					note: await this.getNoteData(data.keyId)
-				});
+			let data;
+			if(data = (new PopupDataRequest()).parse(rawData)){
+				const keyId = data.keyId;
+				QDEB&&console.debug(`${debugHandle} received "PopupDataRequest" message`);
+				return this.getNoteData(keyId).then(noteData => (new PopupDataReply).from({
+					keyId: keyId,
+					state: note2state(noteData, this.prefs)
+				}));
+			}
+
+			if(data = (new SyncNote()).parse(rawData)){
+				QDEB&&console.debug(`${debugHandle} received "SyncNote" message`, data);
+				if(PopupManager.has(data.keyId)){
+					PopupManager.get(data.keyId).fireListeners("onnote", data.keyId, data.reason, data.noteData);
+				}
+				return undefined;
 			}
 
 				console.error(`${debugHandle} unknown message`);
 
-			return;
+			return undefined;
 		});
 
 		browser.menus.onClicked.addListener(this.menuHandler.bind(this));

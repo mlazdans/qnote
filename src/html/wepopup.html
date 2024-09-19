@@ -2,15 +2,45 @@
 <html>
 <head>
 	<meta charset="utf-8"/>
-	<title>QNote</title>
-	<link rel="stylesheet" href="../html/wepopup.css" type="text/css"></style>
+	<title></title>
+	<style>
+		* {
+			padding: 0;
+			margin: 0;
+			box-sizing: border-box;
+		}
+
+		html, body {
+			width: 100%;
+			height: 100%;
+		}
+
+		img {
+			border: none;
+		}
+	</style>
+	<script type="module" src="../scripts/wepopup.js"></script>
+	<link rel="stylesheet" href="../html/qpopup.css" type="text/css">
 </head>
 
 <body>
-	<div id="popup-content">
-		<textarea id="qnote-text"></textarea>
+	<div class="qpopup">
+		<div class="qpopup-title unselectable">
+			<div class="qpopup-title-text">QNote</div>
+			<div class="qpopup-button qpopup-button-close" data-i18ntitle="close.and.save"></div>
+		</div>
+		<div class="qpopup-contents-wrap">
+			<textarea class="qpopup-textinput"></textarea>
+		</div>
+		<div class="qpopup-controls unselectable">
+			<div class="qpopup-custom-controls unselectable">
+				<div class="qpopup-button qpopup-button-delete" data-i18ntitle="delete"></div>
+				<div class="qpopup-spacer"></div>
+				<div class="qpopup-button qpopup-button-save" data-i18ntitle="close.and.save"></div>
+				<div class="qpopup-button qpopup-button-reset" data-i18ntitle="reset.note.window"></div>
+			</div>
+			<div class="qpopup-controls-resize" style="cursor: default;"></div>
+		</div>
 	</div>
-	<script src="../scripts/wepopup.js"></script>
 </body>
-
 </html>

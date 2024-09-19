@@ -1,5 +1,7 @@
+import { IPopupCloseReason } from "../modules-exp/api.mjs";
 import { IPreferences } from "./common.mjs";
 import { INoteData } from "./Note.mjs";
+import { IPopupState } from "./NotePopups.mjs";
 
 abstract class DefaultMessage<M extends object = {}> {
 	abstract command: string;
@@ -19,11 +21,11 @@ abstract class DefaultMessage<M extends object = {}> {
 	}
 
 	from(data: M): M {
-		return Object.assign({}, data);
+		return Object.assign({}, { command: this.command, ...data});
 	}
 
 	// Send to tab and optionally receive reply
-	send(tabId: number, data?: M) {
+	async send(tabId: number, data?: M) {
 		return browser.tabs.sendMessage(tabId, { ...data, command: this.command });
 	}
 
@@ -33,7 +35,7 @@ abstract class DefaultMessage<M extends object = {}> {
 	}
 
 	// Just send and optionally receive reply
-	sendMessage(data?: M) {
+	async sendMessage(data?: M) {
 		return browser.runtime.sendMessage({ ...data, command: this.command });
 	}
 }
@@ -65,18 +67,28 @@ export class RestoreFocus extends DefaultMessage {
 }
 
 // NoteDataRequest
-export abstract class NoteDataRequestData {
+export abstract class PopupDataRequestData {
 	abstract keyId: string
 }
-export class NoteDataRequest extends DefaultMessage<NoteDataRequestData> {
-	command = "NoteDataRequest"
+export class PopupDataRequest extends DefaultMessage<PopupDataRequestData> {
+	command = "PopupDataRequest"
 }
 
 // NoteDataReply
-abstract class NoteDataReplyData {
+abstract class PopupDataReplyData {
 	abstract keyId: string
-	abstract note: INoteData | null
+	abstract state: IPopupState
 }
-export class NoteDataReply extends DefaultMessage<NoteDataReplyData> {
-	command = "NoteDataReply"
+export class PopupDataReply extends DefaultMessage<PopupDataReplyData> {
+	command = "PopupDataReply"
+}
+
+// SyncNote
+abstract class SyncNoteData {
+	abstract keyId: string
+	abstract reason: IPopupCloseReason
+	abstract noteData: INoteData
+}
+export class SyncNote extends DefaultMessage<SyncNoteData> {
+	command = "SyncNote"
 }

@@ -1,11 +1,13 @@
+import { IPopupCloseReason } from '../modules-exp/api.mjs';
 import { dateFormatWithPrefs, IPreferences, PopupAnchor } from './common.mjs';
-import { INoteData } from './Note.mjs';
+import { INote, INoteData } from './Note.mjs';
 import { QEventDispatcher } from './QEventDispatcher.mjs';
 
-export interface INotePopup {
+export interface INotePopup extends QEventDispatcher<{
+	onnote: (keyId: string, reason: IPopupCloseReason, noteData: INoteData) => void
+}> {
 	keyId: string;
-	windowId: number;
-	flags: number | undefined;
+	note: INote;
 	pop(): Promise<void>
 	close(): Promise<void>
 	update(state: IPopupState): Promise<IPopupState>
@@ -30,17 +32,59 @@ export interface IPopupState {
 	confirmDelete?: boolean
 }
 
+export function note2state(noteData: INoteData | null, prefs: IPreferences): IPopupState {
+	const state: IPopupState =  {
+		// focused: undefined,
+		top: noteData?.top,
+		left: noteData?.left,
+		width: noteData?.width || prefs.width,
+		height: noteData?.height || prefs.height,
+		// offsetTop: undefined,
+		// offsetLeft: undefined,
+		anchor: prefs.anchor,
+		anchorPlacement: prefs.anchorPlacement,
+		title: "QNote",
+		text: noteData?.text,
+		// placeholder: undefined,
+		focusOnDisplay: prefs.focusOnDisplay,
+		enableSpellChecker: prefs.enableSpellChecker,
+		confirmDelete: prefs.confirmDelete
+	}
+
+	if(prefs.alwaysDefaultPlacement){
+		state.width = prefs.width;
+		state.height = prefs.height;
+		state.left = undefined;
+		state.top = undefined;
+	}
+
+	if(noteData?.ts) {
+		state.title = "QNote: " + dateFormatWithPrefs(prefs, noteData?.ts);
+	}
+
+	return state;
+}
+
+export function state2note(state: IPopupState): INoteData {
+	return {
+		text: state.text,
+		left: state.left,
+		top: state.top,
+		width: state.width,
+		height: state.height,
+	}
+}
+
 export abstract class DefaultNotePopup extends QEventDispatcher<{
-	close: (keyId: string, reason: string, state: IPopupState) => void
+	onnote: (keyId: string, reason: IPopupCloseReason, noteData: INoteData) => void
 }> implements INotePopup {
 	keyId: string
-	windowId: number
-	flags: number | undefined;
+	note: INote;
 
-	constructor(keyId: string, windowId: number) {
+	constructor(keyId: string, note: INote) {
 		super()
 		this.keyId = keyId
-		this.windowId = windowId
+		this.note = note;
 	}
 
 	abstract pop(): Promise<void>
@@ -54,15 +98,9 @@ export class QNotePopup extends DefaultNotePopup {
 	private id: number;
 
 	// Use create() to instantiate object because we need id from qpopup.api which is async
-	private constructor(keyId: string, id: number, windowId: number) {
-		super(keyId, windowId);
+	private constructor(keyId: string, note: INote, id: number) {
+		super(keyId, note);
 		this.id = id
-
-		browser.qpopup.onClose.addListener((id: number, reason: string, state: IPopupState) => {
-			if(id == this.id){
-				this.fireListeners("close", keyId, reason, state);
-			}
-		});
 
 		// Not used currently. Keep this code around for now
 		// browser.qpopup.onFocus.addListener((id: number) => {
@@ -80,15 +118,17 @@ export class QNotePopup extends DefaultNotePopup {
 		// });
 	}
 
+	getId(){
+		return this.id
+	}
+
 	static init(debugOn: boolean){
 		browser.qpopup.setDebug(debugOn);
 	}
 
-	static async create(keyId: string, windowId: number, initialState: IPopupState): Promise<QNotePopup> {
+	static async create(keyId: string, note: INote, windowId: number, initialState: IPopupState): Promise<QNotePopup> {
 		return browser.qpopup.create(windowId, initialState).then(id => {
-			console.log(`created qpopup ${id}`);
-
-			return new QNotePopup(keyId, id, windowId);
+			return new QNotePopup(keyId, note, id);
 		});
 	}
 
@@ -107,47 +147,53 @@ export class QNotePopup extends DefaultNotePopup {
 	async resetPosition() {
 		return browser.qpopup.resetPosition(this.id);
 	}
+}
 
-	static note2state(noteData: INoteData, prefs: IPreferences): IPopupState {
-		const state: IPopupState =  {
-			// focused: undefined,
-			top: noteData?.top,
-			left: noteData?.left,
-			width: noteData?.width || prefs.width,
-			height: noteData?.height || prefs.height,
-			// offsetTop: undefined,
-			// offsetLeft: undefined,
-			anchor: prefs.anchor,
-			anchorPlacement: prefs.anchorPlacement,
-			title: "QNote",
-			text: noteData?.text,
-			// placeholder: undefined,
-			focusOnDisplay: prefs.focusOnDisplay,
-			enableSpellChecker: prefs.enableSpellChecker,
-			confirmDelete: prefs.confirmDelete
-		}
+export class WebExtensionPopup extends DefaultNotePopup {
+	private id: number | undefined;
+	// private initialState: browser.windows._CreateCreateData
+	private state: IPopupState;
 
-		if(prefs.alwaysDefaultPlacement){
-			state.width = prefs.width;
-			state.height = prefs.height;
-			state.left = undefined;
-			state.top = undefined;
-		}
+	constructor(keyId: string, note: INote, state: IPopupState) {
+		super(keyId, note);
 
-		if(noteData?.ts) {
-			state.title = "QNote: " + dateFormatWithPrefs(prefs, noteData?.ts);
-		}
-
-		return state;
+		this.state = state;
 	}
 
-	static state2note(state: IPopupState): INoteData {
-		return {
-			text: state.text,
-			left: state.left,
-			top: state.top,
-			width: state.width,
-			height: state.height,
+	getId(){
+		return this.id
+	}
+
+	async pop() {
+		const initialState: browser.windows._CreateCreateData = {
+			url: "html/wepopup.html?keyId=" + encodeURIComponent(this.keyId),
+			type: "popup",
+			width: this.state.width,
+			height: this.state.height,
+			left: this.state.left,
+			top: this.state.top,
+			allowScriptsToClose: true,
 		}
+
+		browser.windows.create(initialState).then(async popupInfo => {
+			if(!popupInfo.id) {
+				throw new Error(`Unexpected windowInfo.id: ${popupInfo.id}`);
+			}
+
+			this.id = popupInfo.id;
+		});
+	}
+
+	async resetPosition() {
+		// return browser.qpopup.resetPosition(this.id);
+	}
+
+	async close() {
+		if(this.id)browser.windows.remove(this.id);
+	}
+
+	async update(state: IPopupState){
+		return state;
+		//return browser.windows.update(this.id, state);
 	}
 }
