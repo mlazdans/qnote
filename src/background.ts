@@ -235,10 +235,10 @@ class QNoteExtension extends QEventDispatcher<{
 			const note = await this.createAndLoadNote(keyId);
 
 			if(this.prefs.windowOption === 'xul'){
-			const windowId = await getCurrentWindowId();
-			if(!windowId){
-				return reject("Could not get current window");
-			}
+				const windowId = await getCurrentWindowId();
+				if(!windowId){
+					return reject("Could not get current window");
+				}
 				popup = await QNotePopup.create(keyId, note, windowId, note2state(note.getData() || {}, this.prefs));
 			} else if(this.prefs.windowOption == 'webext'){
 				popup = new WebExtensionPopup(keyId, note, note2state(note.getData() || {}, this.prefs));
@@ -246,12 +246,12 @@ class QNoteExtension extends QEventDispatcher<{
 				throw new TypeError(`${debugHandle} unknown windowOption option: ${this.prefs.windowOption}`);
 			}
 
-				QDEB&&console.debug(`${debugHandle} new popup: ${keyId}`, popup);
+			QDEB&&console.debug(`${debugHandle} new popup: ${keyId}`, popup);
 
-				PopupManager.add(popup);
+			PopupManager.add(popup);
 			popup.addListener("onnote", this.onNoteHandler.bind(this));
 
-				resolve(popup);
+			resolve(popup);
 		});
 	}
 
@@ -620,7 +620,7 @@ class QNoteExtension extends QEventDispatcher<{
 			QDEB&&console.groupEnd();
 
 			if((new AttachToMessage()).parse(rawData)){
-					QDEB&&console.debug(`${debugHandle} received "AttachToMessage" message`);
+				QDEB&&console.debug(`${debugHandle} received "AttachToMessage" message`);
 				return browser.messageDisplay.getDisplayedMessages(sender.tab?.id).then(async messages => {
 					if(messages.length == 1){
 						const data = await this.getNoteData(messages[0].headerMessageId);
@@ -668,7 +668,7 @@ class QNoteExtension extends QEventDispatcher<{
 				return undefined;
 			}
 
-				console.error(`${debugHandle} unknown message`);
+			console.error(`${debugHandle} unknown message`);
 
 			return undefined;
 		});
