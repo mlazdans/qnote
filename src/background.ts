@@ -168,7 +168,6 @@ class QNoteExtension extends QEventDispatcher<{
 		} else {
 			browser.tabs.query({
 				type: ["content", "mail", "messageDisplay"],
-				status: "complete",
 				windowType: "normal"
 			}).then(tabs => {
 				tabs.forEach(tab => {
@@ -180,7 +179,7 @@ class QNoteExtension extends QEventDispatcher<{
 	}
 
 	// TODO: add tag
-	async saveOrUpdate(keyId: string, newNote: INoteData, overwrite: boolean): Promise<INoteData | null>{
+	async saveOrUpdate(keyId: string, newNote: INoteData, overwrite: boolean, updateViews: boolean = true): Promise<INoteData | null>{
 		const note = await this.createAndLoadNote(keyId);
 
 		if(note.exists() && !overwrite){
@@ -195,7 +194,9 @@ class QNoteExtension extends QEventDispatcher<{
 
 		const noteData = await note.save() ? note.getData() : null;
 
-		await this.updateViews();
+		if(updateViews){
+			await this.updateViews();
+		}
 
 		return noteData;
 	}
@@ -312,7 +313,6 @@ class QNoteExtension extends QEventDispatcher<{
 				console.error(`BUG: ${menuDebugHandle} unknown menuItemId:`, info.menuItemId);
 			}
 		// process multiple message selection
-		// TODO: should not updateView() on every processed message!!
 		} else if(messages.length > 1){
 			if(info.menuItemId === "create_multi"){
 				this.createMultiNote(messages);
@@ -321,14 +321,16 @@ class QNoteExtension extends QEventDispatcher<{
 				if(sourceNoteData && isClipboardSet(sourceNoteData)){
 					sourceNoteData.ts = Date.now();
 					for(const m of messages){
-						await this.saveOrUpdate(m.headerMessageId, sourceNoteData, true);
+						await this.saveOrUpdate(m.headerMessageId, sourceNoteData, true, false);
 					};
+					this.updateViews();
 				}
 			} else if(info.menuItemId === "delete_multi"){
 				if(!this.prefs.confirmDelete || await confirmDelete()) {
 					for(const m of messages){
 						await this.deleteNote(m.headerMessageId);
 					}
+					this.updateViews();
 				}
 			} else if(info.menuItemId === "reset_multi"){
 				for(const m of messages){
@@ -362,7 +364,7 @@ class QNoteExtension extends QEventDispatcher<{
 	}
 
 	// TODO: remove tag
-	async deleteNote(keyId: string): Promise<boolean> {
+	async deleteNote(keyId: string, updateViews: boolean = true): Promise<boolean> {
 		const popup = PopupManager.has(keyId) ? PopupManager.get(keyId) : null;
 
 		if(popup){
@@ -373,7 +375,9 @@ class QNoteExtension extends QEventDispatcher<{
 
 		if(note.exists()){
 			await note.delete();
-			await this.updateViews();
+			if(updateViews){
+				await this.updateViews();
+			}
 			return true;
 		} else {
 			return false;
@@ -381,25 +385,14 @@ class QNoteExtension extends QEventDispatcher<{
 	}
 
 	async createMultiNote(messages: browser.messages.MessageHeader[]){
-		const windowId = await getCurrentWindowId();
+		const popup = await this.createPopup("multi-note-create", { placeholder:  _("multi.note.warning") });
 
-		if(!windowId){
-			// return reject("Could not get current window");
-			return;
-		}
-
-		const popupState = note2state({}, this.prefs);
-		popupState.placeholder = _("multi.note.warning");
-
-		// TODO: webext window
-
-		popup.addListener("close", async (keyId, reason, state) =>{
-			if(reason == "close" && state.text){
-				const noteData = QNotePopup.state2note(state);
+		popup.addListener("onnote", async (keyId, reason, noteData) =>{
+			if(reason == "close" && noteData.text){
 				for(const m of messages){
-					await this.saveOrUpdate(m.headerMessageId, noteData, false)
+					await this.saveOrUpdate(m.headerMessageId, noteData, false, false)
 				}
-				// this.updateMultiPane(messages);
+				this.updateViews();
 			}
 		});
 
@@ -473,10 +466,10 @@ class QNoteExtension extends QEventDispatcher<{
 		// });
 
 		// Change tabs
-		// browser.tabs.onActivated.addListener(async activeInfo => {
-		// 	QDEB&&console.debug(`${debugHandle} tabs.onActivated(), id:`, activeInfo);
-		// 	// this.updateView();
-		// });
+		browser.tabs.onActivated.addListener(async activeInfo => {
+			QDEB&&console.debug(`${debugHandle} tabs.onActivated(), tabId:`, activeInfo.tabId);
+			this.updateViews(activeInfo.tabId);
+		});
 
 		// browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
 		// 	QDEB&&console.debug(`${debugHandle} tabs.onUpdated(), id:`, tabId, changeInfo, tab);
