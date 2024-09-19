@@ -3,13 +3,9 @@
 // MAYBE: save create and update time
 // TODO: test brand new installation with XNote++ and then switch to QNote
 // TODO: qpopup z-index
-// TODO: AL+Q
-//       *) holding alt+q pops way too fast
-//       *) when multiple popups are open, alt+q pops with selected message only, not with focused popup
 // TODO: menu - close all opened notes
 // TODO: add "install", "update" handling if neccessary
 // TODO: write usage docs (inc filters, actions)
-// TODO: check if can make compatible wtih TB115
 
 // App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup experiment API
 //  |     \                            \     \-> handles events sent by qpopup.api, fires events back to App through DefaultNotePopup
@@ -392,7 +388,7 @@ class QNoteExtension extends QEventDispatcher<{
 		const note = this.createNote("multi-note-create");
 		const popup = await this.createPopup(note, { placeholder:  _("multi.note.warning") });
 
-		popup.addListener("onnote", async (keyId, reason, noteData) =>{
+		popup.addListener("onnote", async (keyId, reason: IPopupCloseReason, noteData) =>{
 			if(reason == "close" && noteData.text){
 				for(const m of messages){
 					await this.saveOrUpdate(m.headerMessageId, noteData, false, false)
@@ -503,7 +499,8 @@ class QNoteExtension extends QEventDispatcher<{
 			});
 		});
 
-		const actionHandler = (tab: browser.tabs.Tab) => {
+		var actionHandlerActive = false;
+		const actionHandler = async (tab: browser.tabs.Tab) => {
 			const actiondebugHandle = `${debugHandle} [tab:${tab.id}]`
 
 			if(!tab.id){
@@ -511,23 +508,29 @@ class QNoteExtension extends QEventDispatcher<{
 				return;
 			}
 
+			if(actionHandlerActive){
+				QDEB&&console.debug(`${actiondebugHandle} already active, bail`);
+				return;
+			}
+
+			actionHandlerActive = true;
 			browser.messageDisplay.getDisplayedMessages(tab.id).then(async (messages) => {
 				if(messages.length == 1){
 					const keyId = messages[0].headerMessageId;
 
 					if(PopupManager.has(keyId)){
-						PopupManager.get(keyId).close();
+						await PopupManager.get(keyId).close();
 					} else {
-						this.popNote(keyId);
+						await this.popNote(keyId);
 					}
 				} else if(messages.length >= 1){
 					if(PopupManager.has("multi-note-create")){
-						PopupManager.get("multi-note-create").close();
+						await PopupManager.get("multi-note-create").close();
 					} else {
-						this.createMultiNote(messages);
+						await this.createMultiNote(messages);
 					}
 				}
-			});
+			}).finally(() => actionHandlerActive = false);
 		};
 
 		// Click on main toolbar
@@ -643,7 +646,7 @@ class QNoteExtension extends QEventDispatcher<{
 				return undefined;
 			}
 
-			console.error(`${debugHandle} unknown message`);
+			console.error(`${debugHandle} unhandled message`);
 
 			return undefined;
 		});

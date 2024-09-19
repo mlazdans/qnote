@@ -276,6 +276,11 @@ class QPopup extends BasePopup {
 			if(e.key == 'Escape'){
 				e.preventDefault();
 			}
+
+			if(e.altKey && (e.key == "Q" || e.key == "q")){
+				e.preventDefault();
+				popupManager.get(id).destroy("close");
+			}
 		});
 
 		this.browser.addEventListener("focus", () => {
