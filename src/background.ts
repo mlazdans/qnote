@@ -494,7 +494,7 @@ class QNoteExtension extends QEventDispatcher<{
 				// Take care of window close outside of note controls
 				if(popup instanceof WebExtensionPopup){
 					if(id === popup.getId()){
-						this.onNoteHandler(keyId, "close", popup.note.getData() || {});
+						popup.fireListeners("onnote", keyId, "close", popup.note.getData() || {});
 					}
 				}
 			});
@@ -504,7 +504,7 @@ class QNoteExtension extends QEventDispatcher<{
 			PopupManager.iter((keyId, popup) => {
 				if(popup instanceof QNotePopup){
 					if(id == popup.getId()){
-						this.onNoteHandler(keyId, reason, state2note(state));
+						popup.fireListeners("onnote", keyId, reason, state2note(state));
 					}
 				}
 			});
