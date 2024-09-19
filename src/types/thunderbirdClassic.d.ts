@@ -161,6 +161,8 @@ declare class BP {
 	lastCalculatedInViewHeight: number;
 	setBackground(background: any): void;
 	background: any;
+	viewHeight: number;
+	extraHeight: any;
 }
 
 interface BasePopupExport {

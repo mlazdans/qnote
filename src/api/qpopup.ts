@@ -236,11 +236,19 @@ class QPopup extends BasePopup {
 		panel.setAttribute("noautofocus", state.focusOnDisplay ? "false" : "true");
 		panel.setAttribute("class", "mail-extension-panel panel-no-padding browser-extension-panel");
 		panel.setAttribute("type", "arrow");
-		panel.setAttribute("role", "group");
+		// panel.setAttribute("role", "group");
 		panel.setAttribute("tabspecific", "true");
 		panel.setAttribute("neverhidden", "true"); // Bizarrely this was needed for scrollbars to work
 		// panel.setAttribute("level", "top"); // With level=top popups pop over each other on focus. But they do not disapper when switching to another window
-		// panel.setAttribute("level", "parent");
+		panel.setAttribute("remote", "true");
+		panel.setAttribute("animate", "false");
+		// panel.setAttribute("constrainpopups", "false");
+		// panel.setAttribute("disableglobalhistory", "true");
+
+		// if (!this.isRemoteBrowser) {
+		// 	this._remoteWebNavigation = null;
+		// 	this.addEventListener("pagehide", this.onPageHide, true);
+		// }
 
 		// window.addEventListener("click", () => {
 		// 	console.error("click from api");
@@ -260,7 +268,7 @@ class QPopup extends BasePopup {
 
 		const popupURL = extension.getURL(url);
 		const browserStyle = false;
-		const fixedWidth = false;
+		const fixedWidth = true;
 		const blockParser = false;
 
 		super(extension, panel, popupURL, browserStyle, fixedWidth, blockParser);
@@ -293,6 +301,17 @@ class QPopup extends BasePopup {
 			PopupEventDispatcher.fireListeners("onblur", self.id);
 		});
 
+		this.browser.style.width = `${state.width}px`;
+		this.browser.style.height = `${state.height}px`;
+
+		// Used in ExtensionPopups.sys.mjs, initialized in async attach(viewNode). Spits some errors in console.
+		// For now just set some bogus values to silence errors
+		this.viewHeight = 6666666;
+		this.extraHeight = {
+			"top": 0,
+			"bottom": 0,
+		};
+
 		popupManager.add(this);
 	}
 
@@ -319,6 +338,11 @@ class QPopup extends BasePopup {
 		const { left, top, width, height } = this.state;
 
 		return new Promise((resolve) => {
+			if (width != null && height != null) {
+				this.browser.style.width = `${width}px`;
+				this.browser.style.height = `${height}px`;
+			}
+
 			// If left/top not set yet. New note or after note reset
 			if (left == null && top == null) {
 				const aProps = this.getAnchorProps();
@@ -458,13 +482,18 @@ class QPopup extends BasePopup {
 		const oldState = Object.assign({}, this.state);
 
 		// state properties come in null-ed
-		let { top, left, offsetTop, offsetLeft } = newState;
+		let { top, left, offsetTop, offsetLeft, width, height } = newState;
 
 		if(offsetTop !== null)newState.top = coalesce(oldState.top, 0) + coalesce(offsetTop, 0) as number;
 		if(offsetLeft !== null)newState.left = coalesce(oldState.left, 0) + coalesce(offsetLeft, 0) as number;
 
 		if (offsetTop !== null || offsetLeft !== null || top !== null || left !== null) {
 			this.moveTo(coalesce(newState.left, 0), coalesce(newState.top, 0));
+		}
+
+		if (width !== null || height !== null) {
+			this.browser.style.width = `${width}px`;
+			this.browser.style.height = `${height}px`;
 		}
 
 		// if(title){
