@@ -12,6 +12,7 @@ export interface INotePopup extends QEventDispatcher<{
 	close(): Promise<void>
 	update(state: IPopupState): Promise<IPopupState>
 	resetPosition(): Promise<void>
+	getState(): IPopupState
 }
 
 export interface IPopupState {
@@ -81,10 +82,17 @@ export abstract class DefaultNotePopup extends QEventDispatcher<{
 	keyId: string
 	note: INote;
 
-	constructor(keyId: string, note: INote) {
+	protected state: IPopupState;
+
+	constructor(keyId: string, note: INote, state: IPopupState) {
 		super()
 		this.keyId = keyId
 		this.note = note;
+		this.state = state;
+	}
+
+	getState(){
+		return this.state;
 	}
 
 	abstract pop(): Promise<void>
@@ -98,8 +106,8 @@ export class QNotePopup extends DefaultNotePopup {
 	private id: number;
 
 	// Use create() to instantiate object because we need id from qpopup.api which is async
-	private constructor(keyId: string, note: INote, id: number) {
-		super(keyId, note);
+	private constructor(keyId: string, note: INote, state: IPopupState, id: number) {
+		super(keyId, note, state);
 		this.id = id
 
 		// Not used currently. Keep this code around for now
@@ -126,9 +134,9 @@ export class QNotePopup extends DefaultNotePopup {
 		browser.qpopup.setDebug(debugOn);
 	}
 
-	static async create(keyId: string, note: INote, windowId: number, initialState: IPopupState): Promise<QNotePopup> {
-		return browser.qpopup.create(windowId, initialState).then(id => {
-			return new QNotePopup(keyId, note, id);
+	static async create(keyId: string, note: INote, windowId: number, state: IPopupState): Promise<QNotePopup> {
+		return browser.qpopup.create(windowId, state).then(id => {
+			return new QNotePopup(keyId, note, state, id);
 		});
 	}
 
@@ -151,13 +159,9 @@ export class QNotePopup extends DefaultNotePopup {
 
 export class WebExtensionPopup extends DefaultNotePopup {
 	private id: number | undefined;
-	// private initialState: browser.windows._CreateCreateData
-	private state: IPopupState;
 
 	constructor(keyId: string, note: INote, state: IPopupState) {
-		super(keyId, note);
-
-		this.state = state;
+		super(keyId, note, state);
 	}
 
 	getId(){

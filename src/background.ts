@@ -222,7 +222,7 @@ class QNoteExtension extends QEventDispatcher<{
 		}
 	}
 
-	async createPopup(keyId: string): Promise<INotePopup> {
+	async createPopup(keyId: string, popupState: IPopupState = {}): Promise<INotePopup> {
 		QDEB&&console.debug(`${debugHandle} createPopup:`, keyId);
 		await browser.qapp.saveFocus();
 		return new Promise(async (resolve, reject) => {
@@ -233,15 +233,16 @@ class QNoteExtension extends QEventDispatcher<{
 			let popup: QNotePopup | WebExtensionPopup | undefined;
 
 			const note = await this.createAndLoadNote(keyId);
+			const state = Object.assign({}, note2state(note.getData() || {}, this.prefs), popupState);
 
 			if(this.prefs.windowOption === 'xul'){
 				const windowId = await getCurrentWindowId();
 				if(!windowId){
 					return reject("Could not get current window");
 				}
-				popup = await QNotePopup.create(keyId, note, windowId, note2state(note.getData() || {}, this.prefs));
+				popup = await QNotePopup.create(keyId, note, windowId, state);
 			} else if(this.prefs.windowOption == 'webext'){
-				popup = new WebExtensionPopup(keyId, note, note2state(note.getData() || {}, this.prefs));
+				popup = new WebExtensionPopup(keyId, note, state);
 			} else {
 				throw new TypeError(`${debugHandle} unknown windowOption option: ${this.prefs.windowOption}`);
 			}
