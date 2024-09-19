@@ -223,7 +223,8 @@ class QNoteExtension extends QEventDispatcher<{
 		}
 	}
 
-	async createPopup(keyId: string, popupState: IPopupState = {}): Promise<INotePopup> {
+	async createPopup(note: INote, popupState: IPopupState = {}): Promise<INotePopup> {
+		const keyId = note.keyId;
 		QDEB&&console.debug(`${debugHandle} createPopup:`, keyId);
 		await browser.qapp.saveFocus();
 		return new Promise(async (resolve, reject) => {
@@ -233,7 +234,6 @@ class QNoteExtension extends QEventDispatcher<{
 
 			let popup: QNotePopup | WebExtensionPopup | undefined;
 
-			const note = await this.createAndLoadNote(keyId);
 			const state = Object.assign({}, note2state(note.getData() || {}, this.prefs), popupState);
 
 			if(this.prefs.windowOption === 'xul'){
@@ -260,7 +260,7 @@ class QNoteExtension extends QEventDispatcher<{
 	async popNote(keyId: string){
 		QDEB&&console.info(`${debugHandle} popNote(), keyId:`, keyId);
 
-		this.createPopup(keyId).then(popup => popup.pop());
+		this.createPopup(await this.createAndLoadNote(keyId)).then(popup => popup.pop());
 	}
 
 	applyTemplate(t: string, data: INoteData): string {
@@ -385,7 +385,8 @@ class QNoteExtension extends QEventDispatcher<{
 	}
 
 	async createMultiNote(messages: browser.messages.MessageHeader[]){
-		const popup = await this.createPopup("multi-note-create", { placeholder:  _("multi.note.warning") });
+		const note = this.createNote("multi-note-create");
+		const popup = await this.createPopup(note, { placeholder:  _("multi.note.warning") });
 
 		popup.addListener("onnote", async (keyId, reason, noteData) =>{
 			if(reason == "close" && noteData.text){
