@@ -4,11 +4,11 @@
 	"author": "Martins Lazdans",
 	"default_locale": "en",
 	"description": "__MSG_description__",
-	"version": "0.14.0",
+	"version": "0.14.0pre1",
 	"applications": {
 		"gecko": {
 			"id": "qnote@dqdp.net",
-			"strict_min_version": "128.2.0"
+			"strict_min_version": "128.1.0"
 		}
 	},
 	"icons": {
