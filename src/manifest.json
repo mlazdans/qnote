@@ -8,8 +8,7 @@
 	"applications": {
 		"gecko": {
 			"id": "qnote@dqdp.net",
-			"strict_min_version": "115.0",
-			"strict_max_version": "128.*"
+			"strict_min_version": "128.2.0"
 		}
 	},
 	"icons": {
