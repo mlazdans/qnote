@@ -646,18 +646,28 @@ class QNoteExtension extends QEventDispatcher<{
 
 			let data;
 			if(data = (new PopupDataRequest()).parse(rawData)){
-				const keyId = data.keyId;
 				QDEB&&console.debug(`${debugHandle} received "PopupDataRequest" message`);
-				return this.getNoteData(keyId).then(noteData => (new PopupDataReply).from({
-					keyId: keyId,
-					state: note2state(noteData, this.prefs)
-				}));
+
+				const keyId = data.keyId;
+				if(PopupManager.has(keyId)){
+					const popup = PopupManager.get(keyId);
+					return Promise.resolve((new PopupDataReply).from({
+						keyId: keyId,
+						state: popup.getState()
+					}));
+				} else {
+					console.error("Popup not found:", keyId);
+				}
+
+				return undefined;
 			}
 
 			if(data = (new SyncNote()).parse(rawData)){
 				QDEB&&console.debug(`${debugHandle} received "SyncNote" message`, data);
 				if(PopupManager.has(data.keyId)){
 					PopupManager.get(data.keyId).fireListeners("onnote", data.keyId, data.reason, data.noteData);
+				} else {
+					console.error("Popup not found:", data.keyId);
 				}
 				return undefined;
 			}
