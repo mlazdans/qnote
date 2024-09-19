@@ -36,7 +36,7 @@
 // https://github.com/dothq/browser-desktop/blob/nightly/types.d.ts
 
 import { AttachToMessage, AttachToMessageReply, PopupDataReply, PopupDataRequest, PrefsUpdated, RestoreFocus, SyncNote } from "./modules/Messages.mjs";
-import { INoteData, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
+import { INote, INoteData, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
 import { INotePopup, IPopupState, note2state, QNotePopup, state2note, WebExtensionPopup } from "./modules/NotePopups.mjs";
 import { convertPrefsToQAppPrefs, dateFormatWithPrefs, IPreferences } from "./modules/common.mjs";
 import { confirmDelete, getCurrentWindowId, getPrefs, isClipboardSet, sendPrefsToQApp } from "./modules/common-background.mjs";
@@ -385,6 +385,10 @@ class QNoteExtension extends QEventDispatcher<{
 	}
 
 	async createMultiNote(messages: browser.messages.MessageHeader[]){
+		if(PopupManager.has("multi-note-create")){
+			return;
+		}
+
 		const note = this.createNote("multi-note-create");
 		const popup = await this.createPopup(note, { placeholder:  _("multi.note.warning") });
 
@@ -477,24 +481,12 @@ class QNoteExtension extends QEventDispatcher<{
 		// 	// this.updateView();
 		// });
 
-		// Create window
-		// browser.windows.onCreated.addListener(async window => {
-		// 	QDEB&&console.debug("windows.onCreated(), windowId:", window.id);
-
-		// 	// This check is needed for WebExtensionNoteWindow
-		// 	if(window.type === "normal"){
-		// 		// CurrentWindowId = Window.id;
-		// 	}
-
-		// 	// await CurrentNote.silentlyPersistAndClose();
-		// });
-
 		browser.windows.onRemoved.addListener(async (id: number) => {
 			QDEB&&console.debug(`${debugHandle} windows.onRemoved(), windowId:`, id);
 			PopupManager.iter((keyId, popup) => {
 				// Take care of window close outside of note controls
 				if(popup instanceof WebExtensionPopup){
-					if(id === popup.getId()){
+					if(id == popup.getId()){
 						popup.fireListeners("onnote", keyId, "close", popup.note.getData() || {});
 					}
 				}
@@ -510,28 +502,6 @@ class QNoteExtension extends QEventDispatcher<{
 				}
 			});
 		});
-
-		// Change focus
-		// browser.windows.onFocusChanged.addListener(async windowId => {
-		// 	// QDEB&&console.debug("windows.onFocusChanged(), windowId:", windowId, CurrentNote);
-		// 	// console.error("browser.windows.onFocusChanged");
-
-		// 	// if(
-		// 	// 	true
-		// 	// 	|| windowId === browser.windows.WINDOW_ID_NONE
-		// 	// 	|| windowId === CurrentNote.windowId
-		// 	// 	|| windowId === CurrentNote.popupId // This check is needed for WebExtensionNoteWindow
-		// 	// ){
-		// 	// 	return;
-		// 	// }
-
-		// 	// CurrentNote.windowId = CurrentWindowId = windowId;
-		// 	// CurrentTabId = await getCurrentTabId();
-
-		// 	// mpUpdateCurrent();
-
-		// 	// await CurrentNote.silentlyPersistAndClose();
-		// });
 
 		const actionHandler = (tab: browser.tabs.Tab) => {
 			const actiondebugHandle = `${debugHandle} [tab:${tab.id}]`
@@ -551,7 +521,11 @@ class QNoteExtension extends QEventDispatcher<{
 						this.popNote(keyId);
 					}
 				} else if(messages.length >= 1){
-					this.createMultiNote(messages);
+					if(PopupManager.has("multi-note-create")){
+						PopupManager.get("multi-note-create").close();
+					} else {
+						this.createMultiNote(messages);
+					}
 				}
 			});
 		};
@@ -656,8 +630,6 @@ class QNoteExtension extends QEventDispatcher<{
 						keyId: keyId,
 						state: popup.getState()
 					}));
-				} else {
-					console.error("Popup not found:", keyId);
 				}
 
 				return undefined;
@@ -667,8 +639,6 @@ class QNoteExtension extends QEventDispatcher<{
 				QDEB&&console.debug(`${debugHandle} received "SyncNote" message`, data);
 				if(PopupManager.has(data.keyId)){
 					PopupManager.get(data.keyId).fireListeners("onnote", data.keyId, data.reason, data.noteData);
-				} else {
-					console.error("Popup not found:", data.keyId);
 				}
 				return undefined;
 			}
