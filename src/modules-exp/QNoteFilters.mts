@@ -1,5 +1,3 @@
-import { INoteData } from "../modules/Note.mjs";
-
 var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
 var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs");
 var { getFolderNoteData } = ChromeUtils.importESModule("resource://qnote/modules-exp/api.mjs");
