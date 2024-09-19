@@ -5,13 +5,12 @@ import { PopupDataReply, PopupDataRequest, RestoreFocus, SyncNote } from "../mod
 import { IPopupState, state2note } from "../modules/NotePopups.mjs";
 
 const urlParams = new URLSearchParams(window.location.search);
-const keyId = urlParams.get("keyId");
+const keyId = urlParams.get("keyId")!;
 
 if(!keyId){
 	throw new Error("Missing query parameter: keyId");
 }
 
-let closeReason: IPopupCloseReason;
 const State: IPopupState = {};
 const i18n = new DOMLocalizator(browser.i18n.getMessage);
 
@@ -73,14 +72,13 @@ function popup(){
 
 function sendNoteData(reason: IPopupCloseReason){
 	return (new SyncNote).sendMessage({
-		keyId: keyId!,
+		keyId: keyId,
 		reason: reason,
 		noteData: state2note(State)
 	});
 }
 
 function customClose(reason: IPopupCloseReason){
-	closeReason = reason;
 	sendNoteData(reason).then(() => window.close());
 }
 
