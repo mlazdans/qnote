@@ -12,6 +12,7 @@ export interface INotePopup extends QEventDispatcher<{
 	close(): Promise<void>
 	update(state: IPopupState): Promise<IPopupState>
 	resetPosition(): Promise<void>
+	focus(): Promise<void>
 	getState(): IPopupState
 }
 
@@ -99,6 +100,7 @@ export abstract class DefaultNotePopup extends QEventDispatcher<{
 	abstract close(): Promise<void>
 	abstract update(state: IPopupState): Promise<IPopupState>
 	abstract resetPosition(): Promise<void>
+	abstract focus(): Promise<void>
 }
 
 // Wrapper around qpopup API, runs in background context
@@ -155,6 +157,10 @@ export class QNotePopup extends DefaultNotePopup {
 	async resetPosition() {
 		return browser.qpopup.resetPosition(this.id);
 	}
+
+	async focus(): Promise<void> {
+		browser.qpopup.update(this.id, { focused: true });
+	}
 }
 
 export class WebExtensionPopup extends DefaultNotePopup {
@@ -197,7 +203,14 @@ export class WebExtensionPopup extends DefaultNotePopup {
 	}
 
 	async update(state: IPopupState){
+		console.error("TODO: WebExtensionPopup.update()")
 		return state;
 		//return browser.windows.update(this.id, state);
+	}
+
+	async focus(): Promise<void> {
+		if(this.id) {
+			browser.windows.update(this.id, { focused:true });
+		}
 	}
 }

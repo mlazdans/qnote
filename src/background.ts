@@ -255,8 +255,11 @@ class QNoteExtension extends QEventDispatcher<{
 
 	async popNote(keyId: string){
 		QDEB&&console.info(`${debugHandle} popNote(), keyId:`, keyId);
-
-		this.createPopup(await this.createAndLoadNote(keyId)).then(popup => popup.pop());
+		if(PopupManager.has(keyId)){
+			PopupManager.get(keyId).focus();
+		} else {
+			this.createPopup(await this.createAndLoadNote(keyId)).then(popup => popup.pop());
+		}
 	}
 
 	applyTemplate(t: string, data: INoteData): string {

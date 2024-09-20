@@ -496,6 +496,10 @@ class QPopup extends BasePopup {
 			this.browser.style.height = `${height}px`;
 		}
 
+		if(newState.focused){
+			this.browser.focus();
+		}
+
 		// if(title){
 		// 	this.title = title;
 		// }
