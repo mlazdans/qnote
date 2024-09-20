@@ -1,4 +1,4 @@
-// TODO: why this is called 2x?
+// TODO: why this file is called 2x?
 import { AttachToMessageReplyData } from "../modules/Messages.mjs";
 
 function attachToMessage(reply: AttachToMessageReplyData | undefined) {
@@ -25,19 +25,14 @@ function attachToMessage(reply: AttachToMessageReplyData | undefined) {
 		}
 	});
 
-	// NOTE: disabled for now because this entire script is injected 2x
-	// document.querySelectorAll(".qnote-insidenote").forEach(el => {
-	// 	if(el instanceof HTMLDivElement){
-	// 		el.addEventListener("dblclick", e => {
-	// 			window.getSelection()?.removeAllRanges();
-	// 			console.log("POP!", reply.keyId);
-	// 		});
-	// 	}
-	// });
+	document.querySelectorAll(".qnote-insidenote").forEach(el => {
+		if(el instanceof HTMLDivElement){
+			el.addEventListener("dblclick", e => {
+				window.getSelection()?.removeAllRanges();
+				browser.runtime.sendMessage({ command: "PopNote", keyId: reply.keyId }); // Can't use classes from Message because of imports >:/
+			});
+		}
+	});
 }
 
-browser.runtime
-	.sendMessage({
-		command: "AttachToMessage",
-	})
-	.then((reply: AttachToMessageReplyData) => attachToMessage(reply));
+browser.runtime.sendMessage({ command: "AttachToMessage" }).then(attachToMessage);

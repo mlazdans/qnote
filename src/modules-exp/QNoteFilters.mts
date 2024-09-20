@@ -468,7 +468,6 @@ export class QNoteFilter
 	}
 }
 
-// NOTE:
 // We need completely restart TB if CustomTerm code changes
 // Currenlty there are no means to remove filter or there is but I'm not aware, please let me know: qnote@dqdp.net
 

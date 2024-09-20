@@ -31,7 +31,7 @@
 //    Types for MozXULElement and others
 // https://github.com/dothq/browser-desktop/blob/nightly/types.d.ts
 
-import { AttachToMessage, AttachToMessageReply, PopupDataReply, PopupDataRequest, PrefsUpdated, RestoreFocus, SyncNote } from "./modules/Messages.mjs";
+import { AttachToMessage, AttachToMessageReply, PopNote, PopupDataReply, PopupDataRequest, PrefsUpdated, RestoreFocus, SyncNote } from "./modules/Messages.mjs";
 import { INote, INoteData, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
 import { INotePopup, IPopupState, note2state, QNotePopup, state2note, WebExtensionPopup } from "./modules/NotePopups.mjs";
 import { convertPrefsToQAppPrefs, dateFormatWithPrefs, IPreferences } from "./modules/common.mjs";
@@ -646,6 +646,12 @@ class QNoteExtension extends QEventDispatcher<{
 				if(PopupManager.has(data.keyId)){
 					PopupManager.get(data.keyId).fireListeners("onnote", data.keyId, data.reason, data.noteData);
 				}
+				return undefined;
+			}
+
+			if(data = (new PopNote()).parse(rawData)){
+				QDEB&&console.debug(`${debugHandle} received "PopNote" message`, data);
+				this.popNote(data.keyId);
 				return undefined;
 			}
 

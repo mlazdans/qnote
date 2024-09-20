@@ -67,10 +67,10 @@ export class RestoreFocus extends DefaultMessage {
 }
 
 // NoteDataRequest
-export abstract class PopupDataRequestData {
+export abstract class KeyIdData {
 	abstract keyId: string
 }
-export class PopupDataRequest extends DefaultMessage<PopupDataRequestData> {
+export class PopupDataRequest extends DefaultMessage<KeyIdData> {
 	command = "PopupDataRequest"
 }
 
@@ -91,4 +91,9 @@ abstract class SyncNoteData {
 }
 export class SyncNote extends DefaultMessage<SyncNoteData> {
 	command = "SyncNote"
+}
+
+// PopNote
+export class PopNote extends DefaultMessage<KeyIdData> {
+	command = "PopNote"
 }
