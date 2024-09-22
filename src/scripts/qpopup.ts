@@ -3,9 +3,7 @@ import { RestoreFocus } from "../modules/Messages.mjs";
 import { IPopupState } from "../modules/NotePopups.mjs";
 import { querySelectorOrDie } from "../modules/common.mjs";
 
-let QDEB = true;
-
-QDEB&&console.debug("qpopup(content) new QPopup: ");
+console.debug("qpopup(content) new QPopup: ");
 
 // NOTE: keep this code around for now
 // let queuedUpdates: IPopupState = {};
@@ -48,6 +46,7 @@ if (isNaN(id)) {
 	throw new Error(`Incorrect query parameter value for id: ${id}`);
 }
 
+let pixelRatio = window.devicePixelRatio || window.screen.availWidth / document.documentElement.clientWidth;
 const State: IPopupState = { };
 const i18n = new DOMLocalizator(browser.i18n.getMessage);
 
@@ -87,6 +86,13 @@ function limitPanelSize(w: number, h: number){
 	height = Math.max(Math.min(h, rectLimit.maxHeight), rectLimit.minHeight);
 
 	return { width, height }
+}
+
+function scale(w: number, h: number, pixelRatio: number){
+	const width = Math.floor(w * pixelRatio);
+	const height = Math.floor(h * pixelRatio);
+
+	return { width, height };
 }
 
 function popup(){
@@ -136,8 +142,8 @@ function popup(){
 
 			if(amDragging)return;
 
-			const offsetTop = e.screenY - screenY;
-			const offsetLeft = e.screenX - screenX;
+			const offsetTop = Math.floor((e.screenY - screenY) * pixelRatio);
+			const offsetLeft = Math.floor((e.screenX - screenX) * pixelRatio);
 
 			({ screenX, screenY } = e);
 
@@ -195,7 +201,7 @@ function popup(){
 			if(limiter.width != oldW || limiter.height != oldH){
 				amResizing = true;
 
-				browser.qpopup.update(id, limiter).finally(() => {
+				browser.qpopup.update(id, scale(limiter.width, limiter.height, pixelRatio)).finally(() => {
 					oldW = limiter.width;
 					oldH = limiter.height;
 					amResizing = false;
@@ -246,14 +252,9 @@ window.addEventListener("DOMContentLoaded", () => {
 	});
 });
 
-let oldPixelRatio = window.devicePixelRatio || window.screen.availWidth / document.documentElement.clientWidth;
 window.addEventListener("resize", () => {
-	const pixelRatio = window.devicePixelRatio || window.screen.availWidth / document.documentElement.clientWidth;
-	if(pixelRatio != oldPixelRatio){
-		requestAnimationFrame(() => {
-			popupEl.style.display = 'none';
-			popupEl.style.display = '';
-		});
-		oldPixelRatio = pixelRatio;
+	let newPixelRatio = window.devicePixelRatio || window.screen.availWidth / document.documentElement.clientWidth;
+	if(pixelRatio != newPixelRatio){
+		pixelRatio = newPixelRatio;
 	}
 });
