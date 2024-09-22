@@ -5,7 +5,7 @@
 
 /* Reduce svg image size because it occupies too much space in column */
 .qnote-column > img {
-	width: 60%;
+	width: 70%;
 }
 
 .qnote-insidenote {
