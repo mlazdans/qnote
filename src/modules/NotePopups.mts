@@ -195,7 +195,10 @@ export class WebExtensionPopup extends DefaultNotePopup {
 	}
 
 	async resetPosition() {
-		// return browser.qpopup.resetPosition(this.id);
+		if(this.id)browser.windows.update(this.id, {
+			left: undefined,
+			top: undefined,
+		});
 	}
 
 	async close() {

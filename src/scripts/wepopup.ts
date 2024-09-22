@@ -19,7 +19,7 @@ const closeEl      = querySelectorOrDie(".qpopup-button-close") as HTMLElement;
 const YTextE       = querySelectorOrDie('.qpopup-textinput') as HTMLTextAreaElement;
 const delEl        = querySelectorOrDie(".qpopup-button-delete") as HTMLElement;
 // TODO: resetEl
-const resetEl      = querySelectorOrDie(".qpopup-button-reset") as HTMLElement;
+// const resetEl      = querySelectorOrDie(".qpopup-button-reset") as HTMLElement;
 const saveEl       = querySelectorOrDie(".qpopup-button-save") as HTMLElement;
 
 function updateElements(state: IPopupState){
@@ -48,7 +48,12 @@ function popup(){
 			customClose("delete");
 		}
 	});
-	// resetEl.addEventListener     ("click", () => browser.qpopup.resetPosition(id));
+	// resetEl.addEventListener     ("click", () => {
+	// 	if(this.id)browser.windows.update(this.id, {
+	// 		left: undefined,
+	// 		top: undefined,
+	// 	});
+	// });
 
 	window.addEventListener("resize", updateNoteData);
 	window.addEventListener("focus", () => YTextE.focus());
