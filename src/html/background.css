@@ -9,6 +9,7 @@
 }
 
 .qnote-insidenote {
+	cursor: context-menu;
 	box-shadow: 2px 2px 2px 1px hsla(210,4%,10%,.15);
 }
 

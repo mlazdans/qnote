@@ -27,8 +27,13 @@ function attachToMessage(reply: AttachToMessageReplyData | undefined) {
 
 	document.querySelectorAll(".qnote-insidenote").forEach(el => {
 		if(el instanceof HTMLDivElement){
+			el.addEventListener("mousedown", e => {
+				if (e.detail > 1) {
+					e.preventDefault();
+				}
+			});
+
 			el.addEventListener("dblclick", e => {
-				window.getSelection()?.removeAllRanges();
 				browser.runtime.sendMessage({ command: "PopNote", keyId: reply.keyId }); // Can't use classes from Message because of imports >:/
 			});
 		}
