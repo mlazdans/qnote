@@ -46,7 +46,9 @@ if (isNaN(id)) {
 	throw new Error(`Incorrect query parameter value for id: ${id}`);
 }
 
-let pixelRatio = window.devicePixelRatio || window.screen.availWidth / document.documentElement.clientWidth;
+// Disabled for now. Need more testing on retina displays.
+// let pixelRatio = window.devicePixelRatio || window.screen.availWidth / document.documentElement.clientWidth;
+let pixelRatio = 1;
 const State: IPopupState = { };
 const i18n = new DOMLocalizator(browser.i18n.getMessage);
 
@@ -252,9 +254,9 @@ window.addEventListener("DOMContentLoaded", () => {
 	});
 });
 
-window.addEventListener("resize", () => {
-	let newPixelRatio = window.devicePixelRatio || window.screen.availWidth / document.documentElement.clientWidth;
-	if(pixelRatio != newPixelRatio){
-		pixelRatio = newPixelRatio;
-	}
-});
+// window.addEventListener("resize", () => {
+// 	let newPixelRatio = window.devicePixelRatio || window.screen.availWidth / document.documentElement.clientWidth;
+// 	if(pixelRatio != newPixelRatio){
+// 		pixelRatio = newPixelRatio;
+// 	}
+// });
