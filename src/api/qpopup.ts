@@ -241,9 +241,11 @@ class QPopup extends BasePopup {
 		panel.setAttribute("neverhidden", "true"); // Bizarrely this was needed for scrollbars to work
 		// panel.setAttribute("level", "top"); // With level=top popups pop over each other on focus. But they do not disapper when switching to another window
 		panel.setAttribute("remote", "true");
-		// panel.setAttribute("animate", "false");
+		// panel.setAttribute("animate", "false"); // Do not set to anything. It will mess up event.screenX/Y :o
 		// panel.setAttribute("constrainpopups", "false");
 		// panel.setAttribute("disableglobalhistory", "true");
+		// panel.setAttribute("flip", "none");
+		// panel.setAttribute("fade", "slow"); // close after slow=4000ms
 
 		// if (!this.isRemoteBrowser) {
 		// 	this._remoteWebNavigation = null;
