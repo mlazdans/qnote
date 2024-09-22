@@ -48,7 +48,6 @@ if (isNaN(id)) {
 	throw new Error(`Incorrect query parameter value for id: ${id}`);
 }
 
-const isRemote = true; // panel attribute remote=true?
 const State: IPopupState = { };
 const i18n = new DOMLocalizator(browser.i18n.getMessage);
 
@@ -67,6 +66,10 @@ function updateElements(state: IPopupState){
 	if(state.text)YTextE.value = state.text;
 	if(state.title)titleTextEl.textContent = state.title;
 	// if(state.width && state.height)resizeNote(state.width, state.height);
+	if(state.width && state.height){
+		popupEl.style.width = `100%`;
+		popupEl.style.height = `100%`;
+	}
 	if(state.placeholder)YTextE.setAttribute("placeholder", state.placeholder);
 }
 
@@ -120,56 +123,55 @@ function popup(){
 	YTextE.addEventListener      ("keyup", () => browser.qpopup.update(id, { text: YTextE.value }));
 
 	let amDragging = false;
-	const tDrag = (mouse: MouseEvent) => {
-		let startX = mouse.screenX;
-		let startY = mouse.screenY;
+	const tDrag = (mouse: PointerEvent) => {
+		mouse.preventDefault();
+
+		let { screenX, screenY } = mouse;
 
 		const el = mouse.target as HTMLElement;
 		el.style.cursor = 'move';
 
-		const mover = (e: MouseEvent) => {
-			if(amDragging){
-				console.debug("Already dragging, bail");
-				return;
-			}
+		const mover = (e: PointerEvent) => {
+			e.preventDefault();
 
-			amDragging = true;
-			// requestAnimationFrame(() => {
-				const offsetTop = e.screenY - startY;
-				const offsetLeft = e.screenX - startX;
-				if(isRemote){
-					startX = e.screenX;
-					startY = e.screenY;
-				}
+			if(amDragging)return;
+
+			const offsetTop = e.screenY - screenY;
+			const offsetLeft = e.screenX - screenX;
+
+			({ screenX, screenY } = e);
+
+			if(offsetTop || offsetLeft){
+				amDragging = true;
 				browser.qpopup.update(id, { offsetLeft, offsetTop }).finally(() => amDragging = false);
-			// });
+			}
 		};
 
-		const handleDragEnd = () => {
-			window.removeEventListener("mousemove", mover);
-			window.removeEventListener("mouseup", handleDragEnd);
+		const handleDragEnd = (e: PointerEvent) => {
+			e.preventDefault();
+			window.removeEventListener("pointermove", mover);
+			window.removeEventListener("pointerup", handleDragEnd);
+			(e.target as Element).releasePointerCapture(e.pointerId);
 			browser.qpopup.setPanelStyle(id, { opacity: "1" });
 			el.style.cursor = '';
 		}
 
-		window.addEventListener("mouseup", handleDragEnd);
-		window.addEventListener("mousemove", mover);
+		window.addEventListener("pointerup", handleDragEnd);
+		window.addEventListener("pointermove", mover);
 
 		browser.qpopup.setPanelStyle(id, { opacity: "0.6" });
 	};
 
 	let amResizing = false;
 	const tResize = (mouse: PointerEvent) => {
+		mouse.preventDefault();
 		const startX = mouse.screenX;
 		const startY = mouse.screenY;
 		const startW = popupEl.offsetWidth;
 		const startH = popupEl.offsetHeight;
 
 		function handleDragEnd(e: PointerEvent) {
-			// e.preventDefault();
-			// e.stopPropagation();
-			// window.removeEventListener("mousemove", resizer);
-			// window.removeEventListener("mouseup", handleDragEnd);
+			e.preventDefault();
 			window.removeEventListener("pointermove", resizer);
 			window.removeEventListener("pointerup", handleDragEnd);
 			(e.target as Element).releasePointerCapture(e.pointerId);
@@ -179,38 +181,28 @@ function popup(){
 		let oldW = -1, oldH = -1;
 
 		function resizer(e: PointerEvent) {
+			e.preventDefault();
+
+			if(amResizing)return;
+
 			if(!e.buttons){
 				handleDragEnd(e);
 				return;
 			}
 
-			// e.preventDefault();
-			// e.stopPropagation();
-
 			const limiter = limitPanelSize(startW + e.screenX - startX, startH + e.screenY - startY);
 
 			if(limiter.width != oldW || limiter.height != oldH){
-				if(amResizing){
-					console.debug("Already resizing, bail");
-					return;
-				}
-
 				amResizing = true;
 
-				// requestAnimationFrame(async () => {
-					browser.qpopup.update(id, limiter).finally(() => {
-						amResizing = false;
-						oldW = limiter.width;
-						oldH = limiter.height;
-						console.log("finally", e.buttons);
-					});
-					// resizeNote(startW + e.screenX - startX, startH + e.screenY - startY).finally(() => amResizing = false);
-				// });
+				browser.qpopup.update(id, limiter).finally(() => {
+					oldW = limiter.width;
+					oldH = limiter.height;
+					amResizing = false;
+				});
 			}
 		};
 
-		// window.addEventListener("mouseup", handleDragEnd);
-		// window.addEventListener("mousemove", resizer);
 		window.addEventListener("pointerup", handleDragEnd);
 		window.addEventListener("pointermove", resizer);
 
@@ -224,8 +216,7 @@ function popup(){
 
 	const handleDragStart = (e: PointerEvent) => {
 		if(e.target && mDown.has(e.target)){
-			// e.preventDefault();
-			// e.stopPropagation();
+			e.preventDefault();
 			(e.target as Element).setPointerCapture(e.pointerId);
 			mDown.get(e.target)(e);
 		}
