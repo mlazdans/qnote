@@ -489,14 +489,16 @@ class QPopup extends BasePopup {
 		if(offsetTop !== null)newState.top = coalesce(oldState.top, 0) + coalesce(offsetTop, 0) as number;
 		if(offsetLeft !== null)newState.left = coalesce(oldState.left, 0) + coalesce(offsetLeft, 0) as number;
 
-		if (offsetTop !== null || offsetLeft !== null || top !== null || left !== null) {
-			this.moveTo(coalesce(newState.left, 0), coalesce(newState.top, 0));
-		}
+		this.window.requestAnimationFrame(() => {
+			if (offsetTop !== null || offsetLeft !== null || top !== null || left !== null) {
+				this.moveTo(coalesce(newState.left, 0), coalesce(newState.top, 0));
+			}
 
-		if (width !== null || height !== null) {
-			this.browser.style.width = `${width}px`;
-			this.browser.style.height = `${height}px`;
-		}
+			if (width !== null || height !== null) {
+				this.browser.style.width = `${width}px`;
+				this.browser.style.height = `${height}px`;
+			}
+		});
 
 		if(newState.focused){
 			this.browser.focus();
