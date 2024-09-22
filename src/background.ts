@@ -215,6 +215,7 @@ class QNoteExtension extends QEventDispatcher<{
 		} else if(reason == "sync"){
 			PopupManager.get(keyId).note.assignData(noteData);
 		} else {
+			PopupManager.remove(keyId);
 			console.warn(`${debugHandle} unknown popup close reason: ${reason}`);
 		}
 	}
