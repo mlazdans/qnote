@@ -666,6 +666,23 @@ class QNoteExtension extends QEventDispatcher<{
 
 		browser.menus.onClicked.addListener(this.menuHandler.bind(this));
 
+		// Inject JS and CSS into existing tabs
+		browser.tabs.query({
+			type: ["content", "mail", "messageDisplay"],
+			windowType: "normal"
+		}).then(tabs => {
+			tabs.forEach(tab => {
+				if(tab.id){
+					browser.tabs.insertCSS(tab.id, {
+						file: "html/background.css",
+					});
+					browser.tabs.executeScript(tab.id, {
+						file: "scripts/messageDisplay.js",
+					});
+				}
+			});
+		});
+
 		this.updateViews();
 	}
 }
@@ -708,6 +725,12 @@ browser.LegacyCSS.onWindowOpened.addListener((url: string) => {
 		browser.LegacyCSS.inject(url, files.get(url));
 	}
 });
+
+browser.scripting.messageDisplay.registerScripts([{
+	id: "qnote-1",
+	js: ["scripts/messageDisplay.js"],
+	css: ["html/background.css"],
+}]);
 
 waitForLoad().then(async isAppStartup => {
 	(new QNoteExtension(await getPrefs())).initExtension();
