@@ -101,7 +101,9 @@ export class QNoteFolder extends DefaultNote {
 	}
 
 	async subload(): Promise<INoteData | null> {
-		return browser.qnote.load(this.root, this.keyId);
+		return browser.qnote.load(this.root, this.keyId).then((data) => {
+			return data ?? browser.xnote.load(this.root, this.keyId);
+		});
 	}
 
 	async save() {
