@@ -26,7 +26,6 @@ QNote extension development was started after <a href="https://addons.thunderbir
 	<li>Auto tag message when adding note</li>
 	<li>Fully <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/xnotepp/">XNote++</a> (3.0.0) compatible</li>
 	<li>Import / export between to XNote++ (*.xnote) and QNote (*.qnote)</li>
-	<li>Supports older Thunderbird versions, starting 68.2.0</li>
 	<li>Templating support for attaching to print and message</li>
 </ul>
 
@@ -43,6 +42,7 @@ QNote extension development was started after <a href="https://addons.thunderbir
 
 <b>History:</b>
 <ul>
+	<li>Version 0.14: complete rewrite in TypeScript, fix most of TB128 incompatibilities</li>
 	<li>Version 0.13: add templating support for attaching to print and message</li>
 	<li>Version 0.12: create custom filters and actions, clipboard copy / paste, multi message selection context menu (create, update, delete, reset, copy, paste)</li>
 	<li>Version 0.11: search notes using QuickFilter, import / export notes in various formats and between storage options</li>
@@ -57,9 +57,7 @@ QNote extension development was started after <a href="https://addons.thunderbir
 
 <b>Know issues:</b>
 <ul>
-	<li>Column handler text preview does not work with TB115 and newer</li>
 	<li>QuickFilter does not work with TB115 and newer. You can still use message search.</li>
 	<li>Search and filters working only when using <i>folder storage</i> option.</li>
-	<li>Does not work very well together with <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/gmail-conversation-view/">Conversations</a> plugin.</li>
-	<li>TB 91.x versions does not work well on Macs when using <i>Floating panel</i> window option.</li>
+	<li>Does not work very well together with <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/gmail-conversation-view/">Conversations</a> extension.</li>
 </ul>
