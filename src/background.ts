@@ -31,6 +31,9 @@
 //    Types for MozXULElement and others
 // https://github.com/dothq/browser-desktop/blob/nightly/types.d.ts
 
+//     Supercharge your Thunderbird extension debugging
+// https://arndissler.net/supercharge-your-thunderbird-extension-debugging/
+
 import { AttachToMessage, AttachToMessageReply, PopNote, PopupDataReply, PopupDataRequest, PrefsUpdated, RestoreFocus, SyncNote } from "./modules/Messages.mjs";
 import { INote, INoteData, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
 import { INotePopup, IPopupState, note2state, QNotePopup, state2note, WebExtensionPopup } from "./modules/NotePopups.mjs";
@@ -684,6 +687,16 @@ async function waitForLoad() {
 
 QDEB&&console.debug(`${debugHandle} ResourceUrl.register("qnote")`);
 await browser.ResourceUrl.register("qnote");
+
+browser.runtime.onInstalled.addListener(async ({ reason, temporary }) => {
+	// console.log("browser.runtime.onInstalled, reason:", reason);
+	// if (temporary) return; // skip during development
+	// if(reason == "install") {
+		const url = browser.runtime.getURL("html/installed.html");
+		await browser.tabs.create({ url });
+		// or: await browser.windows.create({ url, type: "popup", height: 600, width: 600, });
+	// }
+});
 
 waitForLoad().then(async isAppStartup => {
 	(new QNoteExtension(await getPrefs())).initExtension();
