@@ -142,7 +142,7 @@ class QNoteExtension extends QEventDispatcher<{
 			await this.updateIcons(tabId, note.exists());
 			await browser.tabs.executeScript(tabId, {
 				file: "scripts/messageDisplay.js",
-			});
+			}).catch(() => console.log("Could not insert js into tab:", tabId));
 		} else if(messages.length >= 1){
 			const keyArray = [];
 			for(let m of messages){
@@ -675,10 +675,10 @@ class QNoteExtension extends QEventDispatcher<{
 				if(tab.id){
 					browser.tabs.insertCSS(tab.id, {
 						file: "html/background.css",
-					});
+					}).catch(() => console.log("Could not insert css into tab:", tab.id));
 					browser.tabs.executeScript(tab.id, {
 						file: "scripts/messageDisplay.js",
-					});
+					}).catch(() => console.log("Could not insert js into tab:", tab.id));
 				}
 			});
 		});
