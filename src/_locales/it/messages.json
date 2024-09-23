@@ -75,7 +75,7 @@
 		"message": "Cartella XNote++ non trovata o non leggibile"
 	},
 	"xnote.folder.found": {
-		"message": "Cartella XNote++ non trovata:<br>&nbsp;$1"
+		"message": "Cartella XNote++ non trovata:"
 	},
 	"storage.fieldset": {
 		"message": "Archivio"

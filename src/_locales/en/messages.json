@@ -75,7 +75,7 @@
 		"message": "XNote++ folder not found or is not readable"
 	},
 	"xnote.folder.found": {
-		"message": "XNote++ folder found:<br>&nbsp;$1"
+		"message": "XNote++ folder found:"
 	},
 	"storage.fieldset": {
 		"message": "Storage"

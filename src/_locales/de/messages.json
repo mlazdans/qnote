@@ -75,7 +75,7 @@
 		"message": "XNote++ Ordner nicht gefunden oder nicht lesbar"
 	},
 	"xnote.folder.found": {
-		"message": "XNote++ Ordner gefunden:<br>&nbsp;$1"
+		"message": "XNote++ Ordner gefunden:"
 	},
 	"storage.fieldset": {
 		"message": "Archiv"

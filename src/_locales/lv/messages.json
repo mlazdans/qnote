@@ -75,7 +75,7 @@
 		"message": "XNote++ mape nav atrasta vai nav piekļuves"
 	},
 	"xnote.folder.found": {
-		"message": "XNote++ mape atrasta:<br>&nbsp;$1"
+		"message": "XNote++ mape atrasta:"
 	},
 	"storage.fieldset": {
 		"message": "Glabātuve"

@@ -239,12 +239,22 @@ function dateFormatChange(){
 async function initXNoteFolderInfo(){
 	const path = await getXNoteStoragePath();
 
-	QDEB&&console.debug(`${debugHandle} trying XNote++ foder: `, path);
+	QDEB&&console.debug(`${debugHandle} trying XNote++ foder:`, path);
+
+	const xFolderFoundEl = getElementByIdOrDie('xnote.folder.found');
+	const xFolderInaccessibleEl = getElementByIdOrDie('xnote.folder.inaccessible');
+	const copy = i18n._("copy");
+
+	xFolderFoundEl.style.display = "none";
+	xFolderInaccessibleEl.style.display = "none";
 
 	if(await browser.legacy.isFolderWritable(path)){
-		getElementByIdOrDie('xnoteFolderInfo').innerHTML = i18n._("xnote.folder.found", path);
+		xFolderFoundEl.innerHTML = i18n._("xnote.folder.found") + `<div style="cursor: pointer" title="${copy}">${path}</div>`;
+		xFolderFoundEl.querySelector('div')?.addEventListener("click", () => navigator.clipboard.writeText(path));
+		xFolderFoundEl.style.display = "";
 	} else {
-		getElementByIdOrDie('xnoteFolderInfo').innerHTML = i18n._("xnote.folder.inaccessible", path);
+		xFolderInaccessibleEl.innerHTML = i18n._("xnote.folder.inaccessible", path);
+		xFolderInaccessibleEl.style.display = "";
 	}
 }
 
