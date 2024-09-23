@@ -4,8 +4,10 @@ CHANGELOG QNote
 RELEASE 0.14.0 - ....
 -----------------
 - Complete rewrite in TypeScript. Fixes most of the issues with TB128
-- Add features: take note screenshot to clipboard
+- Feature take note screenshot to clipboard
 - Fix note scrolling with large texts (#48)
+- Fix MacOS blank window (#58)
+- Fix QNote missing text column (#57)
 - Deprecated: storage option inside extension
 
 RELEASE 0.13.0 - Aug 21, 2024
