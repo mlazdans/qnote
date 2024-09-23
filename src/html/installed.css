@@ -1,0 +1,84 @@
+* {
+	box-sizing: border-box;
+	padding: 0;
+	margin: 0;
+}
+
+body {
+	margin: 1rem !important;
+}
+
+img {
+	border: none;
+}
+
+.contents {
+	background: url(../images/txt-background.png);
+	background-repeat: no-repeat;
+	background-position: right bottom;
+	background-color: #FBFEBF;
+	border: solid 1px #FAF098;
+	padding: 1rem;
+	padding-bottom: 0;
+	border-radius: 1rem;
+	margin-top: 0.5rem;
+}
+
+.head {
+	background-image: url(../images/icons/qnote.svg);
+	background-size: 4rem;
+	background-repeat: no-repeat;
+	background-position: 0 center;
+	padding: 0.5rem 0 0.5rem 4.5rem;
+	margin: 1rem;
+}
+
+.subhead {
+	margin: 0 2rem;
+}
+
+.stdpad p, h2, ul {
+	padding: 0 1rem 1rem 1rem;
+}
+.stdpad li {
+	margin: 0 0 0 2rem;
+}
+
+.donations {
+	background-image: url(../images/icons/important.svg);
+	background-size: 3.4rem;
+	background-repeat: no-repeat;
+	background-position: 0 center;
+	padding: 0.5rem 4rem;
+}
+
+.eur, .usd {
+	background-size: 1rem;
+	background-repeat: no-repeat;
+	background-position: left;
+	padding: 0 0.5rem 0 1.1rem;
+	font-weight: bold;
+}
+.eur {
+	background-image: url(../images/icons/EUR.svg);
+}
+.usd {
+	background-image: url(../images/icons/USD.svg);
+}
+
+.thick-border {
+	border: 0.3rem dashed darkred;
+}
+
+@media (prefers-color-scheme: dark) {
+	.contents {
+		color: white;
+		background-color: #2f2f33;
+		background-image: url(../images/txt-background-dark.png);
+		border: solid 1px black;
+	}
+
+	.thick-border {
+		border: 0.3rem dashed silver;
+	}
+}

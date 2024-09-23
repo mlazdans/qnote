@@ -706,17 +706,17 @@ QDEB&&console.debug(`${debugHandle} ResourceUrl.register("qnote")`);
 await browser.ResourceUrl.register("qnote");
 
 browser.runtime.onInstalled.addListener(async ({ reason, temporary }) => {
-	// console.log("browser.runtime.onInstalled, reason:", reason);
 	// if (temporary) return; // skip during development
-	// if(reason == "install") {
-		const url = browser.runtime.getURL("html/installed.html");
-		await browser.tabs.create({ url });
-		// or: await browser.windows.create({ url, type: "popup", height: 600, width: 600, });
-	// }
+	if(reason == "install") {
+		await browser.tabs.create({ url: browser.runtime.getURL("html/installed.html") });
+	}
+
+	if(reason == "update") {
+		await browser.tabs.create({ url: browser.runtime.getURL("html/update-0.14.html") });
+	}
 });
 
 browser.LegacyCSS.onWindowOpened.addListener((url: string) => {
-	// console.log("LegacyCSS", url);
 	const files: Map<string, string> = new Map([
 		["about:3pane", "html/background.css"],
 	]);
