@@ -44,6 +44,7 @@ declare global {
 		export const qpopup: IQPopupAPI;
 		export const qapp: IQAppAPI;
 		export const legacy: ILegacyAPI;
+		export const LegacyCSS: any;
 
 		export namespace ResourceUrl {
 			function register(name: string): Promise<void>;

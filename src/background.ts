@@ -698,6 +698,17 @@ browser.runtime.onInstalled.addListener(async ({ reason, temporary }) => {
 	// }
 });
 
+browser.LegacyCSS.onWindowOpened.addListener((url: string) => {
+	// console.log("LegacyCSS", url);
+	const files: Map<string, string> = new Map([
+		["about:3pane", "html/background.css"],
+	]);
+
+	if (files.has(url)) {
+		browser.LegacyCSS.inject(url, files.get(url));
+	}
+});
+
 waitForLoad().then(async isAppStartup => {
 	(new QNoteExtension(await getPrefs())).initExtension();
 });

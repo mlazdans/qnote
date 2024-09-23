@@ -111,31 +111,31 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 		};
 	}
 
-	uninstallCSS(cssUri: string) {
-		try {
-			let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
-			let uri = Services.io.newURI(extension.getURL(cssUri), null, null);
-			if(cssService.sheetRegistered(uri, cssService.USER_SHEET)){
-				QDEB&&console.debug(`Unregistering ${cssUri}`);
-				cssService.unregisterSheet(uri, cssService.USER_SHEET);
-			}
-		} catch (e: any) {
-			console.error("uninstallCSS() failed:", e);
-		}
-	}
+	// uninstallCSS(cssUri: string) {
+	// 	try {
+	// 		let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
+	// 		let uri = Services.io.newURI(extension.getURL(cssUri), null, null);
+	// 		if(cssService.sheetRegistered(uri, cssService.USER_SHEET)){
+	// 			QDEB&&console.debug(`Unregistering ${cssUri}`);
+	// 			cssService.unregisterSheet(uri, cssService.USER_SHEET);
+	// 		}
+	// 	} catch (e: any) {
+	// 		console.error("uninstallCSS() failed:", e);
+	// 	}
+	// }
 
-	installCSS(cssUri: string) {
-		try {
-			let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
-			let uri = Services.io.newURI(extension.getURL(cssUri), null, null);
-			if(!cssService.sheetRegistered(uri, cssService.USER_SHEET)){
-				QDEB&&console.debug(`Registering ${cssUri}`);
-				cssService.loadAndRegisterSheet(uri, cssService.USER_SHEET);
-			}
-		} catch (e: any) {
-			console.error("installCSS() failed:", e);
-		}
-	}
+	// installCSS(cssUri: string) {
+	// 	try {
+	// 		let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
+	// 		let uri = Services.io.newURI(extension.getURL(cssUri), null, null);
+	// 		if(!cssService.sheetRegistered(uri, cssService.USER_SHEET)){
+	// 			QDEB&&console.debug(`Registering ${cssUri}`);
+	// 			cssService.loadAndRegisterSheet(uri, cssService.USER_SHEET);
+	// 		}
+	// 	} catch (e: any) {
+	// 		console.error("installCSS() failed:", e);
+	// 	}
+	// }
 
 	// https://developer.thunderbird.net/add-ons/mailextensions/experiments#managing-your-experiments-lifecycle
 	onShutdown(isAppShutdown: boolean) {
@@ -152,7 +152,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 			ThreadPaneColumns.removeCustomColumn('qnote-text');
 		}
 
-		this.uninstallCSS("html/background.css");
+		// this.uninstallCSS("html/background.css");
 
 		if(this.customAction){
 			this.customAction.uninstall();
@@ -186,8 +186,8 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 					this.setPrefs(prefs);
 
 					// Remove old style sheet in case it still lay around, for example, after update
-					API.uninstallCSS("html/background.css");
-					API.installCSS("html/background.css");
+					// API.uninstallCSS("html/background.css");
+					// API.installCSS("html/background.css");
 
 					Services.ww.registerNotification(API.WindowObserver);
 

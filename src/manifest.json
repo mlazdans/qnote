@@ -98,6 +98,14 @@
 				"paths": [["ResourceUrl"]],
 				"script": "api/ResourceUrl.js"
 			}
+		},
+		"LegacyCSS": {
+			"schema": "schemas/LegacyCSS.json",
+			"parent": {
+				"scopes": ["addon_parent"],
+				"paths": [["LegacyCSS"]],
+				"script": "api/LegacyCSS.js"
+			}
 		}
 	}
 }
