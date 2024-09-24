@@ -720,6 +720,7 @@ browser.runtime.onInstalled.addListener(async ({ reason, temporary }) => {
 browser.LegacyCSS.onWindowOpened.addListener((url: string) => {
 	const files: Map<string, string> = new Map([
 		["about:3pane", "html/background.css"],
+		["chrome://messenger/content/multimessageview.xhtml", "html/background.css"],
 	]);
 
 	if (files.has(url)) {
