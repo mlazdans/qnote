@@ -6,63 +6,67 @@
 5. [Popup windows](#popup-windows)
 6. [Screenshots](#screenshots)
 7. [Known issues](#known-issues)
-8. [Donations](#donations)
+8. [Support](#support)
+9. [Credits](#credits)
 
 # About
 
-This is source code repository for Thunderbird [QNote](https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/) add-on. To install extension just zip whole folder and rename file's extension to .xpi and add it to Thunderbird.
+This is the source code repository for the Thunderbird [QNote](https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/) extension.
 
-<p><img src="https://img.shields.io/badge/QNote-v0.13.0-brightgreen">
-<img src="https://img.shields.io/badge/Thunderbird-v68.2.0%20--%20128.x-brightgreen"></p>
+<p>
+	<img src="https://img.shields.io/badge/QNote-v0.14.0-brightgreen">
+	<img src="https://img.shields.io/badge/Thunderbird-v68.2.0%20--%20131.x-brightgreen">
+</p>
 
 # Features
 
-- Add notes to e-mail messages
-- Save note position, size, multiple default note positions
-- Searchable notes via Thunderbird's QuickFilter or Edit / Find / Search Messages
-- Various filter actions via Tools / Message Filters
-- Clipboard Copy / Paste
-- Mail pane column with note icon and / or note preview
-- Actions on multi message selection: create, update, delete, reset, copy, paste
-- Attach note to message body
-- Attach note when printing
-- Light / dark theme
+- Add notes to email messages
+- Save note position and size; multiple default note positions
+- Searchable notes using Thunderbird's built-in search (Edit / Find / Search Messages)
+- Filter and apply actions based on different conditions (Tools / Message Filters)
+- Clipboard copy/paste
+- Column with note icon and preview
+- Actions on multiple message selections: create, update, delete, reset, copy, paste
+- Attach notes to email message body
+- Attach notes when printing
+- Light and dark themes
 - Multiple locales and localized date formats
-- Auto tag message when adding note
-- Fully <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/xnotepp/">XNote++</a> (3.0.0) compatible
-- Import / export between to XNote++ (\*.xnote) and QNote (\*.qnote) formats
-- Supports older Thunderbird versions, starting 68.2.0
-- Templating support for attaching to print and message
+- Automatically tag messages when adding notes
+- Fully compatible with <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/xnotepp/">XNote++</a> (3.0.0)
+- Import/export between XNote++ (.xnote) and QNote (.qnote) file formats
+- Supports Thunderbird versions, starting from 68.2.0 (check <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/versions/">archive</a> for latest supported version for your Thunderbird installation)
+- Templating support for attaching to print and email message
 
 # Usage
 
-- Alt+Q to toggle note
-- ESC to close note without saving
-- Right click context menu to delete note or reset note window
-- Use QuickFilter or Message Search to search notes (only for folder storage)
-- Use Filter Manager to create custom actions (only for folder storage)
+- Press Alt+Q to toggle the note
+- Press ESC to close the note without saving
+- Right-click on message(s) to access more commands in the context menu
+- Use the built-in search to search within notes
+- Use the built-in Filter Manager to create custom filters and actions
+
 
 # Storage
 
 There are two options for storing notes:
 
-- Inside extension
-- Outside extension in folder
+- Storing inside the extension (deprecated)
+- Storing in a folder
 
-Currently storing notes outside extension is more versatile and preffered way. This enables seaching notes and sharing with different computers using sharing mechanism like Dropbox, NFS, Windows / Samba share, etc. You can also use XNote++ folder.
+Currently, there is no built-in mechanism for sharing notes across multiple computers. For now, in order to share notes across multiple computers, you could use shared folder solutions like Dropbox, NFS, or Windows/Samba shares.
 
-When modifying XNote++ notes (.xnote extension) these will be saved in more versatile JSON format (.qnote extension).
+If you are migrating from the XNote++ extension, you have two options: using the XNote++ folder directly or importing notes into the QNote folder. For more information, refer to the doc\migration-guide.md
 
-__If you are using internal storage then don't forget to export data before removing extension!__
+__If you are using internal storage, don't forget to export data before removing the extension.__
 
 # Popup windows
 
-There are two options for note window:
+There are two options for note windows:
 
-- Floating panel
-- Popup window
+- floating panel
+- popup window
 
-_Floating panel_ has nicer looks but does not display well on MacOS. Fall back to _Popup window_ if experience difficulties with _Floating panel_.
+_Floating panel_ looks better but might not work well on all platforms. Fall back to _popup window_ if you experience difficulties with the _floating panel_. The _popup window_ uses Thunderbird's standard API.
 
 # Screenshots
 
@@ -89,15 +93,13 @@ _Floating panel_ has nicer looks but does not display well on MacOS. Fall back t
 </p>
 
 # Known issues
-- Column handler text preview does not work with TB115 and newer
-- QuickFilter does not work with TB115 and newer. You can still use message search.
-- Search and filters working only when using _folder storage_ option.
-- Does not work very well together with <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/gmail-conversation-view/">Conversations</a> plugin.
-- TB 91.x versions does not work well on Macs when using _Floating panel_ window option.
+- It does not work very well together with the <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/gmail-conversation-view/">Conversations</a> extension.
 
-# Donations
+# Support
 
-I enjoy some [beer (EUR)](https://www.paypal.com/donate/?hosted_button_id=CCFL84AMQKV4S) or [beer (USD)](https://www.paypal.com/donate/?hosted_button_id=NKF22QJS87LWN) now and then. Much appreciated! ;)
+Maintaining this extension requires a significant amount of time. If you find it useful, and you'd like to support its development, contributions in [EUR](https://www.paypal.com/donate/?hosted_button_id=CCFL84AMQKV4S) or [USD](https://www.paypal.com/donate/?hosted_button_id=NKF22QJS87LWN) via PayPal would be greatly appreciated.
 
-# Icons
-Very nice icons grabbed from [Gartoon Redux Action Icons Pack](https://www.iconarchive.com/show/gartoon-action-icons-by-gartoon-team.html)
+# Credits
+
+- Beautiful icons sourced from the [Gartoon Redux Action Icons Pack](https://www.iconarchive.com/show/gartoon-action-icons-by-gartoon-team.html)
+- Date formatting is provided by the [Luxon](https://github.com/moment/luxon/) library
