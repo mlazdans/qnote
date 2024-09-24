@@ -715,7 +715,7 @@ await browser.ResourceUrl.register("qnote");
 
 browser.runtime.onInstalled.addListener(async ({ reason, temporary }) => {
 	// skip during development
-	if (temporary) return;
+	// if (temporary) return;
 
 	if(reason == "install") {
 		await browser.tabs.create({ url: browser.runtime.getURL("html/installed.html") });
