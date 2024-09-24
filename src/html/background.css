@@ -4,8 +4,9 @@
 } */
 
 /* Reduce svg image size because it occupies too much space in column */
-.qnote-column > img {
-	margin-inline: 4px;
+#qnoteButton > img, .qnote-column > img {
+	width: 16px;
+	height: 16px;
 }
 
 .qnote-insidenote {
