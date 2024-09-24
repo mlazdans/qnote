@@ -64,6 +64,10 @@ export function note2state(noteData: INoteData | null, prefs: IPreferences): IPo
 		state.title = "QNote: " + dateFormatWithPrefs(prefs, noteData?.ts);
 	}
 
+	if(!noteData){
+		state.placeholder = browser.i18n.getMessage("create.new.note");
+	}
+
 	return state;
 }
 
