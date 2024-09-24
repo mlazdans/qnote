@@ -188,7 +188,7 @@ function ts2jsdate(ts?: Date | number): Date {
 export function dateFormatWithPrefs(prefs: IPreferences, ts?: Date | number): string {
 	const dt = luxon.DateTime.fromJSDate(ts2jsdate(ts)).setLocale(prefs.dateLocale)
 	if(prefs.dateFormatPredefined){
-		return dt.toLocaleString(prefs.dateFormatPredefined);
+		return dt.toLocaleString(luxon.DateTime[prefs.dateFormatPredefined]);
 	} else if(prefs.dateFormat) {
 		return php2luxon(prefs.dateFormat, dt);
 	} else {
