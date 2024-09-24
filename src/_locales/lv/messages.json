@@ -15,16 +15,16 @@
 		"message": "JSON parsēšanas kļūda: $1"
 	},
 	"modify.note": {
-		"message": "Labot zīmīti"
+		"message": "Labot"
 	},
 	"delete.note": {
-		"message": "Dzēst zīmīti"
+		"message": "Dzēst"
 	},
 	"reset.note.window": {
-		"message": "Atiestatīt loga pozīcijas"
+		"message": "Atiestatīt pozīciju"
 	},
 	"create.new.note": {
-		"message": "Izveidot zīmīti"
+		"message": "Izveidot jaunu"
 	},
 	"toggleqnote": {
 		"message": "Pārslēgties uz zīmīti"
@@ -69,7 +69,7 @@
 		"message": "(lūdzu izmantojiet tagu pārvaldnieku)"
 	},
 	"import.finished.stats": {
-		"message": "Imports pabeigts:\nimportētās zīmītes - $1\nkļūdainās zīmītes - $2\njau esošās zīmītes - $3\npārrakstītās zīmītes - $4"
+		"message": "Imports / eksports pabeigts:\nsaglabāts - $1\nkļūdas - $2\nesošās - $3\npārrakstīts - $4"
 	},
 	"xnote.folder.inaccessible": {
 		"message": "XNote++ mape nav atrasta vai nav piekļuves"
@@ -225,7 +225,7 @@
 		"message": "Eksportēt XNotes"
 	},
 	"import.folder.button.descr": {
-		"message": "Importēt .qnote vai .xnote failus iekšējā glabātuvē"
+		"message": "Importēt .qnote vai .xnote failus izvēlētajā glabātuvē"
 	},
 	"export.qnotes.button.descr": {
 		"message": "Eksportēt zīmītes no izvēlētās glabātuves .qnote formātā"
@@ -271,5 +271,20 @@
 	},
 	"attach.template.reset": {
 		"message": "Atiestatīt veidni"
+	},
+	"take.screenshot": {
+		"message": "Akrānšāviņš"
+	},
+	"deprecated": {
+		"message": "Novecojis"
+	},
+	"source.path.same": {
+		"message": "Izvēlētā mape ir tāda pati kā pašreizējā mape. Izvēlieties citu mapi!"
+	},
+	"dest.path.same": {
+		"message": "Galamērķa mape ir tāda pati kā pašreizējā mape. Izvēlieties citu galamērķa mapi!"
+	},
+	"close": {
+		"message": "Aizvērt"
 	}
 }

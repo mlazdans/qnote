@@ -15,16 +15,16 @@
 		"message": "JSON Formatfehler: $1"
 	},
 	"modify.note": {
-		"message": "Notiz bearbeiten"
+		"message": "Bearbeiten"
 	},
 	"delete.note": {
-		"message": "Notiz löschen"
+		"message": "Löschen"
 	},
 	"reset.note.window": {
-		"message": "Notiz zurücksetzen"
+		"message": "Position auf Standard"
 	},
 	"create.new.note": {
-		"message": "Neue Notiz"
+		"message": "Neue QNote"
 	},
 	"toggleqnote": {
 		"message": "Notiz umschalten"
@@ -69,7 +69,7 @@
 		"message": "(mit Einstellungen / Allgemein / Schlagwörter bearbeiten)"
 	},
 	"import.finished.stats": {
-		"message": "Notizen importiert:\ninsgesamt - $1\nfehlerhaft - $2\nvorhanden - $3\nüberschrieben - $4"
+		"message": "QNote Import / Export fertig:\ngespeichert - $1\nFehler - $2\nvorhanden - $3\nüberschrieben - $4"
 	},
 	"xnote.folder.inaccessible": {
 		"message": "XNote++ Ordner nicht gefunden oder nicht lesbar"
@@ -225,7 +225,7 @@
 		"message": "Als XNote++ exportieren"
 	},
 	"import.folder.button.descr": {
-		"message": "Dateien vom Typ .qnote oder .xnote ins Archiv importieren"
+		"message": "Importiere .qnote oder .xnote Dateien ins gewählte Archiv"
 	},
 	"export.qnotes.button.descr": {
 		"message": "Notizen im .qnote-Format (JSON) exportieren"
@@ -271,5 +271,20 @@
 	},
 	"attach.template.reset": {
 		"message": "Vorlage zurück auf Standard"
+	},
+	"take.screenshot": {
+		"message": "Bildschirmfoto"
+	},
+	"deprecated": {
+		"message": "Veraltet"
+	},
+	"source.path.same": {
+		"message": "Ihr Import Ordner ist das momentane Archiv. Bitte wählen Sie einen anderen Ordner für den Import!"
+	},
+	"dest.path.same": {
+		"message": "Ihr Export Ordner ist das momentane Archiv. Bitte wählen Sie einen anderen Ordner für den Export!"
+	},
+	"close": {
+		"message": "Schließen"
 	}
 }

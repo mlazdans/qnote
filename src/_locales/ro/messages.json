@@ -15,16 +15,16 @@
 		"message": "Eroare de analiză JSON: $1"
 	},
 	"modify.note": {
-		"message": "Modificați nota"
+		"message": "Modifică"
 	},
 	"delete.note": {
-		"message": "Ștergeți nota"
+		"message": "Şterge"
 	},
 	"reset.note.window": {
-		"message": "Resetați fereastra notei"
+		"message": "Resetați poziția"
 	},
 	"create.new.note": {
-		"message": "Creați o notă nouă"
+		"message": "Notă nouă"
 	},
 	"toggleqnote": {
 		"message": "Comută nota"
@@ -69,7 +69,7 @@
 		"message": "(vă rugăm să utilizați managerul de etichete pentru a gestiona etichetele)"
 	},
 	"import.finished.stats": {
-		"message": "Import finalizat:\nnote importate - $1\nnote eronate - $2\nnote existente - $3\nnote suprascrise - $4"
+		"message": "Importul/exportul notelor s-a încheiat:\nsalvate - $1\nerori - $2\nexistente - $3\nsuprascrise - $4"
 	},
 	"xnote.folder.inaccessible": {
 		"message": "Dosarul XNote++ nu a fost găsit sau nu poate fi citit"
@@ -225,7 +225,7 @@
 		"message": "Exportați XNotes"
 	},
 	"import.folder.button.descr": {
-		"message": "Importați fișiere .qnote sau .xnote în stocarea extensiei"
+		"message": "Importă fișierele .qnote sau .xnote în spațiul de stocare selectat"
 	},
 	"export.qnotes.button.descr": {
 		"message": "Exportați notele din stocarea selectată în format .qnote"
@@ -271,5 +271,20 @@
 	},
 	"attach.template.reset": {
 		"message": "Resetează șablonul"
+	},
+	"take.screenshot": {
+		"message": "Fă o captură de ecran"
+	},
+	"deprecated": {
+		"message": "Depreciat"
+	},
+	"source.path.same": {
+		"message": "Dosarul sursă este același cu dosarul de stocare curent. Vă rugăm să alegeți un dosar sursă diferit!"
+	},
+	"dest.path.same": {
+		"message": "Dosarul de destinație este același cu dosarul de stocare curent. Vă rugăm să alegeți un dosar de destinație diferit!"
+	},
+	"close": {
+		"message": "Închide"
 	}
 }

@@ -15,16 +15,16 @@
 		"message": "Errore parse JSON: $1"
 	},
 	"modify.note": {
-		"message": "Modifica nota"
+		"message": "Modifica"
 	},
 	"delete.note": {
-		"message": "Cancella nota"
+		"message": "Cancella"
 	},
 	"reset.note.window": {
-		"message": "Reimposta finestra nota"
+		"message": "Reset posizione"
 	},
 	"create.new.note": {
-		"message": "Crea una nuova nota"
+		"message": "Nuova nota"
 	},
 	"toggleqnote": {
 		"message": "Attiva/disattiva nota"
@@ -69,7 +69,7 @@
 		"message": "(per favore vai in impostazioni/Calendario/Categorie per gestire le categorie)"
 	},
 	"import.finished.stats": {
-		"message": "Importazione finita:\nnote importate - $1\nnote con errori - $2\nnote esistenti - $3\nnote sovrascritte - $4"
+		"message": "Importazione/esportazione note finita:\nsaved - $1\nerrors - $2\nexisting - $3\noverwritten - $4"
 	},
 	"xnote.folder.inaccessible": {
 		"message": "Cartella XNote++ non trovata o non leggibile"
@@ -225,7 +225,7 @@
 		"message": "Esporta XNotes"
 	},
 	"import.folder.button.descr": {
-		"message": "Importa file .qnote o .xnote nella memoria di estensione"
+		"message": "Importa file .qnote o .xnote nell'archivio selezionato"
 	},
 	"export.qnotes.button.descr": {
 		"message": "Esporta note dalla memoria selezionata in formato .qnote"
@@ -271,5 +271,20 @@
 	},
 	"attach.template.reset": {
 		"message": "Ripristina modello"
+	},
+	"take.screenshot": {
+		"message": "Cattura schermo (screenshot)"
+	},
+	"deprecated": {
+		"message": "Obsoleto"
+	},
+	"source.path.same": {
+		"message": "La cartella di origine è la stessa della cartella di archiviazione corrente. Scegli una cartella di origine diversa!"
+	},
+	"dest.path.same": {
+		"message": "La cartella di destinazione è la stessa della cartella di archiviazione corrente. Scegli una cartella di destinazione diversa!"
+	},
+	"close": {
+		"message": "Chiudi"
 	}
 }
