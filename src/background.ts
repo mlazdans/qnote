@@ -1,10 +1,8 @@
 // MAYBE: note popup on mouse over
 // MAYBE: save note pos and dims locally, outside note
 // MAYBE: save create and update time
+// MAYBE: multiple notes. This will require fixing qpopup z-index and option close all opened notes
 // TODO: test brand new installation with XNote++ and then switch to QNote
-// TODO: qpopup z-index
-// TODO: menu - close all opened notes
-// TODO: write usage docs (inc filters, actions)
 
 // App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup experiment API
 //  |     \                            \     \-> handles events sent by qpopup.api, fires events back to App through DefaultNotePopup
@@ -47,6 +45,7 @@ var QDEB = true;
 const debugHandle = "[qnote:background]";
 const BrowserAction = browser.action ? browser.action : browser.browserAction;
 const _ = browser.i18n.getMessage;
+const maxNoteCount = 1;
 
 type UpdateIconsDetails = {
 	path?: browser._manifest.IconPath | undefined;
@@ -84,6 +83,10 @@ const PopupManager = new class {
 		for(const [keyId, popup] of this.popups.entries()){
 			f(keyId, popup);
 		}
+	}
+
+	get count(){
+		return this.popups.size;
 	}
 }
 
@@ -229,6 +232,12 @@ class QNoteExtension extends QEventDispatcher<{
 		return new Promise(async (resolve, reject) => {
 			if(PopupManager.has(keyId)){
 				return resolve(PopupManager.get(keyId));
+			}
+
+			if(PopupManager.count >= maxNoteCount){
+				PopupManager.iter((keyId, popup) => {
+					popup.close();
+				});
 			}
 
 			let popup: QNotePopup | WebExtensionPopup | undefined;
