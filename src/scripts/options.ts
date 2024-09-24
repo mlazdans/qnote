@@ -82,36 +82,37 @@ function displayMsg(msgs: Array<string>, title: string){
 	errorBox.showModal();
 }
 
-async function getPrefFromHtml<K extends keyof Partial<IPreferences>>(key: K): Promise<IPreferences[K]> {
-	return new Promise((resolve, reject) => {
-		for(const node of document.querySelectorAll(`[name=${key}]`)){
-			if(isTypeCheckbox(node)){
-				return resolve(node.checked as IPreferences[K]);
-			} else if(isInputElement(node) || isSelectElement(node) || isTextAreaElement(node)){
-				const readyToReturn = isTypeRadio(node) ? node.checked : true;
-				if(readyToReturn){
-					const type = typeof Prefs.defaults[key];
-					if(type == "string"){
-						return resolve(node.value as IPreferences[K]);
-					} else if(type == "number"){
-						return resolve(Number(node.value) as IPreferences[K]);
-					} else {
-						return reject(`Unsupported type: ${type} for preference: ${key} from element: ${node.nodeName}.`);
-					}
+function getPrefFromHtml<K extends keyof Partial<IPreferences>>(key: K): IPreferences[K] | undefined {
+	for(const node of document.querySelectorAll(`[name=${key}]`)){
+		if(isTypeCheckbox(node)){
+			return node.checked as IPreferences[K];
+		} else if(isInputElement(node) || isSelectElement(node) || isTextAreaElement(node)){
+			const readyToReturn = isTypeRadio(node) ? node.checked : true;
+			if(readyToReturn){
+				const type = typeof Prefs.defaults[key];
+				if(type == "string"){
+					return node.value as IPreferences[K];
+				} else if(type == "number"){
+					return Number(node.value) as IPreferences[K];
+				} else {
+					console.error(`Unsupported type: ${type} for preference: ${key} from element: ${node.nodeName}.`);
+					return undefined;
 				}
-			} else {
-				return reject(`Unsupported element: ${node.nodeName}`);
 			}
+		} else {
+			console.error(`Unsupported element: ${node.nodeName}`);
+			return undefined;
 		}
+	}
 
-		return reject(`Element(s) by name not found: ${key}`);
-	});
+	console.error(`Element(s) by name not found: ${key}`);
+
+	return undefined;
 }
 
-async function setPrefFromHtml<K extends keyof Partial<IPreferences>>(p: Partial<IPreferences>, key: K): Promise<IPreferences[K]> {
-	return getPrefFromHtml(key).then(v => {
-		return p[key] = v;
-	});
+function setPrefFromHtml<K extends keyof Partial<IPreferences>>(p: Partial<IPreferences>, key: K): IPreferences[K] | undefined {
+	const v = getPrefFromHtml(key);
+	return v === undefined ? v :  p[key] = v;
 }
 
 async function saveOption(name: keyof IPreferences){
@@ -119,7 +120,7 @@ async function saveOption(name: keyof IPreferences){
 
 	const newPrefs: Partial<IWritablePreferences> = {};
 	const ErrMsg: Array<string> = [];
-	await setPrefFromHtml(newPrefs, name);
+	setPrefFromHtml(newPrefs, name);
 
 	// await Promise.all([
 	// 	setPrefFromHtml(prefs, "anchorPlacement"),
@@ -153,8 +154,8 @@ async function saveOption(name: keyof IPreferences){
 
 	// Some folder validations
 	if((name == "storageOption") || (name == "storageFolder")) {
-		await setPrefFromHtml(newPrefs, "storageFolder");
-		await setPrefFromHtml(newPrefs, "storageOption");
+		setPrefFromHtml(newPrefs, "storageFolder");
+		setPrefFromHtml(newPrefs, "storageOption");
 		if(newPrefs.storageOption == "folder"){
 			if(!newPrefs.storageFolder || !await browser.legacy.isFolderWritable(newPrefs.storageFolder)){
 				ErrMsg.push(i18n._("folder.unaccesible", newPrefs.storageFolder));
