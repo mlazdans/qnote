@@ -283,11 +283,11 @@ class QPopup extends BasePopup {
 
 		// Event flow: browser -> stack -> panel
 		this.browser.addEventListener("keydown", (e: KeyboardEvent) => {
-			if(e.key == 'Escape'){
+			if(e.code == "Escape"){
 				e.preventDefault();
 			}
 
-			if(e.altKey && (e.key == "Q" || e.key == "q")){
+			if(e.altKey && e.code == "KeyQ"){
 				e.preventDefault();
 				popupManager.get(id).destroy("close");
 			}
