@@ -4,7 +4,6 @@
 // TODO: test brand new installation with XNote++ and then switch to QNote
 // TODO: qpopup z-index
 // TODO: menu - close all opened notes
-// TODO: add "install", "update" handling if neccessary
 // TODO: write usage docs (inc filters, actions)
 
 // App -> INotePopup -> DefaultNotePopup -> QNotePopup -> qpopup experiment API
@@ -234,7 +233,7 @@ class QNoteExtension extends QEventDispatcher<{
 
 			let popup: QNotePopup | WebExtensionPopup | undefined;
 
-			const state = Object.assign({}, note2state(note.getData() || {}, this.prefs), popupState);
+			const state = Object.assign({}, note2state(note.getData(), this.prefs), popupState);
 
 			if(this.prefs.windowOption === 'xul'){
 				const windowId = await getCurrentWindowId();
@@ -706,7 +705,9 @@ QDEB&&console.debug(`${debugHandle} ResourceUrl.register("qnote")`);
 await browser.ResourceUrl.register("qnote");
 
 browser.runtime.onInstalled.addListener(async ({ reason, temporary }) => {
-	// if (temporary) return; // skip during development
+	// skip during development
+	if (temporary) return;
+
 	if(reason == "install") {
 		await browser.tabs.create({ url: browser.runtime.getURL("html/installed.html") });
 	}

@@ -283,5 +283,8 @@
 	},
 	"dest.path.same": {
 		"message": "Destination folder is the same as current storage folder. Please choose different destination folder!"
+	},
+	"close": {
+		"message": "Close"
 	}
 }
