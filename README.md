@@ -70,26 +70,17 @@ _Floating panel_ looks better but might not work well on all platforms. Fall bac
 
 # Screenshots
 
-<p><a href="thunderbird.net/screenshots/_combined.png">All screenshots (PNG)</a></p>
-
 <p align="center" width="100%">
-<img width="30%" src="thunderbird.net/screenshots/note.jpg" alt="Note popup">
-<img width="30%" src="thunderbird.net/screenshots/utf8chars.jpg" alt="UTF-8 chars">
-<img width="30%" src="thunderbird.net/screenshots/attach_message.jpg" alt="Attach to message">
+<img width="40%" src="thunderbird.net/screenshots/note.jpg" alt="Note popup">
+<img width="40%" src="thunderbird.net/screenshots/attach_message.jpg" alt="Attach to message">
 </p>
 <p align="center" width="100%">
-<img width="30%" src="thunderbird.net/screenshots/attach_print.jpg" alt="Attach to print">
-<img width="30%" src="thunderbird.net/screenshots/column.jpg" alt="Column header">
-<img width="30%" src="thunderbird.net/screenshots/menu.jpg" alt="Right click menu">
+<img width="40%" src="thunderbird.net/screenshots/attach_print.jpg" alt="Attach to print">
+<img width="40%" src="thunderbird.net/screenshots/column.jpg" alt="Column header">
 </p>
 <p align="center" width="100%">
-<img width="30%" src="thunderbird.net/screenshots/quick_filter.jpg" alt="Searchable notes">
-<img width="30%" src="thunderbird.net/screenshots/options1.jpg" alt="Options page 1">
-<img width="30%" src="thunderbird.net/screenshots/options2.jpg" alt="Options page 2">
-</p>
-<p align="center" width="100%">
-<img width="30%" src="thunderbird.net/screenshots/filters.jpg" alt="Message filters">
-<img width="30%" src="thunderbird.net/screenshots/search.jpg" alt="Message search">
+<img width="40%" src="thunderbird.net/screenshots/filters.jpg" alt="Message filters">
+<img width="40%" src="thunderbird.net/screenshots/search.jpg" alt="Message search">
 </p>
 
 # Known issues
