@@ -173,6 +173,10 @@ async function saveOption(name: keyof IPreferences){
 	}
 
 	savePrefs(newPrefs).then(() => (new PrefsUpdated).sendMessage());
+
+	if(newPrefs.dateLocale !== undefined){
+		initDateFormats(newPrefs.dateLocale, getPrefFromHtml("dateFormatPredefined"));
+	}
 }
 
 function initTags(tags: Array<messenger.messages.tags.MessageTag>): void {
@@ -195,7 +199,7 @@ function initTags(tags: Array<messenger.messages.tags.MessageTag>): void {
 	}
 }
 
-function initDateFormats(prefs: IPreferences): void {
+function initDateFormats(dateLocale: string | undefined, dateFormatPredefined: string | undefined): void {
 	const select = window.document.getElementById('dateFormatPredefined');
 
 	if(!select || !isSelectElement(select)){
@@ -214,7 +218,7 @@ function initDateFormats(prefs: IPreferences): void {
 	opts.value = "";
 	select.add(opts);
 
-	const d = luxon.DateTime.fromJSDate(new Date).setLocale(prefs.dateLocale);
+	const d = luxon.DateTime.fromJSDate(new Date).setLocale(dateLocale);
 
 	dateFormats.forEach((groups, groupKey) => {
 		const gr = document.createElement('optgroup');
@@ -223,7 +227,7 @@ function initDateFormats(prefs: IPreferences): void {
 			const opt = document.createElement('option');
 			opt.text = d.toLocaleString(luxon.DateTime[k]);
 			opt.value = k;
-			opt.selected = prefs.dateFormatPredefined == k;
+			opt.selected = dateFormatPredefined == k;
 			gr.appendChild(opt);
 		});
 		select.add(gr);
@@ -450,7 +454,7 @@ function gridPosChange(){
 
 async function initOptionsPageValues(prefs: IPreferences){
 	i18n.setValues(document, prefs);
-	initDateFormats(prefs);
+	initDateFormats(prefs.dateLocale, prefs.dateFormatPredefined);
 	storageOptionChange();
 	dateFormatChange();
 	gridPosChange();
