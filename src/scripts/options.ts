@@ -95,17 +95,17 @@ function getPrefFromHtml<K extends keyof Partial<IPreferences>>(key: K): IPrefer
 				} else if(type == "number"){
 					return Number(node.value) as IPreferences[K];
 				} else {
-					console.error(`Unsupported type: ${type} for preference: ${key} from element: ${node.nodeName}.`);
+					console.error(`${debugHandle} BUG: unsupported type: "${type}" for preference: "${key}" from element: "${node.nodeName}"`);
 					return undefined;
 				}
 			}
 		} else {
-			console.error(`Unsupported element: ${node.nodeName}`);
+			console.error(`${debugHandle} BUG: unsupported element: ${node.nodeName}`);
 			return undefined;
 		}
 	}
 
-	console.error(`Element(s) by name not found: ${key}`);
+	console.error(`${debugHandle} BUG: element(s) by name "${key}" not found`);
 
 	return undefined;
 }
@@ -177,6 +177,10 @@ async function saveOption(name: keyof IPreferences){
 	if(newPrefs.dateLocale !== undefined){
 		initDateFormats(newPrefs.dateLocale, getPrefFromHtml("dateFormatPredefined"));
 	}
+
+	if(newPrefs.enableDebug !== undefined){
+		QDEB = newPrefs.enableDebug;
+	}
 }
 
 function initTags(tags: Array<messenger.messages.tags.MessageTag>): void {
@@ -244,7 +248,7 @@ function dateFormatChange(){
 async function initXNoteFolderInfo(){
 	const path = await getXNoteStoragePath();
 
-	QDEB&&console.debug(`${debugHandle} trying XNote++ foder:`, path);
+	QDEB&&console.info(`${debugHandle} trying XNote++ foder:`, path);
 
 	const xFolderFoundEl = getElementByIdOrDie('xnote.folder.found');
 	const xFolderInaccessibleEl = getElementByIdOrDie('xnote.folder.inaccessible');
@@ -292,7 +296,7 @@ async function toggleFormConstrols(prefs: Partial<IPreferences>, defaultDisabled
 async function initExportButtons(prefs: IPreferences){
 	let listener = (type: typeof QNoteFolder | typeof XNoteFolder) => {
 		return async () => {
-			console.log(`${debugHandle} exportButton<${type.name}>::click()`);
+			QDEB&&console.log(`${debugHandle} exportButton<${type.name}>::click()`);
 
 			// Select path where to export QNotes / XNotes
 			browser.legacy.folderPicker(await browser.qapp.getProfilePath()).then(async selectedPath => {
@@ -320,7 +324,7 @@ async function initExportButtons(prefs: IPreferences){
 	exportQNotesButton.addEventListener('click', listener(QNoteFolder));
 	exportXNotesButton.addEventListener('click', listener(XNoteFolder));
 	importFolderButton.addEventListener('click', async () => {
-		console.log(`${debugHandle} importFolderButton::click()`);
+		QDEB&&console.log(`${debugHandle} importFolderButton::click()`);
 
 		// Path from where to import .xnote or .qnote files
 		browser.legacy.folderPicker(await browser.qapp.getProfilePath()).then(async selectedPath => {
@@ -336,7 +340,7 @@ async function initExportButtons(prefs: IPreferences){
 				const notes = await loadAllFolderNotes(selectedPath);
 				await saveNotesAs(QNoteLocalStorage, notes, !!overwriteExistingNotes.checked).then(printImportStats);
 			} else {
-				console.error("Bug: unknown storageOption:", prefs.storageOption);
+				console.error(`${debugHandle} BUG: unknown storageOption:`, prefs.storageOption);
 			}
 			toggleFormConstrols(prefs, false);
 		});
@@ -346,12 +350,17 @@ async function initExportButtons(prefs: IPreferences){
 
 // Saving is handled by different handler
 async function storageOptionChange(){
-	const option = await getPrefFromHtml("storageOption");
-
 	if(!input_storageFolder.value){
-		input_storageFolder.value = await browser.qapp.createStoragePath();
+		const storageFolder = await browser.qapp.createStoragePath();
+		if(storageFolder){
+			input_storageFolder.value = storageFolder;
+		} else {
+			displayErrors([i18n._("could.not.initialize.storage.folder")]);
+			return;
+		}
 	}
 
+	const option = getPrefFromHtml("storageOption");
 	if(option == 'folder'){
 		storageFieldset_folder.style.display = '';
 	} else {
@@ -518,8 +527,9 @@ function generatePosGrid(){
 
 // Called only once, after DOM loaded
 async function initOptionsPage(prefs: IPreferences){
-	i18n.setTexts(document);
+	QDEB = prefs.enableDebug;
 
+	i18n.setTexts(document);
 	initTags(await browser.messages.tags.list());
 	generatePosGrid();
 	initXNoteFolderInfo();
@@ -545,12 +555,9 @@ async function initOptionsPage(prefs: IPreferences){
 
 		const prefKey = el.name as keyof IPreferences;
 
-		unAccountedForListeners.delete(prefKey);
+		QDEB&&unAccountedForListeners.delete(prefKey);
 
-		return el.addEventListener(method, () => {
-			console.log(`Saving: ${prefKey}`);
-			saveOption(prefKey)
-		});
+		return el.addEventListener(method, () => saveOption(prefKey));
 	};
 
 	document.querySelectorAll("textarea,select,input[type=text],input[type=number]").forEach(el => createSaveListener(el, "change"));
@@ -590,7 +597,7 @@ async function exportStorage(){
 }
 
 window.addEventListener("DOMContentLoaded", async () => {
-	QDEB&&console.log(`${debugHandle} DOMContentLoaded`);
+	QDEB&&console.debug(`${debugHandle} DOMContentLoaded`);
 
 	await initOptionsPage(await getPrefs());
 });

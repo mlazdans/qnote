@@ -16,6 +16,7 @@ export interface IWritableQAppPreferences {
 	messageAttachBottom: boolean
 	attachTemplate     : string
 	treatTextAsHtml    : boolean
+	enableDebug        : boolean
 }
 
 export interface IWritablePreferences extends IWritableQAppPreferences {
@@ -29,7 +30,6 @@ export interface IWritablePreferences extends IWritableQAppPreferences {
 	dateLocale            : string
 	width                 : number
 	height                : number
-	enableDebug           : boolean
 	anchor                : PopupAnchor
 	anchorPlacement       : string
 	alwaysDefaultPlacement: boolean
@@ -41,14 +41,14 @@ export type IPreferences = Readonly<IWritablePreferences>;
 export type IQAppPreferences = Readonly<IWritableQAppPreferences>;
 
 export interface IXNotePreferences {
-	usetag: boolean,
-	dateformat: string;
-	width: number,
-	height: number,
-	show_on_select: boolean,
+	usetag                   : boolean,
+	dateformat               : string;
+	width                    : number,
+	height                   : number,
+	show_on_select           : boolean,
 	show_first_x_chars_in_col: number,
-	storage_path: string,
-	version: string,
+	storage_path             : string,
+	version                  : string,
 }
 
 export class QAppPrefs
@@ -61,6 +61,7 @@ export class QAppPrefs
 		messageAttachBottom: false,
 		attachTemplate     : '<div class="qnote-title">QNote: {{ qnote_date }}</div>\n<div class="qnote-text">{{ qnote_text }}</div>',
 		treatTextAsHtml    : false,
+		enableDebug        : true,
 	}
 }
 
@@ -117,23 +118,18 @@ export interface TypeFile {
 export type HTMLInputButtonElement   = HTMLInputElement & TypeButton
 export type HTMLInputCheckboxElement = HTMLInputElement & TypeCheckbox
 export type HTMLInputRadioElement    = HTMLInputElement & TypeRadio
-export type HTMLInputFileElement    = HTMLInputElement & TypeFile
+export type HTMLInputFileElement     = HTMLInputElement & TypeFile
 
 export interface IBox {
-	top: number;
-	left: number;
-	width: number;
+	top   : number;
+	left  : number;
+	width : number;
 	height: number;
 }
 
 export var Box = {
 	center: function(innerBox: IBox, outerBox: IBox, absolute = true): IBox {
-		const retBox: IBox = {
-			top: 0,
-			left: 0,
-			width: 0,
-			height: 0,
-		};
+		const retBox: IBox = { top: 0, left: 0, width: 0, height: 0 };
 
 		retBox.left = Math.round((outerBox.width - innerBox.width) / 2);
 		retBox.top = Math.round((outerBox.height - innerBox.height) / 2);
@@ -347,13 +343,14 @@ export function isTypeRadio(node: Element): node is HTMLInputRadioElement {
 
 export function convertPrefsToQAppPrefs(prefs: IPreferences): IQAppPreferences {
 	return {
-		storageOption: prefs.storageOption,
-		storageFolder: prefs.storageFolder,
-		showFirstChars: prefs.showFirstChars,
-		messageAttachTop: prefs.messageAttachTop,
+		storageOption      : prefs.storageOption,
+		storageFolder      : prefs.storageFolder,
+		showFirstChars     : prefs.showFirstChars,
+		messageAttachTop   : prefs.messageAttachTop,
 		messageAttachBottom: prefs.messageAttachBottom,
-		attachTemplate: prefs.attachTemplate,
-		treatTextAsHtml: prefs.treatTextAsHtml,
+		attachTemplate     : prefs.attachTemplate,
+		treatTextAsHtml    : prefs.treatTextAsHtml,
+		enableDebug        : prefs.enableDebug,
 	}
 }
 

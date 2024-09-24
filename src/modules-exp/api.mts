@@ -31,10 +31,9 @@ export interface INoteFileAPI<T extends INoteFileProvider> {
 // type KeyDownEventKeys = typeof QAPP_ON_KEYDOWN_MAP[number];
 
 export interface IQAppAPI {
-	createStoragePath(): Promise<string>
+	createStoragePath(): Promise<string | undefined>
 	updateColumsView(): Promise<void>
 	init(Prefs: IQAppPreferences): Promise<void>
-	setDebug(on: boolean): Promise<void>
 	setPrefs(prefs: IQAppPreferences): Promise<void>
 	getProfilePath(): Promise<string>
 	saveFocus(): Promise<void>
@@ -55,7 +54,6 @@ export interface ILegacyAPI {
 export type IPopupCloseReason = "close" | "escape" | "delete" | "sync";
 
 export interface IQPopupAPI {
-	setDebug(on: boolean): Promise<void>
 	close(id: number, reason: IPopupCloseReason): Promise<void>
 	get(id: number): Promise<IPopupState>
 	pop(id: number): Promise<void>

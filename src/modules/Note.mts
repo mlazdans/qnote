@@ -5,12 +5,12 @@ export type NoteClassType =
 	| typeof QNoteLocalStorage;
 
 export interface INoteData {
-	text?: string;
-	left?: number;
-	top?: number;
-	width?: number;
+	text?  : string;
+	left?  : number;
+	top?   : number;
+	width? : number;
 	height?: number;
-	ts?: number;
+	ts?    : number;
 }
 
 export interface INote {
@@ -41,9 +41,9 @@ export abstract class DefaultNote implements INote {
 			return this.getData();
 		} catch(e) {
 			if(e instanceof Error){
-				console.error("Error loading note:", e.message);
+				console.error("[qnote] error loading note:", e.message);
 			} else {
-				console.error("Error loading note:", e);
+				console.error("[qnote] error loading note:", e);
 			}
 			return null;
 		}

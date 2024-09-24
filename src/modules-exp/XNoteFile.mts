@@ -166,7 +166,7 @@ export class XNoteFile implements INoteFileProvider {
 			} else if(t === 'number'){
 				setProperty(prefs, k, pi.getIntPref(k));
 			} else {
-				console.warn(`Unknown type: ${t}`);
+				console.error(`[qnote:xnote] BUG: unsupported preference type: ${t}, key: ${k}`);
 			}
 		}
 

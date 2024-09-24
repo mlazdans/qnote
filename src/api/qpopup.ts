@@ -24,6 +24,7 @@ var { Box, coalesce } = ChromeUtils.importESModule("resource://qnote/modules/com
 
 var QDEB = true;
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
+var debugHandle = "[qnote:qpopup]";
 
 class QPopupEventDispatcher extends QEventDispatcher<{
 	onclose: (id: number, reason: string, state: IPopupState) => void;
@@ -37,9 +38,9 @@ var popupManager = {
 	counter: 0,
 	popups: new Map<number, QPopup>(),
 	add(popup: QPopup): void {
-		QDEB && console.debug(`qpopup.popupManager: Adding new popup with id ${popup.id}`);
+		QDEB && console.debug(`${debugHandle} popupManager: adding new popup with id:`, popup.id);
 		if (this.has(popup.id)) {
-			throw new Error(`qpopup: id ${popup.id} already exists`);
+			throw new Error(`${debugHandle} id already exists: ${popup.id}`);
 		} else {
 			this.popups.set(popup.id, popup);
 		}
@@ -51,7 +52,7 @@ var popupManager = {
 		if (this.popups.has(id)) {
 			return this.popups.get(id)!;
 		} else {
-			throw new Error(`qpopup: id ${id} not found`);
+			throw new Error(`${debugHandle} id not found: ${id}`);
 		}
 	},
 	has(id: number): boolean {
@@ -60,20 +61,8 @@ var popupManager = {
 };
 
 var qpopup = class extends ExtensionCommon.ExtensionAPI {
-	static onDisable(id: string) {
-		console.log("[qpopup onDisable]", id);
-	}
-
-	static onUninstall(id: string) {
-		console.log("[qpopup onUninstall]", id);
-	}
-
-	static onUpdate(id: string, manifest: any) {
-		console.log("[qpopup onUpdate]", id, manifest);
-	}
-
 	onShutdown(isAppShutdown: any) {
-		console.log("[qpopup onShutdown]", isAppShutdown);
+		QDEB&&console.log(`${debugHandle} shutdown`);
 
 		if(isAppShutdown){
 			return;
@@ -89,7 +78,7 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 			try {
 				return extension.windowManager.get(windowId).window;
 			} catch {
-				throw new Error("windowManager fail");
+				throw new Error(`${debugHandle} windowManager failed`);
 			}
 		}
 
@@ -138,16 +127,13 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 						};
 					},
 				}).api(),
-				async setDebug(on: boolean) {
-					QDEB = on;
-				},
 				async takeScreenshot(id: number): Promise<boolean> {
 					const p = popupManager.get(id);
 
 					const canvas = p.window.document.createElement('canvas');
 					const ctx = canvas.getContext('2d');
 					if(!ctx){
-						console.error("Could not create cavas context");
+						QDEB&&console.error(`${debugHandle} could not create canvas context`);
 						return false;
 					}
 
@@ -170,18 +156,18 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 								transferable.setTransferData("application/x-moz-nativeimage", imgDecoded);
 								Services.clipboard.setData(transferable, null, Ci.nsIClipboard.kGlobalClipboard);
 							} else {
-								console.error("Decoding image failed");
+								QDEB&&console.error(`${debugHandle} decoding image failed`);
 							}
 						}, "image/png", 0.9);
 					} catch (e) {
-						console.error("Taking snapshot failed ", e);
+						QDEB&&console.error(`${debugHandle} taking screenshot failed`, e);
 						return false;
 					}
 
 					return true;
 				},
 				async close(id: number, reason: string) {
-					QDEB && console.debug("qpopup.remove()", id);
+					QDEB && console.debug(`${debugHandle} close(), id:`, id, ', reason:', reason);
 					popupManager.get(id).destroy(reason);
 				},
 				async get(id: number) {
@@ -199,7 +185,8 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 					return popupManager.get(id).resetPosition();
 				},
 				async create(windowId: number, state: IPopupState) {
-					QDEB && console.debug("qpopup.create()");
+					if(state.enableDebug != undefined)QDEB = state.enableDebug;
+					QDEB && console.debug(`${debugHandle} create()`);
 
 					const popup = new QPopup(id2RealWindow(windowId), extension, state);
 
@@ -225,7 +212,7 @@ class QPopup extends BasePopup {
 		const mainPopupSet = document.getElementById("mainPopupSet");
 
 		if (!mainPopupSet) {
-			throw new Error("mainPopupSet not found");
+			throw new Error(`${debugHandle} mainPopupSet not found`);
 		}
 
 		const id = ++popupManager.counter;
@@ -318,7 +305,7 @@ class QPopup extends BasePopup {
 	}
 
 	destroy(reason?: string) {
-		QDEB&&console.debug("qpopup.api.destroy id:", this.id);
+		QDEB&&console.debug(`${debugHandle} destroy() id:`, this.id, ', reason:', reason);
 		if(popupManager.has(this.id)){
 			this.mainPopupSet.removeChild(this.panel);
 			popupManager.remove(this.id);
@@ -336,7 +323,10 @@ class QPopup extends BasePopup {
 	}
 
 	pop() {
-		QDEB && console.debug("qpopup.api.pop:", this.state);
+		QDEB&&console.group(`${debugHandle} pop()`);
+		QDEB&&console.debug(this.state);
+		QDEB&&console.groupEnd();
+
 		const { left, top, width, height } = this.state;
 
 		return new Promise((resolve) => {
@@ -357,7 +347,7 @@ class QPopup extends BasePopup {
 					this.state.left = this.panel.screenX + (width || 0) * anchorAdjX;
 				} else {
 					// This should never happend, only if aEl not found or anchorPlacement not set for some reason
-					console.warn("anchor element not found or anchorPlacement not set");
+					console.warn(`${debugHandle} anchor element not found or anchorPlacement not set`);
 					this.panel.openPopup(null, this.state.anchorPlacement || "after_start");
 				}
 			} else {

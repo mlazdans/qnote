@@ -86,6 +86,11 @@
 				"optional": true,
 				"default": false,
 				"description": ""
+			},
+			"enableDebug": {
+				"type": "boolean",
+				"optional": true,
+				"description": ""
 			}
 		}
 	}],
@@ -134,17 +139,6 @@
 		"async": true,
 		"parameters": [{
 			"$ref": "Prefs"
-		}]
-	},{
-		"name": "setDebug",
-		"type": "function",
-		"description": "Enable/Disable debug messages",
-		"async": true,
-		"parameters": [{
-			"name": "on",
-			"type": "boolean",
-			"optional": true,
-			"default": false
 		}]
 	},{
 		"name": "saveFocus",

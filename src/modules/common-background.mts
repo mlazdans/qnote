@@ -28,13 +28,14 @@ export async function getPrefs(): Promise<IPreferences> {
 	const prefs: IWritablePreferences = Object.assign({}, Prefs.defaults, savedPrefs);
 	const isEmpty = Object.keys(savedPrefs).length === 0;
 
-	QDEB&&console.group("getPrefs()");
-	QDEB&&console.debug("savedPrefs", savedPrefs);
-	QDEB&&console.debug("prefs", prefs);
+	QDEB&&console.groupCollapsed(`${debugHandle} getPrefs()`);
+	QDEB&&console.debug("savedPrefs:", savedPrefs);
+	QDEB&&console.debug("prefs:", prefs);
 	QDEB&&console.debug("isEmpty?", isEmpty);
+	QDEB&&console.groupEnd();
 
 	if(isEmpty){
-		QDEB&&console.log(`No saved preferences, fallback to defaults`);
+		QDEB&&console.info(`${debugHandle} no saved preferences, falling back to defaults`);
 
 		// Set xnote prefs
 		Object.assign(prefs, xnotePrefsMapper(await browser.xnote.getPrefs()));
@@ -50,12 +51,15 @@ export async function getPrefs(): Promise<IPreferences> {
 	}
 
 	if(!prefs.storageOption || !prefs.storageFolder) {
-		prefs.storageOption = 'folder';
-		prefs.storageFolder = await browser.qapp.createStoragePath();
-		QDEB&&console.debug("Set prefs.storageFolder to default:", prefs.storageFolder);
+		const storageFolder = await browser.qapp.createStoragePath()
+		if(storageFolder){
+			prefs.storageOption = 'folder';
+			prefs.storageFolder = storageFolder;
+			QDEB&&console.info(`${debugHandle} set prefs.storageFolder to default:`, prefs.storageFolder);
+		} else {
+			throw new Error(`${debugHandle} could not initialize default storage path`);
+		}
 	}
-
-	QDEB&&console.groupEnd();
 
 	return prefs;
 }
@@ -64,26 +68,18 @@ export async function getXNoteStoragePath(): Promise<string> {
 	const xnotePrefs = await browser.xnote.getPrefs();
 
 	if(xnotePrefs.storage_path){
-		QDEB&&console.debug(`${debugHandle} XNote++ storage folder setting found: ${xnotePrefs.storage_path}`);
+		QDEB&&console.info(`${debugHandle} XNote++ storage folder setting found: ${xnotePrefs.storage_path}`);
 
 		const path = await browser.xnote.getStoragePath(xnotePrefs.storage_path);
 
 		if(await browser.legacy.isFolderWritable(path)){
 			return path;
 		} else {
-			QDEB&&console.debug(`${debugHandle} XNote++ storage folder not writable: ${path}`);
+			QDEB&&console.warn(`${debugHandle} XNote++ storage folder not writable: ${path}`);
 		}
 	}
 
 	return await browser.xnote.getStoragePath();
-}
-
-async function isReadable(path: string){
-	return await browser.legacy.isReadable(path);
-}
-
-async function isFolderReadable(path: string){
-	return await browser.legacy.isFolderReadable(path);
 }
 
 // Load all note keys from folder, prioritizing qnote if both qnote and xnote exists
@@ -128,7 +124,7 @@ export async function saveNotesAs(...[instanceType, importNotes, overwrite, root
 		} else if(instanceType == QNoteLocalStorage) {
 			return new instanceType(keyId);
 		} else {
-			throw new Error(`${debugHandle} unreachable`);
+			throw new Error(`${debugHandle} BUG: unreachable`);
 		}
 	}
 
@@ -142,7 +138,7 @@ export async function saveNotesAs(...[instanceType, importNotes, overwrite, root
 				return N.save().then(() => {
 					stats[oldData ? "overwritten" : "imported"]++;
 				}).catch(e => {
-					console.error(_("error.saving.note"), keyId, e.message);
+					console.error(`${debugHandle} ` + _("error.saving.note"), keyId, e.message);
 					stats.errored++;
 				});
 			}
@@ -240,7 +236,7 @@ async function getSavedPrefs(): Promise<Partial<IPreferences>> {
 			} else if(type === "string"){
 				setProperty(ret, k, String(val));
 			} else {
-				console.error(`Unsupported preference type: ${type} for key ${k}`);
+				console.error(`${debugHandle} BUG: unsupported preference type: ${type}, key: ${k}`);
 			}
 		}
 	}
@@ -254,4 +250,8 @@ export function isClipboardSet(content: INoteData | null): content is INoteData 
 
 export async function confirmDelete(): Promise<boolean> {
 	return browser.legacy.confirm(_("delete.note"), _("are.you.sure"));
+}
+
+export function setQDEBCommonBackground(on: boolean){
+	QDEB = on;
 }

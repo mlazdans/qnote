@@ -17,47 +17,49 @@ export interface INotePopup extends QEventDispatcher<{
 }
 
 export interface IPopupState {
-	focused?: boolean
-	top?: number
-	left?: number
-	offsetTop?: number
-	offsetLeft?: number
-	width?: number
-	height?: number
-	anchor?: PopupAnchor
-	anchorPlacement?: string
-	title?: string
-	text?: string
-	placeholder?: string
-	focusOnDisplay?: boolean
+	focused?           : boolean
+	top?               : number
+	left?              : number
+	offsetTop?         : number
+	offsetLeft?        : number
+	width?             : number
+	height?            : number
+	anchor?            : PopupAnchor
+	anchorPlacement?   : string
+	title?             : string
+	text?              : string
+	placeholder?       : string
+	focusOnDisplay?    : boolean
 	enableSpellChecker?: boolean
-	confirmDelete?: boolean
+	confirmDelete?     : boolean
+	enableDebug?       : boolean
 }
 
 export function note2state(noteData: INoteData | null, prefs: IPreferences): IPopupState {
 	const state: IPopupState =  {
-		// focused: undefined,
-		top: noteData?.top,
-		left: noteData?.left,
-		width: noteData?.width || prefs.width,
-		height: noteData?.height || prefs.height,
-		// offsetTop: undefined,
-		// offsetLeft: undefined,
-		anchor: prefs.anchor,
-		anchorPlacement: prefs.anchorPlacement,
-		title: "QNote",
-		text: noteData?.text,
-		// placeholder: undefined,
-		focusOnDisplay: prefs.focusOnDisplay,
+		// focused        : undefined,
+		top               : noteData?.top,
+		left              : noteData?.left,
+		width             : noteData?.width || prefs.width,
+		height            : noteData?.height || prefs.height,
+		// offsetTop      : undefined,
+		// offsetLeft     : undefined,
+		anchor            : prefs.anchor,
+		anchorPlacement   : prefs.anchorPlacement,
+		title             : "QNote",
+		text              : noteData?.text,
+		// placeholder    : undefined,
+		focusOnDisplay    : prefs.focusOnDisplay,
 		enableSpellChecker: prefs.enableSpellChecker,
-		confirmDelete: prefs.confirmDelete
+		confirmDelete     : prefs.confirmDelete,
+		enableDebug       : prefs.enableDebug,
 	}
 
 	if(prefs.alwaysDefaultPlacement){
-		state.width = prefs.width;
+		state.width  = prefs.width;
 		state.height = prefs.height;
-		state.left = undefined;
-		state.top = undefined;
+		state.left   = undefined;
+		state.top    = undefined;
 	}
 
 	if(noteData?.ts) {
@@ -73,10 +75,10 @@ export function note2state(noteData: INoteData | null, prefs: IPreferences): IPo
 
 export function state2note(state: IPopupState): INoteData {
 	return {
-		text: state.text,
-		left: state.left,
-		top: state.top,
-		width: state.width,
+		text  : state.text,
+		left  : state.left,
+		top   : state.top,
+		width : state.width,
 		height: state.height,
 	}
 }
@@ -136,10 +138,6 @@ export class QNotePopup extends DefaultNotePopup {
 		return this.id
 	}
 
-	static init(debugOn: boolean){
-		browser.qpopup.setDebug(debugOn);
-	}
-
 	static async create(keyId: string, note: INote, windowId: number, state: IPopupState): Promise<QNotePopup> {
 		return browser.qpopup.create(windowId, state).then(id => {
 			return new QNotePopup(keyId, note, state, id);
@@ -180,12 +178,12 @@ export class WebExtensionPopup extends DefaultNotePopup {
 
 	async pop() {
 		const initialState: browser.windows._CreateCreateData = {
-			url: "html/wepopup.html?keyId=" + encodeURIComponent(this.keyId),
-			type: "popup",
-			width: this.state.width,
-			height: this.state.height,
-			left: this.state.left,
-			top: this.state.top,
+			url                : "html/wepopup.html?keyId=" + encodeURIComponent(this.keyId),
+			type               : "popup",
+			width              : this.state.width,
+			height             : this.state.height,
+			left               : this.state.left,
+			top                : this.state.top,
 			allowScriptsToClose: true,
 		}
 
@@ -210,9 +208,8 @@ export class WebExtensionPopup extends DefaultNotePopup {
 	}
 
 	async update(state: IPopupState){
-		console.error("TODO: WebExtensionPopup.update()")
+		console.error("[qnote] TODO: WebExtensionPopup.update()")
 		return state;
-		//return browser.windows.update(this.id, state);
 	}
 
 	async focus(): Promise<void> {

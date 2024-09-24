@@ -35,7 +35,7 @@ import { AttachToMessage, AttachToMessageReply, PopNote, PopupDataReply, PopupDa
 import { INote, INoteData, QNoteFolder, QNoteLocalStorage } from "./modules/Note.mjs";
 import { INotePopup, IPopupState, note2state, QNotePopup, state2note, WebExtensionPopup } from "./modules/NotePopups.mjs";
 import { convertPrefsToQAppPrefs, dateFormatWithPrefs, IPreferences } from "./modules/common.mjs";
-import { confirmDelete, getCurrentWindowId, getPrefs, isClipboardSet, sendPrefsToQApp } from "./modules/common-background.mjs";
+import { confirmDelete, getCurrentWindowId, getPrefs, isClipboardSet, sendPrefsToQApp, setQDEBCommonBackground } from "./modules/common-background.mjs";
 import { Menu } from "./modules/Menu.mjs";
 import { QEventDispatcher } from "./modules/QEventDispatcher.mjs";
 import { IPopupCloseReason } from "./modules-exp/api.mjs";
@@ -97,11 +97,16 @@ class QNoteExtension extends QEventDispatcher<{
 
 	constructor(prefs: IPreferences) {
 		super();
-		QDEB&&console.info(`${debugHandle} new QNoteExtension()`);
-
+		QDEB&&console.log(`${debugHandle} new QNoteExtension()`);
 		this.prefs = prefs;
-		// TODO: re-enable debug
-		// QDEB = prefs.enableDebug;
+		this.ripplePrefs(this.prefs);
+	}
+
+	ripplePrefs(prefs: IPreferences) {
+		this.prefs = prefs;
+		QDEB = prefs.enableDebug;
+		setQDEBCommonBackground(QDEB);
+		sendPrefsToQApp(prefs).then(() => this.updateViews())
 	}
 
 	createNote(keyId: string): QNoteLocalStorage | QNoteFolder {
@@ -133,7 +138,7 @@ class QNoteExtension extends QEventDispatcher<{
 	}
 
 	async updateTabView(tabId: number){
-		QDEB&&console.debug("updateTabView() for tabId:", tabId);
+		QDEB&&console.debug(`${debugHandle} updateTabView(), tabId:`, tabId);
 
 		const messages = await browser.messageDisplay.getDisplayedMessages(tabId);
 
@@ -144,7 +149,7 @@ class QNoteExtension extends QEventDispatcher<{
 			await this.updateIcons(tabId, note.exists());
 			await browser.tabs.executeScript(tabId, {
 				file: "scripts/messageDisplay.js",
-			}).catch(() => console.log("Could not insert js into tab:", tabId));
+			}).catch(() => console.log(`${debugHandle} could not insert js into tab id:`, tabId));
 		} else if(messages.length >= 1){
 			const keyArray = [];
 			for(let m of messages){
@@ -226,43 +231,49 @@ class QNoteExtension extends QEventDispatcher<{
 	}
 
 	async createPopup(note: INote, popupState: IPopupState = {}): Promise<INotePopup> {
+		QDEB&&console.debug(`${debugHandle} createPopup(), keyId:`, note.keyId);
+
 		const keyId = note.keyId;
-		QDEB&&console.debug(`${debugHandle} createPopup:`, keyId);
+
 		await browser.qapp.saveFocus();
-		return new Promise(async (resolve, reject) => {
-			if(PopupManager.has(keyId)){
-				return resolve(PopupManager.get(keyId));
+
+		if(PopupManager.has(keyId)){
+			QDEB&&console.debug(`${debugHandle} popup already exists`);
+			return PopupManager.get(keyId);
+		}
+
+		if(PopupManager.count >= maxNoteCount){
+			// TODO: close only latest
+			PopupManager.iter((keyId, popup) => {
+				popup.close();
+			});
+		}
+
+		let popup: QNotePopup | WebExtensionPopup | undefined;
+
+		const state = Object.assign({}, note2state(note.getData(), this.prefs), popupState);
+
+		if(this.prefs.windowOption === 'xul'){
+			const windowId = await getCurrentWindowId();
+			if(!windowId){
+				throw new Error(`${debugHandle} could not get current window`);
 			}
+			popup = await QNotePopup.create(keyId, note, windowId, state);
+		} else if(this.prefs.windowOption == 'webext'){
+			popup = new WebExtensionPopup(keyId, note, state);
+		} else {
+			throw new Error(`${debugHandle} unknown windowOption option: ${this.prefs.windowOption}`);
+		}
 
-			if(PopupManager.count >= maxNoteCount){
-				PopupManager.iter((keyId, popup) => {
-					popup.close();
-				});
-			}
+		QDEB&&console.groupCollapsed(`${debugHandle} new popup()`);
+		QDEB&&console.debug("popup:", popup);
+		QDEB&&console.groupEnd();
 
-			let popup: QNotePopup | WebExtensionPopup | undefined;
+		PopupManager.add(popup);
 
-			const state = Object.assign({}, note2state(note.getData(), this.prefs), popupState);
+		popup.addListener("onnote", this.onNoteHandler.bind(this));
 
-			if(this.prefs.windowOption === 'xul'){
-				const windowId = await getCurrentWindowId();
-				if(!windowId){
-					return reject("Could not get current window");
-				}
-				popup = await QNotePopup.create(keyId, note, windowId, state);
-			} else if(this.prefs.windowOption == 'webext'){
-				popup = new WebExtensionPopup(keyId, note, state);
-			} else {
-				throw new TypeError(`${debugHandle} unknown windowOption option: ${this.prefs.windowOption}`);
-			}
-
-			QDEB&&console.debug(`${debugHandle} new popup: ${keyId}`, popup);
-
-			PopupManager.add(popup);
-			popup.addListener("onnote", this.onNoteHandler.bind(this));
-
-			resolve(popup);
-		});
+		return popup;
 	}
 
 	async popNote(keyId: string){
@@ -282,9 +293,10 @@ class QNoteExtension extends QEventDispatcher<{
 	}
 
 	async menuHandler(info: browser.menus.OnClickData) {
-		var menuDebugHandle: string = `${debugHandle} [menuHandler]`;
+		var menuDebugHandle: string = `${debugHandle}[menuHandler]`;
+
 		if(!info.selectedMessages || !info.selectedMessages.messages.length){
-			QDEB&&console.warn(`${menuDebugHandle} menu: no messages selected, bail`);
+			QDEB&&console.warn(`${menuDebugHandle} no messages selected, bail`);
 			return;
 		}
 
@@ -321,7 +333,7 @@ class QNoteExtension extends QEventDispatcher<{
 			} else if(info.menuItemId === "reset"){
 				this.resetNote(keyId);
 			} else {
-				console.error(`BUG: ${menuDebugHandle} unknown menuItemId:`, info.menuItemId);
+				console.error(`${menuDebugHandle} BUG: unknown menuItemId:`, info.menuItemId);
 			}
 		// process multiple message selection
 		} else if(messages.length > 1){
@@ -348,7 +360,7 @@ class QNoteExtension extends QEventDispatcher<{
 					this.resetNote(m.headerMessageId);
 				}
 			} else {
-				console.error(`BUG: ${menuDebugHandle} unknown menuItemId:`, info.menuItemId);
+				console.error(`${menuDebugHandle} BUG: unknown menuItemId:`, info.menuItemId);
 			}
 		}
 	}
@@ -447,9 +459,6 @@ class QNoteExtension extends QEventDispatcher<{
 		}
 
 		await browser.qapp.init(convertPrefsToQAppPrefs(this.prefs));
-		await browser.qapp.setDebug(QDEB);
-
-		QNotePopup.init(QDEB);
 
 		// window.addEventListener("unhandledrejection", event => {
 		// 	console.warn(`Unhandle: ${event.reason}`, event);
@@ -459,7 +468,7 @@ class QNoteExtension extends QEventDispatcher<{
 
 		// Messages displayed
 		browser.messageDisplay.onMessagesDisplayed.addListener(async (tab: browser.tabs.Tab, messages: browser.messages.MessageHeader[]) => {
-			QDEB&&console.debug(`${debugHandle} messageDisplay.onMessagesDisplayed:`, messages);
+			QDEB&&console.debug(`${debugHandle} messageDisplay.onMessagesDisplayed()`);
 			if(messages.length == 1){
 				const keyId = messages[0].headerMessageId;
 				const note = await this.createAndLoadNote(keyId);
@@ -472,9 +481,9 @@ class QNoteExtension extends QEventDispatcher<{
 		});
 
 		// Change folders
-		browser.mailTabs.onDisplayedFolderChanged.addListener(async (tab, _displayedFolder) => {
-			QDEB&&console.debug(`${debugHandle} mailTabs.onDisplayedFolderChanged()`);
-		});
+		// browser.mailTabs.onDisplayedFolderChanged.addListener(async (tab, _displayedFolder) => {
+		// 	QDEB&&console.debug(`${debugHandle} mailTabs.onDisplayedFolderChanged()`);
+		// });
 
 		// Create tabs
 		// browser.tabs.onCreated.addListener(async tab => {
@@ -516,7 +525,7 @@ class QNoteExtension extends QEventDispatcher<{
 
 		var actionHandlerActive = false;
 		const actionHandler = async (tab: browser.tabs.Tab) => {
-			const actiondebugHandle = `${debugHandle} [tab:${tab.id}]`
+			const actiondebugHandle = `${debugHandle}[tab:${tab.id}]`
 
 			if(!tab.id){
 				QDEB&&console.debug(`${actiondebugHandle} no tab.id, bail`);
@@ -557,10 +566,10 @@ class QNoteExtension extends QEventDispatcher<{
 		// Handle keyboard shortcuts
 		browser.commands.onCommand.addListener((command, tab) => {
 			if(command === 'qnote') {
-				QDEB&&console.debug(`${debugHandle} commands.onCommand() command:`, command);
+				QDEB&&console.debug(`${debugHandle} commands.onCommand(), command:`, command);
 				actionHandler(tab);
 			} else {
-				console.error(`${debugHandle} unknown command: `, command);
+				console.error(`${debugHandle} BUG: unknown command:`, command);
 			}
 		});
 
@@ -601,9 +610,8 @@ class QNoteExtension extends QEventDispatcher<{
 
 		// Receive data from content
 		browser.runtime.onMessage.addListener((rawData: any, sender: browser.runtime.MessageSender, _sendResponse) => {
-			QDEB&&console.group(`${debugHandle} received message:`);
-			QDEB&&console.debug("rawData:", rawData);
-			QDEB&&console.debug("sender:", sender);
+			QDEB&&console.groupCollapsed(`${debugHandle} received message! rawData:`, rawData);
+			QDEB&&console.debug("Sender:", sender);
 			QDEB&&console.groupEnd();
 
 			if((new AttachToMessage()).parse(rawData)){
@@ -631,10 +639,7 @@ class QNoteExtension extends QEventDispatcher<{
 
 			if((new PrefsUpdated()).parse(rawData)){
 				QDEB&&console.debug(`${debugHandle} received "PrefsUpdated" message`);
-				return getPrefs().then(prefs => {
-					this.prefs = prefs;
-					sendPrefsToQApp(prefs).then(() => this.updateViews())
-				});
+				return getPrefs().then(prefs => this.ripplePrefs(prefs));
 			}
 
 			let data;
@@ -667,7 +672,7 @@ class QNoteExtension extends QEventDispatcher<{
 				return undefined;
 			}
 
-			console.error(`${debugHandle} unhandled message`);
+			console.error(`${debugHandle} BUG: unhandled message:`, rawData);
 
 			return undefined;
 		});
@@ -683,10 +688,10 @@ class QNoteExtension extends QEventDispatcher<{
 				if(tab.id){
 					browser.tabs.insertCSS(tab.id, {
 						file: "html/background.css",
-					}).catch(() => console.log("Could not insert css into tab:", tab.id));
+					}).catch(() => QDEB&&console.warn(`${debugHandle} could not insert css into tab:`, tab.id));
 					browser.tabs.executeScript(tab.id, {
 						file: "scripts/messageDisplay.js",
-					}).catch(() => console.log("Could not insert js into tab:", tab.id));
+					}).catch(() => QDEB&&console.warn(`${debugHandle} could not insert js into tab:`, tab.id));
 				}
 			});
 		});
@@ -713,9 +718,10 @@ async function waitForLoad() {
 QDEB&&console.debug(`${debugHandle} ResourceUrl.register("qnote")`);
 await browser.ResourceUrl.register("qnote");
 
+QDEB&&console.debug(`${debugHandle} add runtime.onInstalled() listener`);
 browser.runtime.onInstalled.addListener(async ({ reason, temporary }) => {
 	// skip during development
-	// if (temporary) return;
+	if (temporary) return;
 
 	if(reason == "install") {
 		await browser.tabs.create({ url: browser.runtime.getURL("html/installed.html") });
@@ -726,6 +732,7 @@ browser.runtime.onInstalled.addListener(async ({ reason, temporary }) => {
 	}
 });
 
+QDEB&&console.debug(`${debugHandle} add LegacyCSS.onWindowOpened() listener`);
 browser.LegacyCSS.onWindowOpened.addListener((url: string) => {
 	const files: Map<string, string> = new Map([
 		["about:3pane", "html/background.css"],
@@ -737,6 +744,7 @@ browser.LegacyCSS.onWindowOpened.addListener((url: string) => {
 	}
 });
 
+QDEB&&console.debug(`${debugHandle} register scripts with scripting.messageDisplay.registerScripts()`);
 browser.scripting.messageDisplay.registerScripts([{
 	id: "qnote-1",
 	js: ["scripts/messageDisplay.js"],

@@ -63,21 +63,15 @@
 			"confirmDelete": {
 				"type": "boolean",
 				"optional": true
+			},
+			"enableDebug": {
+				"type": "boolean",
+				"optional": true,
+				"description": ""
 			}
 		}
 	}],
 	"functions": [{
-		"name": "setDebug",
-		"type": "function",
-		"description": "Enable/Disable debug messages",
-		"async": true,
-		"parameters": [{
-			"name": "on",
-			"type": "boolean",
-			"optional": true,
-			"default": false
-		}]
-	},{
 		"name": "get",
 		"type": "function",
 		"async": "callback",

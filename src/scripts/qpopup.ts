@@ -3,8 +3,6 @@ import { RestoreFocus } from "../modules/Messages.mjs";
 import { IPopupState } from "../modules/NotePopups.mjs";
 import { querySelectorOrDie } from "../modules/common.mjs";
 
-console.debug("qpopup(content) new QPopup: ");
-
 // NOTE: keep this code around for now
 // let queuedUpdates: IPopupState = {};
 // let updateActivityTs = Date.now();
@@ -254,6 +252,7 @@ window.addEventListener("DOMContentLoaded", () => {
 	});
 });
 
+// TODO: test pixelRatio on MacOS retina
 // window.addEventListener("resize", () => {
 // 	let newPixelRatio = window.devicePixelRatio || window.screen.availWidth / document.documentElement.clientWidth;
 // 	if(pixelRatio != newPixelRatio){

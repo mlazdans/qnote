@@ -79,7 +79,7 @@ export class DOMLocalizator {
 		} else if (isTextAreaElement(node) || isButtonElement(node)) {
 			node.value = value;
 		} else {
-			console.warn(`Unsupported input element type: ${node.nodeName}`);
+			console.error(`[qnote:DOMLocalizator] unsupported input element type: ${node.nodeName}`);
 		}
 	}
 }

@@ -9,6 +9,7 @@ var { getFolderNoteData }                     = ChromeUtils.importESModule("reso
 
 var QDEB = true;
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
+var debugHandle = "[qnote:qapp]";
 
 class QAppEventDispatcher extends QEventDispatcher<{
 	domwindowopened: (aSubject: MozWindow, aTopic: string, aData: any) => void,
@@ -33,18 +34,17 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 		// 	{type: message.data.type, token: message.data.token, result});
 		// });
 
-		const fName = "new qapp()";
-		QDEB&&console.debug(`${fName}`);
+		QDEB&&console.log(`${debugHandle} new QApp()`);
 
 		super(...args);
 
-		QDEB&&console.debug("Installing custom term");
+		QDEB&&console.debug(`${debugHandle} installing custom term`);
 		this.customTerm = new QCustomTerm();
 
-		QDEB&&console.debug("Installing custom action");
+		QDEB&&console.debug(`${debugHandle} installing custom action`);
 		this.customAction = new QNoteAction();
 
-		QDEB&&console.debug("Installing filters");
+		QDEB&&console.debug(`${debugHandle} installing filters`);
 		this.customFilter = new QNoteFilter();
 
 		this.Prefs = null;
@@ -52,10 +52,10 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 		this.EventDispatcher = new QAppEventDispatcher();
 
 		const API = this;
+		const windowObserverDebugHandle = `${debugHandle}[WindowObserver]`;
 		this.WindowObserver = {
 			observe: function(aSubject: MozWindow, aTopic: string, aData: any) {
-				let fName = "qapp.WindowObserver.observe()";
-				QDEB&&console.debug(`${fName} ${aTopic}`, aSubject.document.URL);
+				QDEB&&console.debug(`${windowObserverDebugHandle} ${aTopic}`, aSubject.document.URL);
 
 				if(aTopic === 'domwindowopened' || aTopic === 'domwindowclosed'){
 					API.EventDispatcher.fireListeners(aTopic, aSubject, aTopic, aData);
@@ -77,7 +77,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 							return;
 						}
 
-						QDEB&&console.debug(`${fName} [DOMContentLoaded]`, document.URL);
+						QDEB&&console.debug(`${windowObserverDebugHandle} DOMContentLoaded`, document.URL);
 
 						// TODO: broken with TB > 115, disabling for now
 						// Attach to QuickFilter
@@ -111,35 +111,9 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 		};
 	}
 
-	// uninstallCSS(cssUri: string) {
-	// 	try {
-	// 		let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
-	// 		let uri = Services.io.newURI(extension.getURL(cssUri), null, null);
-	// 		if(cssService.sheetRegistered(uri, cssService.USER_SHEET)){
-	// 			QDEB&&console.debug(`Unregistering ${cssUri}`);
-	// 			cssService.unregisterSheet(uri, cssService.USER_SHEET);
-	// 		}
-	// 	} catch (e: any) {
-	// 		console.error("uninstallCSS() failed:", e);
-	// 	}
-	// }
-
-	// installCSS(cssUri: string) {
-	// 	try {
-	// 		let cssService = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
-	// 		let uri = Services.io.newURI(extension.getURL(cssUri), null, null);
-	// 		if(!cssService.sheetRegistered(uri, cssService.USER_SHEET)){
-	// 			QDEB&&console.debug(`Registering ${cssUri}`);
-	// 			cssService.loadAndRegisterSheet(uri, cssService.USER_SHEET);
-	// 		}
-	// 	} catch (e: any) {
-	// 		console.error("installCSS() failed:", e);
-	// 	}
-	// }
-
 	// https://developer.thunderbird.net/add-ons/mailextensions/experiments#managing-your-experiments-lifecycle
 	onShutdown(isAppShutdown: boolean) {
-		console.debug("QNote.shutdown(), isAppShutdown:", isAppShutdown);
+		QDEB&&console.debug(`${debugHandle} shutdown`);
 
 		if (isAppShutdown) {
 			return;
@@ -175,14 +149,14 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 						try {
 							Services.focus.setFocus(focusSavedElement, 0);
 						} catch (e: any) {
-							console.error("restoreFocus() failed:", e);
+							console.error(`${debugHandle} restoreFocus() failed:`, e);
 						}
 					} else {
-						console.warn("focusSavedElement is not set");
+						QDEB&&console.warn(`${debugHandle} focusSavedElement is not set`);
 					}
 				},
 				async init(prefs: IQAppPreferences){
-					QDEB&&console.debug("qapp.init()");
+					QDEB&&console.debug(`${debugHandle} init()`);
 					this.setPrefs(prefs);
 
 					// Remove old style sheet in case it still lay around, for example, after update
@@ -201,7 +175,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 							url: extension.baseURI.resolve("resource://qnote/images/1x1.gif"),
 						};
 
-						QDEB&&console.log("ThreadPaneColumns.addCustomColumn");
+						QDEB&&console.log(`${debugHandle} ThreadPaneColumns.addCustomColumn("qnote")`);
 						ThreadPaneColumns.addCustomColumn('qnote', {
 							name: "QNote",
 							hidden: false,
@@ -227,9 +201,10 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 							}
 						});
 					} else {
-						QDEB&&console.debug("qnote column already exists");
+						QDEB&&console.debug(`${debugHandle} qnote column already exists`);
 					}
 
+					QDEB&&console.log(`${debugHandle} ThreadPaneColumns.addCustomColumn("qnote-text")`);
 					if(ThreadPaneColumns && ThreadPaneColumns.getColumn('qnote-text') == null){
 						ThreadPaneColumns.addCustomColumn('qnote-text', {
 							name: "QText",
@@ -247,23 +222,19 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 							},
 						});
 					} else {
-						QDEB&&console.debug("qnote-text column already exists");
+						QDEB&&console.debug(`${debugHandle} qnote-text column already exists`);
 					}
 
-					QDEB&&console.debug("Installing custom term");
-
 					if(MailServices.filters.getCustomTerm(API.customTermId)){
-						QDEB&&console.debug(`CustomTerm ${API.customTermId} already defined`);
+						QDEB&&console.debug(`${debugHandle} custom term already exists:`, API.customTermId);
 					} else {
-						QDEB&&console.debug(`Defining CustomTerm ${API.customTermId}`);
+						QDEB&&console.debug(`${debugHandle} installing custom term:`, API.customTermId);
 						MailServices.filters.addCustomTerm(API.customTerm);
 					}
 				},
-				async setDebug(on: boolean){
-					QDEB = on;
-				},
 				async setPrefs(prefs: IQAppPreferences){
 					API.Prefs = prefs;
+					QDEB = prefs.enableDebug;
 					API.customAction.setStorageFolder(prefs.storageFolder);
 					API.customFilter.setStorageFolder(prefs.storageFolder);
 					API.customTerm.setStorageFolder(prefs.storageFolder);
@@ -275,34 +246,34 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 					}
 				},
 				async attachNotesToMultiMessage(keys: Array<string>){
-					const fName = `qapp.attachNotesToMultiMessage()`;
+					const fName = `${debugHandle}[attachNotesToMultiMessage]`;
 
 					const w = Services.wm.getMostRecentWindow("mail:3pane");
 					if(!w || !w.document){
-						QDEB&&console.log(`${fName}: window not found, bail`);
+						QDEB&&console.log(`${fName} window not found, bail`);
 						return;
 					}
 
 					const browser = w.document.querySelector("browser[src='about:3pane']") as any;
 					if(!browser){
-						QDEB&&console.log(`${fName}: about:3pane browser element not found, bail`);
+						QDEB&&console.log(`${fName} about:3pane browser element not found, bail`);
 						return;
 					}
 
 					if(!browser.contentDocument){
-						QDEB&&console.log(`${fName}: browser.contentDocument not found, bail`);
+						QDEB&&console.log(`${fName} browser.contentDocument not found, bail`);
 						return;
 					}
 
 					const multiMessageBrowser = browser.contentDocument.getElementById('multiMessageBrowser') as any;
 					if(!multiMessageBrowser){
-						QDEB&&console.log(`${fName}: multiMessageBrowser not found, bail`);
+						QDEB&&console.log(`${fName} multiMessageBrowser not found, bail`);
 						return;
 					}
 
 					const document = multiMessageBrowser.contentDocument as Document
 					if(!document){
-						QDEB&&console.log(`${fName}: multiMessageBrowser.contentDocument not found, bail`);
+						QDEB&&console.log(`${fName} multiMessageBrowser.contentDocument not found, bail`);
 						return;
 					}
 
@@ -338,7 +309,8 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 						try {
 							path.create(Ci.nsIFile.DIRECTORY_TYPE, 0o755);
 						} catch (e: any) {
-							console.error("path.create() failed:", e);
+							console.error(`${debugHandle} createStoragePath() failed:`, e);
+							return undefined;
 						}
 					}
 					return path.path;
