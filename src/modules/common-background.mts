@@ -24,15 +24,17 @@ type SaveNotesAsArgs =  typeof QNoteFolder | typeof XNoteFolder | typeof QNoteLo
 ;
 
 export async function getPrefs(): Promise<IPreferences> {
-	const fName = "prefs()";
-
 	const savedPrefs = await getSavedPrefs();
 	const prefs: IWritablePreferences = Object.assign({}, Prefs.defaults, savedPrefs);
-
 	const isEmpty = Object.keys(savedPrefs).length === 0;
 
+	QDEB&&console.group("getPrefs()");
+	QDEB&&console.debug("savedPrefs", savedPrefs);
+	QDEB&&console.debug("prefs", prefs);
+	QDEB&&console.debug("isEmpty?", isEmpty);
+
 	if(isEmpty){
-		QDEB&&console.log(`${fName} - no saved preferences, fallback to defaults`);
+		QDEB&&console.log(`No saved preferences, fallback to defaults`);
 
 		// Set xnote prefs
 		Object.assign(prefs, xnotePrefsMapper(await browser.xnote.getPrefs()));
@@ -45,12 +47,15 @@ export async function getPrefs(): Promise<IPreferences> {
 		if(prefs.dateFormat === "yyyy-mm-dd - HH:MM"){
 			prefs.dateFormat = 'Y-m-d H:i';
 		}
+	}
 
+	if(!prefs.storageOption || !prefs.storageFolder) {
 		prefs.storageOption = 'folder';
 		prefs.storageFolder = await browser.qapp.createStoragePath();
-	} else {
-		QDEB&&console.debug(`${fName} - loading preferences`);
+		QDEB&&console.debug("Set prefs.storageFolder to default:", prefs.storageFolder);
 	}
+
+	QDEB&&console.groupEnd();
 
 	return prefs;
 }
