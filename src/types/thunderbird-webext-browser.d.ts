@@ -17654,7 +17654,7 @@ declare namespace browser {
          * tab itself is currently not visible). It returns `null` if no messages
          * are displayed, or if multiple messages are displayed.
          */
-        export function getDisplayedMessage(tabId: number): Promise<messages.MessageHeader | null | null>;
+        export function getDisplayedMessage(tabId?: number): Promise<messages.MessageHeader | null>;
 
         /**
          * Gets an array of the currently displayed messages in the specified tab
