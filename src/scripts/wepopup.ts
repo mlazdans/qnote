@@ -59,11 +59,11 @@ function popup(){
 	window.addEventListener("focus", () => YTextE.focus());
 	YTextE.addEventListener("keyup", updateNoteData);
 	document.addEventListener("keyup", e => {
-		if(e.key == "Escape"){
+		if(e.code == "Escape"){
 			customClose("escape");
 		}
 
-		if(!e.repeat && e.altKey && (e.key == "Q" || e.key == "q")){
+		if(!e.repeat && e.altKey && e.code == "KeyQ"){
 			customClose("close");
 		}
 	});
