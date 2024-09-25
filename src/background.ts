@@ -37,7 +37,6 @@ import { INotePopup, IPopupState, note2state, QNotePopup, state2note, WebExtensi
 import { convertPrefsToQAppPrefs, dateFormatWithPrefs, IPreferences } from "./modules/common.mjs";
 import { confirmDelete, getCurrentWindowId, getPrefs, isClipboardSet, sendPrefsToQApp, setQDEBCommonBackground } from "./modules/common-background.mjs";
 import { Menu } from "./modules/Menu.mjs";
-import { QEventDispatcher } from "./modules/QEventDispatcher.mjs";
 import { IPopupCloseReason } from "./modules-exp/api.mjs";
 
 var QDEB = true;
@@ -46,6 +45,12 @@ const debugHandle = "[qnote:background]";
 const BrowserAction = browser.action ? browser.action : browser.browserAction;
 const _ = browser.i18n.getMessage;
 const maxNoteCount = 1;
+
+const DO_UPDATE_VIEW       = true;
+const DO_OVERWRITE         = true;
+const DO_ADD_TAG           = true;
+const DO_REMOVE_TAG        = false;
+const DO_REGISTER_LISTENER = true;
 
 type UpdateIconsDetails = {
 	path?: browser._manifest.IconPath | undefined;
@@ -90,13 +95,10 @@ const PopupManager = new class {
 	}
 }
 
-class QNoteExtension extends QEventDispatcher<{
-	onnote: (keyId: string, reason: IPopupCloseReason, noteData: INoteData) => void
-}> {
+class QNoteExtension {
 	prefs: IPreferences
 
 	constructor(prefs: IPreferences) {
-		super();
 		QDEB&&console.log(`${debugHandle} new QNoteExtension()`);
 		this.prefs = prefs;
 		this.ripplePrefs(this.prefs);
@@ -184,8 +186,7 @@ class QNoteExtension extends QEventDispatcher<{
 		}
 	}
 
-	// TODO: add tag
-	async saveOrUpdate(keyId: string, newNote: INoteData, overwrite: boolean, updateViews: boolean = true): Promise<INoteData | null>{
+	async saveOrUpdate(keyId: string, newNote: INoteData, overwrite: boolean, updateViews: boolean, messageId: number | undefined): Promise<INoteData | null>{
 		const note = await this.createAndLoadNote(keyId);
 
 		if(note.exists() && !overwrite){
@@ -198,6 +199,10 @@ class QNoteExtension extends QEventDispatcher<{
 			note.assignData({ ...newNote, ts: Date.now() });
 		}
 
+		if(this.prefs.useTag && messageId !== undefined){
+			this.tagMessage(messageId, this.prefs.tagName, DO_ADD_TAG);
+		}
+
 		const noteData = await note.save() ? note.getData() : null;
 
 		if(updateViews){
@@ -207,17 +212,17 @@ class QNoteExtension extends QEventDispatcher<{
 		return noteData;
 	}
 
-	async onNoteHandler(keyId: string, reason: IPopupCloseReason, noteData: INoteData) {
+	async onNoteHandler(keyId: string, reason: IPopupCloseReason, noteData: INoteData, messageId: number | undefined) {
 		QDEB&&console.debug(`${debugHandle} popup close, keyId: ${keyId}, reason: ${reason}`);
 		if(reason == "close"){
 			PopupManager.remove(keyId);
 			if(noteData.text){
-				await this.saveOrUpdate(keyId, noteData, true);
+				await this.saveOrUpdate(keyId, noteData, DO_OVERWRITE, DO_UPDATE_VIEW, messageId);
 			}
 			await browser.qapp.restoreFocus();
 		} else if(reason == "delete"){
 			PopupManager.remove(keyId);
-			await this.deleteNote(keyId);
+			await this.deleteNote(keyId, DO_UPDATE_VIEW, messageId);
 			await browser.qapp.restoreFocus();
 		} else if(reason == "escape"){
 			PopupManager.remove(keyId);
@@ -230,7 +235,7 @@ class QNoteExtension extends QEventDispatcher<{
 		}
 	}
 
-	async createPopup(note: INote, popupState: IPopupState = {}): Promise<INotePopup> {
+	async createPopup(note: INote, messageId: number | undefined,  popupState: IPopupState, registerListeners = DO_REGISTER_LISTENER): Promise<INotePopup> {
 		QDEB&&console.debug(`${debugHandle} createPopup(), keyId:`, note.keyId);
 
 		const keyId = note.keyId;
@@ -271,17 +276,21 @@ class QNoteExtension extends QEventDispatcher<{
 
 		PopupManager.add(popup);
 
-		popup.addListener("onnote", this.onNoteHandler.bind(this));
+		if(registerListeners){
+			popup.addListener("onnote", (keyId: string, reason: IPopupCloseReason, noteData: INoteData) => {
+				this.onNoteHandler(keyId, reason, noteData, messageId);
+			});
+		}
 
 		return popup;
 	}
 
-	async popNote(keyId: string){
+	async popNote(keyId: string, messageId: number | undefined){
 		QDEB&&console.info(`${debugHandle} popNote(), keyId:`, keyId);
 		if(PopupManager.has(keyId)){
 			PopupManager.get(keyId).focus();
 		} else {
-			this.createPopup(await this.createAndLoadNote(keyId)).then(popup => popup.pop());
+			this.createPopup(await this.createAndLoadNote(keyId), messageId, {}).then(popup => popup.pop());
 		}
 	}
 
@@ -307,14 +316,15 @@ class QNoteExtension extends QEventDispatcher<{
 		// process single message
 		if(messages.length === 1){
 			const keyId = messages[0].headerMessageId;
+			const messageId = messages[0].id;
 
 			if(info.menuItemId === "create" || info.menuItemId === "modify"){
-				this.popNote(keyId);
+				this.popNote(keyId, messageId);
 			} else if(info.menuItemId === "paste"){
 				const sourceNoteData = await browser.qnote.getFromClipboard();
 				if(isClipboardSet(sourceNoteData)){
 					sourceNoteData.ts = Date.now();
-					this.saveOrUpdate(keyId, sourceNoteData, true);
+					this.saveOrUpdate(keyId, sourceNoteData, DO_OVERWRITE, DO_UPDATE_VIEW, messageId);
 				} else {
 					QDEB&&console.debug(`${menuDebugHandle} paste - no data`);
 				}
@@ -328,7 +338,7 @@ class QNoteExtension extends QEventDispatcher<{
 				});
 			} else if(info.menuItemId === "delete"){
 				if(!this.prefs.confirmDelete || await confirmDelete()) {
-					await this.deleteNote(keyId)
+					await this.deleteNote(keyId, DO_UPDATE_VIEW, messageId)
 				}
 			} else if(info.menuItemId === "reset"){
 				this.resetNote(keyId);
@@ -344,14 +354,14 @@ class QNoteExtension extends QEventDispatcher<{
 				if(sourceNoteData && isClipboardSet(sourceNoteData)){
 					sourceNoteData.ts = Date.now();
 					for(const m of messages){
-						await this.saveOrUpdate(m.headerMessageId, sourceNoteData, true, false);
+						await this.saveOrUpdate(m.headerMessageId, sourceNoteData, DO_OVERWRITE, !DO_UPDATE_VIEW, m.id);
 					};
 					this.updateViews();
 				}
 			} else if(info.menuItemId === "delete_multi"){
 				if(!this.prefs.confirmDelete || await confirmDelete()) {
 					for(const m of messages){
-						await this.deleteNote(m.headerMessageId);
+						await this.deleteNote(m.headerMessageId, !DO_UPDATE_VIEW, m.id);
 					}
 					this.updateViews();
 				}
@@ -386,8 +396,7 @@ class QNoteExtension extends QEventDispatcher<{
 		}
 	}
 
-	// TODO: remove tag
-	async deleteNote(keyId: string, updateViews: boolean = true): Promise<boolean> {
+	async deleteNote(keyId: string, updateViews: boolean, messageId: number | undefined): Promise<boolean> {
 		const popup = PopupManager.has(keyId) ? PopupManager.get(keyId) : null;
 
 		if(popup){
@@ -401,6 +410,11 @@ class QNoteExtension extends QEventDispatcher<{
 			if(updateViews){
 				await this.updateViews();
 			}
+
+			if(this.prefs.useTag && messageId !== undefined){
+				this.tagMessage(messageId, this.prefs.tagName, DO_REMOVE_TAG);
+			}
+
 			return true;
 		} else {
 			return false;
@@ -413,12 +427,12 @@ class QNoteExtension extends QEventDispatcher<{
 		}
 
 		const note = this.createNote("multi-note-create");
-		const popup = await this.createPopup(note, { placeholder:  _("multi.note.warning") });
+		const popup = await this.createPopup(note, undefined, { placeholder:  _("multi.note.warning") }, !DO_REGISTER_LISTENER);
 
 		popup.addListener("onnote", async (keyId, reason: IPopupCloseReason, noteData) =>{
 			if(reason == "close" && noteData.text){
 				for(const m of messages){
-					await this.saveOrUpdate(m.headerMessageId, noteData, false, false)
+					await this.saveOrUpdate(m.headerMessageId, noteData, !DO_OVERWRITE, !DO_UPDATE_VIEW, m.id)
 				}
 				this.updateViews();
 			}
@@ -427,27 +441,24 @@ class QNoteExtension extends QEventDispatcher<{
 		popup.pop();
 	}
 
-	// TODO: better to have messageId (number) here rather than searching for keyId. Now... how to get that id here...
-	//       This means it should be somehow preserved from onMessagesDisplayed() event...
-	// async function tagMessage(id, tagName, toTag = true) {
-	// async tagMessage(messageId: number){
-	// 	return getMessage(id).then(message => {
-	// 		QDEB&&console.debug(`tagMessage(id:${id}, tagName:${tagName}, toTag:${toTag})`);
-	// 		let tags = message.tags;
+	async tagMessage(messageId: number, tagName: string, doAddTag: boolean){
+		QDEB&&console.debug(`${debugHandle} tagMessage, id:`, messageId);
+		return browser.messages.get(messageId).then(message => {
+			let tags = message.tags;
 
-	// 		if(toTag){
-	// 			if(!message.tags.includes(tagName)){
-	// 				tags.push(tagName);
-	// 			}
-	// 		} else {
-	// 			tags = tags.filter(item => item !== tagName);
-	// 		}
+			if(doAddTag){
+				if(!message.tags.includes(tagName)){
+					tags.push(tagName);
+				}
+			} else {
+				tags = tags.filter(item => item !== tagName);
+			}
 
-	// 		return browser.messages.update(message.id, {
-	// 			tags: tags
-	// 		});
-	// 	});
-	// }
+			return browser.messages.update(messageId, {
+				tags: tags
+			});
+		});
+	}
 
 	async initExtension(){
 		QDEB&&console.log(`${debugHandle} initExtension()`);
@@ -471,10 +482,11 @@ class QNoteExtension extends QEventDispatcher<{
 			QDEB&&console.debug(`${debugHandle} messageDisplay.onMessagesDisplayed()`);
 			if(messages.length == 1){
 				const keyId = messages[0].headerMessageId;
+				const messageId = messages[0].id;
 				const note = await this.createAndLoadNote(keyId);
 
 				if(note.exists() && this.prefs.showOnSelect){
-					this.popNote(keyId);
+					this.popNote(keyId, messageId);
 				}
 			}
 			this.updateViews(tab.id);
@@ -541,11 +553,12 @@ class QNoteExtension extends QEventDispatcher<{
 			browser.messageDisplay.getDisplayedMessages(tab.id).then(async (messages) => {
 				if(messages.length == 1){
 					const keyId = messages[0].headerMessageId;
+					const messageId = messages[0].id;
 
 					if(PopupManager.has(keyId)){
 						await PopupManager.get(keyId).close();
 					} else {
-						await this.popNote(keyId);
+						await this.popNote(keyId, messageId);
 					}
 				} else if(messages.length >= 1){
 					if(PopupManager.has("multi-note-create")){
@@ -668,7 +681,10 @@ class QNoteExtension extends QEventDispatcher<{
 
 			if(data = (new PopNote()).parse(rawData)){
 				QDEB&&console.debug(`${debugHandle} received "PopNote" message`, data);
-				this.popNote(data.keyId);
+				const keyId = data.keyId;
+				browser.messageDisplay.getDisplayedMessage().then(m => {
+					this.popNote(keyId, m?.id);
+				});
 				return undefined;
 			}
 
