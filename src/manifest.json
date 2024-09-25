@@ -4,11 +4,12 @@
 	"author": "Martins Lazdans",
 	"default_locale": "en",
 	"description": "__MSG_description__",
-	"version": "0.14.0pre6",
+	"version": "0.14.0",
 	"applications": {
 		"gecko": {
 			"id": "qnote@dqdp.net",
-			"strict_min_version": "128.1.0"
+			"strict_min_version": "128.0",
+			"strict_max_version": "131.0"
 		}
 	},
 	"icons": {
@@ -36,11 +37,11 @@
 	},
 	"message_display_action": {
 		"default_title": "QNote",
-		"default_icon": "images/icon-disabled.svg"
+		"default_icon": "images/icons/qnote-disabled.svg"
 	},
 	"browser_action": {
 		"default_title": "QNote",
-		"default_icon": "images/icon-disabled.svg"
+		"default_icon": "images/icons/qnote-disabled.svg"
 	},
 	"commands": {
 		"qnote": {
