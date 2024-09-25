@@ -1,0 +1,1 @@
+I added these *.idl files to the repo as a reference and to keep track of any changes in the type definitions later.
