@@ -436,6 +436,7 @@ class QNoteExtension {
 				}
 				this.updateViews();
 			}
+			PopupManager.remove("multi-note-create");
 		});
 
 		popup.pop();
