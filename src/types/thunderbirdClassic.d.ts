@@ -50,25 +50,6 @@ declare class nsISupports {
 	QueryInterface<T>(type: Type<T>): T;
 }
 
-type ThreadPaneColumnsPath     = "chrome://messenger/content/ThreadPaneColumns.mjs";
-type ThreadPaneColumnsOldPath  = "chrome://messenger/content/thread-pane-columns.mjs"
-
-type ExtensionParentPath       = "resource://gre/modules/ExtensionParent.jsm";
-type ExtensionCommonPath       = "resource://gre/modules/ExtensionCommon.jsm";
-type FileUtilsPath             = "resource://gre/modules/FileUtils.jsm";
-type ServicesPath              = "resource://gre/modules/Services.jsm";
-type ExtensionUtilsPath        = "resource://gre/modules/ExtensionUtils.jsm";
-
-type IteratorUtilsPath         = "resource:///modules/iteratorUtils.jsm";
-type MailServicesPath          = "resource:///modules/MailServices.jsm";
-type ExtensionPopupsPath       = "resource:///modules/ExtensionPopups.jsm";
-type ExtensionPopupsESPath     = "resource:///modules/ExtensionPopups.sys.mjs";
-
-// interface FileUtilsExport {
-// 	FileUtils: typeof FileUtils
-// }
-
-// const extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 interface ExtensionParentFire {
 	// Bug 1754866 fire.sync doesn't match documentation.
 	sync(...args: any): any
@@ -176,18 +157,18 @@ declare namespace Components
 		//with TB67 the import is only possible with returning the imports, see https://wiki.mozilla.org/Thunderbird/Add-ons_Guide_63
 		//therefore the import function returns different types depending on the input path
 
-		public static import(path: IteratorUtilsPath): IteratorUtils;
-		public static import(path: MailServicesPath): MailServicesExport;
-		public static import(path: ExtensionPopupsPath): BasePopupExport;
-		public static import(path: ExtensionParentPath): ExtensionParentExport;
-		public static import(path: ExtensionCommonPath): any;
-		public static import(path: FileUtilsPath): any;
-		public static import(path: ExtensionUtilsPath): any;
-		public static importESModule(path: ExtensionPopupsESPath): BasePopupExport;
-		public static importESModule(path: ThreadPaneColumnsPath): any;
-		public static importESModule(path: ThreadPaneColumnsOldPath): any;
-		public static importESModule(path: FileUtilsPath): any;
-		public static importESModule(path: ServicesPath): any;
+		public static import(path: "resource:///modules/iteratorUtils.jsm"): IteratorUtils;
+		public static import(path: "resource:///modules/MailServices.jsm"): MailServicesExport;
+		public static import(path: "resource:///modules/ExtensionPopups.jsm"): BasePopupExport;
+		public static import(path: "resource://gre/modules/ExtensionParent.jsm"): ExtensionParentExport;
+		public static import(path: "resource://gre/modules/ExtensionCommon.jsm"): any;
+		public static import(path: "resource://gre/modules/FileUtils.jsm"): any;
+		public static import(path: "resource://gre/modules/ExtensionUtils.jsm"): any;
+		public static importESModule(path: "resource:///modules/ExtensionPopups.sys.mjs"): BasePopupExport;
+		public static importESModule(path: "chrome://messenger/content/ThreadPaneColumns.mjs"): any;
+		public static importESModule(path: "chrome://messenger/content/thread-pane-columns.mjs"): any;
+		public static importESModule(path: "resource://gre/modules/FileUtils.jsm"): any;
+		public static importESModule(path: "resource://gre/modules/Services.jsm"): any;
 		public static importESModule(path: "resource://qnote/modules-exp/QPopups.sys.mjs"): BasePopupExport;
 
 		public static importESModule(path: "resource://qnote/modules/QEventDispatcher.mjs"): typeof import("../modules/QEventDispatcher.mjs");
