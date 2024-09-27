@@ -3,9 +3,9 @@ import { IQAppPreferences } from "../modules/common.mjs";
 var { ExtensionParent }                       = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var { MailServices }                          = ChromeUtils.import("resource:///modules/MailServices.jsm");
 var { ThreadPaneColumns }                     = ChromeUtils.importESModule("chrome://messenger/content/ThreadPaneColumns.mjs");
-var { QNoteFilter, QNoteAction, QCustomTerm } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFilters.mjs");
-var { QEventDispatcher }                      = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs");
-var { getFolderNoteData }                     = ChromeUtils.importESModule("resource://qnote/modules-exp/api.mjs");
+var { QNoteFilter, QNoteAction, QCustomTerm } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFilters.mjs?version=0.14.1");
+var { QEventDispatcher }                      = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs?version=0.14.1");
+var { getFolderNoteData }                     = ChromeUtils.importESModule("resource://qnote/modules-exp/api.mjs?version=0.14.1");
 
 var QDEB = true;
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
@@ -168,11 +168,11 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 					if(ThreadPaneColumns && ThreadPaneColumns.getColumn('qnote') == null){
 						const icon = {
 							id: "qnote_exists",
-							url: extension.baseURI.resolve("resource://qnote/images/icons/qnote.svg"),
+							url: extension.baseURI.resolve("resource://qnote/images/icons/qnote.svg?version=0.14.1"),
 						};
 						const icon2 = {
 							id: "qnote_off",
-							url: extension.baseURI.resolve("resource://qnote/images/1x1.gif"),
+							url: extension.baseURI.resolve("resource://qnote/images/1x1.gif?version=0.14.1"),
 						};
 
 						QDEB&&console.log(`${debugHandle} ThreadPaneColumns.addCustomColumn("qnote")`);
@@ -191,7 +191,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 								}
 							},
 							iconCellDefinitions: [icon, icon2],
-							iconHeaderUrl: extension.baseURI.resolve("resource://qnote/images/icons/qnote.svg"),
+							iconHeaderUrl: extension.baseURI.resolve("resource://qnote/images/icons/qnote.svg?version=0.14.1"),
 							iconCallback: function(msgHdr: any){
 								if(API.Prefs?.storageFolder){
 									return getFolderNoteData(msgHdr.messageId, API.Prefs.storageFolder) ? "qnote_exists" : "qnote_off";

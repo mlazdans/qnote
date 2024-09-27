@@ -169,15 +169,15 @@ declare namespace Components
 		public static importESModule(path: "chrome://messenger/content/thread-pane-columns.mjs"): any;
 		public static importESModule(path: "resource://gre/modules/FileUtils.jsm"): any;
 		public static importESModule(path: "resource://gre/modules/Services.jsm"): any;
-		public static importESModule(path: "resource://qnote/modules-exp/QPopups.sys.mjs"): BasePopupExport;
 
-		public static importESModule(path: "resource://qnote/modules/QEventDispatcher.mjs"): typeof import("../modules/QEventDispatcher.mjs");
-		public static importESModule(path: "resource://qnote/modules/DOMLocalizator.mjs"): typeof import("../modules/DOMLocalizator.mjs");
-		public static importESModule(path: "resource://qnote/modules-exp/QNoteFile.mjs"): typeof import("../modules-exp/QNoteFile.mts");
-		public static importESModule(path: "resource://qnote/modules-exp/XNoteFile.mjs"): typeof import("../modules-exp/XNoteFile.mts");
-		public static importESModule(path: "resource://qnote/modules-exp/QNoteFilters.mjs"): typeof import("../modules-exp/QNoteFilters.mts");
-		public static importESModule(path: "resource://qnote/modules-exp/api.mjs"): typeof import("../modules-exp/api.mts");
-		public static importESModule(path: "resource://qnote/modules/common.mjs"): typeof import("../modules/common.mts");
+		public static importESModule(path: "resource://qnote/modules-exp/QPopups.sys.mjs?version=0.14.1"): BasePopupExport;
+		public static importESModule(path: "resource://qnote/modules/QEventDispatcher.mjs?version=0.14.1"): typeof import("../modules/QEventDispatcher.mjs");
+		public static importESModule(path: "resource://qnote/modules/DOMLocalizator.mjs?version=0.14.1"): typeof import("../modules/DOMLocalizator.mjs");
+		public static importESModule(path: "resource://qnote/modules-exp/QNoteFile.mjs?version=0.14.1"): typeof import("../modules-exp/QNoteFile.mts");
+		public static importESModule(path: "resource://qnote/modules-exp/XNoteFile.mjs?version=0.14.1"): typeof import("../modules-exp/XNoteFile.mts");
+		public static importESModule(path: "resource://qnote/modules-exp/QNoteFilters.mjs?version=0.14.1"): typeof import("../modules-exp/QNoteFilters.mts");
+		public static importESModule(path: "resource://qnote/modules-exp/api.mjs?version=0.14.1"): typeof import("../modules-exp/api.mts");
+		public static importESModule(path: "resource://qnote/modules/common.mjs?version=0.14.1"): typeof import("../modules/common.mts");
 		public static unload(path: string): void;
 		public static defineModuleGetter(param1: any, param2: any, param3: any): void;
 	}
