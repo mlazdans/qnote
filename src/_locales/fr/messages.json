@@ -69,7 +69,7 @@
 		"message": "(utiliser le gestionnaire des étiquettes)"
 	},
 	"import.finished.stats": {
-		"message": "Importation terminée :\n$1 notes importées\n$2 notes erronées\n$3 notes existantes\n$4 notes remplacées"
+		"message": "Importation/Exportation des notes terminée :\n$1 notes enregistrées\n$2 notes erronées\n$3 notes existantes\n$4 notes remplacées"
 	},
 	"xnote.folder.inaccessible": {
 		"message": "Dossier de XNote++ introuvable ou inexploitable"
@@ -225,7 +225,7 @@
 		"message": "Exporter comme xnotes"
 	},
 	"import.folder.button.descr": {
-		"message": "Importer des fichiers .qnote ou .xnote dans le stockage de l’extension"
+		"message": "Importer des fichiers .qnote ou .xnote dans le stockage sélectionné"
 	},
 	"export.qnotes.button.descr": {
 		"message": "Exporter les notes du stockage sélectionné au format .qnote"
@@ -271,5 +271,20 @@
 	},
 	"attach.template.reset": {
 		"message": "Réinitialiser le modèle"
+	},
+	"take.screenshot": {
+		"message": "Effectuer une capture d’écran"
+	},
+	"deprecated": {
+		"message": "Obsolète"
+	},
+	"source.path.same": {
+		"message": "Le dossier source est identique au dossier de stockage actuel. Veuillez choisir un autre dossier source !"
+	},
+	"dest.path.same": {
+		"message": "Le dossier de destination est identique au dossier de stockage actuel. Veuillez choisir un autre dossier de destination !"
+	},
+	"close": {
+		"message": "Fermer"
 	}
 }
