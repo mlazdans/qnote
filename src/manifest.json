@@ -4,7 +4,7 @@
 	"author": "Martins Lazdans",
 	"default_locale": "en",
 	"description": "__MSG_description__",
-	"version": "0.14.1",
+	"version": "0.14.2",
 	"applications": {
 		"gecko": {
 			"id": "qnote@dqdp.net",

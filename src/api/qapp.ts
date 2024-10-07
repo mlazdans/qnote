@@ -168,11 +168,11 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 					if(ThreadPaneColumns && ThreadPaneColumns.getColumn('qnote') == null){
 						const icon = {
 							id: "qnote_exists",
-							url: extension.baseURI.resolve("resource://qnote/images/icons/qnote.svg?version=0.14.1"),
+							url: extension.baseURI.resolve("resource://qnote/images/icons/qnote.svg"),
 						};
 						const icon2 = {
 							id: "qnote_off",
-							url: extension.baseURI.resolve("resource://qnote/images/1x1.gif?version=0.14.1"),
+							url: extension.baseURI.resolve("resource://qnote/images/1x1.gif"),
 						};
 
 						QDEB&&console.log(`${debugHandle} ThreadPaneColumns.addCustomColumn("qnote")`);
