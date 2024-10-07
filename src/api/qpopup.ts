@@ -18,9 +18,9 @@ export interface PanelStyle {
 
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var { BasePopup } = ChromeUtils.importESModule("resource:///modules/ExtensionPopups.sys.mjs");
-// var { BasePopup } = ChromeUtils.importESModule("resource://qnote/modules-exp/QPopups.sys.mjs?version=0.14.1"); // Keep in repo for hacking/testing
-var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs?version=0.14.1");
-var { Box, coalesce } = ChromeUtils.importESModule("resource://qnote/modules/common.mjs?version=0.14.1");
+// var { BasePopup } = ChromeUtils.importESModule("resource://qnote/modules-exp/QPopups.sys.mjs?version=0.14.3"); // Keep in repo for hacking/testing
+var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs?version=0.14.3");
+var { Box, coalesce } = ChromeUtils.importESModule("resource://qnote/modules/common.mjs?version=0.14.3");
 
 var QDEB = true;
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
