@@ -1,13 +1,15 @@
 # Table of contents
 1. [About](#about)
-2. [Features](#features)
-3. [Usage](#usage)
-4. [Storage](#storage)
-5. [Popup windows](#popup-windows)
-6. [Screenshots](#screenshots)
-7. [Known issues](#known-issues)
-8. [Support](#support)
-9. [Credits](#credits)
+1. [Features](#features)
+1. [Usage](#usage)
+1. [Storage](#storage)
+1. [Popup windows](#popup-windows)
+1. [Screenshots](#screenshots)
+1. [Building](#building)
+1. [Releases](#releases)
+1. [Known issues](#known-issues)
+1. [Support](#support)
+1. [Credits](#credits)
 
 
 # About
@@ -29,9 +31,9 @@ This is the source code repository for the Thunderbird [QNote](https://addons.th
 - Light and dark themes
 - Multiple locales and localized date formats
 - Tag messages when creating notes
-- Fully compatible with <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/xnotepp/">XNote++</a> (3.0.0)
+- Fully compatible with [XNote++](https://addons.thunderbird.net/en-US/thunderbird/addon/xnotepp/) (3.0.0)
 - Import / export between XNote++ (.xnote) and QNote (.qnote) file formats
-- Supports Thunderbird versions, starting from 68.2.0 (check <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/versions/">archive</a> for latest supported version for your Thunderbird installation)
+- Supports Thunderbird versions, starting from 68.2.0 (check [archive](https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/versions/) for latest supported version for your Thunderbird installation)
 - Simple templating support
 
 # Usage
@@ -50,7 +52,7 @@ There are two options for storing notes:
 
 Currently, there is no built-in mechanism for sharing notes across multiple computers. For now, in order to share notes across multiple computers, you could use shared folder solutions like Dropbox, NFS, or Windows/Samba shares.
 
-If you are migrating from the XNote++ extension, you have two options: using the XNote++ folder directly or importing notes into the QNote folder. For more information, refer to the <a href="doc/migration-guide.md">migration guide</a>.
+If you are migrating from the XNote++ extension, you have two options: using the XNote++ folder directly or importing notes into the QNote folder. For more information, refer to the [migration guide](doc/migration-guide.md).
 
 __If you are using internal storage, don't forget to export data before removing the extension.__
 
@@ -76,8 +78,25 @@ _Floating panel_ looks better but might not work well on all platforms. Fall bac
 <img width="40%" src="thunderbird.net/screenshots/search.jpg" alt="Message search">
 </p>
 
+# Building
+```
+npm install
+./node_modules/.bin/tsc
+build.bat
+```
+
+All assets should now be placed in the `dist/release` folder if there are no errors.
+
+Use `make_xpi.bat` to generate a `.xpi` ZIP file or point to `dist/release` as the source folder for `Tools / Developer Tools / Debug Add-ons`.
+
+If you are using Linux, adjust `.bat` files to the appropriate Linux commands.
+
+# Releases
+
+Official releases are published on [addons.thunderbird.net](https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/versions/) website.
+
 # Known issues
-- It does not work well together with the <a href="https://addons.thunderbird.net/en-US/thunderbird/addon/gmail-conversation-view/">Conversations</a> extension.
+- It does not work well together with the [Conversations](https://addons.thunderbird.net/en-US/thunderbird/addon/gmail-conversation-view/) extension.
 
 # Support
 Maintaining this extension requires a significant amount of time. If you find it useful, and you'd like to support its development, contributions in [EUR](https://www.paypal.com/donate/?hosted_button_id=CCFL84AMQKV4S) or [USD](https://www.paypal.com/donate/?hosted_button_id=NKF22QJS87LWN) via PayPal would be greatly appreciated.
