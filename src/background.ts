@@ -301,17 +301,19 @@ class QNoteExtension {
 		;
 	}
 
-	async menuHandler(info: browser.menus.OnClickData) {
+	async menuHandler(info: browser.menus.OnClickData, tab?: browser.tabs.Tab) {
 		var menuDebugHandle: string = `${debugHandle}[menuHandler]`;
 
-		if(!info.selectedMessages || !info.selectedMessages.messages.length){
-			QDEB&&console.warn(`${menuDebugHandle} no messages selected, bail`);
-			return;
+		var messages: browser.messages.MessageHeader[];
+		if(info.selectedMessages){
+			messages = info.selectedMessages.messages;
+		} else if(tab?.id){
+			messages = await browser.messageDisplay.getDisplayedMessages(tab.id);
+		} else {
+			messages = [];
 		}
 
 		QDEB&&console.info(`${menuDebugHandle} menuItemId:`, info.menuItemId);
-
-		const messages = info.selectedMessages.messages;
 
 		// process single message
 		if(messages.length === 1){
@@ -372,6 +374,8 @@ class QNoteExtension {
 			} else {
 				console.error(`${menuDebugHandle} BUG: unknown menuItemId:`, info.menuItemId);
 			}
+		} else {
+			QDEB&&console.warn(`${menuDebugHandle} no messages selected`);
 		}
 	}
 
@@ -593,32 +597,30 @@ class QNoteExtension {
 
 			await browser.menus.removeAll();
 
-			const in_message_list = info.contexts.includes('message_list');
+			var messages: browser.messages.MessageHeader[];
+			if(info.contexts.includes('message_list') && info.selectedMessages){
+				messages = info.selectedMessages.messages;
+			} else if(info.contexts.includes('page') && tab?.id){
+				messages = await browser.messageDisplay.getDisplayedMessages(tab.id);
+			} else {
+				messages = [];
+			}
 
-			if(in_message_list){
-				if(!info.selectedMessages){
-					QDEB&&console.warn(`${debugHandle} selectedMessages object is not set, bail`)
-					return;
-				}
+			// Single message
+			if(messages.length == 1){
+				const note = await this.createAndLoadNote(messages[0].headerMessageId);
 
-				const messages = info.selectedMessages.messages;
-
-				// Single message
-				if(messages.length == 1){
-					const note = await this.createAndLoadNote(messages[0].headerMessageId);
-
-					if(note.exists()){
-						await Menu.modify();
-					} else {
-						await Menu.new();
-					}
-					browser.menus.refresh();
-				} else if(messages.length > 1){
-					await Menu.multi();
-					browser.menus.refresh();
+				if(note.exists()){
+					await Menu.modify();
 				} else {
-					QDEB&&console.warn(`${debugHandle} no messages selected`);
+					await Menu.new();
 				}
+				browser.menus.refresh();
+			} else if(messages.length > 1){
+				await Menu.multi();
+				browser.menus.refresh();
+			} else {
+				QDEB&&console.warn(`${debugHandle} no messages selected`);
 			}
 		});
 
