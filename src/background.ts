@@ -214,10 +214,12 @@ class QNoteExtension {
 
 	async onNoteHandler(keyId: string, reason: IPopupCloseReason, noteData: INoteData, messageId: number | undefined) {
 		QDEB&&console.debug(`${debugHandle} popup close, keyId: ${keyId}, reason: ${reason}`);
-		if(reason == "close"){
+		if(reason == "saveclose" || reason == "close"){
 			PopupManager.remove(keyId);
 			if(noteData.text){
-				await this.saveOrUpdate(keyId, noteData, DO_OVERWRITE, DO_UPDATE_VIEW, messageId);
+				if(reason == "saveclose" || (reason == "close" && this.prefs.saveOnClose)){
+					await this.saveOrUpdate(keyId, noteData, DO_OVERWRITE, DO_UPDATE_VIEW, messageId);
+				}
 			}
 			await browser.qapp.restoreFocus();
 		} else if(reason == "delete"){

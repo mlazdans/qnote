@@ -36,6 +36,7 @@ function updateNoteData(){
 	State.top = window.screenY;
 	State.width = window.outerWidth;
 	State.height = window.outerHeight;
+	sendNoteData("sync");
 }
 
 function popup(){

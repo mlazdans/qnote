@@ -35,6 +35,7 @@ export interface IWritablePreferences extends IWritableQAppPreferences {
 	alwaysDefaultPlacement: boolean
 	confirmDelete         : boolean
 	enableSpellChecker    : boolean
+	saveOnClose           : boolean
 }
 
 export type IPreferences = Readonly<IWritablePreferences>;
@@ -84,6 +85,7 @@ export class Prefs {
 		alwaysDefaultPlacement: false,
 		confirmDelete         : false,
 		enableSpellChecker    : true,
+		saveOnClose           : true,
 	}
 }
 

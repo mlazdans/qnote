@@ -98,8 +98,8 @@ function scale(w: number, h: number, pixelRatio: number){
 function popup(){
 	i18n.setTexts(document);
 
-	closeEl.addEventListener     ("click", () => browser.qpopup.close(id, "escape"));
-	saveEl.addEventListener      ("click", () => browser.qpopup.close(id, "close"));
+	closeEl.addEventListener     ("click", () => browser.qpopup.close(id, "close"));
+	saveEl.addEventListener      ("click", () => browser.qpopup.close(id, "saveclose"));
 	delEl.addEventListener       ("click", () => {
 		if(!State.confirmDelete || confirm(i18n._("delete.note"))){
 			browser.qpopup.close(id, "delete");

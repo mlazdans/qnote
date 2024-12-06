@@ -47,7 +47,7 @@ export interface ILegacyAPI {
 	isFolderWritable(path: string): Promise<boolean>
 }
 
-export type IPopupCloseReason = "close" | "escape" | "delete" | "sync";
+export type IPopupCloseReason = "close" | "escape" | "delete" | "sync" | "saveclose";
 
 export interface IQPopupAPI {
 	close(id: number, reason: IPopupCloseReason): Promise<void>

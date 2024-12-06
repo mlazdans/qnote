@@ -286,5 +286,8 @@
 	},
 	"close": {
 		"message": "Close"
+	},
+	"saveOnClose": {
+		"message": "Save on close"
 	}
 }
