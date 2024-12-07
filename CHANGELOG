@@ -1,7 +1,13 @@
 CHANGELOG QNote
 ===========================
 
-RELEASE 0.14.0 - ....
+RELEASE 0.14.4 - ....
+-----------------
+- Revert default save and close mechanism as it was before 0.14.3 (#67, #68, #69)
+- Show context menu in message page context (#71)
+- Fix large icons when opening message pane in a new tab (#72)
+
+RELEASE 0.14.3 - Oct 7, 2024
 -----------------
 - Complete rewrite in TypeScript. Fixes most of the issues with TB128
 - Feature take note screenshot to clipboard

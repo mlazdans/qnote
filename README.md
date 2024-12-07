@@ -38,7 +38,7 @@ This is the source code repository for the Thunderbird [QNote](https://addons.th
 
 # Usage
 
-- Press Alt+Q to toggle the note
+- Press Alt+Q to open / save &amp; close the note
 - Press ESC to close the note without saving
 - Right-click on message(s) to access more commands in the context menu
 - Use the built-in search to search within notes

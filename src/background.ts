@@ -778,7 +778,7 @@ browser.runtime.onInstalled.addListener(async ({ reason, temporary }) => {
 	}
 
 	if(reason == "update") {
-		await browser.tabs.create({ url: browser.runtime.getURL("html/update-0.14.html") });
+		await browser.tabs.create({ url: browser.runtime.getURL("html/updated.html") });
 	}
 });
 
