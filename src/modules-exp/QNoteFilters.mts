@@ -1,6 +1,6 @@
-var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs?version=0.14.3");
-var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs?version=0.14.3");
-var { getFolderNoteData } = ChromeUtils.importESModule("resource://qnote/modules-exp/api.mjs?version=0.14.3");
+var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs?version=version");
+var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs?version=version");
+var { getFolderNoteData } = ChromeUtils.importESModule("resource://qnote/modules-exp/api.mjs?version=version");
 var { MailServices } = ChromeUtils.import("resource:///modules/MailServices.jsm");
 var { ExtensionParent } = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var { ThreadPaneColumns } = ChromeUtils.importESModule("chrome://messenger/content/ThreadPaneColumns.mjs");

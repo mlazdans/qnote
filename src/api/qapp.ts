@@ -3,9 +3,9 @@ import { IQAppPreferences } from "../modules/common.mjs";
 var { ExtensionParent }                       = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
 var { MailServices }                          = ChromeUtils.import("resource:///modules/MailServices.jsm");
 var { ThreadPaneColumns }                     = ChromeUtils.importESModule("chrome://messenger/content/ThreadPaneColumns.mjs");
-var { QNoteFilter, QNoteAction, QCustomTerm } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFilters.mjs?version=0.14.3");
-var { QEventDispatcher }                      = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs?version=0.14.3");
-var { getFolderNoteData }                     = ChromeUtils.importESModule("resource://qnote/modules-exp/api.mjs?version=0.14.3");
+var { QNoteFilter, QNoteAction, QCustomTerm } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFilters.mjs?version=version");
+var { QEventDispatcher }                      = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs?version=version");
+var { getFolderNoteData }                     = ChromeUtils.importESModule("resource://qnote/modules-exp/api.mjs?version=version");
 
 var QDEB = true;
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
@@ -191,7 +191,7 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 								}
 							},
 							iconCellDefinitions: [icon, icon2],
-							iconHeaderUrl: extension.baseURI.resolve("resource://qnote/images/icons/qnote.svg?version=0.14.3"),
+							iconHeaderUrl: extension.baseURI.resolve("resource://qnote/images/icons/qnote.svg?version=version"),
 							iconCallback: function(msgHdr: any){
 								if(API.Prefs?.storageFolder){
 									return getFolderNoteData(msgHdr.messageId, API.Prefs.storageFolder) ? "qnote_exists" : "qnote_off";

@@ -7,8 +7,8 @@ import { IXNoteFileAPI } from "./XNoteFile.mjs";
 
 var { ExtensionUtils } = ChromeUtils.import("resource://gre/modules/ExtensionUtils.jsm");
 var { FileUtils } = ChromeUtils.import("resource://gre/modules/FileUtils.jsm");
-var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs?version=0.14.3");
-var { XNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/XNoteFile.mjs?version=0.14.3");
+var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs?version=version");
+var { XNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/XNoteFile.mjs?version=version");
 var { ExtensionError } = ExtensionUtils;
 
 export interface INoteFileProvider {

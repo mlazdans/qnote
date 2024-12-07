@@ -9,6 +9,8 @@ if exist %E% (
 	rem file exists
 )
 
+call update_vers.bat
+
 "C:\Program Files\7-Zip\7z.exe" a %E% .\dist\release\* > nul
 
 if errorlevel 1 (
