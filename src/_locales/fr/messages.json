@@ -51,7 +51,7 @@
 		"message": "Afficher les n premiers caractères dans la colonne QNote : n ="
 	},
 	"focus.on.display": {
-		"message": "Cibler QNote à l’affichage"
+		"message": "Cibler à l’affichage"
 	},
 	"enable.spell.checker": {
 		"message": "Vérifier l’orthographe"
@@ -111,10 +111,10 @@
 		"message": "Présenter les notes dans"
 	},
 	"window.option.xul": {
-		"message": "un panneau flottant"
+		"message": "Panneau flottant"
 	},
 	"window.option.webext": {
-		"message": "une fenêtre contextuelle"
+		"message": "Fenêtre contextuelle"
 	},
 	"close.and.save": {
 		"message": "Enregistrer et fermer"
@@ -150,7 +150,7 @@
 		"message": "Caractères de formatage"
 	},
 	"implemented.formatting.rules": {
-		"message": "(implantés : $1)"
+		"message": "(acceptés : $1)"
 	},
 	"datetime_group": {
 		"message": "Date et heure"
@@ -286,5 +286,11 @@
 	},
 	"close": {
 		"message": "Fermer"
+	},
+	"saveOnClose": {
+		"message": "Enregistrer à la fermeture"
+	},
+	"autoClose": {
+		"message": "Fermer automatiquement"
 	}
 }
