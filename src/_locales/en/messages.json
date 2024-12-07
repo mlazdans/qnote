@@ -51,7 +51,7 @@
 		"message": "Show first X characters in column"
 	},
 	"focus.on.display": {
-		"message": "Focus QNote after display"
+		"message": "Focus after display"
 	},
 	"enable.spell.checker": {
 		"message": "Enable spell checker"
@@ -289,5 +289,8 @@
 	},
 	"saveOnClose": {
 		"message": "Save on close"
+	},
+	"autoClose": {
+		"message": "Auto close"
 	}
 }

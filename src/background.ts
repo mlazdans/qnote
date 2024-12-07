@@ -467,6 +467,12 @@ class QNoteExtension {
 		});
 	}
 
+	closeAllNotes(){
+		PopupManager.iter((keyId, popup) => {
+			popup.close();
+		});
+	}
+
 	async initExtension(){
 		QDEB&&console.log(`${debugHandle} initExtension()`);
 
@@ -487,6 +493,11 @@ class QNoteExtension {
 		// Messages displayed
 		browser.messageDisplay.onMessagesDisplayed.addListener(async (tab: browser.tabs.Tab, messages: browser.messages.MessageHeader[]) => {
 			QDEB&&console.debug(`${debugHandle} messageDisplay.onMessagesDisplayed()`);
+
+			if(this.prefs.autoClose){
+				this.closeAllNotes();
+			}
+
 			if(messages.length == 1){
 				const keyId = messages[0].headerMessageId;
 				const messageId = messages[0].id;
@@ -500,18 +511,27 @@ class QNoteExtension {
 		});
 
 		// Change folders
-		// browser.mailTabs.onDisplayedFolderChanged.addListener(async (tab, _displayedFolder) => {
-		// 	QDEB&&console.debug(`${debugHandle} mailTabs.onDisplayedFolderChanged()`);
-		// });
+		browser.mailTabs.onDisplayedFolderChanged.addListener(async (tab, _displayedFolder) => {
+			QDEB&&console.debug(`${debugHandle} mailTabs.onDisplayedFolderChanged()`);
+			if(this.prefs.autoClose){
+				this.closeAllNotes();
+			}
+		});
 
 		// Create tabs
-		// browser.tabs.onCreated.addListener(async tab => {
-		// 	QDEB&&console.debug(`${debugHandle} tabs.onCreated(), tabId:`, tab.id);
-		// });
+		browser.tabs.onCreated.addListener(async tab => {
+			QDEB&&console.debug(`${debugHandle} tabs.onCreated(), tabId:`, tab.id);
+			if(this.prefs.autoClose){
+				this.closeAllNotes();
+			}
+		});
 
 		// Change tabs
 		browser.tabs.onActivated.addListener(async activeInfo => {
 			QDEB&&console.debug(`${debugHandle} tabs.onActivated(), tabId:`, activeInfo.tabId);
+			if(this.prefs.autoClose){
+				this.closeAllNotes();
+			}
 			this.updateViews(activeInfo.tabId);
 		});
 
@@ -597,6 +617,10 @@ class QNoteExtension {
 		browser.menus.onShown.addListener(async (info, tab) => {
 			QDEB&&console.debug(`${debugHandle} menus.onShown()`);
 
+			if(this.prefs.autoClose){
+				this.closeAllNotes();
+			}
+
 			await browser.menus.removeAll();
 
 			var messages: browser.messages.MessageHeader[];
@@ -624,6 +648,11 @@ class QNoteExtension {
 			} else {
 				QDEB&&console.warn(`${debugHandle} no messages selected`);
 			}
+		});
+
+		QDEB&&console.debug(`${debugHandle} add runtime.onSuspend() listener`);
+		browser.runtime.onSuspend.addListener(() => {
+			this.closeAllNotes();
 		});
 
 		// Receive data from content

@@ -64,12 +64,8 @@ var qpopup = class extends ExtensionCommon.ExtensionAPI {
 	onShutdown(isAppShutdown: any) {
 		QDEB&&console.log(`${debugHandle} shutdown`);
 
-		if(isAppShutdown){
-			return;
-		}
-
 		for(const id of popupManager.popups.keys()){
-			popupManager.get(id).destroy("shutdown");
+			popupManager.get(id).destroy("close");
 		}
 	}
 
