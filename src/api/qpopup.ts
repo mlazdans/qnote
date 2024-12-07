@@ -270,10 +270,10 @@ class QPopup extends BasePopup {
 				e.preventDefault();
 			}
 
-			if(e.altKey && e.code == "KeyQ"){
-				e.preventDefault();
-				popupManager.get(id).destroy("close");
-			}
+			// if(e.altKey && e.code == "KeyQ"){
+			// 	e.preventDefault();
+			// 	popupManager.get(id).destroy("close");
+			// }
 		});
 
 		this.browser.addEventListener("focus", () => {
