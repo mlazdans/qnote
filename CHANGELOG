@@ -3,6 +3,7 @@ CHANGELOG QNote
 
 RELEASE 0.14.4 - ....
 -----------------
+- Remove extra title bar for popup window (#75)
 - Revert default save and close mechanism as it was before 0.14.3 (#67, #68, #69)
 - Show context menu in message page context (#71)
 - Fix large icons when opening message pane in a new tab (#72)
