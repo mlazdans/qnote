@@ -185,14 +185,11 @@ export class WebExtensionPopup extends DefaultNotePopup {
 			left               : this.state.left,
 			top                : this.state.top,
 			allowScriptsToClose: true,
+			titlePreface       : this.state.title ? this.state.title + " - " : "",
 		}
 
-		browser.windows.create(initialState).then(async popupInfo => {
-			if(!popupInfo.id) {
-				throw new Error(`Unexpected windowInfo.id: ${popupInfo.id}`);
-			}
-
-			this.id = popupInfo.id;
+		browser.windows.create(initialState).then(async windowInfo => {
+			this.id = windowInfo.id;
 		});
 	}
 

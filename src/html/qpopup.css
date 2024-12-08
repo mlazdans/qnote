@@ -47,6 +47,7 @@
 	width: 100%;
 	height: 100%;
 	height: calc(100% - var(--controls-height) - var(--title-height));
+	flex-grow: 1;
 }
 
 .qpopup-textinput {

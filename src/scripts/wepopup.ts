@@ -14,8 +14,8 @@ if(!keyId){
 const State: IPopupState = {};
 const i18n = new DOMLocalizator(browser.i18n.getMessage);
 
-const titleTextEl  = querySelectorOrDie(".qpopup-title-text") as HTMLElement;
-const closeEl      = querySelectorOrDie(".qpopup-button-close") as HTMLElement;
+// const titleTextEl  = querySelectorOrDie(".qpopup-title-text") as HTMLElement;
+// const closeEl      = querySelectorOrDie(".qpopup-button-close") as HTMLElement;
 const YTextE       = querySelectorOrDie('.qpopup-textinput') as HTMLTextAreaElement;
 const delEl        = querySelectorOrDie(".qpopup-button-delete") as HTMLElement;
 // TODO: resetEl
@@ -25,7 +25,7 @@ const saveEl       = querySelectorOrDie(".qpopup-button-save") as HTMLElement;
 function updateElements(state: IPopupState){
 	YTextE.setAttribute("spellcheck", state.enableSpellChecker ? "true" : "false");
 	if(state.text)YTextE.value = state.text;
-	if(state.title)titleTextEl.textContent = state.title;
+	// if(state.title)titleTextEl.textContent = state.title;
 	// if(state.width && state.height)resizeNote(state.width, state.height);
 	if(state.placeholder)YTextE.setAttribute("placeholder", state.placeholder);
 }
@@ -42,7 +42,7 @@ function updateNoteData(){
 function popup(){
 	i18n.setTexts(document);
 
-	closeEl.addEventListener     ("click", () => customClose("close"));
+	// closeEl.addEventListener     ("click", () => customClose("close"));
 	saveEl.addEventListener      ("click", () => customClose("close"));
 	delEl.addEventListener       ("click", () => {
 		if(!State.confirmDelete || confirm(i18n._("delete.note"))){
