@@ -9,7 +9,7 @@ export interface INotePopup extends QEventDispatcher<{
 	keyId: string;
 	note: INote;
 	pop(): Promise<void>
-	close(): Promise<void>
+	close(reason?: IPopupCloseReason): Promise<void>
 	update(state: IPopupState): Promise<IPopupState>
 	resetPosition(): Promise<void>
 	focus(): Promise<void>
@@ -88,6 +88,7 @@ export abstract class DefaultNotePopup extends QEventDispatcher<{
 }> implements INotePopup {
 	keyId: string
 	note: INote;
+	closeReason?: IPopupCloseReason;
 
 	protected state: IPopupState;
 
@@ -103,7 +104,7 @@ export abstract class DefaultNotePopup extends QEventDispatcher<{
 	}
 
 	abstract pop(): Promise<void>
-	abstract close(): Promise<void>
+	abstract close(reason?: IPopupCloseReason): Promise<void>
 	abstract update(state: IPopupState): Promise<IPopupState>
 	abstract resetPosition(): Promise<void>
 	abstract focus(): Promise<void>
@@ -148,8 +149,9 @@ export class QNotePopup extends DefaultNotePopup {
 		return browser.qpopup.pop(this.id);
 	}
 
-	async close() {
-		return browser.qpopup.close(this.id, "close");
+	async close(reason?: IPopupCloseReason) {
+		this.closeReason = reason;
+		return browser.qpopup.close(this.id, reason ?? "close");
 	}
 
 	async update(state: IPopupState) {
@@ -200,7 +202,8 @@ export class WebExtensionPopup extends DefaultNotePopup {
 		});
 	}
 
-	async close() {
+	async close(reason?: IPopupCloseReason) {
+		this.closeReason = reason;
 		if(this.id)browser.windows.remove(this.id);
 	}
 

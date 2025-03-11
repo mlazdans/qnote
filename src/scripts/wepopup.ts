@@ -43,7 +43,7 @@ function popup(){
 	i18n.setTexts(document);
 
 	// closeEl.addEventListener     ("click", () => customClose("close"));
-	saveEl.addEventListener      ("click", () => customClose("close"));
+	saveEl.addEventListener      ("click", () => customClose("saveclose"));
 	delEl.addEventListener       ("click", () => {
 		if(!State.confirmDelete || confirm(i18n._("delete.note"))){
 			customClose("delete");
@@ -64,8 +64,13 @@ function popup(){
 			customClose("escape");
 		}
 
-		if(!e.repeat && e.altKey && e.code == "KeyQ"){
-			customClose("close");
+		if(e.repeat){
+			return;
+		}
+
+		// TODO: respect user changed default key bindings
+		if(e.altKey && e.code == "KeyQ"){
+			customClose("saveclose");
 		}
 	});
 
@@ -99,6 +104,6 @@ window.addEventListener("DOMContentLoaded", async () => {
 	}
 });
 
-document.addEventListener("visibilitychange", () => {
-	sendNoteData("sync"); // Sync data and later will save if needed, e.g., window closed by command or forcibly
-});
+// document.addEventListener("visibilitychange", () => {
+// 	sendNoteData("sync"); // Sync data and later will save if needed, e.g., window closed by command or forcibly
+// });

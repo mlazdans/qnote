@@ -373,6 +373,8 @@ class QNoteExtension {
 				for(const m of messages){
 					this.resetNote(m.headerMessageId);
 				}
+			} else if(info.menuItemId === "options"){
+				browser.runtime.openOptionsPage();
 			} else {
 				console.error(`${menuDebugHandle} BUG: unknown menuItemId:`, info.menuItemId);
 			}
@@ -436,9 +438,10 @@ class QNoteExtension {
 		const popup = await this.createPopup(note, undefined, { placeholder:  _("multi.note.warning") }, !DO_REGISTER_LISTENER);
 
 		popup.addListener("onnote", async (keyId, reason: IPopupCloseReason, noteData) =>{
-			if(reason == "close" && noteData.text){
+			// TODO: some code dup with single note handling
+			if(noteData.text && (reason == "saveclose" || (reason == "close" && this.prefs.saveOnClose))){
 				for(const m of messages){
-					await this.saveOrUpdate(m.headerMessageId, noteData, !DO_OVERWRITE, !DO_UPDATE_VIEW, m.id)
+					await this.saveOrUpdate(m.headerMessageId, noteData, DO_OVERWRITE, !DO_UPDATE_VIEW, m.id)
 				}
 				this.updateViews();
 			}
@@ -546,7 +549,7 @@ class QNoteExtension {
 				// Take care of window close outside of note controls
 				if(popup instanceof WebExtensionPopup){
 					if(id == popup.getId()){
-						popup.fireListeners("onnote", keyId, "close", popup.note.getData() || {});
+						popup.fireListeners("onnote", keyId, popup.closeReason ?? "close", popup.note.getData() || {});
 					}
 				}
 			});
@@ -563,7 +566,7 @@ class QNoteExtension {
 		});
 
 		var actionHandlerActive = false;
-		const actionHandler = async (tab: browser.tabs.Tab) => {
+		const actionHandler = async (tab: browser.tabs.Tab, closeReason?: IPopupCloseReason) => {
 			const actiondebugHandle = `${debugHandle}[tab:${tab.id}]`
 
 			if(!tab.id){
@@ -583,13 +586,13 @@ class QNoteExtension {
 					const messageId = messages[0].id;
 
 					if(PopupManager.has(keyId)){
-						await PopupManager.get(keyId).close();
+						await PopupManager.get(keyId).close(closeReason ?? "close");
 					} else {
 						await this.popNote(keyId, messageId);
 					}
 				} else if(messages.length >= 1){
 					if(PopupManager.has("multi-note-create")){
-						await PopupManager.get("multi-note-create").close();
+						await PopupManager.get("multi-note-create").close(closeReason ?? "close");
 					} else {
 						await this.createMultiNote(messages);
 					}
@@ -598,16 +601,20 @@ class QNoteExtension {
 		};
 
 		// Click on main toolbar
-		BrowserAction.onClicked.addListener(actionHandler);
+		BrowserAction.onClicked.addListener((tab) => {
+			actionHandler(tab);
+		});
 
 		// Click on QNote button
-		browser.messageDisplayAction.onClicked.addListener(actionHandler);
+		browser.messageDisplayAction.onClicked.addListener((tab) => {
+			actionHandler(tab);
+		});
 
 		// Handle keyboard shortcuts
 		browser.commands.onCommand.addListener((command, tab) => {
 			if(command === 'qnote') {
 				QDEB&&console.debug(`${debugHandle} commands.onCommand(), command:`, command);
-				actionHandler(tab);
+				actionHandler(tab, "saveclose");
 			} else {
 				console.error(`${debugHandle} BUG: unknown command:`, command);
 			}
