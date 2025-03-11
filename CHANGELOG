@@ -3,6 +3,8 @@ CHANGELOG QNote
 
 RELEASE 0.14.5 - ...
 - Fix compatibility with TB136
+- Fix issues with multinote (#78)
+- Fix autosave when closing / switching tab / window
 
 RELEASE 0.14.4 - Dec 16, 2024
 -----------------
