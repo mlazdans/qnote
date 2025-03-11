@@ -59,4 +59,9 @@ declare global {
 			function getRegisteredContentScripts(): any;
 		}
 	}
+
+	var FileUtils: typeof globalThis;
+	var ExtensionUtils: typeof globalThis;
+	var ExtensionParent: typeof globalThis;
+	var MailServices: typeof globalThis;
 }

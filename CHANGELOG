@@ -1,7 +1,10 @@
 CHANGELOG QNote
 ===========================
 
-RELEASE 0.14.4 - ....
+RELEASE 0.14.5 - ...
+- Fix compatibility with TB136
+
+RELEASE 0.14.4 - Dec 16, 2024
 -----------------
 - Remove extra title bar for popup window (#75)
 - Revert default save and close mechanism as it was before 0.14.3 (#67, #68, #69)

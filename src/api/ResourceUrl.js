@@ -19,12 +19,14 @@
 (function (exports) {
 
   // Import some things we need.
-  var { ExtensionCommon } = ChromeUtils.import(
+  var ExtensionCommon = globalThis.ExtensionCommon || ChromeUtils.import(
     "resource://gre/modules/ExtensionCommon.jsm"
-  );
-  var { ExtensionUtils } = ChromeUtils.import(
+  ).ExtensionCommon;
+
+  var ExtensionUtils = globalThis.ExtensionUtils || ChromeUtils.import(
     "resource://gre/modules/ExtensionUtils.jsm"
-  );
+  ).ExtensionUtils;
+
   var Services = globalThis.Services || ChromeUtils.import(
     "resource://gre/modules/Services.jsm"
   ).Services;

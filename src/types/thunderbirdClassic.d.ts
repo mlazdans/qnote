@@ -167,8 +167,11 @@ declare namespace Components
 		public static importESModule(path: "resource:///modules/ExtensionPopups.sys.mjs"): BasePopupExport;
 		public static importESModule(path: "chrome://messenger/content/ThreadPaneColumns.mjs"): any;
 		public static importESModule(path: "chrome://messenger/content/thread-pane-columns.mjs"): any;
-		public static importESModule(path: "resource://gre/modules/FileUtils.jsm"): any;
+		public static importESModule(path: "resource://gre/modules/FileUtils.sys.mjs"): any;
 		public static importESModule(path: "resource://gre/modules/Services.jsm"): any;
+		public static importESModule(path: "resource://gre/modules/ExtensionParent.sys.mjs"): ExtensionParentExport;
+		public static importESModule(path: "resource:///modules/MailServices.sys.mjs"): MailServicesExport;
+		public static importESModule(path: "resource://gre/modules/ExtensionUtils.sys.mjs"): any;
 
 		public static importESModule(path: "resource://qnote/modules-exp/QPopups.sys.mjs?version=version"): BasePopupExport;
 		public static importESModule(path: "resource://qnote/modules/QEventDispatcher.mjs?version=version"): typeof import("../modules/QEventDispatcher.mjs");
@@ -708,26 +711,26 @@ declare namespace Components
 }
 
 //https://developer.mozilla.org/en-US/docs/Mozilla/JavaScript_code_modules/FileUtils.jsm
-declare class FileUtils
-{
-	File: any
-	MODE_RDONLY: number
-	MODE_WRONLY: number
-	MODE_RDWR: number
-	MODE_CREATE: number
-	MODE_APPEND: number
-	MODE_TRUNCATE: number
-	PERMS_FILE: number
-	PERMS_DIRECTORY: number
-	public static getFile(key: string, pathArray: string[], followLinks?: boolean): Ci.nsIFile
-	getDir(key: any, pathArray: any): any;
-	openFileOutputStream(file: any, modeFlags: any): any;
-	openAtomicFileOutputStream(file: any, modeFlags: any): any;
-	openSafeFileOutputStream(file: any, modeFlags: any): any;
-	_initFileOutputStream(fos: any, file: any, modeFlags: any): any;
-	closeAtomicFileOutputStream(stream: any): void;
-	closeSafeFileOutputStream(stream: any): void;
-}
+// declare class FileUtils
+// {
+// 	File: any
+// 	MODE_RDONLY: number
+// 	MODE_WRONLY: number
+// 	MODE_RDWR: number
+// 	MODE_CREATE: number
+// 	MODE_APPEND: number
+// 	MODE_TRUNCATE: number
+// 	PERMS_FILE: number
+// 	PERMS_DIRECTORY: number
+// 	public static getFile(key: string, pathArray: string[], followLinks?: boolean): Ci.nsIFile
+// 	getDir(key: any, pathArray: any): any;
+// 	openFileOutputStream(file: any, modeFlags: any): any;
+// 	openAtomicFileOutputStream(file: any, modeFlags: any): any;
+// 	openSafeFileOutputStream(file: any, modeFlags: any): any;
+// 	_initFileOutputStream(fos: any, file: any, modeFlags: any): any;
+// 	closeAtomicFileOutputStream(stream: any): void;
+// 	closeSafeFileOutputStream(stream: any): void;
+// }
 
 //https://developer.mozilla.org/en-US/docs/Mozilla/Tech/Toolkit_API/extIApplication
 declare class Application

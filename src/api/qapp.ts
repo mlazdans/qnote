@@ -1,7 +1,23 @@
 import { IQAppPreferences } from "../modules/common.mjs";
 
-var { ExtensionParent }                       = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm");
-var { MailServices }                          = ChromeUtils.import("resource:///modules/MailServices.jsm");
+var ExtensionParent: any;
+if(globalThis.ExtensionParent) {
+	ExtensionParent = globalThis.ExtensionParent;
+} else if(ChromeUtils.import) {
+	ExtensionParent = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm").ExtensionParent;
+} else {
+	ExtensionParent = ChromeUtils.importESModule("resource://gre/modules/ExtensionParent.sys.mjs").ExtensionParent;
+}
+
+var MailServices: any;
+if(globalThis.MailServices) {
+	MailServices = globalThis.MailServices;
+} else if(ChromeUtils.import) {
+	MailServices = ChromeUtils.import("resource:///modules/MailServices.jsm").MailServices;
+} else {
+	MailServices = ChromeUtils.importESModule("resource:///modules/MailServices.sys.mjs").MailServices;
+}
+
 var { ThreadPaneColumns }                     = ChromeUtils.importESModule("chrome://messenger/content/ThreadPaneColumns.mjs");
 var { QNoteFilter, QNoteAction, QCustomTerm } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFilters.mjs?version=version");
 var { QEventDispatcher }                      = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs?version=version");
