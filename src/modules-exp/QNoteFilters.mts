@@ -1,25 +1,8 @@
-var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs?version=version");
-var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs?version=version");
+var { QEventDispatcher }  = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs?version=version");
+var { QNoteFile }         = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs?version=version");
 var { getFolderNoteData } = ChromeUtils.importESModule("resource://qnote/modules-exp/api.mjs?version=version");
-
-var ExtensionParent: any;
-if(globalThis.ExtensionParent) {
-	ExtensionParent = globalThis.ExtensionParent;
-} else if(ChromeUtils.import) {
-	ExtensionParent = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm").ExtensionParent;
-} else {
-	ExtensionParent = ChromeUtils.importESModule("resource://gre/modules/ExtensionParent.sys.mjs").ExtensionParent;
-}
-
-var MailServices: any;
-if(globalThis.MailServices) {
-	MailServices = globalThis.MailServices;
-} else if(ChromeUtils.import) {
-	MailServices = ChromeUtils.import("resource:///modules/MailServices.jsm").MailServices;
-} else {
-	MailServices = ChromeUtils.importESModule("resource:///modules/MailServices.sys.mjs").MailServices;
-}
-
+var { ExtensionParent }   = ChromeUtils.importESModule("resource://gre/modules/ExtensionParent.sys.mjs");
+var { MailServices }      = ChromeUtils.importESModule("resource:///modules/MailServices.sys.mjs");
 var { ThreadPaneColumns } = ChromeUtils.importESModule("chrome://messenger/content/ThreadPaneColumns.mjs");
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");
 

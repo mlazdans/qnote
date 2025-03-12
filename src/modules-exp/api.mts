@@ -5,26 +5,10 @@ import { IPopupState } from "../modules/NotePopups.mjs";
 import { IQNoteFileAPI } from "./QNoteFile.mjs";
 import { IXNoteFileAPI } from "./XNoteFile.mjs";
 
-var ExtensionUtils: any;
-if(globalThis.ExtensionUtils){
-	ExtensionUtils = globalThis.ExtensionUtils;
- } else if(ChromeUtils.import) {
-	ExtensionUtils = ChromeUtils.import("resource://gre/modules/ExtensionUtils.jsm").ExtensionUtils;
-} else {
-	ExtensionUtils = ChromeUtils.importESModule("resource://gre/modules/ExtensionUtils.sys.mjs").ExtensionUtils;
-}
-
-var FileUtils: any;
-if(globalThis.FileUtils){
-	FileUtils = globalThis.FileUtils;
-} else if(ChromeUtils.import) {
-	FileUtils = ChromeUtils.import("resource://gre/modules/FileUtils.jsm").FileUtils
-} else {
-	FileUtils = ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs").FileUtils;
-}
-
-var { QNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs?version=version");
-var { XNoteFile } = ChromeUtils.importESModule("resource://qnote/modules-exp/XNoteFile.mjs?version=version");
+var { ExtensionUtils } = ChromeUtils.importESModule("resource://gre/modules/ExtensionUtils.sys.mjs");
+var { FileUtils }      = ChromeUtils.importESModule("resource://gre/modules/FileUtils.sys.mjs");
+var { QNoteFile }      = ChromeUtils.importESModule("resource://qnote/modules-exp/QNoteFile.mjs?version=version");
+var { XNoteFile }      = ChromeUtils.importESModule("resource://qnote/modules-exp/XNoteFile.mjs?version=version");
 var { ExtensionError } = ExtensionUtils;
 
 export interface INoteFileProvider {

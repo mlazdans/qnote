@@ -16,19 +16,11 @@ export interface PanelStyle {
 	opacity?: string;
 }
 
-var ExtensionParent: any;
-if(globalThis.ExtensionParent) {
-	ExtensionParent = globalThis.ExtensionParent;
-} else if(ChromeUtils.import) {
-	ExtensionParent = ChromeUtils.import("resource://gre/modules/ExtensionParent.jsm").ExtensionParent;
-} else {
-	ExtensionParent = ChromeUtils.importESModule("resource://gre/modules/ExtensionParent.sys.mjs").ExtensionParent;
-}
-
-var { BasePopup } = ChromeUtils.importESModule("resource:///modules/ExtensionPopups.sys.mjs");
-// var { BasePopup } = ChromeUtils.importESModule("resource://qnote/modules-exp/QPopups.sys.mjs?version=version"); // Keep in repo for hacking/testing
+var { ExtensionParent }  = ChromeUtils.importESModule("resource://gre/modules/ExtensionParent.sys.mjs");
+var { BasePopup }        = ChromeUtils.importESModule("resource:///modules/ExtensionPopups.sys.mjs");
+// var { BasePopup }     = ChromeUtils.importESModule("resource://qnote/modules-exp/QPopups.sys.mjs?version=version"); // Keep in repo for hacking/testing
 var { QEventDispatcher } = ChromeUtils.importESModule("resource://qnote/modules/QEventDispatcher.mjs?version=version");
-var { Box, coalesce } = ChromeUtils.importESModule("resource://qnote/modules/common.mjs?version=version");
+var { Box, coalesce }    = ChromeUtils.importESModule("resource://qnote/modules/common.mjs?version=version");
 
 var QDEB = true;
 var extension = ExtensionParent.GlobalManager.getExtension("qnote@dqdp.net");

@@ -39,12 +39,8 @@
 (function (exports) {
 
   // Import some things we need.
-  var { ExtensionSupport } = ChromeUtils.importESModule(
-    "resource:///modules/ExtensionSupport.sys.mjs"
-  );
-  var { ExtensionUtils } = ChromeUtils.importESModule(
-    "resource://gre/modules/ExtensionUtils.sys.mjs"
-  );
+  var { ExtensionSupport } = ChromeUtils.importESModule("resource:///modules/ExtensionSupport.sys.mjs");
+  var { ExtensionUtils }   = ChromeUtils.importESModule("resource://gre/modules/ExtensionUtils.sys.mjs");
   var { ExtensionError } = ExtensionUtils;
 
   async function waitForLoad(window) {

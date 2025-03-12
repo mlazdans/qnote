@@ -19,17 +19,8 @@
 (function (exports) {
 
   // Import some things we need.
-  var ExtensionCommon = globalThis.ExtensionCommon || ChromeUtils.import(
-    "resource://gre/modules/ExtensionCommon.jsm"
-  ).ExtensionCommon;
-
-  var ExtensionUtils = globalThis.ExtensionUtils || ChromeUtils.import(
-    "resource://gre/modules/ExtensionUtils.jsm"
-  ).ExtensionUtils;
-
-  var Services = globalThis.Services || ChromeUtils.import(
-    "resource://gre/modules/Services.jsm"
-  ).Services;
+  var { ExtensionUtils }  = ChromeUtils.importESModule("resource://gre/modules/ExtensionUtils.sys.mjs");
+  // var { Services }        = ChromeUtils.importESModule("resource://gre/modules/Services.sys.mjs");
   var { ExtensionError } = ExtensionUtils;
 
   let resourceUrls = new Set();
