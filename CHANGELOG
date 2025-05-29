@@ -1,7 +1,10 @@
 CHANGELOG QNote
 ===========================
 
-RELEASE 0.14.6 - ...
+RELEASE 0.14.8 - ...
+- Fix compatibility with TB139
+
+RELEASE 0.14.7 - Mar 24, 2025
 - Fix compatibility with TB136
 - Fix issues with multinote (#78)
 - Fix autosave when closing / switching tab / window
