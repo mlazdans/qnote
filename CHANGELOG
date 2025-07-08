@@ -1,7 +1,10 @@
 CHANGELOG QNote
 ===========================
 
-RELEASE 0.14.8 - ...
+RELEASE 0.14.9 - ...
+- Fix compatibility with TB140
+
+RELEASE 0.14.8 - May 29, 2025
 - Fix compatibility with TB139
 
 RELEASE 0.14.7 - Mar 24, 2025

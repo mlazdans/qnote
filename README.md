@@ -16,8 +16,8 @@
 This is the source code repository for the Thunderbird [QNote](https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/) extension.
 
 <p>
-	<img src="https://img.shields.io/badge/QNote-v0.14.8-brightgreen">
-	<img src="https://img.shields.io/badge/Thunderbird-v68.2.0%20--%20139.x-brightgreen">
+	<img src="https://img.shields.io/badge/QNote-v0.14.9-brightgreen">
+	<img src="https://img.shields.io/badge/Thunderbird-v68.2.0%20--%20140.x-brightgreen">
 </p>
 
 # Features
