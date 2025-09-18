@@ -1,0 +1,296 @@
+{
+	"description": {
+		"message": "Dodawaj notatki do swoich e-maili. Zamiennik programu XNote++ z większą liczbą funkcji.."
+	},
+	"are.you.sure": {
+		"message": "Jesteś pewien?"
+	},
+	"browse": {
+		"message": "Przeglądaj"
+	},
+	"folder.unaccesible": {
+		"message": "Nie znaleziono folderu lub nie można go odczytać.: $1"
+	},
+	"json.parse.error": {
+		"message": "Błąd przetwarzania JSON: $1"
+	},
+	"modify.note": {
+		"message": "Edytuj"
+	},
+	"delete.note": {
+		"message": "Usuń"
+	},
+	"reset.note.window": {
+		"message": "Przywróć pozycję"
+	},
+	"create.new.note": {
+		"message": "Nowa notatka"
+	},
+	"toggleqnote": {
+		"message": "Przełącz notatkę"
+	},
+	"width.label": {
+		"message": "Wysokość"
+	},
+	"height.label": {
+		"message": "Szerokość"
+	},
+	"use.tag.label": {
+		"message": "Użyj tagu"
+	},
+	"show.on.select.label": {
+		"message": "Pokaż okienko przy wyborze wiadomości"
+	},
+	"save.preferences.button": {
+		"message": "Zapisz"
+	},
+	"extension.reload.button": {
+		"message": "Przeładuj"
+	},
+	"show.first.chars.label": {
+		"message": "Pokaż pierwsze X znaków w kolumnie"
+	},
+	"focus.on.display": {
+		"message": "Przełączenie na okno po wyświetleniu"
+	},
+	"enable.spell.checker": {
+		"message": "Włącz sprawdzanie pisowni"
+	},
+	"overwrite.existing.notes": {
+		"message": "Zastąp istniejące notatki"
+	},
+	"no.message_id.header": {
+		"message": "Nie można utworzyć notatki. Wiadomość bez nagłówka „message-id:”."
+	},
+	"maintenance.fieldset": {
+		"message": "Konserwacja"
+	},
+	"use.tag.manager": {
+		"message": "(proszę używać menedżera tagów do zarządzania tagami)"
+	},
+	"import.finished.stats": {
+		"message": "Import/eksport notatek zakończony:\nzapisane - $1\nbłędy - $2\nistniejące - $3\nnadpisane - $4"
+	},
+	"xnote.folder.inaccessible": {
+		"message": "Nie znaleziono folderu XNote++ lub nie można go odczytać."
+	},
+	"xnote.folder.found": {
+		"message": "Znaleziono folder XNote++:"
+	},
+	"storage.fieldset": {
+		"message": "Przechowywanie"
+	},
+	"storage.option.ext": {
+		"message": "Wewnątrz dodatku"
+	},
+	"storage.option.folder": {
+		"message": "Folder lokalny"
+	},
+	"storage.cleared": {
+		"message": "Pamięć została wyczyszczona"
+	},
+	"storage.clear.failed": {
+		"message": "Nie udało się wyczyścić pamięci: $1"
+	},
+	"storage.imported": {
+		"message": "Przechowywanie zaimportowane"
+	},
+	"storage.import.failed": {
+		"message": "Nie udało się zaimportować danych magazynu: $1"
+	},
+	"storage.clear.button": {
+		"message": "Wyczyść magazyn"
+	},
+	"storage.export.button": {
+		"message": "Eksportowanie pamięci"
+	},
+	"storage.import": {
+		"message": "Importuj pamięć dodatku"
+	},
+	"window.fieldset": {
+		"message": "Okno"
+	},
+	"window.option.xul": {
+		"message": "Pływający panel"
+	},
+	"window.option.webext": {
+		"message": "Wyskakujące okienko"
+	},
+	"close.and.save": {
+		"message": "Zamknij i zapisz"
+	},
+	"delete": {
+		"message": "Usuń"
+	},
+	"attach.bottom": {
+		"message": "gpód"
+	},
+	"attach.top": {
+		"message": "góra"
+	},
+	"attach.title": {
+		"message": "tytuł"
+	},
+	"attach.text": {
+		"message": "tekst"
+	},
+	"enable.message_attach": {
+		"message": "Dołącz do wiadomości"
+	},
+	"enable.debug.messages": {
+		"message": "Włącz komunikaty debugowania"
+	},
+	"date.format": {
+		"message": "Format daty"
+	},
+	"date.format.custom": {
+		"message": "-własny-"
+	},
+	"formatting.rules": {
+		"message": "Zasady formatowania"
+	},
+	"implemented.formatting.rules": {
+		"message": "(wdrożone: $1)"
+	},
+	"datetime_group": {
+		"message": "Data i czas"
+	},
+	"date_group": {
+		"message": "Data"
+	},
+	"time_group": {
+		"message": "Czas"
+	},
+	"relative.to": {
+		"message": "W stosunku do"
+	},
+	"confirm.delete": {
+		"message": "Potwierdź usunięcie"
+	},
+	"default.dimensions.fieldset": {
+		"message": "Domyślne wymiary i rozmieszczenie"
+	},
+	"behaviour.fieldset": {
+		"message": "Zachowanie"
+	},
+	"additional.attach": {
+		"message": "Dodatkowo dołącz"
+	},
+	"import.folder.button": {
+		"message": "Importuj notatki z folderu"
+	},
+	"anchor.window": {
+		"message": "Okno"
+	},
+	"anchor.threadpane": {
+		"message": "Lista wiadomości"
+	},
+	"anchor.message": {
+		"message": "Wiadomość"
+	},
+	"options": {
+		"message": "Opcje"
+	},
+	"reset.defaults.button": {
+		"message": "Przywróć ustawienia domyślne"
+	},
+	"error": {
+		"message": "Błąd"
+	},
+	"custom.date.locale": {
+		"message": "Formatowanie daty według lokalizacji"
+	},
+	"locale.rules": {
+		"message": "Tagi językowe"
+	},
+	"error.saving.note": {
+		"message": "Błąd podczas zapisywania notatki"
+	},
+	"error.deleting.note": {
+		"message": "Błąd podczas usuwania notatki"
+	},
+	"close.current.note": {
+		"message": "Proszę zamknąć bieżącą notatkę."
+	},
+	"always.default.placement": {
+		"message": "Zawsze używaj domyślnego rozmiaru i położenia"
+	},
+	"options.reset": {
+		"message": "Opcje zostały zresetowane."
+	},
+	"export.qnotes.button": {
+		"message": "Eksportuj QNotes"
+	},
+	"export.xnotes.button": {
+		"message": "Eksportuj XNotes"
+	},
+	"import.folder.button.descr": {
+		"message": "Importuj pliki .qnote lub .xnote do wybranej pamięci"
+	},
+	"export.qnotes.button.descr": {
+		"message": "Eksportuj notatki z wybranego magazynu w formacie .qnote"
+	},
+	"export.xnotes.button.descr": {
+		"message": "Eksportuj notatki z wybranego magazynu w formacie .xnote"
+	},
+	"storage.export.button.descr": {
+		"message": "Preferencje eksportu i notatki zapisane w pamięci dodatku"
+	},
+	"storage.import.descr": {
+		"message": "Importuj preferencje i notatki z powrotem do pamięci dodatku"
+	},
+	"storage.clear.button.descr": {
+		"message": "Wyczyść preferencje i notatki zapisane w pamięci dodatku"
+	},
+	"could.not.initialize.storage.folder": {
+		"message": "Nie można zainicjować folderu przechowywania QNote!\nSprawdź ustawienia dodatku."
+	},
+	"multi.note": {
+		"message": "Wiele notatek"
+	},
+	"multi.note.warning": {
+		"message": "Notatka zostanie dodana do wszystkich wybranych wiadomości, jeśli jeszcze nie istnieje."
+	},
+	"actions.unavailable": {
+		"message": "Operacje dostępne tylko w przypadku opcji przechowywania w folderze"
+	},
+	"filters.unavailable": {
+		"message": "Filtry dostępne tylko z opcją przechowywania w folderach"
+	},
+	"copy": {
+		"message": "Kopiuj"
+	},
+	"paste": {
+		"message": "Wklej"
+	},
+	"attach.template": {
+		"message": "Szablon"
+	},
+	"attach.treat.text.as.html": {
+		"message": "Traktuj tekst jako HTML"
+	},
+	"attach.template.reset": {
+		"message": "Zresetuj szablon"
+	},
+	"take.screenshot": {
+		"message": "Zrób zrzut ekranu"
+	},
+	"deprecated": {
+		"message": "Przestarzałe"
+	},
+	"source.path.same": {
+		"message": "Folder źródłowy jest taki sam jak bieżący folder przechowywania. Wybierz inny folder źródłowy!"
+	},
+	"dest.path.same": {
+		"message": "Folder docelowy jest taki sam jak bieżący folder przechowywania. Wybierz inny folder docelowy!"
+	},
+	"close": {
+		"message": "Zamknij"
+	},
+	"saveOnClose": {
+		"message": "Zapisz przy zamykaniu"
+	},
+	"autoClose": {
+		"message": "Automatyczne zamykanie"
+	}
+}
