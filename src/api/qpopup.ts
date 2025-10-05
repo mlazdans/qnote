@@ -291,7 +291,7 @@ class QPopup extends BasePopup {
 
 		// Used in ExtensionPopups.sys.mjs, initialized in async attach(viewNode). Spits some errors in console.
 		// For now just set some bogus values to silence errors
-		this.viewHeight = 6666666;
+		// this.viewHeight = 6666666;
 		this.extraHeight = {
 			"top": 0,
 			"bottom": 0,
