@@ -40,6 +40,7 @@
 .qpopup-title-text {
 	margin-left: calc(var(--title-height) / 4);
 	flex-grow: 1;
+	white-space: nowrap;
 }
 
 /* Mid section */
@@ -110,6 +111,8 @@
 
 /* Close button  */
 .qpopup-button-close {
+	position: absolute;
+	right: 0;
 	margin: 0 calc(var(--title-height) / 4);
 	background-image: url(../images/icons/close.svg);
 }
