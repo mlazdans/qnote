@@ -238,10 +238,20 @@ function popup(){
 	}
 }
 
+var wasDownEscape: boolean = false;
+document.addEventListener("keydown", (e) => {
+	if(e.key == "Escape"){
+		wasDownEscape = true;
+	}
+});
+
 document.addEventListener("keyup", (e) => {
 	if(e.key == "Escape"){
-		browser.qpopup.close(id, "escape");
+		if(wasDownEscape) {
+			browser.qpopup.close(id, "escape");
+		}
 	}
+	wasDownEscape = false;
 });
 
 window.addEventListener("DOMContentLoaded", () => {

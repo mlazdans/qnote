@@ -265,16 +265,17 @@ class QPopup extends BasePopup {
 		const self = this;
 
 		// Event flow: browser -> stack -> panel
-		this.browser.addEventListener("keydown", (e: KeyboardEvent) => {
-			if(e.code == "Escape"){
-				e.preventDefault();
-			}
+		// this.browser.addEventListener("keydown", (e: KeyboardEvent) => {
+		// 	// if(e.code == "Escape"){
+		// 	// 	console.log("Escape");
+		// 	// 	e.preventDefault();
+		// 	// }
 
-			// if(e.altKey && e.code == "KeyQ"){
-			// 	e.preventDefault();
-			// 	popupManager.get(id).destroy("close");
-			// }
-		});
+		// 	// if(e.altKey && e.code == "KeyQ"){
+		// 	// 	e.preventDefault();
+		// 	// 	popupManager.get(id).destroy("close");
+		// 	// }
+		// });
 
 		this.browser.addEventListener("focus", () => {
 			self.state.focused = true;
