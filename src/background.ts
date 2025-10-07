@@ -299,7 +299,7 @@ class QNoteExtension {
 	applyTemplate(t: string, data: INoteData): string {
 		return t
 			.replace("{{ qnote_date }}", dateFormatWithPrefs(this.prefs, data.ts))
-			.replace("{{ qnote_text }}", '<span class="qnote-text-span"></span>')
+			.replace("{{ qnote_text }}", data.text ?? "")
 		;
 	}
 

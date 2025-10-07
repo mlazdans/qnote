@@ -17,14 +17,6 @@ function attachToMessage(reply: AttachToMessageReplyData | undefined) {
 		document.body.insertAdjacentHTML("beforeend", '<div class="qnote-insidenote qnote-insidenote-bottom">' + reply.html + "</div>");
 	}
 
-	document.querySelectorAll(".qnote-text-span").forEach(el => {
-		if (reply.prefs.treatTextAsHtml) {
-			el.innerHTML = reply.note.text || "";
-		} else {
-			el.textContent = reply.note.text || "";
-		}
-	});
-
 	document.querySelectorAll(".qnote-insidenote").forEach(el => {
 		if(el instanceof HTMLDivElement){
 			el.addEventListener("mousedown", e => {
