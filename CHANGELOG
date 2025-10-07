@@ -1,7 +1,7 @@
 CHANGELOG QNote
 ===========================
 
-RELEASE 0.14.12 - ...
+RELEASE 0.14.12 - Oct 06, 2025
 - Updated compatibility for TB144
 - Fix Escape handling (#86)
 - Fix (hopefully) the bug causing the popup window to sometimes appear folded
