@@ -18,7 +18,7 @@
 		"message": "Bearbeiten"
 	},
 	"delete.note": {
-		"message": "Löschen"
+		"message": "Löschen?"
 	},
 	"reset.note.window": {
 		"message": "Position auf Standard"

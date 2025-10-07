@@ -18,7 +18,7 @@
 		"message": "Modifier"
 	},
 	"delete.note": {
-		"message": "Supprimer"
+		"message": "Supprimer?"
 	},
 	"reset.note.window": {
 		"message": "Réinitialiser la position"
