@@ -72,8 +72,13 @@ function displayMsg(msgs: Array<string>, title: string){
 	const titleBox = querySelectorOrDie(".qpopup-title-text", errorBox);
 	const errorContent = querySelectorOrDie(".qpopup-textinput", errorBox);
 
-	titleBox.innerHTML = title;
-	errorContent.innerHTML = msgs.join("<br>");
+	titleBox.textContent = title;
+	errorContent.replaceChildren();
+	for(let i = 0; i < msgs.length; i++){
+		const el = document.createElement("div");
+		el.textContent = msgs[i];
+		errorContent.appendChild(el);
+	}
 
 	closeButton.addEventListener("click", () => {
 		errorBox.close();
@@ -158,7 +163,9 @@ async function saveOption(name: keyof IPreferences){
 		setPrefFromHtml(newPrefs, "storageOption");
 		if(newPrefs.storageOption == "folder"){
 			if(!newPrefs.storageFolder || !await browser.legacy.isFolderWritable(newPrefs.storageFolder)){
-				ErrMsg.push(i18n._("folder.unaccesible", newPrefs.storageFolder));
+				let parts = i18n._("folder.unaccesible", newPrefs.storageFolder).split(/: /, 2);
+				parts[0] += ":";
+				ErrMsg.push(...parts);
 			}
 		} else {
 			newPrefs.storageFolder = "";
@@ -252,24 +259,29 @@ async function initXNoteFolderInfo(){
 
 	const xFolderFoundEl = getElementByIdOrDie('xnote.folder.found');
 	const xFolderInaccessibleEl = getElementByIdOrDie('xnote.folder.inaccessible');
-	const copy = i18n._("copy");
 
 	xFolderFoundEl.style.display = "none";
 	xFolderInaccessibleEl.style.display = "none";
 
 	if(await browser.legacy.isFolderWritable(path)){
-		xFolderFoundEl.innerHTML = i18n._("xnote.folder.found") + `<div style="cursor: pointer" title="${copy}">${path}</div>`;
-		xFolderFoundEl.querySelector('div')?.addEventListener("click", () => navigator.clipboard.writeText(path));
+		const copyPasteXNotePath = document.createElement("div");
+		copyPasteXNotePath.title = i18n._("copy");
+		copyPasteXNotePath.style.cursor = "pointer";
+		copyPasteXNotePath.textContent = path;
+		copyPasteXNotePath.addEventListener("click", () => navigator.clipboard.writeText(path));
+
+		xFolderFoundEl.textContent = i18n._("xnote.folder.found");
+		xFolderFoundEl.appendChild(copyPasteXNotePath);
 		xFolderFoundEl.style.display = "";
 	} else {
-		xFolderInaccessibleEl.innerHTML = i18n._("xnote.folder.inaccessible", path);
+		xFolderInaccessibleEl.textContent = i18n._("xnote.folder.inaccessible", path);
 		xFolderInaccessibleEl.style.display = "";
 	}
 }
 
 function printImportStats(stats: ExportStats){
 	displayMsg(
-		[i18n._("import.finished.stats", [stats.imported, stats.errored, stats.existing, stats.overwritten]).replace(/\n/g, "<br>\n")],
+		i18n._("import.finished.stats", [stats.imported, stats.errored, stats.existing, stats.overwritten]).split(/\n/g),
 		"Info"
 	);
 }
