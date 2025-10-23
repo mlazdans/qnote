@@ -610,6 +610,11 @@ class QNoteExtension {
 			actionHandler(tab);
 		});
 
+		// Click on compose window
+		// browser.composeAction.onClicked.addListener((tab) => {
+		// 	actionHandler(tab);
+		// });
+
 		// Handle keyboard shortcuts
 		browser.commands.onCommand.addListener((command, tab) => {
 			if(command === 'qnote') {
