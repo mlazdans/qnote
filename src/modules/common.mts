@@ -61,7 +61,7 @@ export class QAppPrefs
 		showFirstChars     : 3,
 		messageAttachTop   : true,
 		messageAttachBottom: false,
-		attachTemplate     : '<div class="qnote-title">QNote: {{ qnote_date }}</div>\n<div class="qnote-text">{{ qnote_text }}</div>',
+		attachTemplate     : '<details><summary class="qnote-title">QNote: {{ qnote_date }}</summary>\n<div class="qnote-text">{{ qnote_text }}</div>\n</details>',
 		treatTextAsHtml    : false,
 		enableDebug        : true,
 	}
