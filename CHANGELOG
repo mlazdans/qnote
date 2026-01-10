@@ -1,7 +1,13 @@
 CHANGELOG QNote
 ===========================
 
-RELEASE 0.14.14 - ...
+RELEASE 0.14.16 - ...
+- Updated compatibility for TB147
+
+RELEASE 0.14.15 - Dec 4, 2025
+- Updated compatibility for TB146
+
+RELEASE 0.14.14 - Oct 23, 2025
 - Updated compatibility for TB145
 - Add Polish locale
 - Minor fixes
