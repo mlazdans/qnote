@@ -1,7 +1,13 @@
 CHANGELOG QNote
 ===========================
 
-RELEASE 0.14.16 - ...
+RELEASE 0.14.18 - ...
+- Updated compatibility for TB149, TB150
+
+RELEASE 0.14.17 - Feb 25, 2026
+- Updated compatibility for TB148
+
+RELEASE 0.14.16 - Jan 13, 2026
 - Updated compatibility for TB147
 
 RELEASE 0.14.15 - Dec 4, 2025
