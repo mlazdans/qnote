@@ -86,7 +86,10 @@ export class QNoteFile implements INoteFileProvider {
 		tempFile.createUnique(tempFile.NORMAL_FILE_TYPE, parseInt("0660",8));
 
 		let fileOutStream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
-		fileOutStream.init(tempFile, 2, 0x200, 0); // Opens for writing only
+		const PR_WRONLY = 0x02, PR_TRUNCATE = 0x20;
+		// Adding "PR_TRUNCATE" here is necessary for saving to work with Linux Gvfs drives
+		// This fixes https://github.com/mlazdans/qnote/issues/107
+		fileOutStream.init(tempFile, PR_WRONLY | PR_TRUNCATE, 0x200, 0); // Opens for writing only
 
 		var con = Cc["@mozilla.org/intl/converter-output-stream;1"].createInstance(Ci.nsIConverterOutputStream);
 		// con.init(fileOutStream, "utf-8", 0, 0xFFFD); // U+FFFD = replacement character
