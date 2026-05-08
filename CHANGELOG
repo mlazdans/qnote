@@ -3,6 +3,7 @@ CHANGELOG QNote
 
 RELEASE 0.14.19 - ...
 - Updated compatibility for TB151
+- Fix compatibility with Gvfs drives on Linux (@meismann)
 
 RELEASE 0.14.18 - Apr 7, 2026
 - Updated compatibility for TB149, TB150
