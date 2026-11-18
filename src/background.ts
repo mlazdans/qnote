@@ -158,10 +158,16 @@ class QNoteExtension {
 		return this.messageListToArray(await browser.mailTabs.getSelectedMessages(tabId));
 	}
 
-	// Mail tab with hidden message pane has no message browser - injecting into it makes TB throw internally
+	// Inject only into tabs that display a message right now. Others (hidden message pane, empty pane, other tab types)
+	// may have no message browser, which makes TB throw internally. Later displays are covered by registerScripts().
+	// NOTE: getDisplayedMessages() alone is not enough - it can report messages for a mail tab with hidden pane.
 	async canInjectIntoTab(tabId: number): Promise<boolean> {
 		const mailTab = await browser.mailTabs.get(tabId).catch(() => null);
-		return !mailTab || !!mailTab.messagePaneVisible;
+		if(mailTab && !mailTab.messagePaneVisible){
+			return false;
+		}
+		const messages = await browser.messageDisplay.getDisplayedMessages(tabId).catch(() => []);
+		return messages.length === 1; // multi-message view is handled by qapp.attachNotesToMultiMessage()
 	}
 
 	// MessageList is paginated
