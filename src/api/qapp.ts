@@ -87,11 +87,20 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 						// 	}
 						// }
 
+						// TB bug workaround: SearchDialog's threadPane.updateColumns() iterates
+						// ThreadPaneColumns.getDefaultColumns() (which includes custom columns) but,
+						// unlike about3Pane, never creates row template cells for custom columns,
+						// so it crashes on `cell.hidden`. Add the missing cells before its "load" handler runs.
+						// NOTE: file was renamed SearchDialog.xhtml -> searchDialog.xhtml at some point, match case-insensitively
+						const url = document.URL.toLowerCase();
+						const isSearchDialog = url.includes('chrome://messenger/content/searchdialog');
+						const isVirtualFolderProperties = url.includes('chrome://messenger/content/virtualfolderproperties');
+						if(isSearchDialog){
+							API.addCustomColumnCells(document);
+						}
+
 						// // Attach to SearchDialog
-						if(API.customFilter && (
-							document.URL.includes('chrome://messenger/content/SearchDialog') ||
-							document.URL.includes('chrome://messenger/content/virtualFolderProperties')
-						)){
+						if(API.customFilter && (isSearchDialog || isVirtualFolderProperties)){
 							API.customFilter.searchDialogHandler(aSubject, document);
 						}
 
@@ -109,6 +118,46 @@ class QApp extends ExtensionCommon.ExtensionAPI {
 				}
 			}
 		};
+	}
+
+	// Mirrors about3Pane's threadPane.makeCustomColumnCell()
+	addCustomColumnCells(document: Document) {
+		const template = document.getElementById("threadPaneRowTemplate") as HTMLTemplateElement | null;
+		if(!template || !ThreadPaneColumns){
+			return;
+		}
+
+		// SearchDialog is a XUL document: plain createElement() would yield XUL elements (no dataset etc.)
+		const XHTML_NS = "http://www.w3.org/1999/xhtml";
+
+		try {
+			for(const column of ThreadPaneColumns.getDefaultColumns().filter((c: any) => c.custom)){
+				const columnName = column.id.toLowerCase();
+				if(template.content.querySelector(`.${columnName}-column`)){
+					continue;
+				}
+
+				const cell = document.createElementNS(XHTML_NS, "td") as HTMLTableCellElement;
+				cell.classList.add(`${columnName}-column`);
+				cell.setAttribute("data-column-name", columnName);
+				if(column.icon && column.iconCellDefinitions){
+					cell.classList.add("button-column");
+					for(const { id, url, title, alt } of column.iconCellDefinitions){
+						const img = document.createElementNS(XHTML_NS, "img") as HTMLImageElement;
+						img.setAttribute("data-cell-icon-id", id);
+						img.setAttribute("src", url);
+						img.setAttribute("alt", alt || "");
+						img.setAttribute("title", title || "");
+						img.setAttribute("hidden", "hidden");
+						cell.appendChild(img);
+					}
+				}
+				template.content.appendChild(cell);
+				QDEB&&console.debug(`${debugHandle} added SearchDialog row template cell for custom column:`, column.id);
+			}
+		} catch(e: any) {
+			console.error(`${debugHandle} addCustomColumnCells() failed:`, e);
+		}
 	}
 
 	// https://developer.thunderbird.net/add-ons/mailextensions/experiments#managing-your-experiments-lifecycle
