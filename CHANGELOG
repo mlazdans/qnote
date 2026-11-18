@@ -4,6 +4,7 @@ CHANGELOG QNote
 RELEASE 0.14.22 - ...
 - Fix extension breaks Search in Thunderbird (#118)
 - Fix can't access qnotes from list view (#116)
+- Fix incorrect event type for tracking input (#110)
 - Minor fixes
 
 RELEASE 0.14.21 - Jul 29, 2026
