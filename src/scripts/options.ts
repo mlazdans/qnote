@@ -4,6 +4,7 @@ import { clearPrefs, ExportStats, getPrefs, getXNoteStoragePath, loadAllExtNotes
 import * as luxon from "../modules/luxon.mjs";
 import { QNoteFolder, QNoteLocalStorage, XNoteFolder } from "../modules/Note.mjs";
 import { PrefsUpdated } from "../modules/Messages.mjs";
+import { ExternalAccessMap, getExternalAccess, onExternalAccessChanged, removeExternalAccess, setExternalAccess } from "../modules/ExternalAccess.mjs";
 
 let QDEB                        = true;
 const debugHandle               = "[qnote:options]";
@@ -547,6 +548,7 @@ async function initOptionsPage(prefs: IPreferences){
 	initXNoteFolderInfo();
 	initOptionsPageValues(prefs);
 	initExportButtons(prefs);
+	initExternalAccess();
 
 	const unAccountedForListeners: Set<string> = new Set;
 	if(QDEB) {
@@ -595,6 +597,43 @@ async function initOptionsPage(prefs: IPreferences){
 		saveOption("attachTemplate");
 		return false;
 	});
+}
+
+function renderExternalAccess(map: ExternalAccessMap){
+	const list = getElementByIdOrDie("externalAccessList") as HTMLTableElement;
+	const empty = getElementByIdOrDie("externalAccessEmpty");
+	const ids = Object.keys(map).sort();
+
+	empty.style.display = ids.length ? "none" : "";
+	list.replaceChildren();
+
+	ids.forEach((extensionId, i) => {
+		const row = list.insertRow();
+
+		const checkbox = document.createElement("input");
+		checkbox.type = "checkbox";
+		checkbox.id = `externalAccess_${i}`;
+		checkbox.checked = map[extensionId] === true;
+		checkbox.addEventListener("change", () => setExternalAccess(extensionId, checkbox.checked));
+		row.insertCell().appendChild(checkbox);
+
+		const label = document.createElement("label");
+		label.htmlFor = checkbox.id;
+		label.textContent = extensionId;
+		row.insertCell().appendChild(label);
+
+		const removeButton = document.createElement("button");
+		removeButton.type = "button";
+		removeButton.textContent = i18n._("external.access.remove");
+		removeButton.addEventListener("click", () => removeExternalAccess(extensionId));
+		row.insertCell().appendChild(removeButton);
+	});
+}
+
+async function initExternalAccess(){
+	renderExternalAccess(await getExternalAccess());
+	// Keep in sync with requests arriving while options are open
+	onExternalAccessChanged(renderExternalAccess);
 }
 
 async function exportStorage(){

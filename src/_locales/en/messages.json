@@ -292,5 +292,20 @@
 	},
 	"autoClose": {
 		"message": "Auto close"
+	},
+	"external.access.fieldset": {
+		"message": "Access from other add-ons"
+	},
+	"external.access.descr": {
+		"message": "Add-ons below have asked to read your notes (read-only). Notes are shared only with add-ons you allow."
+	},
+	"external.access.empty": {
+		"message": "No add-ons have requested access yet."
+	},
+	"external.access.remove": {
+		"message": "Remove"
+	},
+	"external.access.request": {
+		"message": "Add-on \"$1\" wants to read your QNote notes (read-only).\n\nYou can change this later in QNote options."
 	}
 }

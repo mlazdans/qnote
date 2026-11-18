@@ -4,6 +4,7 @@
 1. [Usage](#usage)
 1. [Storage](#storage)
 1. [Popup windows](#popup-windows)
+1. [API for other add-ons](#api-for-other-add-ons)
 1. [Screenshots](#screenshots)
 1. [Building](#building)
 1. [Releases](#releases)
@@ -35,6 +36,7 @@ This is the source code repository for the Thunderbird [QNote](https://addons.th
 - Import / export between XNote++ (.xnote) and QNote (.qnote) file formats
 - Supports Thunderbird versions, starting from 68.2.0 (check [archive](https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/versions/) for latest supported version for your Thunderbird installation)
 - Simple templating support
+- Read-only [API for other add-ons](#api-for-other-add-ons), with user-controlled access
 
 # Usage
 
@@ -63,6 +65,28 @@ There are two options for note windows:
 - popup window
 
 _Floating panel_ looks better but might not work well on all platforms. Fall back to _popup window_ if you experience difficulties with the _floating panel_. The _popup window_ uses Thunderbird's standard API.
+
+# API for other add-ons
+Other add-ons can read notes (read-only) via QNote's external API.
+
+**Users:** the first time an add-on requests access, QNote asks whether to allow it. You can change or revoke access later in QNote options, under _Access from other add-ons_.
+
+**Developers:** send messages to `qnote@dqdp.net`:
+
+```js
+// Check access (triggers the permission prompt on first call)
+await browser.runtime.sendMessage("qnote@dqdp.net", { command: "getStatus" });
+// -> { apiVersion: 1, access: "granted" | "denied" }
+
+// Read notes by message header ID (max 1000 per call)
+await browser.runtime.sendMessage("qnote@dqdp.net", {
+	command: "getNotes",
+	headerMessageIds: [msg.headerMessageId]
+});
+// -> { apiVersion: 1, notes: { [headerMessageId]: { text, ts } | null } }
+```
+
+`ts` is a timestamp in milliseconds; `null` means the message has no note. If a call fails, the reply is `{ apiVersion, error }`, where `error` is `"access-denied"`, `"invalid-request"` or `"unknown-command"`. Access stays `"denied"` until the user allows it. The prompt doesn't block, so call `getStatus` again later.
 
 # Screenshots
 <p align="center" width="100%">

@@ -37,6 +37,7 @@ import { INotePopup, IPopupState, note2state, QNotePopup, state2note, WebExtensi
 import { convertPrefsToQAppPrefs, dateFormatWithPrefs, IPreferences } from "./modules/common.mjs";
 import { confirmDelete, getCurrentWindowId, getPrefs, isClipboardSet, sendPrefsToQApp, setQDEBCommonBackground } from "./modules/common-background.mjs";
 import { Menu } from "./modules/Menu.mjs";
+import { getExternalAccess, setExternalAccess } from "./modules/ExternalAccess.mjs";
 import { IPopupCloseReason } from "./modules-exp/api.mjs";
 
 var QDEB = true;
@@ -45,6 +46,11 @@ const debugHandle = "[qnote:background]";
 const BrowserAction = browser.action ? browser.action : browser.browserAction;
 const _ = browser.i18n.getMessage;
 const maxNoteCount = 1;
+
+// External API for other add-ons, see handleExternalMessage()
+const EXTERNAL_API_VERSION   = 1;
+const EXTERNAL_MAX_BATCH     = 1000;
+const externalAccessPrompted = new Set<string>();
 
 const DO_UPDATE_VIEW       = true;
 const DO_OVERWRITE         = true;
@@ -195,6 +201,69 @@ class QNoteExtension {
 			}
 		}
 		this.updateViews(tabId);
+	}
+
+	/**
+	 * Read-only API for other add-ons:
+	 *   browser.runtime.sendMessage("qnote@dqdp.net", { command: "getStatus" })
+	 *     -> { apiVersion, access: "granted" | "denied" }
+	 *   browser.runtime.sendMessage("qnote@dqdp.net", { command: "getNotes", headerMessageIds: [...] })
+	 *     -> { apiVersion, notes: { [headerMessageId]: { text, ts } | null } }
+	 * Errors: { apiVersion, error: "access-denied" | "invalid-request" | "unknown-command" }
+	 *
+	 * Callers must be allowed by the user: asked with a modal prompt on first request, changeable in options.
+	 */
+	async handleExternalMessage(msg: any, sender: browser.runtime.MessageSender): Promise<any> {
+		const reply = (data: object) => ({ apiVersion: EXTERNAL_API_VERSION, ...data });
+
+		const extensionId = sender.id;
+		if(!extensionId){
+			return reply({ error: "access-denied" });
+		}
+
+		const state = (await getExternalAccess())[extensionId];
+
+		// Not decided yet (new or unanswered) -> ask. Explicit deny is respected, user can change it in options.
+		// Guard: one prompt at a time per add-on, even with parallel requests.
+		if((state === undefined || state === null) && !externalAccessPrompted.has(extensionId)){
+			externalAccessPrompted.add(extensionId);
+			QDEB&&console.debug(`${debugHandle} asking user about external access for:`, extensionId);
+			if(state === undefined){
+				await setExternalAccess(extensionId, null); // show up in options even if prompt is ignored/fails
+			}
+			browser.legacy.confirm("QNote", _("external.access.request", [extensionId])).then(allowed => {
+				console.log(`${debugHandle} external access for ${extensionId}:`, allowed ? "allowed" : "denied");
+				return setExternalAccess(extensionId, allowed);
+			}).catch(e => {
+				console.error(`${debugHandle} external access prompt failed:`, e);
+			}).finally(() => externalAccessPrompted.delete(extensionId));
+		}
+		const allowed = state === true;
+
+		switch(msg?.command){
+			case "getStatus":
+				return reply({ access: allowed ? "granted" : "denied" });
+			case "getNotes": {
+				if(!allowed){
+					return reply({ error: "access-denied" });
+				}
+
+				const ids = msg.headerMessageIds;
+				if(!Array.isArray(ids) || ids.length > EXTERNAL_MAX_BATCH || !ids.every(id => typeof id === "string" && id)){
+					return reply({ error: "invalid-request" });
+				}
+
+				const notes: Record<string, { text: string, ts: number | null } | null> = {};
+				await Promise.all(ids.map(async (id: string) => {
+					const data = await this.getNoteData(id).catch(() => null);
+					notes[id] = data ? { text: data.text ?? "", ts: data.ts ?? null } : null;
+				}));
+
+				return reply({ notes });
+			}
+			default:
+				return reply({ error: "unknown-command" });
+		}
 	}
 
 	async updateTabView(tabId: number){
@@ -803,6 +872,12 @@ class QNoteExtension {
 		});
 
 		browser.menus.onClicked.addListener(this.menuHandler.bind(this));
+
+		// Requests from other add-ons
+		browser.runtime.onMessageExternal.addListener((msg: any, sender: browser.runtime.MessageSender) => {
+			QDEB&&console.debug(`${debugHandle} runtime.onMessageExternal() from:`, sender.id, msg);
+			return this.handleExternalMessage(msg, sender);
+		});
 
 		// Inject JS and CSS into existing tabs
 		browser.tabs.query({
