@@ -3,7 +3,7 @@
 html, body {
 	/* font: message-box; */
 	/* background-color: var(--in-content-page-background); */
-	color: var(--in-content-page-color);
+	color: var(--text-color, CanvasText);
 	margin: 0;
 	padding: 0;
 }
@@ -29,8 +29,9 @@ legend {
 fieldset {
 	/* border: 1px solid #96c9ef; */
 	/* border: 1px solid var(--in-content-categories-background) !important; */
-	background-color: var(--in-content-categories-background);
-	border: 1px solid var(--in-content-box-border-color) !important;
+	background-color: var(--background-color-box, transparent);
+	border: var(--border-width, 1px) solid var(--border-color, GrayText) !important;
+	border-radius: var(--border-radius-medium, 4px);
 	/* margin: 0 0 0 1em; */
 	margin: 0;
 	padding: 0 1rem;
