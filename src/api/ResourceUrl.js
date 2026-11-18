@@ -35,14 +35,15 @@
               "@mozilla.org/network/protocol;1?name=resource"
             ].getService(Ci.nsISubstitutingProtocolHandler);
 
-            if (resProto.hasSubstitution(namespace)) {
-              throw new ExtensionError(`There is already a resource:// url for the namespace "${namespace}"`);
-            }
             let uri = Services.io.newURI(
               folder || ".",
               null,
               context.extension.rootURI
             );
+            // Allow re-registering the same mapping (e.g. leftover after an add-on reload whose shutdown failed)
+            if (resProto.hasSubstitution(namespace) && !resProto.getSubstitution(namespace).equals(uri)) {
+              throw new ExtensionError(`There is already a resource:// url for the namespace "${namespace}"`);
+            }
             resProto.setSubstitutionWithFlags(
               namespace,
               uri,
@@ -59,12 +60,15 @@
         return; // the application gets unloaded anyway
       }
 
-      // Unload JSMs of this add-on
-      for (let module of Cu.loadedModules) {
-        let [schema, , namespace] = module.split("/");
-        if (schema == "resource:" && resourceUrls.has(namespace)) {
-          console.log("Unloading module", module);
-          Cu.unload(module);
+      // Unload JSMs of this add-on. JSM support (Cu.loadedModules / Cu.unload) is gone in newer TB;
+      // ES modules can't be unloaded at all, they stay cached until restart.
+      if (Cu.loadedModules && Cu.unload) {
+        for (let module of Cu.loadedModules) {
+          let [schema, , namespace] = module.split("/");
+          if (schema == "resource:" && resourceUrls.has(namespace)) {
+            console.log("Unloading module", module);
+            Cu.unload(module);
+          }
         }
       }
 
