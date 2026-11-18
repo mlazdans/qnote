@@ -70,14 +70,18 @@ _Floating panel_ looks better but might not work well on all platforms. Fall bac
 # API for other add-ons
 Other add-ons can read notes (read-only) via QNote's external API.
 
-**Users:** the first time an add-on requests access, QNote asks whether to allow it. You can change or revoke access later in QNote options, under _Access from other add-ons_.
+**Users:** when an add-on requests access, QNote asks whether to allow it. You can change or revoke access later in QNote options, under _Access from other add-ons_.
 
 **Developers:** send messages to `qnote@dqdp.net`:
 
 ```js
-// Check access (triggers the permission prompt on first call)
+// Check access, never prompts
 await browser.runtime.sendMessage("qnote@dqdp.net", { command: "getStatus" });
-// -> { apiVersion: 1, access: "granted" | "denied" }
+// -> { apiVersion: 1, access: "unknown" | "pending" | "granted" | "denied" }
+
+// Ask the user (only if not decided yet), resolves after the user answers
+await browser.runtime.sendMessage("qnote@dqdp.net", { command: "requestAccess" });
+// -> { apiVersion: 1, access: "pending" | "granted" | "denied" }
 
 // Read notes by message header ID (max 1000 per call)
 await browser.runtime.sendMessage("qnote@dqdp.net", {
@@ -87,7 +91,7 @@ await browser.runtime.sendMessage("qnote@dqdp.net", {
 // -> { apiVersion: 1, notes: { [headerMessageId]: { text, ts } | null } }
 ```
 
-`ts` is a timestamp in milliseconds; `null` means the message has no note. If a call fails, the reply is `{ apiVersion, error }`, where `error` is `"access-denied"`, `"invalid-request"` or `"unknown-command"`. Access stays `"denied"` until the user allows it. The prompt doesn't block, so call `getStatus` again later.
+`ts` is a timestamp in milliseconds; `null` means the message has no note. If a call fails, the reply is `{ apiVersion, error }`, where `error` is `"access-denied"`, `"invalid-request"` or `"unknown-command"`. `"unknown"` means access was never requested, `"pending"` means the user hasn't answered yet. `getNotes` never prompts; it returns `"access-denied"` unless access is `"granted"`.
 
 # Screenshots
 <p align="center" width="100%">
