@@ -139,19 +139,73 @@ class QNoteExtension {
 		browser.messageDisplayAction.setIcon(params);
 	}
 
+	/**
+	 * Messages the user is currently working with in a tab: the displayed ones or,
+	 * if the message pane is hidden (nothing gets displayed then), the selected ones.
+	 */
+	async getActiveMessages(tabId: number): Promise<browser.messages.MessageHeader[]> {
+		const displayed = await browser.messageDisplay.getDisplayedMessages(tabId);
+		if(displayed.length){
+			return displayed;
+		}
+
+		// Rejects for non-mail tabs
+		const mailTab = await browser.mailTabs.get(tabId).catch(() => null);
+		if(!mailTab || mailTab.messagePaneVisible){
+			return displayed;
+		}
+
+		return this.messageListToArray(await browser.mailTabs.getSelectedMessages(tabId));
+	}
+
+	// Mail tab with hidden message pane has no message browser - injecting into it makes TB throw internally
+	async canInjectIntoTab(tabId: number): Promise<boolean> {
+		const mailTab = await browser.mailTabs.get(tabId).catch(() => null);
+		return !mailTab || !!mailTab.messagePaneVisible;
+	}
+
+	// MessageList is paginated
+	async messageListToArray(list: browser.messages.MessageList): Promise<browser.messages.MessageHeader[]> {
+		const messages = [...list.messages];
+		while(list.id){
+			list = await browser.messages.continueList(list.id);
+			messages.push(...list.messages);
+		}
+		return messages;
+	}
+
+	async onMessagesShown(tabId: number, messages: browser.messages.MessageHeader[]){
+		if(this.prefs.autoClose){
+			this.closeAllNotes();
+		}
+
+		if(messages.length == 1){
+			const keyId = messages[0].headerMessageId;
+			const messageId = messages[0].id;
+			const note = await this.createAndLoadNote(keyId);
+
+			if(note.exists() && this.prefs.showOnSelect){
+				this.popNote(keyId, messageId);
+			}
+		}
+		this.updateViews(tabId);
+	}
+
 	async updateTabView(tabId: number){
 		QDEB&&console.debug(`${debugHandle} updateTabView(), tabId:`, tabId);
 
-		const messages = await browser.messageDisplay.getDisplayedMessages(tabId);
+		const messages = await this.getActiveMessages(tabId);
 
 		if(messages.length == 1){
 			const keyId = messages[0].headerMessageId;
 			const note = await this.createAndLoadNote(keyId);
 
 			await this.updateIcons(tabId, note.exists());
-			await browser.tabs.executeScript(tabId, {
-				file: "scripts/messageDisplay.js",
-			}).catch(() => console.log(`${debugHandle} could not insert js into tab id:`, tabId));
+			if(await this.canInjectIntoTab(tabId)){
+				await browser.tabs.executeScript(tabId, {
+					file: "scripts/messageDisplay.js",
+				}).catch(() => console.log(`${debugHandle} could not insert js into tab id:`, tabId));
+			}
 		} else if(messages.length >= 1){
 			const keyArray = [];
 			for(let m of messages){
@@ -310,7 +364,7 @@ class QNoteExtension {
 		if(info.selectedMessages){
 			messages = info.selectedMessages.messages;
 		} else if(tab?.id){
-			messages = await browser.messageDisplay.getDisplayedMessages(tab.id);
+			messages = await this.getActiveMessages(tab.id);
 		} else {
 			messages = [];
 		}
@@ -496,21 +550,24 @@ class QNoteExtension {
 		// Messages displayed
 		browser.messageDisplay.onMessagesDisplayed.addListener(async (tab: browser.tabs.Tab, messages: browser.messages.MessageHeader[]) => {
 			QDEB&&console.debug(`${debugHandle} messageDisplay.onMessagesDisplayed()`);
+			if(tab.id){
+				this.onMessagesShown(tab.id, messages);
+			}
+		});
 
-			if(this.prefs.autoClose){
-				this.closeAllNotes();
+		// Selection changed with message pane hidden - onMessagesDisplayed does not fire then
+		browser.mailTabs.onSelectedMessagesChanged.addListener(async (tab: browser.tabs.Tab, selectedMessages: browser.messages.MessageList) => {
+			if(!tab.id){
+				return;
 			}
 
-			if(messages.length == 1){
-				const keyId = messages[0].headerMessageId;
-				const messageId = messages[0].id;
-				const note = await this.createAndLoadNote(keyId);
-
-				if(note.exists() && this.prefs.showOnSelect){
-					this.popNote(keyId, messageId);
-				}
+			const mailTab = await browser.mailTabs.get(tab.id).catch(() => null);
+			if(!mailTab || mailTab.messagePaneVisible){
+				return; // onMessagesDisplayed handles it
 			}
-			this.updateViews(tab.id);
+
+			QDEB&&console.debug(`${debugHandle} mailTabs.onSelectedMessagesChanged() with hidden message pane`);
+			this.onMessagesShown(tab.id, await this.messageListToArray(selectedMessages));
 		});
 
 		// Change folders
@@ -580,7 +637,7 @@ class QNoteExtension {
 			}
 
 			actionHandlerActive = true;
-			browser.messageDisplay.getDisplayedMessages(tab.id).then(async (messages) => {
+			this.getActiveMessages(tab.id).then(async (messages) => {
 				if(messages.length == 1){
 					const keyId = messages[0].headerMessageId;
 					const messageId = messages[0].id;
@@ -639,7 +696,7 @@ class QNoteExtension {
 			if(info.contexts.includes('message_list') && info.selectedMessages){
 				messages = info.selectedMessages.messages;
 			} else if(info.contexts.includes('page') && tab?.id){
-				messages = await browser.messageDisplay.getDisplayedMessages(tab.id);
+				messages = await this.getActiveMessages(tab.id);
 			} else {
 				messages = [];
 			}
@@ -746,8 +803,8 @@ class QNoteExtension {
 			type: ["content", "mail", "messageDisplay"],
 			windowType: "normal"
 		}).then(tabs => {
-			tabs.forEach(tab => {
-				if(tab.id){
+			tabs.forEach(async tab => {
+				if(tab.id && await this.canInjectIntoTab(tab.id)){
 					browser.tabs.insertCSS(tab.id, {
 						file: "html/background.css",
 					}).catch(() => QDEB&&console.warn(`${debugHandle} could not insert css into tab:`, tab.id));
