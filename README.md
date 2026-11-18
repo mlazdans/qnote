@@ -81,15 +81,14 @@ _Floating panel_ looks better but might not work well on all platforms. Fall bac
 # Building
 ```
 npm install
-./node_modules/.bin/tsc
-build.bat
+npm run build
 ```
 
 All assets should now be placed in the `dist/release` folder if there are no errors.
 
-Use `make_xpi.bat` to generate a `.xpi` ZIP file or point to `dist/release` as the source folder for `Tools / Developer Tools / Debug Add-ons`.
+Use `npm run xpi` to generate `dist/qnote-<version>.xpi`, or point to `dist/release` as the source folder for `Tools / Developer Tools / Debug Add-ons`.
 
-If you are using Linux, adjust `.bat` files to the appropriate Linux commands.
+During development run `npm run watch` - recompiles TypeScript and copies assets on change.
 
 # Releases
 

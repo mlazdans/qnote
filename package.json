@@ -1,17 +1,22 @@
 {
   "name": "qnote",
-  "version": "0.14.0",
+  "version": "0.0.0",
+  "private": true,
   "description": "QNote addon from Thunderbird",
   "main": "index.js",
   "dependencies": {
     "typescript": "^5.5.4"
   },
   "scripts": {
+    "build": "node build.mjs && tsc",
+    "watch": "node build.mjs --watch",
+    "xpi": "npm run build && node xpi.mjs",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "",
   "devDependencies": {
+    "adm-zip": "^0.6.1",
     "eslint-config-prettier": "^9.1.0",
     "ts-loader": "^9.5.1"
   }
