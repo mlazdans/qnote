@@ -224,6 +224,13 @@ declare namespace Components
 			init(nsIInputStream: nsIInputStream, aCharset: string, aBufferSize: number, aReplacementChar: number): void;
 		}
 
+		class nsICryptoHash extends nsISupports {
+			readonly MD5: number;
+			init(aAlgorithm: number): void;
+			update(aData: ArrayLike<number>, aLen: number): void;
+			finish(aASCII: boolean): string;
+		}
+
 		class nsIFileInputStream extends nsIInputStream {
 			init(file: any,  ioFlags: number, perm: number, behaviorFlags: number | null): void;
 		}

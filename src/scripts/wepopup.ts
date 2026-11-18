@@ -58,7 +58,7 @@ function popup(){
 
 	window.addEventListener("resize", updateNoteData);
 	window.addEventListener("focus", () => YTextE.focus());
-	YTextE.addEventListener("keyup", updateNoteData);
+	YTextE.addEventListener("input", updateNoteData);
 	document.addEventListener("keyup", e => {
 		if(e.code == "Escape"){
 			customClose("escape");

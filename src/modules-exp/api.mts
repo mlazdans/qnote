@@ -135,10 +135,10 @@ export const QNoteFileAPI: IQNoteFileAPI = {
 		const transferable = Transferable(w);
 
 		transferable.addDataFlavor("text/qnote");
-		transferable.addDataFlavor("text/unicode");
+		transferable.addDataFlavor("text/plain");
 
 		transferable.setTransferData("text/qnote", noteWrapper);
-		transferable.setTransferData("text/unicode", txtWrapper);
+		transferable.setTransferData("text/plain", txtWrapper);
 
 		clipBoard.setData(transferable, null, Ci.nsIClipboard.kGlobalClipboard);
 
@@ -153,7 +153,6 @@ export const QNoteFileAPI: IQNoteFileAPI = {
 		const data: AString = {};
 
 		transferable.addDataFlavor("text/qnote");
-		transferable.addDataFlavor("text/unicode");
 		transferable.addDataFlavor("text/plain");
 		transferable.addDataFlavor("text/html");
 		clipBoard.getData(transferable, Ci.nsIClipboard.kGlobalClipboard)

@@ -49,6 +49,15 @@
 				"default": "Alt+Q"
 			},
 			"description": "__MSG_toggleqnote__"
+		},
+		"copy": {
+			"description": "__MSG_copy__"
+		},
+		"paste": {
+			"description": "__MSG_paste__"
+		},
+		"delete": {
+			"description": "__MSG_delete__"
 		}
 	},
 	"experiment_apis": {

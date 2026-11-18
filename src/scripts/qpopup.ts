@@ -126,7 +126,7 @@ function popup(){
 		});
 	});
 	resetEl.addEventListener     ("click", () => browser.qpopup.resetPosition(id));
-	YTextE.addEventListener      ("keyup", () => browser.qpopup.update(id, { text: YTextE.value }));
+	YTextE.addEventListener      ("input", () => browser.qpopup.update(id, { text: YTextE.value }));
 
 	let amDragging = false;
 	const tDrag = (mouse: PointerEvent) => {
