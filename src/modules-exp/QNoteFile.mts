@@ -8,6 +8,11 @@ export interface IQNoteFileAPI extends INoteFileAPI<QNoteFile> {
 	getFromClipboard(): Promise<INoteData | null>
 }
 
+// keyId is stored only in files with hashed (long) names
+interface IQNoteFileData extends INoteData {
+	keyId?: string;
+}
+
 export class QNoteFile implements INoteFileProvider {
 	exists(file: any){
 		return file && file.exists();
@@ -27,10 +32,40 @@ export class QNoteFile implements INoteFileProvider {
 		;
 	}
 
-	getFile(root:string, keyId: string){
-		var file = new FileUtils.File(root);
+	md5(str: string){
+		const ch = Cc["@mozilla.org/security/hash;1"].createInstance(Ci.nsICryptoHash);
+		ch.init(ch.MD5);
+		const data = new TextEncoder().encode(str);
+		ch.update(data, data.length);
+		const bin: string = ch.finish(false);
 
-		file.appendRelativePath(this.encodeFileName(keyId + '.qnote'));
+		return Array.from(bin, c => c.charCodeAt(0).toString(16).padStart(2, "0")).join("");
+	}
+
+	// Windows fails on paths longer than ~255 (temp file adds "~" and ".tmp"), 250 leaves some margin.
+	// Existing files keep their name. New too long ones become "<prefix>~<md5>.qnote",
+	// raw "~" never appears in encoded names.
+	getFile(root:string, keyId: string){
+		const MAX_PATH = 250;
+		const enc = this.encodeFileName(keyId);
+
+		const file = new FileUtils.File(root);
+		file.append(enc + ".qnote");
+
+		if(file.exists()){
+			return file;
+		}
+
+		// Fixed prefix length, so hashed name does not depend on the folder path
+		const prefix = enc.substring(0, 60).replace(/%[0-9A-F]?$/i, "");
+
+		const hashedFile = new FileUtils.File(root);
+		hashedFile.append(prefix + "~" + this.md5(keyId) + ".qnote");
+
+		// Hashed file exists (e.g. folder moved to a shorter path) or full name is too long
+		if(hashedFile.exists() || ("~" + file.path + ".tmp").length > MAX_PATH){
+			return hashedFile;
+		}
 
 		return file;
 	}
@@ -52,6 +87,12 @@ export class QNoteFile implements INoteFileProvider {
 			return null;
 		}
 
+		const { keyId: _, ...data } = this.readFile(file);
+
+		return data;
+	}
+
+	readFile(file: any): IQNoteFileData {
 		var fileInStream = Cc["@mozilla.org/network/file-input-stream;1"].createInstance(Ci.nsIFileInputStream);
 		fileInStream.init(file, 0x01, parseInt("0444", 8), null);
 
@@ -79,7 +120,14 @@ export class QNoteFile implements INoteFileProvider {
 
 	save(root: string, keyId: string, note: INoteData) {
 		var file = this.getFile(root, keyId);
-		let data = JSON.stringify(note);
+		const fileData: IQNoteFileData = { ...note };
+
+		// Hashed name can't be decoded back, so keep keyId inside
+		if(file.leafName.includes("~")){
+			fileData.keyId = keyId;
+		}
+
+		let data = JSON.stringify(fileData);
 
 		let tempFile = file.parent.clone();
 		tempFile.append("~" + file.leafName + ".tmp");
@@ -99,7 +147,12 @@ export class QNoteFile implements INoteFileProvider {
 
 		fileOutStream.close();
 
-		tempFile.moveTo(null, file.leafName);
+		try {
+			tempFile.moveTo(null, file.leafName);
+		} catch(e) {
+			tempFile.remove(false);
+			throw e;
+		}
 	}
 
 	getAllKeys(root: string) {
@@ -110,9 +163,18 @@ export class QNoteFile implements INoteFileProvider {
 		while (eFiles.hasMoreElements()) {
 			var o = eFiles.getNext().QueryInterface(Ci.nsIFile);
 
-			var fileName = this.decodeFileName(o.leafName);
-			if(fileName.substring(fileName.length - 6) === '.qnote'){
-				notes.push(fileName.substring(0, fileName.length - 6));
+			const name: string = o.leafName;
+			if(!name.endsWith(".qnote")){
+				continue;
+			}
+
+			if(name.includes("~")){
+				const keyId = this.readFile(o).keyId;
+				if(keyId){
+					notes.push(keyId);
+				}
+			} else {
+				notes.push(this.decodeFileName(name.slice(0, -6)));
 			}
 		}
 
