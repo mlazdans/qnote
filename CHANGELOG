@@ -1,7 +1,12 @@
 CHANGELOG QNote
 ===========================
 
-RELEASE 0.14.21 - ...
+RELEASE 0.14.22 - ...
+- Fix extension breaks Search in Thunderbird (#118)
+- Fix can't access qnotes from list view (#116)
+- Minor fixes
+
+RELEASE 0.14.21 - Jul 29, 2026
 - Updated compatibility for TB154
 
 RELEASE 0.14.20 - Jun 19, 2026
