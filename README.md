@@ -35,6 +35,7 @@ This is the source code repository for the Thunderbird [QNote](https://addons.th
 - Import / export between XNote++ (.xnote) and QNote (.qnote) file formats
 - Supports Thunderbird versions, starting from 68.2.0 (check [archive](https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/versions/) for latest supported version for your Thunderbird installation)
 - Simple templating support
+- Copy / Paste / Delete keyboard shortcuts
 
 # Usage
 
