@@ -413,7 +413,7 @@ class QNoteExtension {
 		} else if(messages.length > 1){
 			if(info.menuItemId === "create_multi"){
 				this.createMultiNote(messages);
-			} else if(info.menuItemId === "paste_multi"){
+			} else if(info.menuItemId === "paste_multi" || info.menuItemId === "paste"){
 				const sourceNoteData = await browser.qnote.getFromClipboard();
 				if(sourceNoteData && isClipboardSet(sourceNoteData)){
 					sourceNoteData.ts = Date.now();
@@ -422,7 +422,7 @@ class QNoteExtension {
 					};
 					this.updateViews();
 				}
-			} else if(info.menuItemId === "delete_multi"){
+			} else if(info.menuItemId === "delete_multi" || info.menuItemId === "delete"){
 				if(!this.prefs.confirmDelete || await confirmDelete()) {
 					for(const m of messages){
 						await this.deleteNote(m.headerMessageId, !DO_UPDATE_VIEW, m.id);
@@ -683,6 +683,8 @@ class QNoteExtension {
 			if(command === 'qnote') {
 				QDEB&&console.debug(`${debugHandle} commands.onCommand(), command:`, command);
 				actionHandler(tab, "saveclose");
+			} else if(command === "copy" || command === "paste" || command === "delete") {
+				this.menuHandler({ menuItemId: command } as browser.menus.OnClickData, tab);
 			} else {
 				console.error(`${debugHandle} BUG: unknown command:`, command);
 			}
