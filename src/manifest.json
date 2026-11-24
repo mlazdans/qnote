@@ -9,7 +9,7 @@
 		"gecko": {
 			"id": "qnote@dqdp.net",
 			"strict_min_version": "128.0",
-			"strict_max_version": "161.*"
+			"strict_max_version": "162.*"
 		}
 	},
 	"icons": {
