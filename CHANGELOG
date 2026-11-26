@@ -1,12 +1,13 @@
 CHANGELOG QNote
 ===========================
 
-RELEASE 0.14.22 - ...
+RELEASE 0.15.0 - ...
+- Add read-only access API for other Thunderbird add-ons (see ThunderAI)
+- Add copy/paste/delete keyboard shortcuts (#98)
 - Fix extension breaks Search in Thunderbird (#118)
 - Fix can't access qnotes from list view (#116)
 - Fix incorrect event type for tracking input (#110)
 - Fix saving notes with long message id (#40)
-- Add copy/paste/delete keyboard shortcuts (#98)
 - Minor fixes
 
 RELEASE 0.14.21 - Jul 29, 2026

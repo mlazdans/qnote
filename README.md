@@ -17,8 +17,8 @@
 This is the source code repository for the Thunderbird [QNote](https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/) extension.
 
 <p>
-	<img src="https://img.shields.io/badge/QNote-v0.14.22-brightgreen">
-	<img src="https://img.shields.io/badge/Thunderbird-v68.2.0%20--%20161.x-brightgreen">
+	<img src="https://img.shields.io/badge/QNote-v0.15.0-brightgreen">
+	<img src="https://img.shields.io/badge/Thunderbird-v68.2.0%20--%20162.x-brightgreen">
 </p>
 
 # Features
@@ -36,7 +36,7 @@ This is the source code repository for the Thunderbird [QNote](https://addons.th
 - Import / export between XNote++ (.xnote) and QNote (.qnote) file formats
 - Supports Thunderbird versions, starting from 68.2.0 (check [archive](https://addons.thunderbird.net/en-US/thunderbird/addon/qnote/versions/) for latest supported version for your Thunderbird installation)
 - Simple templating support
-- Read-only [API for other add-ons](#api-for-other-add-ons), with user-controlled access
+- Read-only [API for other add-ons](#api-for-other-add-ons), with user-controlled access (see [ThunderAI](https://github.com/micz/ThunderAI))
 - Copy / Paste / Delete keyboard shortcuts
 
 # Usage
